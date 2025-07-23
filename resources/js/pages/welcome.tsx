@@ -1,13 +1,10 @@
 import MainContent from '@/components/main';
-import { type SharedData } from '@/types';
-import { usePage } from '@inertiajs/react';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Instala bootstrap vía npm
 import { useEffect, useState } from 'react';
 import '../../css/main.css';
 
 export default function Welcome() {
     const [loading, setLoading] = useState(true);
-    const { auth } = usePage<SharedData>().props;
 
     useEffect(() => {
         // Simulate loading delay
