@@ -1,4 +1,3 @@
-# Devocionales Web App
 
 Este proyecto es una aplicación web para mostrar devocionales cristianos en formato blog. Permite visualizar los devocionales más recientes, navegar entre categorías, ver detalles de cada devocional y acceder a contenido destacado, últimas publicaciones y secciones de inspiración.
 
