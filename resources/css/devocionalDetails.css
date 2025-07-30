@@ -8,58 +8,105 @@
     src: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/im-fell-french-canon-pro.woff2') format('woff2');
     font-display: swap;
 }
+
 * {
     box-sizing: border-box;
 }
+
 body {
     margin: 0;
+    font-family: 'IM Fell French Canon Pro', serif;
+    background: #fafaf9;
 }
-header {
-    /* /* background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/mountain-range.jpg) no-repeat; */
-    /* position: relative;
-    padding-top: 61.93333333%;
-    background-size: cover;
-    font-family: 'Sucrose Bold Two';
-    z-index: -2; */
-}
-.header img {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 45.8%;
-}
-.header h1 {
-    position: fixed;
-    top: 2rem;
-    right: 2rem;
-    font-size: 10vw;
-    line-height: 0.8;
-    margin-top: 0;
-    text-align: center;
-}
-.header h1 span {
-    display: block;
-    font-size: 8.75vw;
-}
-/* main {
-    background: #fff;
-    position: relative;
-    border: 1px solid #fff;
-    font-family: 'IM Fell French Canon Pro';
-    font-size: 1.4rem;
-    padding: 2rem 25%;
-    line-height: 1.6;
-} */
 
 .devocional-details {
-    z-index: 2;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 6px 32px 0px rgba(0, 0, 0, 0.13);
     position: relative;
     z-index: 2;
-    background-color: #fff;
+    overflow: visible;
 }
 
-@media all and (max-width: 400px) {
-    main {
-        padding: 2rem;
+.header-modal {
+    width: 100%;
+    min-height: 220px;
+    background-position: center;
+    background-size: cover;
+    border-radius: 8px 8px 0 0;
+    position: relative;
+    color: white;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.header-modal .title {
+    position: fixed;
+    font-family: 'Sucrose Bold Two', cursive;
+    font-size: 4rem;
+    line-height: 1;
+    margin: 0 0 1rem 0;
+    text-align: center;
+    text-shadow: 0 2px 12px #2227;
+    padding: 1rem 0;
+}
+
+.header-modal .title span {
+    display: block;
+    font-size: 3.5rem;
+    margin: 0.5rem 0;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.devocional-details section {
+    padding: 2rem 1.5rem 1rem 1.5rem;
+}
+
+.devocional-details p {
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: #222;
+    margin: 0;
+    word-break: break-word;
+}
+
+.devocional-details .date {
+    margin-top: 1.5rem;
+    color: #888;
+    font-size: 1rem;
+    text-align: right;
+}
+
+@media (max-width: 700px) {
+    .devocional-details {
+        max-width: 98vw;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .header-modal .title {
+        font-size: 2.1rem;
+    }
+    .header-modal .title span {
+        font-size: 1.1rem;
+    }
+    .devocional-details section {
+        padding: 1rem 0.5rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .devocional-details {
+        padding: 0;
+    }
+    .header-modal .title {
+        font-size: 1.4rem;
+    }
+    .header-modal .title span {
+        font-size: 0.9rem;
     }
 }
