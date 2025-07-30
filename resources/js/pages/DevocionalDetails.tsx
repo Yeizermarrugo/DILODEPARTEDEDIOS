@@ -1,16 +1,19 @@
 import { useImagePreload } from '@/components/useImagePreload';
-import { usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
 type Devocional = {
     contenido: string;
     imagen: string;
-    // Agrega aquí otros campos si es necesario
+    created_at?: string;
 };
 
-const DevocionalDetails = () => {
-    const { devocional } = usePage().props as unknown as { devocional: Devocional };
+interface props {
+    devocional: Devocional;
+}
+
+const DevocionalDetails = ({ devocional }: props) => {
+    // const { devocional } = usePage().props as unknown as { devocional: Devocional };
     const [loading, setLoading] = useState(true);
     const imageLoaded = useImagePreload(devocional.imagen);
 
@@ -45,7 +48,7 @@ const DevocionalDetails = () => {
         const [parte1, parte2, parte3] = splitH1Parts(h1Text);
         return (
             <header
-                className="header"
+                className="header-modal"
                 style={{
                     background: `url(${devocional.imagen}) no-repeat`,
                     backgroundSize: 'cover',
@@ -56,7 +59,7 @@ const DevocionalDetails = () => {
                     zIndex: -2,
                 }}
             >
-                <h1 style={{ paddingTop: '50px' }}>
+                <h1 className="title" style={{ paddingTop: '50px' }}>
                     {parte1}
                     <span>{parte2}</span>
                     {parte3}
@@ -81,6 +84,15 @@ const DevocionalDetails = () => {
             <section>
                 <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
             </section>
+            <div style={{ marginTop: '8px', color: '#888' }}>
+                {devocional.created_at
+                    ? new Date(devocional.created_at).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                      })
+                    : ''}
+            </div>
         </div>
     );
 };
