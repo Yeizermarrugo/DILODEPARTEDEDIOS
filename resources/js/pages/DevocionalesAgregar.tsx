@@ -70,11 +70,18 @@ const DevocionalesAgregar = () => {
                 );
                 alert('Devocional agregado correctamente');
                 window.location.href = '/dashboard';
-            } catch (error: any) {
+            } catch (error: unknown) {
                 alert('Hubo un error al guardar el devocional');
                 // Muestra los errores de validación si existen
-                if (error.response && error.response.data && error.response.data.errors) {
-                    console.error('Errores de validación:', error.response.data.errors);
+                if (
+                    typeof error === 'object' &&
+                    error !== null &&
+                    'response' in error &&
+                    (error as { response?: { data?: { errors?: unknown } } }).response &&
+                    (error as { response: { data?: { errors?: unknown } } }).response.data &&
+                    (error as { response: { data: { errors?: unknown } } }).response.data.errors
+                ) {
+                    console.error('Errores de validación:', (error as { response: { data: { errors: unknown } } }).response.data.errors);
                 } else {
                     console.error('Error al guardar el devocional:', error);
                 }
