@@ -24,9 +24,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/devocionals', [DevocionalController::class, 'latest']);
 Route::post('/devocionalesadd', [DevocionalController::class, 'store'])->middleware(['auth', 'verified']);
 Route::post('/upload-image', [ImageUploadController::class, 'store']);
-Route::get('/devocional/{id}', [DevocionalController::class, 'show']);
+// Route::get('/devocional/{id}', [DevocionalController::class, 'show']);
+Route::get('/about', function () {
+    return Inertia::render('About');
+});
 
-Route::inertia('/BlogDetails', 'BlogDetails');
+// Route::inertia('/BlogDetails', 'BlogDetails');
 
 
 require __DIR__ . '/settings.php';
