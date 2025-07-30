@@ -1,24 +1,64 @@
+import DevocionalDetails from '@/pages/DevocionalDetails';
 import { useEffect, useState } from 'react';
 
 export default function MainContent() {
     interface Devocional {
         contenido: string;
-        imagen?: string;
+        imagen: string;
         id?: number;
         created_at?: string;
         categoria?: string;
     }
     const [devocionales, setDevocionales] = useState<Devocional[]>([]);
     const [loading, setLoading] = useState(true);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [devocionalSeleccionado, setDevocionalSeleccionado] = useState<Devocional | null>(null);
+
+    const abrirModal = (devocional: Devocional) => {
+        setDevocionalSeleccionado(devocional);
+        setModalOpen(true);
+        window.history.pushState({}, '', `?devocional=${devocional.id}`);
+    };
+
+    const cerrarModal = () => {
+        setModalOpen(false);
+        setDevocionalSeleccionado(null);
+        window.history.pushState({}, '', window.location.pathname);
+    };
 
     useEffect(() => {
-        fetch('/devocionals')
-            .then((res) => res.json())
-            .then((data) => {
-                setDevocionales(data);
-                setLoading(false);
-            });
-    }, []);
+        let isMounted = true; // Para evitar actualizar el estado si el componente se desmonta
+
+        // 1. Cargar devocionales solo si aún no están cargados
+        if (loading) {
+            fetch('/devocionals')
+                .then((res) => res.json())
+                .then((data) => {
+                    if (isMounted) {
+                        setDevocionales(data);
+                        setLoading(false);
+
+                        // 2. Verificar el parámetro en la URL y abrir el modal si corresponde
+                        const params = new URLSearchParams(window.location.search);
+                        const id = params.get('devocional');
+                        if (id) {
+                            const encontrado = data.find((d: Devocional) => String(d.id) === id);
+                            if (encontrado) {
+                                setDevocionalSeleccionado(encontrado);
+                                setModalOpen(true);
+                            }
+                        }
+                    }
+                });
+        }
+
+        // 3. Controlar el scroll del fondo según el estado del modal
+        document.body.style.overflow = modalOpen ? 'hidden' : '';
+        return () => {
+            isMounted = false;
+            document.body.style.overflow = '';
+        };
+    }, [loading, modalOpen]);
 
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
@@ -65,12 +105,13 @@ export default function MainContent() {
                                     {/* <span className="category">Technology</span> */}
                                 </div>
                                 <h2 className="devocional-title">
-                                    <a href={`/devocional/${dev[0].id}`}>
+                                    <button onClick={() => abrirModal(dev[0])}>
                                         <TituloDevocional contenido={dev[0].contenido} />
-                                    </a>
+                                    </button>
                                 </h2>
                             </div>
                         </article>
+
                         {/* End Featured Post */}
 
                         {/* Regular Posts */}
@@ -90,9 +131,9 @@ export default function MainContent() {
                                     {/* <span className="category">Security</span> */}
                                 </div>
                                 <h3 className="post-title">
-                                    <a href={`/devocional/${dev[1].id}`}>
+                                    <button onClick={() => abrirModal(dev[1])}>
                                         <TituloDevocional contenido={dev[1].contenido} />
-                                    </a>
+                                    </button>
                                 </h3>
                             </div>
                         </article>
@@ -112,9 +153,9 @@ export default function MainContent() {
                                     {/* <span className="category">Security</span> */}
                                 </div>
                                 <h3 className="post-title">
-                                    <a href={`/devocional/${dev[2].id}`}>
+                                    <button onClick={() => abrirModal(dev[2])}>
                                         <TituloDevocional contenido={dev[2].contenido} />
-                                    </a>
+                                    </button>
                                 </h3>
                             </div>
                         </article>
@@ -134,9 +175,9 @@ export default function MainContent() {
                                     {/* <span className="category">Security</span> */}
                                 </div>
                                 <h3 className="post-title">
-                                    <a href={`/devocional/${dev[3].id}`}>
+                                    <button onClick={() => abrirModal(dev[3])}>
                                         <TituloDevocional contenido={dev[3].contenido} />
-                                    </a>
+                                    </button>
                                 </h3>
                             </div>
                         </article>
@@ -156,17 +197,80 @@ export default function MainContent() {
                                     {/* <span className="category">Security</span> */}
                                 </div>
                                 <h3 className="post-title">
-                                    <a href={`/devocional/${dev[4].id}`}>
+                                    <button onClick={() => abrirModal(dev[4])}>
                                         <TituloDevocional contenido={dev[4].contenido} />
-                                    </a>
+                                    </button>
                                 </h3>
                             </div>
                         </article>
                     </div>
                 </div>
             </section>
-            {/* /Blog Hero Section */}
-
+            {/* Modal */}
+            {modalOpen && devocionalSeleccionado && (
+                <div
+                    className="modal-overlay"
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        background: 'rgba(0, 0, 0, 0.7)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                        overflow: 'auto',
+                    }}
+                    onClick={cerrarModal}
+                >
+                    <div
+                        className="modal-content"
+                        style={{
+                            background: '#fff',
+                            padding: '24px',
+                            borderRadius: '8px',
+                            maxWidth: '800px',
+                            width: '100%',
+                            position: 'relative',
+                            maxHeight: '90vh', // Limita el alto
+                            overflowY: 'auto',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            style={{
+                                position: 'absolute',
+                                top: '8px',
+                                right: '8px',
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '1.5em',
+                                cursor: 'pointer',
+                            }}
+                            onClick={cerrarModal}
+                        >
+                            &times;
+                        </button>
+                        <DevocionalDetails devocional={devocionalSeleccionado} />
+                        {/* <img src={devocionalSeleccionado.imagen} alt="" style={{ width: '100%', marginBottom: '16px' }} />
+                        <div className="modal-title">
+                            <TituloDevocional contenido={devocionalSeleccionado.contenido} />
+                        </div>
+                        <div className="modal-body" dangerouslySetInnerHTML={{ __html: devocionalSeleccionado.contenido }} />
+                        <div style={{ marginTop: '8px', color: '#888' }}>
+                            {devocionalSeleccionado.created_at
+                                ? new Date(devocionalSeleccionado.created_at).toLocaleDateString('es-ES', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric',
+                                  })
+                                : ''}
+                        </div> */}
+                    </div>
+                </div>
+            )}
             {/* Featured Posts Section */}
             <section id="featured-posts" className="featured-posts section">
                 <div className="section-title container" data-aos="fade-up">
