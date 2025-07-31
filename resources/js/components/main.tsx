@@ -274,9 +274,9 @@ export default function MainContent() {
             {/* Featured Posts Section */}
             <section id="featured-posts" className="featured-posts section">
                 <div className="section-title container" data-aos="fade-up">
-                    <h2>Featured Posts</h2>
+                    <h2>PRÓXIMAMENTE</h2>
                     <div>
-                        <span>Check Our</span> <span className="description-title">Featured Posts</span>
+                        <span>MENSAJES QUE</span> <span className="description-title">TRANSFORMAN</span>
                     </div>
                 </div>
                 <div className="container" data-aos="fade-up" data-aos-delay="100">
@@ -286,8 +286,8 @@ export default function MainContent() {
                             {/* Repite los slides igual que en tu HTML original */}
                             <div className="swiper-slide">
                                 <div className="blog-post-item">
-                                    <img src="/assets/img/blog/blog-post-portrait-1.webp" alt="Blog Image" />
-                                    <div className="blog-post-content">
+                                    <img src="/assets/img/blog/YouTube-Banner.png" alt="Blog Image" />
+                                    {/* <div className="blog-post-content">
                                         <div className="post-meta">
                                             <span>
                                                 <i className="bi bi-person"></i> Julia Parker
@@ -309,7 +309,7 @@ export default function MainContent() {
                                         <a href="#" className="read-more">
                                             Read More <i className="bi bi-arrow-right"></i>
                                         </a>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             {/* ...otros slides igual que en tu HTML original... */}
