@@ -3622,3 +3622,11 @@ section,
     color: color-mix(in srgb, var(--default-color), transparent 60%);
     font-size: 14px;
 }
+
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 20px;
+    height: auto;
+}
