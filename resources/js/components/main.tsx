@@ -31,7 +31,7 @@ export default function MainContent() {
 
         // 1. Cargar devocionales solo si aún no están cargados
         if (loading) {
-            fetch('/devocionals')
+            fetch('/devocionals-latest')
                 .then((res) => res.json())
                 .then((data) => {
                     if (isMounted) {
@@ -254,20 +254,6 @@ export default function MainContent() {
                             &times;
                         </button>
                         <DevocionalDetails devocional={devocionalSeleccionado} />
-                        {/* <img src={devocionalSeleccionado.imagen} alt="" style={{ width: '100%', marginBottom: '16px' }} />
-                        <div className="modal-title">
-                            <TituloDevocional contenido={devocionalSeleccionado.contenido} />
-                        </div>
-                        <div className="modal-body" dangerouslySetInnerHTML={{ __html: devocionalSeleccionado.contenido }} />
-                        <div style={{ marginTop: '8px', color: '#888' }}>
-                            {devocionalSeleccionado.created_at
-                                ? new Date(devocionalSeleccionado.created_at).toLocaleDateString('es-ES', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric',
-                                  })
-                                : ''}
-                        </div> */}
                     </div>
                 </div>
             )}
