@@ -25,8 +25,6 @@ const DevocionalDetails = ({ devocional }: props) => {
         }, 1000);
     }, []);
 
-    console.log('devocional', devocional);
-
     const getH1Text = (html: string): string => {
         const match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
         return match ? match[1].trim() : '';
