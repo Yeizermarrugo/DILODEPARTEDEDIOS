@@ -1086,6 +1086,20 @@ section,
     color: color-mix(in srgb, var(--accent-color), transparent 20%);
 }
 
+.blog-hero .blog-item .recent-post-title {
+    margin: 0;
+    font-family: var(--heading-font);
+}
+
+.blog-hero .blog-item .recent-post-title button {
+    color: var(--default-color);
+    text-decoration: none;
+}
+
+.blog-hero .blog-item .recent-post-title button:hover {
+    color: color-mix(in srgb, var(--accent-color), transparent 20%);
+}
+
 /*--------------------------------------------------------------
 # Featured Posts Section
 --------------------------------------------------------------*/
@@ -1862,6 +1876,11 @@ section,
 .blog-details {
     max-width: 1000px;
     margin: 0 auto;
+}
+
+.blog-details-page,
+.main {
+    background: #fff !important;
 }
 
 .blog-details .hero-img {
