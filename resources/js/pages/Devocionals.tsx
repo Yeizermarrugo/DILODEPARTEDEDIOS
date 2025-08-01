@@ -1,3 +1,4 @@
+import DevocionalCard from '@/components/DevocionalCard';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { useEffect, useState } from 'react';
@@ -186,7 +187,7 @@ function Devocionals() {
                 <div className="container">
                     <div className="row">
                         {/* Blog Content */}
-                        <div className="col-lg-8">
+                        <div className="col-sm-8">
                             <section id="blog-details" className="blog-grid section">
                                 <div className="container" data-aos="fade-up">
                                     {loading ? (
@@ -206,29 +207,16 @@ function Devocionals() {
                                                     {selectedCategory ? `Categoría - ${selectedCategory}` : 'Todos los Devocionales'}
                                                 </h2>
                                             </div>
-                                            {devocionales.map((dev) => (
-                                                <article className="blog-item featured" data-aos="fade-up" key={dev.id}>
-                                                    <img src={dev.imagen} alt="Blog Image" className="img-fluid" />
-                                                    <div className="blog-content">
-                                                        <div className="post-meta">
-                                                            <span className="date">
-                                                                {dev.created_at
-                                                                    ? new Date(dev.created_at).toLocaleDateString('es-ES', {
-                                                                          year: 'numeric',
-                                                                          month: 'long',
-                                                                          day: 'numeric',
-                                                                      })
-                                                                    : ''}
-                                                            </span>
-                                                        </div>
-                                                        <h2 style={{ color: ' #212529' }} className="devocional-title">
-                                                            <button onClick={() => abrirModal(dev)}>
-                                                                <TituloDevocional contenido={dev.contenido} />
-                                                            </button>
-                                                        </h2>
-                                                    </div>
-                                                </article>
-                                            ))}
+                                            <div className="cards-container">
+                                                <DevocionalCard
+                                                    devocionales={devocionales.map((dev) => ({
+                                                        ...dev,
+                                                        // Extract titulo from contenido using obtenerPrimerEtiqueta
+                                                        titulo: obtenerPrimerEtiqueta(dev.contenido),
+                                                        contenido: dev.contenido,
+                                                    }))}
+                                                />
+                                            </div>
 
                                             {renderPaginator()}
                                         </>
