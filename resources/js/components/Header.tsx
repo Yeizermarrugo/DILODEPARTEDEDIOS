@@ -47,20 +47,20 @@ const Header = () => {
                         <ul>
                             <li>
                                 <a href="/" className="active">
-                                    Home
+                                    Inicio
                                 </a>
                             </li>
                             <li>
-                                <a href="/about">About</a>
+                                <a href="/about">Quienes somos?</a>
                             </li>
                             <li>
-                                <a href="category.html">Category</a>
+                                <a href="/devocionales">Devocionales</a>
                             </li>
                             <li>
-                                <a href="blog-details.html">Blog Details</a>
+                                <a href="category.html">Podcast y mas</a>
                             </li>
                             <li>
-                                <a href="author-profile.html">Author Profile</a>
+                                <a href="author-profile.html">Libros</a>
                             </li>
 
                             <li>
