@@ -9,5 +9,5 @@ class Devocional extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['contenido', 'imagen'];
+    protected $fillable = ['contenido', 'imagen', 'categoria'];
 }
