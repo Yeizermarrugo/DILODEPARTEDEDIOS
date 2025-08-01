@@ -11,14 +11,36 @@ class DevocionalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Obtiene todos los devocionales y los devuelve como JSON con paginación
-        // Si necesitas paginación, puedes usar Devocional::paginate(10);
-        $devocionales = Devocional::paginate(10);
-        return response()->json($devocionales);
+
+        $perPage = $request->input('per_page', 10); // Puedes cambiar 10 por 20 si prefieres
+        $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
+
+        $categorias = Devocional::whereNotNull('categoria')
+            ->where('categoria', '!=', '')
+            ->groupBy('categoria')
+            ->selectRaw('categoria, COUNT(*) as count')
+            ->get();
+
+        return response()->json([
+            'devocionales' => $devocionales,
+            'categorias' => $categorias,
+        ]);
     }
 
+    public function porCategoria(Request $request, $categoria)
+    {
+        $perPage = $request->input('per_page', 10);
+        $devocionales = Devocional::where('categoria', $categoria)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'devocionales' => $devocionales,
+            'categoria' => $categoria
+        ]);
+    }
     //devolver los ultimos 5 devocionales
     public function latest()
     {
@@ -55,11 +77,13 @@ class DevocionalController extends Controller
     {
         $request->validate([
             'contenido' => 'required|string',
+            'categoria' => 'required|string',
             'imagen' => 'required|string|url', // Asegúrate de que 'imagen' sea una cadena y tenga un tamaño máximo
         ]);
 
         $devocional = Devocional::create([
             'contenido' => $request->input('contenido'),
+            'categoria' => $request->input('categoria'),
             'imagen' => $request->input('imagen') // Asegúrate de que 'imagen' esté en el request
         ]);
 
