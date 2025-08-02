@@ -14,7 +14,7 @@ class DevocionalController extends Controller
     public function index(Request $request)
     {
 
-        $perPage = $request->input('per_page', 10); // Puedes cambiar 10 por 20 si prefieres
+        $perPage = $request->input('per_page', 15); // Puedes cambiar 10 por 20 si prefieres
         $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
 
         $categorias = Devocional::whereNotNull('categoria')
@@ -31,7 +31,7 @@ class DevocionalController extends Controller
 
     public function porCategoria(Request $request, $categoria)
     {
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 15);
         $devocionales = Devocional::where('categoria', $categoria)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
