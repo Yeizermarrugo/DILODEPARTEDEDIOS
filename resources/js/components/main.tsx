@@ -2,34 +2,34 @@ import DevocionalDetails from '@/pages/DevocionalDetails';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
+interface Devocional {
+    contenido: string;
+    imagen: string;
+    id?: number;
+    created_at?: string;
+    categoria?: string;
+}
+interface YoutubeVideo {
+    id: {
+        videoId: string;
+    };
+    snippet: {
+        title: string;
+        publishedAt: string;
+        description: string;
+        thumbnails: {
+            default: {
+                url: string;
+            };
+        };
+        // Puedes agregar más campos si los necesitas
+    };
+}
 export default function MainContent() {
-    interface Devocional {
-        contenido: string;
-        imagen: string;
-        id?: number;
-        created_at?: string;
-        categoria?: string;
-    }
     const [devocionales, setDevocionales] = useState<Devocional[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [devocionalSeleccionado, setDevocionalSeleccionado] = useState<Devocional | null>(null);
-    interface YoutubeVideo {
-        id: {
-            videoId: string;
-        };
-        snippet: {
-            title: string;
-            publishedAt: string;
-            description: string;
-            thumbnails: {
-                default: {
-                    url: string;
-                };
-            };
-            // Puedes agregar más campos si los necesitas
-        };
-    }
     const [videos, setVideos] = useState<YoutubeVideo[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const URL = '/youtube/latest';
