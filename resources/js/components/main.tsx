@@ -1,4 +1,5 @@
 import DevocionalDetails from '@/pages/DevocionalDetails';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 export default function MainContent() {
@@ -13,6 +14,43 @@ export default function MainContent() {
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [devocionalSeleccionado, setDevocionalSeleccionado] = useState<Devocional | null>(null);
+    interface YoutubeVideo {
+        id: {
+            videoId: string;
+        };
+        snippet: {
+            title: string;
+            publishedAt: string;
+            description: string;
+            thumbnails: {
+                default: {
+                    url: string;
+                };
+            };
+            // Puedes agregar más campos si los necesitas
+        };
+    }
+    const [videos, setVideos] = useState<YoutubeVideo[] | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const URL = '/youtube/latest';
+
+    useEffect(() => {
+        axios
+            .get(URL)
+            .then((res) => {
+                const data = res.data;
+                if (data.items && data.items.length > 0) {
+                    setVideos(data.items);
+                    console.log('data: ', data);
+                } else {
+                    setError('No se encontró ningún video.');
+                }
+            })
+            .catch((err) => {
+                // setError('Error al consultar la API.');
+                console.log('error Youtube API', err);
+            });
+    }, []);
 
     const abrirModal = (devocional: Devocional) => {
         setDevocionalSeleccionado(devocional);
@@ -61,7 +99,7 @@ export default function MainContent() {
     }, [loading, modalOpen]);
 
     const obtenerPrimerEtiqueta = (html: string) => {
-        const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
+        const match = html?.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
         if (match) {
             return match[0]; // Devuelve la primera etiqueta completa, con HTML
         }
@@ -73,7 +111,8 @@ export default function MainContent() {
     };
 
     const dev = devocionales.slice(0, 5);
-    if (loading) {
+    if (error) return <div>{error}</div>;
+    if (loading && !videos) {
         return (
             <div id="preloader" className="d-flex align-items-center justify-content-center">
                 <div className="spinner-border" role="status">
@@ -90,12 +129,12 @@ export default function MainContent() {
                     <div className="blog-grid">
                         {/* Featured Post (Large) */}
                         <article className="blog-item featured" data-aos="fade-up">
-                            <img src={dev[0].imagen} alt="Blog Image" className="img-fluid" />
+                            <img src={dev[0]?.imagen} alt="Blog Image" className="img-fluid" />
                             <div className="blog-content">
                                 <div className="post-meta">
                                     <span className="date">
-                                        {dev[0].created_at
-                                            ? new Date(dev[0].created_at).toLocaleDateString('es-ES', {
+                                        {dev[0]?.created_at
+                                            ? new Date(dev[0]?.created_at).toLocaleDateString('es-ES', {
                                                   year: 'numeric',
                                                   month: 'long',
                                                   day: 'numeric',
@@ -106,7 +145,7 @@ export default function MainContent() {
                                 </div>
                                 <h2 className="devocional-title">
                                     <button onClick={() => abrirModal(dev[0])}>
-                                        <TituloDevocional contenido={dev[0].contenido} />
+                                        <TituloDevocional contenido={dev[0]?.contenido} />
                                     </button>
                                 </h2>
                             </div>
@@ -116,12 +155,12 @@ export default function MainContent() {
 
                         {/* Regular Posts */}
                         <article className="blog-item" data-aos="fade-up" data-aos-delay="100">
-                            <img src={dev[1].imagen} alt="Blog Image" className="img-fluid" />
+                            <img src={dev[1]?.imagen} alt="Blog Image" className="img-fluid" />
                             <div className="blog-content">
                                 <div className="post-meta">
                                     <span className="date">
-                                        {dev[1].created_at
-                                            ? new Date(dev[1].created_at).toLocaleDateString('es-ES', {
+                                        {dev[1]?.created_at
+                                            ? new Date(dev[1]?.created_at).toLocaleDateString('es-ES', {
                                                   year: 'numeric',
                                                   month: 'long',
                                                   day: 'numeric',
@@ -132,18 +171,18 @@ export default function MainContent() {
                                 </div>
                                 <h3 className="post-title">
                                     <button onClick={() => abrirModal(dev[1])}>
-                                        <TituloDevocional contenido={dev[1].contenido} />
+                                        <TituloDevocional contenido={dev[1]?.contenido} />
                                     </button>
                                 </h3>
                             </div>
                         </article>
                         <article className="blog-item" data-aos="fade-up" data-aos-delay="100">
-                            <img src={dev[2].imagen} alt="Blog Image" className="img-fluid" />
+                            <img src={dev[2]?.imagen} alt="Blog Image" className="img-fluid" />
                             <div className="blog-content">
                                 <div className="post-meta">
                                     <span className="date">
-                                        {dev[2].created_at
-                                            ? new Date(dev[2].created_at).toLocaleDateString('es-ES', {
+                                        {dev[2]?.created_at
+                                            ? new Date(dev[2]?.created_at).toLocaleDateString('es-ES', {
                                                   year: 'numeric',
                                                   month: 'long',
                                                   day: 'numeric',
@@ -154,18 +193,18 @@ export default function MainContent() {
                                 </div>
                                 <h3 className="post-title">
                                     <button onClick={() => abrirModal(dev[2])}>
-                                        <TituloDevocional contenido={dev[2].contenido} />
+                                        <TituloDevocional contenido={dev[2]?.contenido} />
                                     </button>
                                 </h3>
                             </div>
                         </article>
                         <article className="blog-item" data-aos="fade-up" data-aos-delay="100">
-                            <img src={dev[3].imagen} alt="Blog Image" className="img-fluid" />
+                            <img src={dev[3]?.imagen} alt="Blog Image" className="img-fluid" />
                             <div className="blog-content">
                                 <div className="post-meta">
                                     <span className="date">
-                                        {dev[3].created_at
-                                            ? new Date(dev[3].created_at).toLocaleDateString('es-ES', {
+                                        {dev[3]?.created_at
+                                            ? new Date(dev[3]?.created_at).toLocaleDateString('es-ES', {
                                                   year: 'numeric',
                                                   month: 'long',
                                                   day: 'numeric',
@@ -176,18 +215,18 @@ export default function MainContent() {
                                 </div>
                                 <h3 className="post-title">
                                     <button onClick={() => abrirModal(dev[3])}>
-                                        <TituloDevocional contenido={dev[3].contenido} />
+                                        <TituloDevocional contenido={dev[3]?.contenido} />
                                     </button>
                                 </h3>
                             </div>
                         </article>
                         <article className="blog-item" data-aos="fade-up" data-aos-delay="100">
-                            <img src={dev[4].imagen} alt="Blog Image" className="img-fluid" />
+                            <img src={dev[4]?.imagen} alt="Blog Image" className="img-fluid" />
                             <div className="blog-content">
                                 <div className="post-meta">
                                     <span className="date">
-                                        {dev[4].created_at
-                                            ? new Date(dev[4].created_at).toLocaleDateString('es-ES', {
+                                        {dev[4]?.created_at
+                                            ? new Date(dev[4]?.created_at).toLocaleDateString('es-ES', {
                                                   year: 'numeric',
                                                   month: 'long',
                                                   day: 'numeric',
@@ -198,7 +237,7 @@ export default function MainContent() {
                                 </div>
                                 <h3 className="post-title">
                                     <button onClick={() => abrirModal(dev[4])}>
-                                        <TituloDevocional contenido={dev[4].contenido} />
+                                        <TituloDevocional contenido={dev[4]?.contenido} />
                                     </button>
                                 </h3>
                             </div>
@@ -306,64 +345,133 @@ export default function MainContent() {
             {/* /Featured Posts Section */}
 
             {/* Category Section */}
-            <section id="category-section" className="category-section section">
+            <section id="category-section" className="category-section section" style={{ background: '#f7f7f7', minHeight: '60vh' }}>
                 <div className="section-title container" data-aos="fade-up">
-                    <h2>Category Section</h2>
+                    <h2>ENSEÑANZA</h2>
                     <div>
-                        <span className="description-title">Category Section</span>
+                        <span>AUDIO CLASES</span> <span className="description-title">DE DOCTRINA</span>
                     </div>
                 </div>
-                <div className="container" data-aos="fade-up" data-aos-delay="100">
-                    {/* Featured Posts */}
-                    <div className="row gy-4 mb-4">
-                        {/* Repite las columnas igual que en tu HTML */}
-                        <div className="col-lg-4">
-                            <article className="featured-post">
-                                <div className="post-img">
-                                    <img src="/assets/img/blog/blog-post-6.webp" alt="" className="img-fluid" loading="lazy" />
+                <div className="container py-5">
+                    <div className="row gy-4 justify-content-center align-items-stretch">
+                        {error && (
+                            <div className="col-12">
+                                <div className="alert alert-danger">{error}</div>
+                            </div>
+                        )}
+                        {videos?.length === 0 && !error && (
+                            <div id="preloader" className="d-flex align-items-center justify-content-center" style={{ minHeight: '300px' }}>
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
                                 </div>
-                                <div className="post-content">
-                                    <div className="category-meta">
-                                        <span className="post-category">Health</span>
-                                        <div className="author-meta">
-                                            <img src="/assets/img/person/person-f-13.webp" alt="" className="author-img" />
-                                            <span className="author-name">William G.</span>
-                                            <span className="post-date">28 April 2024</span>
+                            </div>
+                        )}
+
+                        {/* Cards de Video */}
+                        {videos?.map((video) => (
+                            <div className="col-lg-3 col-md-6 d-flex" key={video.id.videoId}>
+                                <div className="card video-card h-100 w-100 shadow-sm">
+                                    <div className="ratio ratio-16x9">
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${video.id.videoId}`}
+                                            title={video.snippet.title}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowFullScreen
+                                            style={{ borderRadius: '0.5rem 0.5rem 0 0' }}
+                                        ></iframe>
+                                    </div>
+                                    <div className="card-body d-flex flex-column">
+                                        <h5 className="card-title" style={{ fontWeight: 600 }}>
+                                            {video.snippet.title}
+                                        </h5>
+                                        <p className="card-text" style={{ fontSize: '0.95rem', color: '#555' }}>
+                                            {video.snippet.description.length > 100
+                                                ? video.snippet.description.slice(0, 97) + '...'
+                                                : video.snippet.description}
+                                        </p>
+                                        <div className="d-flex justify-content-between align-items-center mt-auto">
+                                            <a
+                                                href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-primary btn-sm"
+                                                style={{
+                                                    background: 'linear-gradient(90deg,#0d6efd 0%, #6C63FF 100%)',
+                                                    border: 'none',
+                                                }}
+                                            >
+                                                Ver en YouTube
+                                            </a>
+                                            <small className="text-muted">{new Date(video.snippet.publishedAt).toLocaleDateString()}</small>
                                         </div>
                                     </div>
-                                    <h2 className="title">
-                                        <a href="blog-details.html">Sed ut perspiciatis unde omnis iste natus error sit voluptatem</a>
-                                    </h2>
                                 </div>
-                            </article>
+                            </div>
+                        ))}
+
+                        {/* Div Ver más */}
+                        <div className="col-lg-3 col-md-6 d-flex align-items-stretch">
+                            <div className="ver-mas-card d-flex flex-column justify-content-center align-items-center w-100 shadow-sm">
+                                <h4 className="mb-3" style={{ fontWeight: 700, color: '#6C63FF' }}>
+                                    ¿Quieres ver más videos?
+                                </h4>
+                                <a
+                                    href="https://youtube.com/playlist?list=PLA3_8ty5OhFV-hmTywh6yGTnzlaTpJpBU&si=voOhM9H8Oba3-FD7"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-lg btn-gradient"
+                                >
+                                    Ver más
+                                </a>
+                            </div>
                         </div>
-                        {/* ...otros col-lg-4 igual que en tu HTML... */}
-                    </div>
-                    {/* List Posts */}
-                    <div className="row">
-                        {/* Repite igual que en tu HTML */}
-                        <div className="col-xl-4 col-lg-6">
-                            <article className="list-post">
-                                <div className="post-img">
-                                    <img src="/assets/img/blog/blog-post-6.webp" alt="" className="img-fluid" loading="lazy" />
-                                </div>
-                                <div className="post-content">
-                                    <div className="category-meta">
-                                        <span className="post-category">Gaming</span>
-                                    </div>
-                                    <h3 className="title">
-                                        <a href="blog-details.html">Quis autem vel eum iure reprehenderit qui in ea voluptate</a>
-                                    </h3>
-                                    <div className="post-meta">
-                                        <span className="read-time">2 mins read</span>
-                                        <span className="post-date">6 April 2026</span>
-                                    </div>
-                                </div>
-                            </article>
-                        </div>
-                        {/* ...otros posts igual que en tu HTML... */}
                     </div>
                 </div>
+
+                {/* Estilos personalizados */}
+                <style>{`
+        .video-card {
+          border-radius: 0.7rem;
+          overflow: hidden;
+          transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .video-card:hover {
+          box-shadow: 0 6px 22px rgba(0,0,0,0.14);
+          transform: translateY(-2px) scale(1.01);
+        }
+        .ver-mas-card {
+          border-radius: 0.7rem;
+          min-height: 100%;
+          background: linear-gradient(135deg,#e9ecef 70%, #f7f7f7 100%);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 2.5rem 1rem;
+        }
+        .btn-gradient {
+          background: linear-gradient(90deg,#0d6efd 0%, #6C63FF 100%);
+          color: #fff;
+          border: none;
+          border-radius: 2rem;
+          font-weight: bold;
+          font-size: 1.15rem;
+          padding: 0.7rem 2.2rem;
+          box-shadow: 0 4px 18px rgba(0,0,0,0.09);
+          transition: background .2s, box-shadow .2s;
+          text-decoration: none;
+        }
+        .btn-gradient:hover {
+          background: linear-gradient(90deg,#6C63FF 0%, #0d6efd 100%);
+          box-shadow: 0 6px 22px rgba(108,99,255,0.18);
+        }
+        @media (max-width: 991px) {
+          .ver-mas-card {
+            margin-top: 2rem;
+            min-height: 220px;
+          }
+        }
+      `}</style>
             </section>
             {/* /Category Section */}
 
@@ -459,7 +567,7 @@ export default function MainContent() {
             {/* /Latest Posts Section */}
 
             {/* Call To Action Section */}
-            <section id="call-to-action" className="call-to-action section">
+            {/* <section id="call-to-action" className="call-to-action section">
                 <div className="container" data-aos="fade-up" data-aos-delay="100">
                     <div className="row gy-4 justify-content-between align-items-center">
                         <div className="col-lg-6">
@@ -501,7 +609,7 @@ export default function MainContent() {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section> */}
             {/* /Call To Action Section */}
         </main>
     );
