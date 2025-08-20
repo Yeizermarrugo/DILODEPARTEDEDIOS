@@ -1,4 +1,21 @@
+import { usePage } from '@inertiajs/react';
+
+const navLinks = [
+    { href: '/', label: 'Inicio' },
+    { href: '/about', label: 'Quienes somos?' },
+    { href: '/devocionales', label: 'Devocionales' },
+    { href: '/category.html', label: 'Podcast y mas' },
+    { href: '/author-profile.html', label: 'Libros' },
+    { href: '/contact.html', label: 'Contact' },
+];
+
 const Header = () => {
+    const { url } = usePage();
+
+    const isActive = (href: string) => {
+        if (href === '/') return url === '/';
+        return url.startsWith(href.replace('.html', ''));
+    };
     return (
         <header id="header" className="header position-relative">
             <div className="container-fluid container-xl position-relative">
@@ -41,7 +58,7 @@ const Header = () => {
                 </div>
             </div>
             {/* Navigation */}
-            <div className="nav-wrap">
+            {/* <div className="nav-wrap">
                 <div className="d-flex justify-content-center position-relative container">
                     <nav id="navmenu" className="navmenu">
                         <ul>
@@ -66,6 +83,22 @@ const Header = () => {
                             <li>
                                 <a href="contact.html">Contact</a>
                             </li>
+                        </ul>
+                        <i className="mobile-nav-toggle d-xl-none bi bi-list"></i>
+                    </nav>
+                </div>
+            </div> */}
+            <div className="nav-wrap">
+                <div className="d-flex justify-content-center position-relative container">
+                    <nav id="navmenu" className="navmenu">
+                        <ul>
+                            {navLinks.map((link) => (
+                                <li key={link.href}>
+                                    <a href={link.href} className={isActive(link.href) ? 'active' : ''}>
+                                        {link.label}
+                                    </a>
+                                </li>
+                            ))}
                         </ul>
                         <i className="mobile-nav-toggle d-xl-none bi bi-list"></i>
                     </nav>
