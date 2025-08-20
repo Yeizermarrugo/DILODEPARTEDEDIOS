@@ -10,32 +10,86 @@ interface Devocional {
     // Add other properties as needed, e.g.:
     titulo: string;
     contenido: string;
+    categoria: string;
 }
 
 interface DevocionalCardProps {
     devocionales: Devocional[];
 }
 
+const colorArray = [
+    // '#FF5252',
+    '#ffd6408c',
+    '#0090ea9a',
+    '#fc00009f',
+    '#00e67791',
+    '#7c4dff85',
+    '#ff408085',
+    '#ff990086',
+    '#c511627c',
+    // '#FFD600',
+    // '#69F0AE',
+    // '#00B8D4',
+    // '#2979FF',
+    // '#304FFE',
+    // '#AA00FF',
+    // '#6200EA',
+    // '#0091EA',
+    // '#00BFAE',
+    // '#64DD17',
+    // '#AEEA00',
+];
+
+// Mapa global de categoría a color
+const categoryColorMap: { [category: string]: string } = {};
 export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
-    function getContentAfterH1(html: string) {
+    /**
+     * Asigna un color único e inmutable por categoría.
+     * Siempre retorna el mismo color para la misma categoría.
+     * Si se acaban los colores, las extras serán blancas.
+     */
+    function getPlainTextAfterH1(html: string) {
         const regex = /<h1\b[^>]*>.*?<\/h1>/i;
         const match = html.match(regex);
-        if (!match) return ''; // Si no hay h1, retorna vacío o todo el texto si prefieres
+        if (!match) return '';
         const index = (match.index ?? 0) + match[0].length;
-        return html.slice(index);
+        const afterH1 = html.slice(index);
+        // Elimina todas las etiquetas HTML
+        const plainText = afterH1.replace(/<[^>]+>/g, '').trim();
+        return plainText;
     }
-    const contenidoFiltrado = (contenido: string) => {
-        getContentAfterH1(contenido);
-    };
 
-    console.log('object', devocionales[0].contenido);
+    function stringToColor(str: string): string {
+        const normalized = str.trim().toLowerCase();
 
-    // Si usas dangerouslySetInnerHTML
-    <div dangerouslySetInnerHTML={{ __html: contenidoFiltrado }} />;
+        if (categoryColorMap[normalized]) {
+            return categoryColorMap[normalized];
+        }
+
+        for (const color of colorArray) {
+            if (!Object.values(categoryColorMap).includes(color)) {
+                categoryColorMap[normalized] = color;
+                return color;
+            }
+        }
+
+        // Si no hay colores disponibles, retorna blanco
+        return '#FFFFFF';
+    }
+
     return (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
             {devocionales.map((dev, idx) => (
-                <Card sx={{ width: 250, display: 'flex', flexDirection: 'column', height: 350 }} key={idx}>
+                <Card
+                    sx={{
+                        width: 250,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: 350,
+                        backgroundColor: `${dev.categoria ? stringToColor(dev.categoria) : '#ffffffff'}`,
+                    }}
+                    key={idx}
+                >
                     {/* <CardMedia sx={{ height: 140 }} image={dev.imagen} /> */}
                     <CardMedia
                         component="img"
@@ -49,13 +103,13 @@ export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
                         }}
                     />
                     <CardContent sx={{ flex: '1 1 auto', overflow: 'hidden', paddingBottom: 0 }}>
-                        <Typography gutterBottom variant="h5" component="div">
+                        <Typography sx={{ color: 'rgba(56, 56, 56, 1)' }} gutterBottom variant="h5" component="div">
                             {dev.titulo}
                         </Typography>
                         <Typography
                             variant="body2"
-                            sx={{ color: 'text.secondary', padding: 0, margin: 0 }}
-                            dangerouslySetInnerHTML={{ __html: getContentAfterH1(dev.contenido).split(' ').slice(0, 20).join(' ') + '...' }}
+                            sx={{ color: 'rgba(119, 119, 119, 0.81)', padding: 0, margin: 0 }}
+                            dangerouslySetInnerHTML={{ __html: getPlainTextAfterH1(dev.contenido).split(' ').slice(0, 20).join(' ') + '...' }}
                         />
                     </CardContent>
                     <CardActions sx={{ mt: 'auto' }}>
