@@ -31,6 +31,15 @@ body {
     overflow: visible;
 }
 
+.devocional {
+    width: 100%;
+    margin: 0 auto;
+    background: #fff;
+    position: relative;
+    z-index: 2;
+    overflow: visible;
+}
+
 .header-modal {
     width: 100%;
     min-height: 220px;
@@ -82,8 +91,32 @@ body {
     text-align: right;
 }
 
+.devocional section {
+    padding: 2rem 1.5rem 1rem 1.5rem;
+}
+
+.devocional p {
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: #222;
+    margin: 0;
+    word-break: break-word;
+}
+
+.devocional .date {
+    margin-top: 1.5rem;
+    color: #888;
+    font-size: 1rem;
+    text-align: right;
+}
+
 @media (max-width: 700px) {
     .devocional-details {
+        max-width: 98vw;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .devocional {
         max-width: 98vw;
         border-radius: 0;
         box-shadow: none;
@@ -97,10 +130,17 @@ body {
     .devocional-details section {
         padding: 1rem 0.5rem;
     }
+
+    .devocional section {
+        padding: 1rem 0.5rem;
+    }
 }
 
 @media (max-width: 400px) {
     .devocional-details {
+        padding: 0;
+    }
+    .devocional {
         padding: 0;
     }
     .header-modal .title {

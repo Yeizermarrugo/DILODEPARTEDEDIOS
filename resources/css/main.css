@@ -832,7 +832,8 @@ h6 {
 .page-title .title-wrapper {
     max-width: 800px;
     margin: 0 auto;
-    padding: 1rem 0;
+    padding: 1rem;
+    text-align: justify;
 }
 
 .page-title .title-wrapper h1 {
@@ -1365,6 +1366,18 @@ section,
     overflow: hidden;
 }
 
+.youtube {
+    display: flex;
+    width: 100%;
+    gap: 30px;
+}
+
+.youtube .featured-post {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .category-section .list-post .post-img img {
     width: 100px;
     height: 100px;
@@ -1783,6 +1796,24 @@ section,
     overflow: hidden;
 }
 
+.mision {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.37);
+    border-radius: 2%;
+}
+
+.vision {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.37);
+    border-radius: 2%;
+    margin-top: 30px;
+    margin-bottom: -30px;
+}
+
+.row {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
 .category-postst .post-img {
     max-height: 240px;
     margin: -30px -30px 15px -30px;
@@ -2961,12 +2992,15 @@ section,
     margin-bottom: 1.5rem;
     line-height: 1.2;
     font-weight: 700;
+    color: var(--default-color);
 }
 
 .about .about-description,
 .about .section-text {
     color: color-mix(in srgb, var(--default-color) 80%, transparent);
     line-height: 1.6;
+    font-size: 1.1rem;
+    text-align: justify;
 }
 
 .about .features-boxes .feature-box {
@@ -3039,6 +3073,7 @@ section,
     border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
     border-radius: 8px;
     transition: 0.3s;
+    min-height: 100%;
 }
 
 .team .team-member:hover {
@@ -3048,6 +3083,8 @@ section,
 .team .team-member .member-img {
     flex: 0 0 200px;
     overflow: hidden;
+    /* background: linear-gradient(to right, #d3d4cf, #ddded9); */
+    background: linear-gradient(90deg, #d3d4cf 0%, #ddded9 60%, #ebebeb 100%);
 }
 
 .team .team-member .member-img img {
@@ -3061,6 +3098,8 @@ section,
 .team .team-member .member-info {
     padding: 25px;
     text-align: left;
+    display: flex;
+    flex-direction: column;
 }
 
 .team .team-member .member-info h4 {
@@ -3087,6 +3126,7 @@ section,
 .team .team-member .member-info .social {
     display: flex;
     gap: 10px;
+    margin-top: auto;
 }
 
 .team .team-member .member-info .social a {
@@ -3625,7 +3665,8 @@ section,
 
 .cards-container {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     flex-wrap: wrap;
     gap: 20px;
     height: auto;
