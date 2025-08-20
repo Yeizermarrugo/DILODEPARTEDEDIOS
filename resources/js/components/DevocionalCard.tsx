@@ -1,6 +1,4 @@
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
@@ -19,14 +17,14 @@ interface DevocionalCardProps {
 
 const colorArray = [
     // '#FF5252',
+    '#ff990086',
+    '#c511627c',
     '#ffd6408c',
     '#0090ea9a',
     '#fc00009f',
     '#00e67791',
     '#7c4dff85',
     '#ff408085',
-    '#ff990086',
-    '#c511627c',
     // '#FFD600',
     // '#69F0AE',
     // '#00B8D4',
@@ -112,10 +110,10 @@ export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
                             dangerouslySetInnerHTML={{ __html: getPlainTextAfterH1(dev.contenido).split(' ').slice(0, 20).join(' ') + '...' }}
                         />
                     </CardContent>
-                    <CardActions sx={{ mt: 'auto' }}>
+                    {/* <CardActions sx={{ mt: 'auto' }}>
                         <Button size="small">Share</Button>
                         <Button size="small">Learn More</Button>
-                    </CardActions>
+                    </CardActions> */}
                 </Card>
             ))}
         </div>
