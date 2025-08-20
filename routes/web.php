@@ -21,11 +21,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('DevocionalesAgregar');
 });
 
-Route::get('/devocionals-latest', [DevocionalController::class, 'latest']);
-Route::post('/devocionalesadd', [DevocionalController::class, 'store'])->middleware(['auth', 'verified']);
-Route::post('/upload-image', [ImageUploadController::class, 'store']);
 
-// Route::get('/devocional/{id}', [DevocionalController::class, 'show']);
+
 Route::get('/about', function () {
     return Inertia::render('About');
 });
@@ -33,8 +30,12 @@ Route::get('/about', function () {
 Route::get('/devocionales', function () {
     return Inertia::render('Devocionals');
 });
+Route::get('/devocionals-latest', [DevocionalController::class, 'latest']);
+Route::post('/devocionalesadd', [DevocionalController::class, 'store'])->middleware(['auth', 'verified']);
+Route::post('/upload-image', [ImageUploadController::class, 'store']);
 Route::get('/devocionales-search', [DevocionalController::class, 'index']);
 Route::get('/devocionales/categoria/{categoria}', [DevocionalController::class, 'porCategoria']);
+Route::get('/devocional/{id}', [DevocionalController::class, 'details']);
 
 // Route::inertia('/BlogDetails', 'BlogDetails');
 
