@@ -27,15 +27,13 @@ const About = () => {
                 <div className="page-title">
                     <div className="title-wrapper">
                         <p>
-                            Creemos firmemente que la Palabra de Dios es viva, eficaz y suficiente para transformar vidas. Nos apasiona ver a personas
-                            de todo el mundo profundizar en la lectura bíblica, no solo como un hábito, sino como una relación viva con el Espíritu
-                            Santo, quien ilumina, corrige, enseña e instruye.
+                            <span style={{ fontWeight: 'bold' }}>Dilo de parte de Dios</span> es una plataforma donde podrás encontrar esa palabra que
+                            necesitas cada día para conectarte con Dios, conocerlo y entender lo que Él tiene para decirte de manera personal.
                         </p>
                         <br />
-                        <p>
-                            Somos un ministerio comprometido con equipar al pueblo de Dios para que comprendan, vivan y compartan las Escrituras con
-                            claridad, convicción y poder. Cada enseñanza, recurso y guía que compartimos tiene un propósito: que Cristo sea formado en
-                            cada creyente y que Su voluntad se cumpla en cada vida.
+                        <p style={{ fontStyle: 'italic' }}>
+                            “Lámpara es a mis pies tu palabra, Y lumbrera a mi camino.”{' '}
+                            <span style={{ fontWeight: 'bold' }}>Salmos 119:105 RVR1960</span>
                         </p>
                     </div>
                 </div>
