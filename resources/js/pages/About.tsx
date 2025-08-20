@@ -1,42 +1,19 @@
+import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import '../../css/main.css';
 
 const teamMembers = [
     {
-        img: 'assets/img/person/person-m-7.webp',
-        name: 'Walter White',
-        role: 'Chief Executive Officer',
-        desc: 'Aliquam iure quaerat voluptatem praesentium possimus unde laudantium vel dolorum distinctio dire flow',
+        img: 'assets/img/person/Yeizer.png',
+        name: 'Yeizer Marrugo',
+        role: 'Cofundador & Director de Tecnología (CTO)',
+        desc: 'Discípulo de Cristo, Ingeniero de sistemas y desarrollador de software, es el encargado de diseñar y programar nuestra página web y brindarnos todos las herramientas y recursos digitales necesarios para cumplir con nuestra asignación de expandir el reino de Dios aquí en la tierra; es también deportista profesional, padre, creador de contenido y cofundador de la escuela de formación y capacitación bíblica Dilo de parte de Dios.',
     },
     {
-        img: 'assets/img/person/person-f-8.webp',
-        name: 'Sarah Jhonson',
-        role: 'Product Manager',
-        desc: 'Labore ipsam sit consequatur exercitationem rerum laboriosam laudantium aut quod dolores exercitationem ut',
-    },
-    {
-        img: 'assets/img/person/person-m-6.webp',
-        name: 'William Anderson',
-        role: 'CTO',
-        desc: 'Illum minima ea autem doloremque ipsum quidem quas aspernatur modi ut praesentium vel tque sed facilis at qui',
-    },
-    {
-        img: 'assets/img/person/person-f-4.webp',
-        name: 'Amanda Jepson',
-        role: 'Accountant',
-        desc: 'Magni voluptatem accusamus assumenda cum nisi aut qui dolorem voluptate sed et veniam quasi quam consectetur',
-    },
-    {
-        img: 'assets/img/person/person-m-12.webp',
-        name: 'Brian Doe',
-        role: 'Marketing',
-        desc: 'Qui consequuntur quos accusamus magnam quo est molestiae eius laboriosam sunt doloribus quia impedit laborum velit',
-    },
-    {
-        img: 'assets/img/person/person-f-9.webp',
-        name: 'Josepha Palas',
-        role: 'Operation',
-        desc: 'Sint sint eveniet explicabo amet consequatur nesciunt error enim rerum earum et omnis fugit eligendi cupiditate vel',
+        img: 'assets/img/person/Diana.png',
+        name: 'Diana López',
+        role: 'Cofundadora & Escritora',
+        desc: 'Discípulo de Cristo, administradora de empresas, escritora y maestra de vocación, madre, creadora de contenido y cofundadora de la escuela de formación y capacitación bíblica Dilo de parte de Dios. Dios le entregó la visión de esta escuela y del ministerio en el año 2022, y desde entonces ha estado trabajando incansablemente para equipar al pueblo de Dios con recursos que les ayuden a comprender y vivir las Escrituras.',
     },
 ];
 
@@ -48,26 +25,17 @@ const About = () => {
             <main className="main">
                 {/* Page Title */}
                 <div className="page-title">
-                    <div className="breadcrumbs">
-                        <nav aria-label="breadcrumb">
-                            <ol className="breadcrumb">
-                                <li className="breadcrumb-item">
-                                    <a href="#">
-                                        <i className="bi bi-house"></i> Home
-                                    </a>
-                                </li>
-                                <li className="breadcrumb-item">
-                                    <a href="#">Category</a>
-                                </li>
-                                <li className="breadcrumb-item active current">About</li>
-                            </ol>
-                        </nav>
-                    </div>
                     <div className="title-wrapper">
-                        <h1>About</h1>
                         <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus
-                            leo.
+                            Creemos firmemente que la Palabra de Dios es viva, eficaz y suficiente para transformar vidas. Nos apasiona ver a personas
+                            de todo el mundo profundizar en la lectura bíblica, no solo como un hábito, sino como una relación viva con el Espíritu
+                            Santo, quien ilumina, corrige, enseña e instruye.
+                        </p>
+                        <br />
+                        <p>
+                            Somos un ministerio comprometido con equipar al pueblo de Dios para que comprendan, vivan y compartan las Escrituras con
+                            claridad, convicción y poder. Cada enseñanza, recurso y guía que compartimos tiene un propósito: que Cristo sea formado en
+                            cada creyente y que Su voluntad se cumpla en cada vida.
                         </p>
                     </div>
                 </div>
@@ -75,73 +43,97 @@ const About = () => {
                 {/* About Section */}
                 <section id="about" className="about section">
                     <div className="container" data-aos="fade-up" data-aos-delay="100">
-                        <span className="section-badge">
+                        {/* <span className="section-badge">
                             <i className="bi bi-info-circle"></i> About Us
-                        </span>
+                        </span> */}
                         <div className="row">
-                            <div className="col-lg-6">
-                                <h2 className="about-title">Nemo enim ipsam voluptatem quia voluptas aspernatur</h2>
+                            <div className="mision col-lg-5">
+                                <h2 className="about-title">Misión</h2>
                                 <p className="about-description">
-                                    Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates
-                                    repudiandae sint et molestiae non recusandae.
+                                    Preparar y capacitar al pueblo de Dios de manera que puedan lograr el completo desarrollo de sus capacidades
+                                    espirituales y naturales, para que vivan con excelencia una vida basada en los principios bíblicos y de ese modo
+                                    cumplan la voluntad de Dios para sus vidas y sirvan como instrumento para los planes de Dios en la vida de otros.
                                 </p>
                             </div>
-                            <div className="col-lg-6">
-                                <p className="about-text">
-                                    Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut
-                                    perferendis doloribus asperiores repellat.
-                                </p>
-                                <p className="about-text">
-                                    Amet eos ut. Officiis soluta ab id dolor non sint. Corporis omnis consequatur quisquam ex consequuntur quo omnis.
-                                    Quo eligendi cum. Amet mollitia qui quidem dolores praesentium quasi ut et.
+                            <div className="vision col-lg-6">
+                                <h2 className="about-title">Visión</h2>
+                                <p className="about-description">
+                                    Ser líderes a nivel mundial en fomentar la cultura de la lectura bíblica, brindando herramientas para su correcta
+                                    comprensión e interpretación, la cual se da de manera efectiva teniendo y manteniendo comunión con el Espíritu
+                                    Santo de Dios, quien nos enseña, nos redarguye, nos corrige y nos instruye para poder entenderla y vivirla.
                                 </p>
                             </div>
+                        </div>
+                        <br />
+                        <br />
+                        <div>
+                            <h2 className="about-title" style={{ justifyContent: 'center', display: 'flex', marginTop: '30px' }}>
+                                Valores
+                            </h2>
                         </div>
                         <div className="row features-boxes gy-4 mt-3">
                             <div className="col-lg-4" data-aos="fade-up" data-aos-delay="200">
                                 <div className="feature-box">
                                     <div className="icon-box">
-                                        <i className="bi bi-bullseye"></i>
+                                        <i className="bi bi-stars"></i>
                                     </div>
                                     <h3>
-                                        <a href="#" className="stretched-link">
-                                            At vero eos
+                                        <a className="stretched-link" style={{ cursor: 'default' }}>
+                                            FE
                                         </a>
                                     </h3>
-                                    <p>
-                                        Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat.
+                                    <p style={{ textAlign: 'justify' }}>
+                                        Por fe creemos que la biblia fue inspirada por el Espíritu Santo de Dios, además de que ya hay evidencia
+                                        científica de todo lo que habla y se ha cumplido mucho de lo que allí está escrito; por esta razón, es nuestro
+                                        valor principal para el estudio, comprensión e interpretación de las escrituras. La fe, la cual no es dada por
+                                        Dios, nos ayuda a creer que él existe, que es bueno y que somos salvos por medio del sacrificio de Cristo.
                                     </p>
                                 </div>
                             </div>
                             <div className="col-lg-4" data-aos="fade-up" data-aos-delay="300">
                                 <div className="feature-box">
                                     <div className="icon-box">
-                                        <i className="bi bi-person-check"></i>
+                                        <i className="bi bi-flower2"></i>
                                     </div>
                                     <h3>
-                                        <a href="#" className="stretched-link">
-                                            Sed ut perspiciatis
+                                        <a className="stretched-link" style={{ cursor: 'default' }}>
+                                            HUMILDAD
                                         </a>
                                     </h3>
-                                    <p>
-                                        At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti
-                                        atque.
+                                    <p style={{ textAlign: 'justify' }}>
+                                        Sólo con humildad podremos tener un corazón dispuesto a recibir y a poner por obra las enseñanzas que Dios nos
+                                        da a través de su palabra. La humildad nos mantiene conscientes de que necesitamos a Dios para ser todo lo que
+                                        somos y hacer todo lo que hacemos.
                                     </p>
                                 </div>
                             </div>
-                            <div className="col-lg-4" data-aos="fade-up" data-aos-delay="400">
+                            <div className="col-lg-4" data-aos="fade-up" data-aos-delay="400" style={{ cursor: 'default' }}>
                                 <div className="feature-box">
                                     <div className="icon-box">
-                                        <i className="bi bi-clipboard-data"></i>
+                                        <i className="bi bi-shield-check"></i>
                                     </div>
                                     <h3>
-                                        <a href="#" className="stretched-link">
-                                            Nemo enim ipsam
-                                        </a>
+                                        <a className="stretched-link">CONFIANZA</a>
                                     </h3>
-                                    <p>
-                                        Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non
-                                        numquam.
+                                    <p style={{ textAlign: 'justify' }}>
+                                        La confianza nos permite estar seguros de que los planes de Dios para nuestra vida son muchos mejores que los
+                                        nuestros, y nos ayuda a descansar en su perfecto plan y propósito, animándonos a cooperar con el Espíritu
+                                        Santo en nuestra transformación y la de otros.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="col-lg-4" data-aos="fade-up" data-aos-delay="400" style={{ cursor: 'default' }}>
+                                <div className="feature-box">
+                                    <div className="icon-box">
+                                        <i className="bi bi-check2-circle"></i>
+                                    </div>
+                                    <h3>
+                                        <a className="stretched-link">OBEDIENCIA</a>
+                                    </h3>
+                                    <p style={{ textAlign: 'justify' }}>
+                                        Obedeciendo de manera práctica y de forma completa los mandatos de Dios, los cuales no son dados a través de
+                                        su palabra, podremos alcanzar todo lo que él ha dispuesto para nuestra vida, cumpliendo cabalmente cada una de
+                                        nuestras asignaciones.
                                     </p>
                                 </div>
                             </div>
@@ -160,9 +152,9 @@ const About = () => {
                 {/* Team Section */}
                 <section id="team" className="team section light-background">
                     <div className="section-title container" data-aos="fade-up">
-                        <h2>Team</h2>
+                        <h2>Equipo</h2>
                         <div>
-                            <span>Check Our</span> <span className="description-title">Team</span>
+                            <span>Nuestro</span> <span className="description-title">Equipo</span>
                         </div>
                     </div>
                     <div className="container" data-aos="fade-up" data-aos-delay="100">
@@ -176,7 +168,7 @@ const About = () => {
                                         <div className="member-info flex-grow-1">
                                             <h4>{member.name}</h4>
                                             <span>{member.role}</span>
-                                            <p>{member.desc}</p>
+                                            <p style={{ textAlign: 'justify' }}>{member.desc}</p>
                                             <div className="social">
                                                 <a href="">
                                                     <i className="bi bi-facebook"></i>
@@ -199,130 +191,7 @@ const About = () => {
                     </div>
                 </section>
             </main>
-
-            <footer id="footer" className="footer">
-                <div className="footer-top container">
-                    <div className="row gy-4">
-                        <div className="col-lg-4 col-md-6 footer-about">
-                            <a href="index.html" className="logo d-flex align-items-center">
-                                <span className="sitename">Blogy</span>
-                            </a>
-                            <div className="footer-contact pt-3">
-                                <p>A108 Adam Street</p>
-                                <p>New York, NY 535022</p>
-                                <p className="mt-3">
-                                    <strong>Phone:</strong> <span>+1 5589 55488 55</span>
-                                </p>
-                                <p>
-                                    <strong>Email:</strong> <span>info@example.com</span>
-                                </p>
-                            </div>
-                            <div className="social-links d-flex mt-4">
-                                <a href="">
-                                    <i className="bi bi-twitter-x"></i>
-                                </a>
-                                <a href="">
-                                    <i className="bi bi-facebook"></i>
-                                </a>
-                                <a href="">
-                                    <i className="bi bi-instagram"></i>
-                                </a>
-                                <a href="">
-                                    <i className="bi bi-linkedin"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div className="col-lg-2 col-md-3 footer-links">
-                            <h4>Useful Links</h4>
-                            <ul>
-                                <li>
-                                    <a href="#">Home</a>
-                                </li>
-                                <li>
-                                    <a href="#">About us</a>
-                                </li>
-                                <li>
-                                    <a href="#">Services</a>
-                                </li>
-                                <li>
-                                    <a href="#">Terms of service</a>
-                                </li>
-                                <li>
-                                    <a href="#">Privacy policy</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="col-lg-2 col-md-3 footer-links">
-                            <h4>Our Services</h4>
-                            <ul>
-                                <li>
-                                    <a href="#">Web Design</a>
-                                </li>
-                                <li>
-                                    <a href="#">Web Development</a>
-                                </li>
-                                <li>
-                                    <a href="#">Product Management</a>
-                                </li>
-                                <li>
-                                    <a href="#">Marketing</a>
-                                </li>
-                                <li>
-                                    <a href="#">Graphic Design</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="col-lg-2 col-md-3 footer-links">
-                            <h4>Hic solutasetp</h4>
-                            <ul>
-                                <li>
-                                    <a href="#">Molestiae accusamus iure</a>
-                                </li>
-                                <li>
-                                    <a href="#">Excepturi dignissimos</a>
-                                </li>
-                                <li>
-                                    <a href="#">Suscipit distinctio</a>
-                                </li>
-                                <li>
-                                    <a href="#">Dilecta</a>
-                                </li>
-                                <li>
-                                    <a href="#">Sit quas consectetur</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="col-lg-2 col-md-3 footer-links">
-                            <h4>Nobis illum</h4>
-                            <ul>
-                                <li>
-                                    <a href="#">Ipsam</a>
-                                </li>
-                                <li>
-                                    <a href="#">Laudantium dolorum</a>
-                                </li>
-                                <li>
-                                    <a href="#">Dinera</a>
-                                </li>
-                                <li>
-                                    <a href="#">Trodelas</a>
-                                </li>
-                                <li>
-                                    <a href="#">Flexo</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div className="copyright container mt-4 text-center">
-                    <p>
-                        © <span>Copyright</span> <strong className="sitename px-1">Blogy</strong> <span>All Rights Reserved</span>
-                    </p>
-                    <div className="credits">
-                        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };
