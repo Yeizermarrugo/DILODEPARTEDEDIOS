@@ -176,10 +176,9 @@ function Devocionals() {
                 <div className="page-title">
                     <div className="breadcrumbs"></div>
                     <div className="title-wrapper">
-                        <h1>Blog Details</h1>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus
-                            leo.
+                        <h1>Encuentra la respuesta que Dios envía hoy a tu vida</h1>
+                        <p style={{ fontStyle: 'italic' }}>
+                            “Tal vez no nos damos cuenta, pero Dios no deja de hablarnos" <span style={{ fontWeight: 'bold' }}>Job 33:14 TLA</span>
                         </p>
                     </div>
                 </div>
@@ -208,14 +207,20 @@ function Devocionals() {
                                                 </h2>
                                             </div>
                                             <div className="cards-container">
-                                                <DevocionalCard
-                                                    devocionales={devocionales.map((dev) => ({
-                                                        ...dev,
-                                                        // Extract titulo from contenido using obtenerPrimerEtiqueta
-                                                        titulo: obtenerPrimerEtiqueta(dev.contenido),
-                                                        contenido: dev.contenido,
-                                                    }))}
-                                                />
+                                                {devocionales.map((devocional, index) => (
+                                                    <a href={`/devocional/${devocional.id}`} style={{ textDecoration: 'none' }}>
+                                                        <DevocionalCard
+                                                            key={index}
+                                                            devocionales={[
+                                                                {
+                                                                    ...devocional,
+                                                                    titulo: obtenerPrimerEtiqueta(devocional.contenido),
+                                                                    contenido: devocional.contenido,
+                                                                },
+                                                            ]}
+                                                        />
+                                                    </a>
+                                                ))}
                                             </div>
 
                                             {renderPaginator()}
