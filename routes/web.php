@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DevocionalController;
 use App\Http\Controllers\ImageUploadController;
+use App\Http\Controllers\YouTubeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -21,7 +22,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('DevocionalesAgregar');
 });
 
+// -----Inicio-----
 
+Route::get('/youtube/latest', [YouTubeController::class, 'latestVideos']);
+
+// ----------
 
 Route::get('/about', function () {
     return Inertia::render('About');
