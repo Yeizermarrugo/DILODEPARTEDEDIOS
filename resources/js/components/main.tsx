@@ -43,7 +43,7 @@ export default function MainContent() {
                     setVideos(data.items);
                     console.log('data: ', data);
                 } else {
-                    setError('No se encontró ningún video.');
+                    // setError('No se encontró ningún video.');
                 }
             })
             .catch((err) => {
@@ -413,7 +413,7 @@ export default function MainContent() {
                         <div className="col-lg-3 col-md-6 d-flex align-items-stretch">
                             <div className="ver-mas-card d-flex flex-column justify-content-center align-items-center w-100 shadow-sm">
                                 <h4 className="mb-3" style={{ fontWeight: 700, color: '#6C63FF' }}>
-                                    ¿Quieres ver más videos?
+                                    Playlist completa
                                 </h4>
                                 <a
                                     href="https://youtube.com/playlist?list=PLA3_8ty5OhFV-hmTywh6yGTnzlaTpJpBU&si=voOhM9H8Oba3-FD7"

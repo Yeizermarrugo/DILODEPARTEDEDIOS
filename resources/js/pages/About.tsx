@@ -27,12 +27,12 @@ const About = () => {
                 <div className="page-title">
                     <div className="title-wrapper">
                         <p>
-                            <span style={{ fontWeight: 'bold' }}>Dilo de parte de Dios</span> es una plataforma donde podrás encontrar esa palabra que
-                            necesitas cada día para conectarte con Dios, conocerlo y entender lo que Él tiene para decirte de manera personal.
+                            <span style={{ fontWeight: 'bold' }}>Dilo de parte de Dios</span> es una plataforma donde encontrarás palabra, recursos y
+                            herramientas que te ayudarán a conectar con Dios, conocerlo y entender lo que él tiene para decirte de manera personal.
                         </p>
                         <br />
                         <p style={{ fontStyle: 'italic' }}>
-                            “Lámpara es a mis pies tu palabra, Y lumbrera a mi camino.”{' '}
+                            “Lámpara es a mis pies tu palabra, y lumbrera a mi camino.”{' '}
                             <span style={{ fontWeight: 'bold' }}>Salmos 119:105 RVR1960</span>
                         </p>
                     </div>
@@ -83,8 +83,8 @@ const About = () => {
                                     <p style={{ textAlign: 'justify' }}>
                                         Por fe creemos que la biblia fue inspirada por el Espíritu Santo de Dios, además de que ya hay evidencia
                                         científica de todo lo que habla y se ha cumplido mucho de lo que allí está escrito; por esta razón, es nuestro
-                                        valor principal para el estudio, comprensión e interpretación de las escrituras. La fe, la cual no es dada por
-                                        Dios, nos ayuda a creer que él existe, que es bueno y que somos salvos por medio del sacrificio de Cristo.
+                                        valor principal para el estudio, comprensión e interpretación de las escrituras. La fe, la cual nos es dada
+                                        por Dios, nos ayuda a creer que él existe, que es bueno y que somos salvos por medio del sacrificio de Cristo.
                                     </p>
                                 </div>
                             </div>
@@ -129,7 +129,7 @@ const About = () => {
                                         <a className="stretched-link">OBEDIENCIA</a>
                                     </h3>
                                     <p style={{ textAlign: 'justify' }}>
-                                        Obedeciendo de manera práctica y de forma completa los mandatos de Dios, los cuales no son dados a través de
+                                        Obedeciendo de manera práctica y de forma completa los mandatos de Dios, los cuales nos son dados a través de
                                         su palabra, podremos alcanzar todo lo que él ha dispuesto para nuestra vida, cumpliendo cabalmente cada una de
                                         nuestras asignaciones.
                                     </p>
@@ -172,11 +172,11 @@ const About = () => {
                                                     <i className="bi bi-facebook"></i>
                                                 </a>
                                                 <a href="">
-                                                    <i className="bi bi-twitter-x"></i>
+                                                    <i className="bi bi-instagram"></i>
                                                 </a>
-                                                <a href="">
+                                                {/* <a href="">
                                                     <i className="bi bi-linkedin"></i>
-                                                </a>
+                                                </a> */}
                                                 <a href="">
                                                     <i className="bi bi-youtube"></i>
                                                 </a>
