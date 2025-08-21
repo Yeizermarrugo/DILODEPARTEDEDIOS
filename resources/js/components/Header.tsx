@@ -1,4 +1,6 @@
 import { usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import '../../css/header.css';
 
 const navLinks = [
     { href: '/', label: 'Inicio' },
@@ -11,11 +13,13 @@ const navLinks = [
 
 const Header = () => {
     const { url } = usePage();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const isActive = (href: string) => {
         if (href === '/') return url === '/';
         return url.startsWith(href.replace('.html', ''));
     };
+
     return (
         <header id="header" className="header position-relative">
             <div className="container-fluid container-xl position-relative">
@@ -57,50 +61,32 @@ const Header = () => {
                     </div>
                 </div>
             </div>
-            {/* Navigation */}
-            {/* <div className="nav-wrap">
-                <div className="d-flex justify-content-center position-relative container">
-                    <nav id="navmenu" className="navmenu">
-                        <ul>
-                            <li>
-                                <a href="/" className="active">
-                                    Inicio
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/about">Quienes somos?</a>
-                            </li>
-                            <li>
-                                <a href="/devocionales">Devocionales</a>
-                            </li>
-                            <li>
-                                <a href="category.html">Podcast y mas</a>
-                            </li>
-                            <li>
-                                <a href="author-profile.html">Libros</a>
-                            </li>
-
-                            <li>
-                                <a href="contact.html">Contact</a>
-                            </li>
-                        </ul>
-                        <i className="mobile-nav-toggle d-xl-none bi bi-list"></i>
-                    </nav>
-                </div>
-            </div> */}
             <div className="nav-wrap">
                 <div className="d-flex justify-content-center position-relative container">
-                    <nav id="navmenu" className="navmenu">
-                        <ul>
+                    <nav id="navmenu" className={`navmenu ${mobileMenuOpen ? 'open' : ''}`}>
+                        <ul style={{ display: mobileMenuOpen ? 'block' : '' }}>
                             {navLinks.map((link) => (
                                 <li key={link.href}>
-                                    <a href={link.href} className={isActive(link.href) ? 'active' : ''}>
+                                    <a href={link.href} className={isActive(link.href) ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>
                                         {link.label}
                                     </a>
                                 </li>
                             ))}
                         </ul>
-                        <i className="mobile-nav-toggle d-xl-none bi bi-list"></i>
+                        <button
+                            className="mobile-nav-toggle d-xl-none"
+                            onClick={() => setMobileMenuOpen((open) => !open)}
+                            aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '2rem',
+                                color: '#333',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            <i className={`bi ${mobileMenuOpen ? 'bi-x' : 'bi-list'}`}></i>
+                        </button>
                     </nav>
                 </div>
             </div>
