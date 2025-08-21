@@ -85,7 +85,7 @@ const ImageUpload = ({ onImageSelected }: ImageUploadProps) => {
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                 >
-                    <input className="file-upload-input" type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
+                    <input className="file-upload-input" name="file" type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
                     <div className="drag-text">
                         <h3>Drag and drop a file or select add Image</h3>
                     </div>
