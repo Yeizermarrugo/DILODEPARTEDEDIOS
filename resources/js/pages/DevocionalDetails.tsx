@@ -53,6 +53,7 @@ const DevocionalDetails = ({ devocional }: props) => {
                     paddingTop: '61.93333333%',
                     fontFamily: "'Sucrose Bold Two'",
                     position: 'relative',
+                    paddingBottom: '200px',
                     color: 'white',
                     zIndex: -2,
                 }}
