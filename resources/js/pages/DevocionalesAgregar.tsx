@@ -2,8 +2,9 @@ import ImageUpload from '@/components/ImageUpload';
 import LoaderBook from '@/components/LoaderBook';
 import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Editor as TinyMCEEditor } from 'tinymce';
+import styles from '../../css/categoriaSelect.module.css';
 
 const DevocionalesAgregar = () => {
     // Tipado correcto para TinyMCE Editor instance
@@ -11,10 +12,25 @@ const DevocionalesAgregar = () => {
     const [imagenUrl, setImagenUrl] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categorias, setCategorias] = useState<string[]>([]);
+    const [categoria, setCategoria] = useState('');
+    const [nuevaCategoria, setNuevaCategoria] = useState('');
+    const [useNuevaCategoria, setUseNuevaCategoria] = useState(false);
 
     // Loader visible si TinyMCE está cargando o si se está guardando/subiendo algo
     const showLoader = isLoading || isSubmitting;
 
+    // Cargar categorías existentes al montar
+    useEffect(() => {
+        axios
+            .get('/devocionales-search') // Asegúrate de que esta ruta devuelve las categorías
+            .then((res) => {
+                console.log('res:: ', JSON.stringify(res.data));
+                const cats = res.data.categorias.map((c: { categoria: string }) => c.categoria);
+                console.log('cats', cats);
+                setCategorias(cats);
+            });
+    }, []);
     // Cuando el editor esté listo, ocultar loader
     const handleEditorInit = (_evt: unknown, editor: TinyMCEEditor) => {
         editorRef.current = editor;
@@ -60,7 +76,7 @@ const DevocionalesAgregar = () => {
             try {
                 await axios.post(
                     '/devocionalesadd',
-                    { contenido: content, imagen: imagenUrl },
+                    { contenido: content, imagen: imagenUrl, categoria: useNuevaCategoria ? nuevaCategoria : categoria },
                     {
                         headers: {
                             'Content-Type': 'application/json',
@@ -117,6 +133,39 @@ const DevocionalesAgregar = () => {
                 <button className="btn-guardar" onClick={handleGuardar} disabled={showLoader}>
                     Guardar
                 </button>
+                <div className={styles['categoria-wrapper']}>
+                    <label className={styles['categoria-label']}>Categoría:</label>
+                    <select
+                        className={styles['categoria-select']}
+                        value={useNuevaCategoria ? 'nueva' : categoria}
+                        onChange={(e) => {
+                            if (e.target.value === 'nueva') {
+                                setUseNuevaCategoria(true);
+                                setCategoria('');
+                            } else {
+                                setUseNuevaCategoria(false);
+                                setCategoria(e.target.value);
+                            }
+                        }}
+                    >
+                        <option value="">Selecciona una categoría</option>
+                        {categorias.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                        <option value="nueva">Agregar nueva categoría...</option>
+                    </select>
+                    {useNuevaCategoria && (
+                        <input
+                            className={styles['categoria-input']}
+                            type="text"
+                            placeholder="Nueva categoría"
+                            value={nuevaCategoria}
+                            onChange={(e) => setNuevaCategoria(e.target.value)}
+                        />
+                    )}
+                </div>
                 <Editor
                     apiKey="pc7pp06765v04kvyv0e65n2ja3v0c3hn5law9o9vpchu0erd"
                     onInit={handleEditorInit}
