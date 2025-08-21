@@ -10,8 +10,13 @@ class ImageUploadController extends Controller
     public function store(Request $request)
     {
         if ($request->hasFile('file')) {
-            $path = $request->file('file')->store('imagenes', 'public');
-            $url = asset('storage/' . $path);
+            // Subir a S3 en la carpeta "imagenes"
+            $path = $request->file('file')->store('imagenes', 's3', 'public');
+
+            // Obtener la URL pública
+            $url = Storage::disk('s3')->url($path);
+
+            // Aquí puedes guardar $url donde quieras, por ejemplo en tu configuración, archivo, etc.
             return response()->json(['location' => $url]);
         }
         return response()->json(['error' => 'No file uploaded.'], 400);
