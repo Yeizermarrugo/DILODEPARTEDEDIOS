@@ -53,11 +53,12 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                     paddingTop: '40%',
                     fontFamily: "'Sucrose Bold Two'",
                     position: 'relative',
+                    paddingBottom: '200px',
                     color: 'white',
                     zIndex: -2,
                 }}
             >
-                <h1 className="title" style={{ paddingTop: '50px', zIndex: -9999 }}>
+                <h1 className="title" style={{ paddingTop: '50px' }}>
                     {parte1}
                     <span>{parte2}</span>
                     {parte3}
@@ -79,7 +80,15 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
     return (
         <div className="devocional">
             <H1Custom contenido={devocional.contenido} />
-            <section>
+            <section
+                style={{
+                    background: '#fff',
+                    padding: '24px',
+                    borderRadius: '8px',
+                    width: '100%',
+                    position: 'relative',
+                }}
+            >
                 <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
             </section>
             <div style={{ marginTop: '8px', color: '#888' }}>
