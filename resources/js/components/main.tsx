@@ -43,7 +43,7 @@ export default function MainContent() {
                     setVideos(data.items);
                     console.log('data: ', data);
                 } else {
-                    // setError('No se encontró ningún video.');
+                    setError('No se encontró ningún video.');
                 }
             })
             .catch((err) => {
