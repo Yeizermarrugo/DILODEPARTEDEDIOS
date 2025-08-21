@@ -48,7 +48,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
             <header
                 className="header-modal"
                 style={{
-                    background: `url(${devocional.imagen}) no-repeat`,
+                    background: `url(${devocional.imagen}) 0% 30% no-repeat`,
                     backgroundSize: 'cover',
                     paddingTop: '40%',
                     fontFamily: "'Sucrose Bold Two'",
