@@ -80,7 +80,7 @@ export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
             {devocionales.map((dev, idx) => (
                 <Card
                     sx={{
-                        width: 250,
+                        width: 200,
                         display: 'flex',
                         flexDirection: 'column',
                         height: 350,
