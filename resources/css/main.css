@@ -3671,3 +3671,50 @@ section,
     gap: 20px;
     height: auto;
 }
+
+/* ----------Devocional---------- */
+/* Responsive widgets location */
+.mobile-widgets {
+    display: block;
+    margin-bottom: 24px;
+}
+@media (min-width: 992px) {
+    .mobile-widgets {
+        display: none !important;
+    }
+}
+.sidebar {
+    display: none;
+}
+@media (min-width: 992px) {
+    .sidebar {
+        display: block !important;
+    }
+}
+
+/* Optional: paginator styling */
+.paginator-btn.active {
+    background: #007bff !important;
+    color: #fff !important;
+}
+.paginator-btn {
+    margin: 0 3px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+}
+.paginator-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.recent-posts-widget .post-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 15px;
+    border-radius: 5px; /* opcional, para bordes redondeados */
+}
