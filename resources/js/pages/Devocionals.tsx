@@ -19,7 +19,6 @@ type Devocional = {
     [key: string]: string | undefined;
 };
 
-// Paginación: type para la respuesta paginada
 type DevocionalesResponse = {
     data: Devocional[];
     current_page: number;
@@ -28,7 +27,6 @@ type DevocionalesResponse = {
     per_page: number;
     next_page_url: string | null;
     prev_page_url: string | null;
-    // Otros campos si necesitas
 };
 
 function Devocionals() {
@@ -42,27 +40,39 @@ function Devocionals() {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // Fetch devocionales (general o por categoría)
-    const fetchDevocionales = (categoria: string | null, pageNumber: number = 1) => {
+    // Fetch devocionales (paginación y search siempre backend)
+    useEffect(() => {
         setLoading(true);
+
         let url = '';
-        if (categoria) {
-            url = `/devocionales/categoria/${encodeURIComponent(categoria)}?page=${pageNumber}`;
+        if (searchTerm.trim() !== '') {
+            // PRUEBA: cambia "search" por "query" según tu backend
+            url = `/devocionales-search?search=${encodeURIComponent(searchTerm)}&page=${page}`;
+        } else if (selectedCategory) {
+            url = `/devocionales/categoria/${encodeURIComponent(selectedCategory)}?page=${page}`;
         } else {
-            url = `/devocionales-search?page=${pageNumber}`;
+            url = `/devocionales-search?page=${page}`;
         }
+
         fetch(url)
             .then((r) => r.json())
             .then((data) => {
-                // Si es general, trae categorias y devocionales
-                if (!categoria) {
+                console.log('URL enviada:', url);
+                console.log('Respuesta backend:', data);
+                if (!selectedCategory && searchTerm.trim() === '') {
                     setCategories(data.categorias || []);
-                    setTotal(data.devocionales.total || 0);
+                    setTotal(data.devocionales?.total || 0);
                 }
-                // Si es por categoría, puede que solo traiga devocionales
                 if (data.devocionales) {
-                    setDevocionales(data.devocionales.data || []);
+                    setDevocionales(
+                        data.devocionales.data.filter(
+                            (dev: { contenido: string; categoria: string }) =>
+                                dev.contenido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                (dev.categoria && dev.categoria.toLowerCase().includes(searchTerm.toLowerCase())),
+                        ) || [],
+                    );
                     setPagination(data.devocionales);
                 } else if (data.data) {
                     setDevocionales(data.data || []);
@@ -70,10 +80,10 @@ function Devocionals() {
                 }
                 setLoading(false);
             });
-    };
+    }, [selectedCategory, page, searchTerm]);
 
+    // Fetch latest posts (no depende del search)
     useEffect(() => {
-        fetchDevocionales(selectedCategory, page);
         fetch('devocionals-latest')
             .then((response) => response.json())
             .then((data) => {
@@ -82,11 +92,16 @@ function Devocionals() {
             .catch((error) => {
                 console.error('Error fetching latest devocionales:', error);
             });
-    }, [selectedCategory, page]);
+    }, []);
 
-    // Cambio de categoría: resetea page a 1
     const handleSelectCategory = (cat: string | null) => {
         setSelectedCategory(cat);
+        setPage(1);
+        setSearchTerm('');
+    };
+
+    const limpiarBusqueda = () => {
+        setSearchTerm('');
         setPage(1);
     };
 
@@ -105,19 +120,18 @@ function Devocionals() {
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
         if (match) {
-            // match[2] es el contenido dentro de la etiqueta
-            // Si ese contenido tiene HTML, lo eliminamos también
             const innerText = match[2].replace(/<[^>]+>/g, '');
             return innerText;
         }
         return '';
     };
+
     const TituloDevocional = ({ contenido }: { contenido: string }) => {
         const titulo = obtenerPrimerEtiqueta(contenido);
         return <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }} dangerouslySetInnerHTML={{ __html: titulo }} />;
     };
 
-    // Paginador dinámico
+    // Paginador (backend)
     const renderPaginator = () => {
         if (!pagination.last_page || pagination.last_page <= 1) return null;
         const pages = [];
@@ -169,6 +183,104 @@ function Devocionals() {
         );
     };
 
+    const PAGE_LIMIT = 15; // Cambia este valor si tu backend usa otro límite
+
+    const showPaginator = () => {
+        if (!searchTerm.trim()) {
+            // No hay búsqueda, muestra paginador si hay más de una página
+            return pagination.last_page && pagination.last_page > 1;
+        }
+        // Hay búsqueda, solo muestra paginador si el total de resultados es más que el límite por página
+        return devocionales.length > PAGE_LIMIT && (pagination.last_page ?? 0) > 1;
+    };
+    const SearchWidget = () => (
+        <div className="search-widget widget-item">
+            <h3 className="widget-title">Search</h3>
+            <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setPage(1);
+                }}
+                placeholder="Buscar devocional..."
+            />
+            {searchTerm && (
+                <button
+                    type="button"
+                    onClick={limpiarBusqueda}
+                    style={{
+                        marginLeft: '10px',
+                        background: 'none',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        padding: '5px 10px',
+                        cursor: 'pointer',
+                    }}
+                    title="Limpiar búsqueda"
+                >
+                    Limpiar
+                </button>
+            )}
+        </div>
+    );
+
+    const CategoriesWidget = () => (
+        <div className="categories-widget widget-item">
+            <h3 className="widget-title">Categories</h3>
+            <ul className="mt-3">
+                <li>
+                    <button
+                        className={selectedCategory === null ? 'active' : ''}
+                        onClick={() => handleSelectCategory(null)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
+                    >
+                        Todas <span>({total})</span>
+                    </button>
+                </li>
+                {categories.map((cat) => (
+                    <li key={cat.categoria}>
+                        <button
+                            className={selectedCategory === cat.categoria ? 'active' : ''}
+                            onClick={() => handleSelectCategory(cat.categoria)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
+                        >
+                            {cat.categoria} <span>({cat.count})</span>
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+
+    const RecentPostsWidget = () => (
+        <div className="recent-posts-widget widget-item">
+            <h3 className="widget-title">Recent Posts</h3>
+            {latestDevocionales.map((post, idx) => (
+                <div className="post-item" key={idx}>
+                    <img src={post.imagen} alt="" className="flex-shrink-0" />
+                    <div>
+                        <h4 style={{ color: '#212529' }} className="recent-post-title">
+                            <button onClick={() => abrirModal(post)}>
+                                <TituloDevocional contenido={post.contenido} />
+                                <time dateTime="2020-01-01">
+                                    {post.created_at
+                                        ? new Date(post.created_at).toLocaleDateString('es-ES', {
+                                              year: 'numeric',
+                                              month: 'long',
+                                              day: 'numeric',
+                                          })
+                                        : ''}
+                                </time>
+                            </button>
+                        </h4>
+                        <time dateTime="2020-01-01">{post.date}</time>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <div className="blog-details-page">
             <Header />
@@ -185,6 +297,15 @@ function Devocionals() {
 
                 <div className="container">
                     <div className="row">
+                        {/* Mobile widgets: Search, Categories y Recent Posts */}
+                        <div className="mobile-widgets d-block d-lg-none" style={{ width: '100%' }}>
+                            <div className="widgets-container" data-aos="fade-up" data-aos-delay="200">
+                                <SearchWidget />
+                                <CategoriesWidget />
+                                <RecentPostsWidget />
+                            </div>
+                        </div>
+
                         {/* Blog Content */}
                         <div className="col-sm-8">
                             <section id="blog-details" className="blog-grid section">
@@ -198,12 +319,16 @@ function Devocionals() {
                                             </div>
                                         </div>
                                     ) : devocionales.length === 0 ? (
-                                        <p>No hay devocionales para esta categoría.</p>
+                                        <p>No hay devocionales para esta búsqueda.</p>
                                     ) : (
                                         <>
                                             <div style={{ paddingBottom: '30px', marginBottom: '30px' }}>
                                                 <h2 style={{ color: '#212529' }}>
-                                                    {selectedCategory ? `Categoría - ${selectedCategory}` : 'Todos los Devocionales'}
+                                                    {searchTerm
+                                                        ? `Resultados de búsqueda "${searchTerm}"`
+                                                        : selectedCategory
+                                                          ? `Categoría - ${selectedCategory}`
+                                                          : 'Todos los Devocionales'}
                                                 </h2>
                                             </div>
                                             <div className="cards-container">
@@ -222,8 +347,7 @@ function Devocionals() {
                                                     </a>
                                                 ))}
                                             </div>
-
-                                            {renderPaginator()}
+                                            {showPaginator() && renderPaginator()}
                                         </>
                                     )}
                                 </div>
@@ -281,75 +405,13 @@ function Devocionals() {
                                 </div>
                             </div>
                         )}
-                        {/* Sidebar */}
-                        <div className="col-lg-4 sidebar">
+
+                        {/* Sidebar widgets (visible solo en escritorio) */}
+                        <div className="col-lg-4 sidebar d-none d-lg-block">
                             <div className="widgets-container" data-aos="fade-up" data-aos-delay="200">
-                                {/* Search Widget */}
-                                <div className="search-widget widget-item">
-                                    <h3 className="widget-title">Search</h3>
-                                    <form action="">
-                                        <input type="text" />
-                                        <button type="submit" title="Search">
-                                            <i className="bi bi-search"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                                {/* Categories Widget */}
-                                <div className="categories-widget widget-item">
-                                    <h3 className="widget-title">Categories</h3>
-                                    <ul className="mt-3">
-                                        <li>
-                                            <button
-                                                className={selectedCategory === null ? 'active' : ''}
-                                                onClick={() => handleSelectCategory(null)}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
-                                            >
-                                                Todas <span>({total})</span>
-                                            </button>
-                                        </li>
-                                        {categories.map((cat) => (
-                                            <li key={cat.categoria}>
-                                                <button
-                                                    className={selectedCategory === cat.categoria ? 'active' : ''}
-                                                    onClick={() => handleSelectCategory(cat.categoria)}
-                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
-                                                >
-                                                    {cat.categoria} <span>({cat.count})</span>
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                {/* Recent Posts Widget */}
-                                <div className="recent-posts-widget widget-item">
-                                    <h3 className="widget-title">Recent Posts</h3>
-                                    {latestDevocionales.map((post, idx) => (
-                                        <div className="post-item" key={idx}>
-                                            <img src={post.imagen} alt="" className="flex-shrink-0" />
-                                            <div>
-                                                <h4 style={{ color: '#212529' }} className="recent-post-title">
-                                                    <button onClick={() => abrirModal(post)}>
-                                                        <TituloDevocional contenido={post.contenido} />
-                                                        <time dateTime="2020-01-01">
-                                                            {post.created_at
-                                                                ? new Date(post.created_at).toLocaleDateString('es-ES', {
-                                                                      year: 'numeric',
-                                                                      month: 'long',
-                                                                      day: 'numeric',
-                                                                  })
-                                                                : ''}
-                                                        </time>
-                                                    </button>
-                                                </h4>
-                                                <time dateTime="2020-01-01">{post.date}</time>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                {/* Tags Widget */}
-                                {/* <div className="tags-widget widget-item">
-                                    <h3 className="widget-title">Tags</h3>
-                                </div> */}
+                                <SearchWidget />
+                                <CategoriesWidget />
+                                <RecentPostsWidget />
                             </div>
                         </div>
                     </div>
