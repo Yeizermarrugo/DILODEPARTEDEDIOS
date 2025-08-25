@@ -41,46 +41,53 @@ function Devocionals() {
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
+    const [query, setQuery] = useState(searchTerm);
 
     // Fetch devocionales (paginación y search siempre backend)
     useEffect(() => {
         setLoading(true);
 
+        // Cancelar peticiones anteriores si cambia algo rápido
+        const controller = new AbortController();
+
         let url = '';
-        if (searchTerm.trim() !== '') {
-            // PRUEBA: cambia "search" por "query" según tu backend
-            url = `/devocionales-search?search=${encodeURIComponent(searchTerm)}&page=${page}`;
+        if (query.trim() !== '') {
+            // Si tu backend usa ?query= en lugar de ?search= cámbialo aquí:
+            url = `/devocionales-search?search=${encodeURIComponent(query)}&page=${page}`;
         } else if (selectedCategory) {
             url = `/devocionales/categoria/${encodeURIComponent(selectedCategory)}?page=${page}`;
         } else {
             url = `/devocionales-search?page=${page}`;
         }
 
-        fetch(url)
+        fetch(url, { signal: controller.signal })
             .then((r) => r.json())
             .then((data) => {
                 console.log('URL enviada:', url);
                 console.log('Respuesta backend:', data);
-                if (!selectedCategory && searchTerm.trim() === '') {
+
+                if (!selectedCategory && query.trim() === '') {
                     setCategories(data.categorias || []);
                     setTotal(data.devocionales?.total || 0);
                 }
+
                 if (data.devocionales) {
-                    setDevocionales(
-                        data.devocionales.data.filter(
-                            (dev: { contenido: string; categoria: string }) =>
-                                dev.contenido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                (dev.categoria && dev.categoria.toLowerCase().includes(searchTerm.toLowerCase())),
-                        ) || [],
-                    );
+                    setDevocionales(data.devocionales.data || []);
                     setPagination(data.devocionales);
                 } else if (data.data) {
                     setDevocionales(data.data || []);
                     setPagination(data);
                 }
-                setLoading(false);
-            });
-    }, [selectedCategory, page, searchTerm]);
+            })
+            .catch((err) => {
+                if (err.name !== 'AbortError') {
+                    console.error('Error en fetch:', err);
+                }
+            })
+            .finally(() => setLoading(false));
+
+        return () => controller.abort();
+    }, [selectedCategory, page, query]); // <- SIN searchTerm
 
     // Fetch latest posts (no depende del search)
     useEffect(() => {
@@ -98,12 +105,14 @@ function Devocionals() {
         setSelectedCategory(cat);
         setPage(1);
         setSearchTerm('');
+        setQuery(''); // <- reset del query para listar por categoría
     };
 
-    const limpiarBusqueda = () => {
-        setSearchTerm('');
-        setPage(1);
-    };
+    // const limpiarBusqueda = () => {
+    //     setSearchTerm('');
+    //     setQuery(''); // <- limpia el término que dispara el fetch
+    //     setPage(1);
+    // };
 
     const abrirModal = (devocional: Devocional) => {
         setDevocionalSeleccionado(devocional);
@@ -193,37 +202,34 @@ function Devocionals() {
         // Hay búsqueda, solo muestra paginador si el total de resultados es más que el límite por página
         return devocionales.length > PAGE_LIMIT && (pagination.last_page ?? 0) > 1;
     };
-    const SearchWidget = () => (
-        <div className="search-widget widget-item">
-            <h3 className="widget-title">Search</h3>
-            <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setPage(1);
-                }}
-                placeholder="Buscar devocional..."
-            />
-            {searchTerm && (
-                <button
-                    type="button"
-                    onClick={limpiarBusqueda}
-                    style={{
-                        marginLeft: '10px',
-                        background: 'none',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        padding: '5px 10px',
-                        cursor: 'pointer',
-                    }}
-                    title="Limpiar búsqueda"
-                >
-                    Limpiar
-                </button>
-            )}
-        </div>
-    );
+    // const SearchWidget = () => (
+    //     <div className="search-widget widget-item">
+    //         <h3 className="widget-title">Search</h3>
+
+    //         <form
+    //             onSubmit={(e) => {
+    //                 e.preventDefault(); // <- evita recargar la página
+    //                 setPage(1);
+    //                 setQuery(searchTerm.trim()); // <- dispara el fetch
+    //             }}
+    //             style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+    //         >
+    //             <input
+    //                 type="text"
+    //                 value={searchTerm}
+    //                 onChange={(e) => setSearchTerm(e.target.value)} // <- NO dispara fetch
+    //                 placeholder="Buscar devocional..."
+    //             />
+    //             <button type="submit">Buscar</button>
+
+    //             {searchTerm && (
+    //                 <button type="button" onClick={limpiarBusqueda} title="Limpiar búsqueda">
+    //                     Limpiar
+    //                 </button>
+    //             )}
+    //         </form>
+    //     </div>
+    // );
 
     const CategoriesWidget = () => (
         <div className="categories-widget widget-item">
@@ -300,7 +306,7 @@ function Devocionals() {
                         {/* Mobile widgets: Search, Categories y Recent Posts */}
                         <div className="mobile-widgets d-block d-lg-none" style={{ width: '100%' }}>
                             <div className="widgets-container" data-aos="fade-up" data-aos-delay="200">
-                                <SearchWidget />
+                                {/* <SearchWidget /> */}
                                 <CategoriesWidget />
                                 <RecentPostsWidget />
                             </div>
@@ -409,7 +415,7 @@ function Devocionals() {
                         {/* Sidebar widgets (visible solo en escritorio) */}
                         <div className="col-lg-4 sidebar d-none d-lg-block">
                             <div className="widgets-container" data-aos="fade-up" data-aos-delay="200">
-                                <SearchWidget />
+                                {/* <SearchWidget /> */}
                                 <CategoriesWidget />
                                 <RecentPostsWidget />
                             </div>
