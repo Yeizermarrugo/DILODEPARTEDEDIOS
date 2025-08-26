@@ -384,11 +384,11 @@ export default function MainContent() {
                                         <h5 className="card-title" style={{ fontWeight: 600 }}>
                                             {video.snippet.title}
                                         </h5>
-                                        <p className="card-text" style={{ fontSize: '0.95rem', color: '#555' }}>
+                                        {/* <p className="card-text" style={{ fontSize: '0.95rem', color: '#555' }}>
                                             {video.snippet.description.length > 100
                                                 ? video.snippet.description.slice(0, 97) + '...'
                                                 : video.snippet.description}
-                                        </p>
+                                        </p> */}
                                         <div className="d-flex justify-content-between align-items-center mt-auto">
                                             <a
                                                 href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
