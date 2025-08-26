@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import { H as Header, F as Footer } from "./Header-BwnaQMLx.js";
+import { H as Header, F as Footer } from "./Header-DNwlD0BP.js";
 import { useState, useEffect } from "react";
 /* empty css              */
 import DevocionalDetails from "./DevocionalDetails-CpvTjuMy.js";

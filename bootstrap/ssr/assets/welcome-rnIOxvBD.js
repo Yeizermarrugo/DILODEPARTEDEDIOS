@@ -1,5 +1,5 @@
 import { jsx, jsxs } from "react/jsx-runtime";
-import { H as Header, F as Footer } from "./Header-BwnaQMLx.js";
+import { H as Header, F as Footer } from "./Header-DNwlD0BP.js";
 import DevocionalDetails from "./DevocionalDetails-CpvTjuMy.js";
 import axios from "axios";
 import { useState, useEffect } from "react";

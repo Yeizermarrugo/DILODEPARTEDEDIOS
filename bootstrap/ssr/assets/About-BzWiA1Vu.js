@@ -1,5 +1,5 @@
 import { jsxs, jsx } from "react/jsx-runtime";
-import { H as Header, F as Footer } from "./Header-BwnaQMLx.js";
+import { H as Header, F as Footer } from "./Header-DNwlD0BP.js";
 /* empty css              */
 import "@inertiajs/react";
 import "react";

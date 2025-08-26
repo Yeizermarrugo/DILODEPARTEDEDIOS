@@ -1,6 +1,6 @@
 {
   "node_modules/bootstrap/dist/css/bootstrap.min.css": [
-    "/build/assets/welcome-ouofWG_G.js",
+    "/build/assets/welcome-rnIOxvBD.js",
     "/build/assets/welcome-DhAbcaWn.css",
     "/build/assets/main-Ctzzvr96.css"
   ],
@@ -14,7 +14,7 @@
     "/build/assets/devocionalDetails-BKiM9dsO.css"
   ],
   "resources/css/header.css": [
-    "/build/assets/Header-BwnaQMLx.js",
+    "/build/assets/Header-DNwlD0BP.js",
     "/build/assets/Header-bHMO2-KO.css"
   ],
   "resources/css/imageUpload.css": [
@@ -26,15 +26,15 @@
     "/build/assets/DevocionalesAgregar-CxbbfZL6.css"
   ],
   "resources/js/components/DevocionalCard.tsx": [
-    "/build/assets/Devocionals-DkQ6SF2a.js",
+    "/build/assets/Devocionals-BdeUkHYQ.js",
     "/build/assets/main-Ctzzvr96.css"
   ],
   "resources/js/components/Footer.tsx": [
-    "/build/assets/Header-BwnaQMLx.js",
+    "/build/assets/Header-DNwlD0BP.js",
     "/build/assets/Header-bHMO2-KO.css"
   ],
   "resources/js/components/Header.tsx": [
-    "/build/assets/Header-BwnaQMLx.js",
+    "/build/assets/Header-DNwlD0BP.js",
     "/build/assets/Header-bHMO2-KO.css"
   ],
   "resources/js/components/ImageUpload.tsx": [
@@ -89,7 +89,7 @@
     "/build/assets/label-Byzlra19.js"
   ],
   "resources/js/components/main.tsx": [
-    "/build/assets/welcome-ouofWG_G.js",
+    "/build/assets/welcome-rnIOxvBD.js",
     "/build/assets/welcome-DhAbcaWn.css",
     "/build/assets/main-Ctzzvr96.css"
   ],
@@ -186,7 +186,7 @@
     "/build/assets/app-logo-icon-CoogQ1E6.js"
   ],
   "resources/js/pages/About.tsx": [
-    "/build/assets/About-D_qMOr7S.js",
+    "/build/assets/About-BzWiA1Vu.js",
     "/build/assets/main-Ctzzvr96.css"
   ],
   "resources/js/pages/DevocionalDetails.tsx": [
@@ -200,8 +200,18 @@
     "/build/assets/DevocionalesAgregar-CxbbfZL6.css"
   ],
   "resources/js/pages/Devocionals.tsx": [
-    "/build/assets/Devocionals-DkQ6SF2a.js",
+    "/build/assets/Devocionals-BdeUkHYQ.js",
     "/build/assets/main-Ctzzvr96.css"
+  ],
+  "resources/js/pages/Libros.tsx": [
+    "/build/assets/Libros-BlcZX0uQ.js",
+    "/build/assets/main-Ctzzvr96.css",
+    "/build/assets/podcast-CR0YLk9G.css"
+  ],
+  "resources/js/pages/Podcast.tsx": [
+    "/build/assets/Podcast-DAspIPBZ.js",
+    "/build/assets/main-Ctzzvr96.css",
+    "/build/assets/podcast-CR0YLk9G.css"
   ],
   "resources/js/pages/auth/confirm-password.tsx": [
     "/build/assets/confirm-password-fXJ-uZv_.js"
@@ -235,7 +245,7 @@
     "/build/assets/profile-DNRSCG2O.js"
   ],
   "resources/js/pages/welcome.tsx": [
-    "/build/assets/welcome-ouofWG_G.js",
+    "/build/assets/welcome-rnIOxvBD.js",
     "/build/assets/welcome-DhAbcaWn.css",
     "/build/assets/main-Ctzzvr96.css"
   ],

@@ -24,8 +24,8 @@ const navLinks = [
   { href: "/", label: "Inicio" },
   { href: "/about", label: "Quienes somos?" },
   { href: "/devocionales", label: "Devocionales" },
-  { href: "/category.html", label: "Podcast y mas" },
-  { href: "/author-profile.html", label: "Libros" },
+  { href: "/podcast", label: "Podcast y mas" },
+  { href: "/libros", label: "Libros" },
   { href: "/contact.html", label: "Contact" }
 ];
 const Header = () => {

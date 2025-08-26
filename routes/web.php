@@ -44,6 +44,14 @@ Route::get('/devocional/{id}', [DevocionalController::class, 'details']);
 
 // Route::inertia('/BlogDetails', 'BlogDetails');
 
+Route::get('/podcast', function () {
+    return Inertia::render('Podcast');
+});
+
+
+Route::get('/libros', function () {
+    return Inertia::render('Libros');
+});
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

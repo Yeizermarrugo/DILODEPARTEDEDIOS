@@ -1,0 +1,27 @@
+html,
+body,
+#app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.index-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+}
+
+/* Centra el contenido principal y permite que el footer quede abajo */
+.centered-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
