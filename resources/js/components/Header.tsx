@@ -25,7 +25,7 @@ const Header = () => {
             <div className="container-fluid container-xl position-relative">
                 <div className="top-row d-flex align-items-center justify-content-between">
                     <a href="/" className="logo d-flex align-items-end">
-                        <h1 className="sitename" style={{ fontFamily: 'serif', fontSize: '25px' }}>
+                        <h1 className="sitename" style={{ fontFamily: 'serif', fontSize: '20px' }}>
                             Dilo de parte de Dios
                         </h1>
                         <span></span>
