@@ -8,7 +8,7 @@ const navLinks = [
     { href: '/devocionales', label: 'Devocionales' },
     { href: '/podcast', label: 'Podcast y mas' },
     { href: '/libros', label: 'Libros' },
-    { href: '/contact.html', label: 'Contact' },
+    // { href: '/contact.html', label: 'Contact' },
 ];
 
 const Header = () => {
@@ -24,8 +24,8 @@ const Header = () => {
         <header id="header" className="header position-relative">
             <div className="container-fluid container-xl position-relative">
                 <div className="top-row d-flex align-items-center justify-content-between">
-                    <a href="#" className="logo d-flex align-items-end">
-                        <h1 className="sitename" style={{ fontFamily: 'serif' }}>
+                    <a href="/" className="logo d-flex align-items-end">
+                        <h1 className="sitename" style={{ fontFamily: 'serif', fontSize: '25px' }}>
                             Dilo de parte de Dios
                         </h1>
                         <span></span>
@@ -40,8 +40,8 @@ const Header = () => {
                             >
                                 <i className="bi bi-facebook"></i>
                             </a>
-                            <a href="#" className="twitter">
-                                <i className="bi bi-twitter"></i>
+                            <a href="https://www.youtube.com/@casadevalientes7" className="twitter" target="_blank">
+                                <i className="bi bi-youtube"></i>
                             </a>
                             <a
                                 href="https://www.instagram.com/dilodepartededios?igsh=ODU0dHc1bnVhNGd2"
