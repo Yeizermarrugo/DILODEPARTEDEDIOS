@@ -49,7 +49,7 @@ const About = () => {
                                 <h2 className="about-title">Misión</h2>
                                 <p className="about-description">
                                     Preparar y capacitar al pueblo de Dios de manera que puedan lograr el completo desarrollo de sus capacidades
-                                    espirituales y naturales, para que vivan con excelencia una vida basada en los principios bíblicos y de ese modo
+                                    espirituales y naturales, para que vivan con excelencia una vida basada en los principios bíblicos, y de ese modo
                                     cumplan la voluntad de Dios para sus vidas y sirvan como instrumento para los planes de Dios en la vida de otros.
                                 </p>
                             </div>
@@ -84,7 +84,8 @@ const About = () => {
                                         Por fe creemos que la biblia fue inspirada por el Espíritu Santo de Dios, además de que ya hay evidencia
                                         científica de todo lo que habla y se ha cumplido mucho de lo que allí está escrito; por esta razón, es nuestro
                                         valor principal para el estudio, comprensión e interpretación de las escrituras. La fe, la cual nos es dada
-                                        por Dios, nos ayuda a creer que él existe, que es bueno y que somos salvos por medio del sacrificio de Cristo.
+                                        por Dios, nos ayuda a creer que él existe, que es bueno y que somos salvos por medio del sacrificio de
+                                        Jesucristo.
                                     </p>
                                 </div>
                             </div>
