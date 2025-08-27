@@ -511,7 +511,7 @@ export default function MainContent() {
                         </div>
                         <div className="content-right position-relative" data-aos="fade-left" data-aos-delay="300">
                             <a href="/podcast">
-                                <img src="/assets/img/misc/podcastIMG.png" alt="Digital Platform" className="img-fluid rounded-4" />
+                                <img src="/assets/img/misc/misc-1.webp" alt="Digital Platform" className="img-fluid rounded-4" />
                             </a>
                             <div className="floating-card">
                                 <a href="/podcast">
