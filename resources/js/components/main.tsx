@@ -518,10 +518,10 @@ export default function MainContent() {
                                     <div className="card-icon">
                                         <i className="bi bi-mic-fill"></i>
                                     </div>
-                                    <div className="card-content">
+                                    {/* <div className="card-content">
                                         <span className="stats-number">PodCAF</span>
                                         {/* <span className="stats-text">Growth Rate</span> */}
-                                    </div>
+                                    {/* </div>  */}
                                 </a>
                             </div>
                         </div>
