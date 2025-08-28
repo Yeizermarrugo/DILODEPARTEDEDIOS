@@ -515,9 +515,7 @@ export default function MainContent() {
                         </a>
                         <div className="floating-card">
                             <a href="/podcast">
-                                <div className="card-icon">
-                                    <i className="bi bi-mic-fill"></i>
-                                </div>
+                                <div className="card-icon">{/* <i className="bi bi-mic-fill"></i> */}</div>
                                 <div className="card-content">
                                     <span className="stats-number">PodCAF</span>
                                     {/* <span className="stats-text">Growth Rate</span> */}
