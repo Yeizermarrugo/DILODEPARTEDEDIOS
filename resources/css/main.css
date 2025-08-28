@@ -1668,8 +1668,9 @@ section,
 .podcast-cta-left {
     flex: 1 1 320px;
     padding: 2.5rem 2rem;
+    padding-right: 100px;
     display: flex;
-    margin-right: 15%;
+    /* margin-right: 10%; */
     flex-direction: column;
     text-align: justify;
     justify-content: center;
@@ -1694,7 +1695,7 @@ section,
     margin-bottom: 0.7rem;
 }
 .podcast-description {
-    font-size: 1.13rem;
+    /* font-size: 1.13rem; */
     color: #444;
     margin-bottom: 1.5rem;
     line-height: 1.6;
