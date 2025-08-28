@@ -477,7 +477,10 @@ export default function MainContent() {
 
             {/* Call To Action 2 Section */}
             <section id="call-to-action-2" className="call-to-action-2 section">
-                <div className="container" data-aos="fade-up" data-aos-delay="100">
+                <section id="call-to-action-2" className="call-to-action-2 section">
+                    <div>¿Me ves?</div>
+                </section>
+                {/* <div className="container" data-aos="fade-up" data-aos-delay="100">
                     <div className="advertise-1 d-flex flex-column flex-lg-row align-items-center position-relative gap-4">
                         <div className="content-left flex-grow-1" data-aos="fade-right" data-aos-delay="200">
                             <span className="badge text-uppercase mb-2">Proximamente</span>
@@ -508,7 +511,7 @@ export default function MainContent() {
                                     Learn More
                                 </a>
                             </div> */}
-                        </div>
+                {/* </div>
                         <div className="content-right position-relative" data-aos="fade-left" data-aos-delay="300">
                             <a href="/podcast">
                                 <img src="/assets/img/misc/misc-1.webp" alt="Digital Platform" className="img-fluid rounded-4" />
@@ -521,7 +524,7 @@ export default function MainContent() {
                                     <div className="card-content">
                                         <span className="stats-number">PodCAF</span>
                                         {/* <span className="stats-text">Growth Rate</span> */}
-                                    </div>
+                {/* </div>
                                 </a>
                             </div>
                         </div>
@@ -530,7 +533,7 @@ export default function MainContent() {
                             <div className="circle-2"></div>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </section>
             {/* /Call To Action 2 Section */}
 
