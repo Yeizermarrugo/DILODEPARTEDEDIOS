@@ -1649,32 +1649,40 @@ section,
     }
 }
 .podcast-cta-section {
-    background: linear-gradient(120deg, #f75815 40%, #6c63ff 100%);
+    /* background: linear-gradient(120deg, #f75815 40%, #6c63ff 100%); */
+    background: color-mix(in srgb, var(--accent-color), transparent 30%);
     padding: 3rem 0;
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 .podcast-cta-card {
     display: flex;
     flex-wrap: wrap;
     background: #fff;
     border-radius: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    max-width: 950px;
-    width: 98%;
+    max-width: 850px;
+    width: 100%;
     overflow: hidden;
 }
-.podcast-cta-left {
+
+.podcast-cta-left,
+.podcast-cta-right {
     flex: 1 1 320px;
-    padding: 2.5rem 2rem;
-    padding-right: 100px;
+    min-width: 250px;
     display: flex;
-    /* margin-right: 10%; */
     flex-direction: column;
-    text-align: justify;
     justify-content: center;
+    text-align: justify;
+    padding: 0.5rem 2rem;
 }
+
+.podcast-cta-left {
+    gap: 1.2rem;
+}
+
 .podcast-mic-icon {
     background: linear-gradient(135deg, #6c63ff 60%, #f75815 100%);
     color: #fff;
@@ -1685,26 +1693,28 @@ section,
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.2rem;
     box-shadow: 0 4px 16px rgba(108, 99, 255, 0.14);
 }
+
 .podcast-title {
     font-weight: 800;
     font-size: 2.1rem;
     color: #6c63ff;
-    margin-bottom: 0.7rem;
+    margin: 0;
 }
+
 .podcast-description {
-    /* font-size: 1.13rem; */
+    font-size: 1.13rem;
     color: #444;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
+    line-height: 1.55;
+    margin-bottom: 0.5rem;
 }
+
 .podcast-tags {
     display: flex;
     gap: 0.7rem;
-    margin-bottom: 1.7rem;
 }
+
 .podcast-tag {
     background: #f7f7f7;
     color: #f75815;
@@ -1715,66 +1725,65 @@ section,
     box-shadow: 0 2px 8px rgba(247, 88, 21, 0.07);
     letter-spacing: 0.03em;
 }
+
 .podcast-cta-buttons {
     display: flex;
     gap: 1rem;
     margin-top: 0.4rem;
 }
-.podcast-cta-btn {
-    padding: 0.8rem 2rem;
-    border-radius: 2rem;
-    font-weight: 700;
-    font-size: 1.12rem;
-    text-decoration: none;
-    transition:
-        background 0.2s,
-        box-shadow 0.2s;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.09);
-    border: none;
-    cursor: pointer;
-    outline: none;
-}
-.btn-gradient {
-    background: linear-gradient(90deg, #f75815 0%, #6c63ff 100%);
-    color: #fff;
-}
-.btn-gradient:hover {
-    background: linear-gradient(90deg, #6c63ff 0%, #f75815 100%);
-    box-shadow: 0 8px 24px rgba(247, 88, 21, 0.12);
-}
-.btn-outline {
-    background: #fff;
-    color: #6c63ff;
-    border: 2px solid #6c63ff;
-}
-.btn-outline:hover {
-    background: #6c63ff;
-    color: #fff;
-}
+
+/* Imagen responsive y centrada */
 .podcast-cta-right {
-    /* flex: 1 1 300px; */
-    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.7rem 2rem;
     background: linear-gradient(120deg, #e9ecef 60%, #fff 100%);
+    border-radius: 1rem;
 }
+
 .podcast-img {
+    display: block;
     max-width: 100%;
+    width: 350px;
+    height: auto;
+    margin: 0 auto;
     border-radius: 1rem;
     box-shadow: 0 6px 32px rgba(108, 99, 255, 0.1);
 }
+
+/* Responsive para tablet y móvil */
 @media (max-width: 900px) {
     .podcast-cta-card {
         flex-direction: column;
         align-items: center;
+        max-width: 98vw;
     }
+    .podcast-cta-left,
     .podcast-cta-right {
-        padding: 1.2rem 0;
-        background: none;
+        padding: 2rem 1rem;
+        min-width: unset;
+        width: 100%;
     }
     .podcast-img {
-        max-width: 500px;
+        width: 220px;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .podcast-cta-card {
+        border-radius: 1rem;
+        padding: 0.5rem;
+    }
+    .podcast-cta-left,
+    .podcast-cta-right {
+        padding: 1.3rem 0.2rem;
+    }
+    .podcast-title {
+        font-size: 1.4rem;
+    }
+    .podcast-img {
+        width: 95vw;
+        max-width: 350px;
     }
 }
 
