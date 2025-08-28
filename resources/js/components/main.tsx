@@ -477,33 +477,30 @@ export default function MainContent() {
 
             {/* Call To Action 2 Section */}
             <section id="call-to-action-2" className="call-to-action-2 section">
-                <section id="call-to-action-2" className="call-to-action-2 section">
-                    <div>¿Me ves?</div>
-                </section>
-                {/* <div className="container" data-aos="fade-up" data-aos-delay="100">
-                    <div className="advertise-1 d-flex flex-column flex-lg-row align-items-center position-relative gap-4">
-                        <div className="content-left flex-grow-1" data-aos="fade-right" data-aos-delay="200">
-                            <span className="badge text-uppercase mb-2">Proximamente</span>
-                            <h2 style={{ color: '#424242d5' }}>PodCAF</h2>
-                            <p className="my-4">
-                                Muy pronto una serie única que unirá la fe, el amor y el cuidado de tu cuerpo. Porque Dios quiere verte prosperar en
-                                todas las áreas de tu vida.
-                            </p>
-                            <div className="features d-flex mb-4 flex-wrap gap-3">
-                                <div className="feature-item">
-                                    <i className="bi bi-check-circle-fill"></i>
-                                    <span>Cristo</span>
-                                </div>
-                                <div className="feature-item">
-                                    <i className="bi bi-check-circle-fill"></i>
-                                    <span>Amor</span>
-                                </div>
-                                <div className="feature-item">
-                                    <i className="bi bi-check-circle-fill"></i>
-                                    <span>Fitness</span>
-                                </div>
+                {/* <div className="container" data-aos="fade-up" data-aos-delay="100"> */}
+                <div className="advertise-1 d-flex flex-column flex-lg-row align-items-center position-relative gap-4">
+                    <div className="content-left flex-grow-1" data-aos="fade-right" data-aos-delay="200">
+                        <span className="badge text-uppercase mb-2">Proximamente</span>
+                        <h2 style={{ color: '#424242d5' }}>PodCAF</h2>
+                        <p className="my-4">
+                            Muy pronto una serie única que unirá la fe, el amor y el cuidado de tu cuerpo. Porque Dios quiere verte prosperar en todas
+                            las áreas de tu vida.
+                        </p>
+                        <div className="features d-flex mb-4 flex-wrap gap-3">
+                            <div className="feature-item">
+                                <i className="bi bi-check-circle-fill"></i>
+                                <span>Cristo</span>
                             </div>
-                            {/* <div className="cta-buttons d-flex flex-wrap gap-3">
+                            <div className="feature-item">
+                                <i className="bi bi-check-circle-fill"></i>
+                                <span>Amor</span>
+                            </div>
+                            <div className="feature-item">
+                                <i className="bi bi-check-circle-fill"></i>
+                                <span>Fitness</span>
+                            </div>
+                        </div>
+                        {/* <div className="cta-buttons d-flex flex-wrap gap-3">
                                 <a href="#" className="btn btn-primary">
                                     Start Free Trial
                                 </a>
@@ -511,29 +508,29 @@ export default function MainContent() {
                                     Learn More
                                 </a>
                             </div> */}
-                {/* </div>
-                        <div className="content-right position-relative" data-aos="fade-left" data-aos-delay="300">
+                    </div>
+                    <div className="content-right position-relative" data-aos="fade-left" data-aos-delay="300">
+                        <a href="/podcast">
+                            <img src="/assets/img/misc/podcastIMG.png" alt="Digital Platform" className="img-fluid rounded-4" />
+                        </a>
+                        <div className="floating-card">
                             <a href="/podcast">
-                                <img src="/assets/img/misc/misc-1.webp" alt="Digital Platform" className="img-fluid rounded-4" />
+                                <div className="card-icon">
+                                    <i className="bi bi-mic-fill"></i>
+                                </div>
+                                <div className="card-content">
+                                    <span className="stats-number">PodCAF</span>
+                                    {/* <span className="stats-text">Growth Rate</span> */}
+                                </div>
                             </a>
-                            <div className="floating-card">
-                                <a href="/podcast">
-                                    <div className="card-icon">
-                                        <i className="bi bi-mic-fill"></i>
-                                    </div>
-                                    <div className="card-content">
-                                        <span className="stats-number">PodCAF</span>
-                                        {/* <span className="stats-text">Growth Rate</span> */}
-                {/* </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div className="decoration">
-                            <div className="circle-1"></div>
-                            <div className="circle-2"></div>
                         </div>
                     </div>
-                </div> */}
+                    <div className="decoration">
+                        <div className="circle-1"></div>
+                        <div className="circle-2"></div>
+                    </div>
+                </div>
+                {/* </div> */}
             </section>
             {/* /Call To Action 2 Section */}
 
