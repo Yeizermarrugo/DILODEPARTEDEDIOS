@@ -476,12 +476,36 @@ export default function MainContent() {
             {/* /Category Section */}
 
             {/* Call To Action 2 Section */}
-            <section id="call-to-action-2" className="call-to-action-2 section">
-                <div className="advertise-1">
-                    <span className="badge">Proximamente</span>
-                    <h2 style={{ color: '#424242d5' }}>PodCAF</h2>
-                    <p>Muy pronto una serie única...</p>
-                    <img src="/assets/img/misc/misc-1.webp" />
+            <section className="podcast-cta-section">
+                <div className="podcast-cta-card">
+                    <div className="podcast-cta-left">
+                        <div className="podcast-mic-icon">
+                            <i className="bi bi-mic-fill"></i>
+                        </div>
+                        <h2 className="podcast-title">PodCAF</h2>
+                        <p className="podcast-description">
+                            Muy pronto una serie única que unirá la fe, el amor y el cuidado de tu cuerpo. Porque Dios quiere verte prosperar en todas
+                            las áreas de tu vida.
+                        </p>
+                        <div className="podcast-tags">
+                            <span className="podcast-tag">Cristo</span>
+                            <span className="podcast-tag">Amor</span>
+                            <span className="podcast-tag">Fitness</span>
+                        </div>
+                        <div className="podcast-cta-buttons">
+                            {/* <a href="/podcast" className="podcast-cta-btn btn-gradient">
+                                Ir a
+                            </a> */}
+                            {/* <a href="/podcast" className="podcast-cta-btn btn-outline">
+                                Ver episodios
+                            </a> */}
+                        </div>
+                    </div>
+                    <div className="podcast-cta-right">
+                        <a href="/podcast">
+                            <img src="/assets/img/misc/podcastIMG.png" alt="Podcast PodCAF" className="podcast-img" />
+                        </a>
+                    </div>
                 </div>
             </section>
             {/* /Call To Action 2 Section */}
