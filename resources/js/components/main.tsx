@@ -494,16 +494,16 @@ export default function MainContent() {
                         </div>
                         <div className="podcast-cta-buttons">
                             {/* <a href="/podcast" className="podcast-cta-btn btn-gradient">
-                                Ir a
-                            </a> */}
+          Ir a
+        </a> */}
                             {/* <a href="/podcast" className="podcast-cta-btn btn-outline">
-                                Ver episodios
-                            </a> */}
+          Ver episodios
+        </a> */}
                         </div>
                     </div>
                     <div className="podcast-cta-right">
                         <a href="/podcast">
-                            <img src="/assets/img/misc/podcastIMG.png" alt="Podcast PodCAF" className="podcast-img" />
+                            <img src="/assets/img/misc/podCAFmobile.png" alt="Podcast PodCAF" className="podcast-img" />
                         </a>
                     </div>
                 </div>
@@ -511,7 +511,7 @@ export default function MainContent() {
             {/* /Call To Action 2 Section */}
 
             {/* Latest Posts Section */}
-            <section id="latest-posts" className="latest-posts section">
+            {/* <section id="latest-posts" className="latest-posts section">
                 <div className="section-title container" data-aos="fade-up">
                     <h2>Latest Posts</h2>
                     <div>
@@ -541,9 +541,9 @@ export default function MainContent() {
                             </article>
                         </div>
                         {/* ...otros col-lg-4 igual que en tu HTML... */}
-                    </div>
-                </div>
-            </section>
+            {/* </div> */}
+            {/* </div> */}
+            {/* </section> */}
             {/* /Latest Posts Section */}
 
             {/* Call To Action Section */}
