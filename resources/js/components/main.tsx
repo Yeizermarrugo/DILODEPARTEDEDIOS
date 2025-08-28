@@ -509,11 +509,11 @@ export default function MainContent() {
                                 </a>
                             </div> */}
                         </div>
-                        <div className="content-right position-relative" data-aos="fade-left" data-aos-delay="300">
-                            <a href="/podcast">
+                        {/* <div className="content-right position-relative" data-aos="fade-left" data-aos-delay="300"> */}
+                        {/* <a href="/podcast">
                                 <img src="/assets/img/misc/podcastIMG.png" alt="Digital Platform" className="img-fluid rounded-4" />
-                            </a>
-                            {/* <div className="floating-card">
+                            </a> */}
+                        {/* <div className="floating-card">
                                 <a href="/podcast">
                                     <div className="card-icon">
                                         <i className="bi bi-mic-fill"></i>
@@ -521,10 +521,10 @@ export default function MainContent() {
                                     {/* <div className="card-content">
                                         <span className="stats-number">PodCAF</span>
                                         {/* <span className="stats-text">Growth Rate</span> */}
-                            {/* </div>  */}
-                            {/* </a>
+                        {/* </div>  */}
+                        {/* </a>
                             </div> */}
-                        </div>
+                        {/* </div> */}
                         <div className="decoration">
                             <div className="circle-1"></div>
                             <div className="circle-2"></div>
