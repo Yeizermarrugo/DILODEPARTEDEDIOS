@@ -80,10 +80,10 @@ export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
             {devocionales.map((dev, idx) => (
                 <Card
                     sx={{
-                        width: 200,
+                        width: 170,
                         display: 'flex',
                         flexDirection: 'column',
-                        height: 350,
+                        height: 280,
                         backgroundColor: `${dev.categoria ? stringToColor(dev.categoria) : '#ffffffff'}`,
                     }}
                     key={idx}
@@ -101,7 +101,7 @@ export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
                         }}
                     />
                     <CardContent sx={{ flex: '1 1 auto', overflow: 'hidden', paddingBottom: 0 }}>
-                        <Typography sx={{ color: 'rgba(56, 56, 56, 1)' }} gutterBottom variant="h5" component="div">
+                        <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div">
                             {dev.titulo}
                         </Typography>
                         <Typography
