@@ -3806,8 +3806,18 @@ section,
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    gap: 50px;
+    height: auto;
+}
+
+.cards-container a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 20px;
     height: auto;
+    width: 160px;
 }
 
 /* ----------Devocional---------- */
@@ -3827,6 +3837,18 @@ section,
 @media (min-width: 992px) {
     .sidebar {
         display: block !important;
+    }
+}
+
+@media (max-width: 500px) {
+    .cards-container a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        height: auto;
+        width: 126.5px;
     }
 }
 
