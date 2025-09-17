@@ -1163,6 +1163,49 @@ section,
     z-index: 2;
 }
 
+/*--------------------------------------------------------------
+# Carousel post
+--------------------------------------------------------------*/
+
+.carousel-slide-wrapper {
+    /* Centra vertical y horizontalmente el contenido dentro del slide */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    width: 100%;
+    background: transparent;
+    position: relative;
+}
+
+.carousel-post-item {
+    /* Centra el carrusel dentro del post-item, mantiene el alto responsivo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 400px;
+    background: transparent;
+    border-radius: 18px;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .carousel-slide-wrapper,
+    .carousel-post-item {
+        min-height: 300px;
+    }
+}
+@media (max-width: 600px) {
+    .carousel-slide-wrapper,
+    .carousel-post-item {
+        min-height: 200px;
+        padding: 0;
+    }
+}
+
 @media (max-width: 1200px) {
     .featured-posts .blog-post-content {
         padding: 25px;

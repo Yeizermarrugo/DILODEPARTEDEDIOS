@@ -1,6 +1,7 @@
 import DevocionalDetails from '@/pages/DevocionalDetails';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import CoverflowCarousel from './CoverflowCarousel';
 
 interface Devocional {
     contenido: string;
@@ -121,6 +122,7 @@ export default function MainContent() {
             </div>
         );
     }
+
     return (
         <main className="main">
             {/* Blog Hero Section */}
@@ -309,9 +311,10 @@ export default function MainContent() {
                         {/* Swiper config script se ignora en React, usa librería Swiper para React si necesitas funcionalidad */}
                         <div className="swiper-wrapper">
                             {/* Repite los slides igual que en tu HTML original */}
-                            <div className="swiper-slide">
-                                <div className="blog-post-item">
-                                    <img src="/assets/img/blog/YouTube-Banner.png" alt="Blog Image" />
+                            <div className="swiper-slide carousel-slide-wrapper">
+                                <div className="carousel-post-item">
+                                    {/* <img src="/assets/img/blog/YouTube-Banner.png" alt="Blog Image" /> */}
+                                    <CoverflowCarousel />
                                     {/* <div className="blog-post-content">
                                         <div className="post-meta">
                                             <span>
