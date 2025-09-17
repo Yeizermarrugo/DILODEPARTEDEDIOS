@@ -1,3 +1,4 @@
+import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
@@ -67,6 +68,12 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
         );
     };
 
+    const stripHtml = (html: string) => {
+        const tmp = document.createElement('DIV');
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || '';
+    };
+
     if (loading && !imageLoaded) {
         return (
             <div id="preloader" className="d-flex align-items-center justify-content-center">
@@ -80,6 +87,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
     return (
         <div className="devocional">
             <H1Custom contenido={devocional.contenido} />
+
             <section
                 style={{
                     background: '#fff',
@@ -89,6 +97,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                     position: 'relative',
                 }}
             >
+                <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
                 <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
             </section>
             <div style={{ marginTop: '8px', color: '#888' }}>
