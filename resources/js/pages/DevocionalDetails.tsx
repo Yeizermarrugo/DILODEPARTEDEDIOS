@@ -1,3 +1,4 @@
+import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
@@ -77,10 +78,18 @@ const DevocionalDetails = ({ devocional }: props) => {
         );
     }
 
+    const stripHtml = (html: string) => {
+        const tmp = document.createElement('DIV');
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || '';
+    };
+
     return (
         <div className="devocional-details">
             <H1Custom contenido={devocional.contenido} />
             <section>
+                <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
+
                 <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
             </section>
             <div style={{ marginTop: '8px', color: '#888' }}>
