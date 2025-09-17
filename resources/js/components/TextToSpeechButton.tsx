@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 export default function TextToSpeechButton({ texto }: { texto: string }) {
-    // const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-    const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+    const [selectedVoiceIndex, setSelectedVoiceIndex] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [rate, setRate] = useState(1);
@@ -15,10 +15,12 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
         setWords(texto.trim().split(/\s+/));
     }, [texto]);
 
+    // Carga voces disponibles y solo muestra las de español
     useEffect(() => {
         const loadVoices = () => {
-            const voicesList = window.speechSynthesis.getVoices();
-            setSelectedVoice(voicesList.find((v) => v.lang.startsWith('es-DO')) ?? null);
+            const allVoices = window.speechSynthesis.getVoices();
+            const spanishVoices = allVoices.filter((v) => v.lang.startsWith('es'));
+            setVoices(spanishVoices.length ? spanishVoices : allVoices); // fallback si no hay voces "es"
         };
         loadVoices();
         window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -30,7 +32,7 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
         window.speechSynthesis.cancel();
         setCurrentWordIdx(0);
         const utterance = new window.SpeechSynthesisUtterance(texto);
-        utterance.voice = selectedVoice || null;
+        utterance.voice = voices[selectedVoiceIndex] || null;
         utterance.rate = rate;
         utterance.onend = () => {
             setIsPlaying(false);
@@ -152,6 +154,20 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                         </div>
                     )}
                 </div>
+
+                {/* Selector de voz */}
+                <select
+                    aria-label="Seleccionar voz"
+                    value={selectedVoiceIndex}
+                    onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
+                    style={{ ...mainBtnStyle, background: '#f4f4f4', color: '#333', minWidth: 150, fontSize: '1em' }}
+                >
+                    {voices.map((voice, idx) => (
+                        <option key={voice.voiceURI} value={idx}>
+                            {voice.name} ({voice.lang})
+                        </option>
+                    ))}
+                </select>
             </div>
             {/* Barra de progreso por palabras */}
             <div
