@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
+function isMobileDevice() {
+    if (typeof navigator === 'undefined') return false;
+    return /android|iphone|ipad|ipod|mobile|opera mini/i.test(navigator.userAgent);
+}
+
 export default function TextToSpeechButton({ texto }: { texto: string }) {
     const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
     const [selectedVoiceIndex, setSelectedVoiceIndex] = useState<number>(0);
@@ -9,30 +14,48 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
     const [showSpeed, setShowSpeed] = useState(false);
     const [currentWordIdx, setCurrentWordIdx] = useState(0);
     const [words, setWords] = useState<string[]>([]);
+    const [isMobile, setIsMobile] = useState(false);
+    const [computerVoiceIdx, setComputerVoiceIdx] = useState<number | null>(null);
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
     useEffect(() => {
         setWords(texto.trim().split(/\s+/));
     }, [texto]);
 
-    // Carga voces disponibles y solo muestra las de español
+    useEffect(() => {
+        setIsMobile(isMobileDevice());
+    }, []);
+
+    // Carga voces disponibles y selecciona según el dispositivo
     useEffect(() => {
         const loadVoices = () => {
             const allVoices = window.speechSynthesis.getVoices();
             const spanishVoices = allVoices.filter((v) => v.lang.startsWith('es'));
-            setVoices(spanishVoices.length ? spanishVoices : allVoices); // fallback si no hay voces "es"
+            setVoices(spanishVoices.length ? spanishVoices : allVoices);
+
+            // En computadoras: busca la voz 'es-DO'
+            if (!isMobile) {
+                const idx = spanishVoices.findIndex((v) => v.lang === 'es-DO');
+                setComputerVoiceIdx(idx >= 0 ? idx : null);
+                setSelectedVoiceIndex(idx >= 0 ? idx : 0);
+            } else {
+                setSelectedVoiceIndex(0);
+                setComputerVoiceIdx(null);
+            }
         };
         loadVoices();
         window.speechSynthesis.onvoiceschanged = loadVoices;
         return () => window.speechSynthesis.cancel();
-    }, []);
+    }, [isMobile]);
 
     // PLAY (desde inicio)
     const handlePlay = () => {
         window.speechSynthesis.cancel();
         setCurrentWordIdx(0);
         const utterance = new window.SpeechSynthesisUtterance(texto);
-        utterance.voice = voices[selectedVoiceIndex] || null;
+        const voice = !isMobile && computerVoiceIdx !== null ? voices[computerVoiceIdx] : voices[selectedVoiceIndex];
+
+        utterance.voice = voice || null;
         utterance.rate = rate;
         utterance.onend = () => {
             setIsPlaying(false);
@@ -53,19 +76,16 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
         setIsPaused(false);
     };
 
-    // PAUSE
     const handlePause = () => {
         window.speechSynthesis.pause();
         setIsPaused(true);
     };
 
-    // RESUME
     const handleResume = () => {
         window.speechSynthesis.resume();
         setIsPaused(false);
     };
 
-    // STOP
     const handleStop = () => {
         window.speechSynthesis.cancel();
         setIsPlaying(false);
@@ -73,10 +93,8 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
         setCurrentWordIdx(0);
     };
 
-    // Avance estimado por palabras
     const progress = words.length ? Math.min(currentWordIdx / words.length, 1) : 0;
 
-    // Botón principal (Play/Pause/Resume/Stop)
     const handleMainClick = () => {
         if (!isPlaying) handlePlay();
         else if (isPlaying && !isPaused) handlePause();
@@ -155,19 +173,33 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                     )}
                 </div>
 
-                {/* Selector de voz */}
-                <select
-                    aria-label="Seleccionar voz"
-                    value={selectedVoiceIndex}
-                    onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
-                    style={{ ...mainBtnStyle, background: '#f4f4f4', color: '#333', minWidth: 150, fontSize: '1em' }}
-                >
-                    {voices.map((voice, idx) => (
-                        <option key={voice.voiceURI} value={idx}>
-                            {voice.name} ({voice.lang})
-                        </option>
-                    ))}
-                </select>
+                {/* Selector de voz SOLO en móviles */}
+                {isMobile && (
+                    <select
+                        aria-label="Seleccionar voz"
+                        value={selectedVoiceIndex}
+                        onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
+                        style={{
+                            ...mainBtnStyle,
+                            background: '#f4f4f4',
+                            color: '#333',
+                            minWidth: 150,
+                            fontSize: '1em',
+                        }}
+                    >
+                        {voices.map((voice, idx) => (
+                            <option key={voice.voiceURI} value={idx}>
+                                {voice.name} ({voice.lang})
+                            </option>
+                        ))}
+                    </select>
+                )}
+                {/* Si está en PC y no existe 'es-DO', muestra advertencia */}
+                {!isMobile && computerVoiceIdx === null && voices.length > 0 && (
+                    <span style={{ color: '#a00', fontSize: '0.95em' }}>
+                        ⚠️ Voz no disponible, usando {voices[selectedVoiceIndex]?.name || 'voz por defecto'}.
+                    </span>
+                )}
             </div>
             {/* Barra de progreso por palabras */}
             <div
