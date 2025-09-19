@@ -39,7 +39,7 @@
 #items {
     padding: 5%;
     overflow: hidden;
-    height: 370px;
+    height: 570px;
     position: relative;
     width: 100%;
     min-width: 300px;
@@ -68,7 +68,8 @@
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
     z-index: 15;
-    width: 44%;
+    width: auto;
+    height: auto;
     max-width: 380px;
 }
 .img_left1 {
@@ -156,10 +157,10 @@
 
 @media only screen and (max-width: 400px) {
     #items {
-        height: 200px; /* antes: 110px */
+        height: 350px; /* antes: 110px */
     }
     .img_center {
-        max-width: 45%;
+        max-width: 60%;
         width: 86vw;
         height: 95%;
     }
