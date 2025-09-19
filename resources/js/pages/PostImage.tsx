@@ -9,7 +9,12 @@ const PostImage = () => {
     const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [postImages, setPostImages] = useState([]); // Lista de imágenes
+    interface PostImage {
+        id: number;
+        url: string;
+    }
+
+    const [postImages, setPostImages] = useState<PostImage[]>([]); // Lista de imágenes
 
     const showLoader = isLoading || isSubmitting;
 
@@ -75,7 +80,7 @@ const PostImage = () => {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
             });
-            setPostImages(postImages.filter((img: any) => img.id !== id));
+            setPostImages(postImages.filter((img) => img.id !== id));
         } catch {
             alert('Error al eliminar la imagen');
         } finally {
@@ -99,7 +104,7 @@ const PostImage = () => {
             </div>
             {/* Cards pequeñas y responsive */}
             <div className="post-image-gallery-grid">
-                {postImages.map((img: any) => (
+                {postImages.map((img) => (
                     <div className="post-image-card" key={img.id}>
                         <img src={img.url} alt={`Imagen ${img.id}`} className="post-image-card-img" />
                         <button
