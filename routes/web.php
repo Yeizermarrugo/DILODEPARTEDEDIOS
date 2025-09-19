@@ -53,5 +53,15 @@ Route::get('/libros', function () {
     return Inertia::render('Libros');
 });
 
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('postImage', function () {
+        return Inertia::render('PostImage');
+    })->name('PostImage');
+});
+
+Route::post('/upload-post-image', [ImageUploadController::class, 'post'])->middleware(['auth', 'verified']);
+
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
