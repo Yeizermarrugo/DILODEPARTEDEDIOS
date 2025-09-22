@@ -301,7 +301,7 @@ export default function MainContent() {
             {/* Featured Posts Section */}
             <section id="featured-posts" className="featured-posts section">
                 <div className="section-title container" data-aos="fade-up">
-                    <h2>PRÓXIMAMENTE</h2>
+                    <h2>INSPÍRATE</h2>
                     <div>
                         <span>MENSAJES QUE</span> <span className="description-title">TRANSFORMAN</span>
                     </div>
