@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::post('/upload-post-image', [ImageUploadController::class, 'post'])->middleware(['auth', 'verified']);
-Route::get('/post-images', [PostController::class, 'index'])->middleware(['auth', 'verified']);
+Route::get('/post-images', [PostController::class, 'index']);
 Route::delete('/post-image/{id}', [PostController::class, 'delete'])->middleware(['auth', 'verified']);
 
 
