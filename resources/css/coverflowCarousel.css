@@ -115,7 +115,7 @@
         height: 400px; /* antes: 260px */
     }
     .img_center {
-        max-width: 300px;
+        max-width: 70%;
         width: 52vw;
         height: 80%; /* Nuevo: más alto */
     }
@@ -135,10 +135,10 @@
 
 @media only screen and (max-width: 600px) {
     #items {
-        height: 250px; /* antes: 180px */
+        height: 350px; /* antes: 180px */
     }
     .img_center {
-        max-width: 50%;
+        max-width: 70%;
         width: 70vw;
         height: 90%;
     }
@@ -161,7 +161,7 @@
         height: 350px; /* antes: 110px */
     }
     .img_center {
-        max-width: 60%;
+        max-width: 70%;
         width: 86vw;
         height: 95%;
     }
