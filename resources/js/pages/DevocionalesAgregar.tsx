@@ -14,9 +14,14 @@ const DevocionalesAgregar = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categorias, setCategorias] = useState<string[]>([]);
+    const [autores, setAutores] = useState<string[]>([]);
+
     const [categoria, setCategoria] = useState('');
+    const [autor, setAutor] = useState('');
     const [nuevaCategoria, setNuevaCategoria] = useState('');
+    const [nuevoAutor, setNuevoAutor] = useState('');
     const [useNuevaCategoria, setUseNuevaCategoria] = useState(false);
+    const [useNuevoAutor, setUseNuevoAutor] = useState(false);
 
     // Loader visible si TinyMCE está cargando o si se está guardando/subiendo algo
     const showLoader = isLoading || isSubmitting;
@@ -26,6 +31,9 @@ const DevocionalesAgregar = () => {
         axios.get('/devocionales-search').then((res) => {
             const cats = res.data.categorias.map((c: { categoria: string }) => c.categoria);
             setCategorias(cats);
+
+            const auts = res.data.autores.map((a: { autor: string }) => a.autor);
+            setAutores(auts);
         });
     }, []);
 
@@ -77,6 +85,7 @@ const DevocionalesAgregar = () => {
                     contenido: editorRef.current.getContent(),
                     imagen: urlImagenFinal,
                     categoria: useNuevaCategoria ? nuevaCategoria : categoria,
+                    autor: useNuevoAutor ? nuevoAutor : autor,
                 },
                 {
                     headers: {
@@ -166,6 +175,39 @@ const DevocionalesAgregar = () => {
                             placeholder="Nueva categoría"
                             value={nuevaCategoria}
                             onChange={(e) => setNuevaCategoria(e.target.value)}
+                        />
+                    )}
+                </div>
+                <div className={styles['autor-wrapper']}>
+                    <label className={styles['autor-label']}>Autor:</label>
+                    <select
+                        className={styles['autor-select']}
+                        value={useNuevoAutor ? 'nuevo' : autor}
+                        onChange={(e) => {
+                            if (e.target.value === 'nuevo') {
+                                setUseNuevoAutor(true);
+                                setAutor('');
+                            } else {
+                                setUseNuevoAutor(false);
+                                setAutor(e.target.value);
+                            }
+                        }}
+                    >
+                        <option value="">Selecciona un Autor</option>
+                        {autores.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                        <option value="nuevo">Agregar nuevo autor...</option>
+                    </select>
+                    {useNuevoAutor && (
+                        <input
+                            className={styles['autor-input']}
+                            type="text"
+                            placeholder="Nuevo autor"
+                            value={nuevoAutor}
+                            onChange={(e) => setNuevoAutor(e.target.value)}
                         />
                     )}
                 </div>

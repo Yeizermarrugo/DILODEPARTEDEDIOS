@@ -7,6 +7,7 @@ type Devocional = {
     contenido: string;
     imagen: string;
     created_at?: string;
+    autor?: string;
 };
 
 interface props {
@@ -17,6 +18,7 @@ const DevocionalDetails = ({ devocional }: props) => {
     // const { devocional } = usePage().props as unknown as { devocional: Devocional };
     const [loading, setLoading] = useState(true);
     const imageLoaded = useImagePreload(devocional.imagen);
+    console.log('devocional', devocional);
 
     useEffect(() => {
         setLoading(true);
@@ -91,6 +93,8 @@ const DevocionalDetails = ({ devocional }: props) => {
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
 
                 <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
+                {/* Display autor if it exists */}
+                <p style={{ color: '#888' }}>{devocional.autor ? `Autor: ${devocional.autor}` : ''}</p>
             </section>
             <div style={{ marginTop: '8px', color: '#888' }}>
                 {devocional.created_at

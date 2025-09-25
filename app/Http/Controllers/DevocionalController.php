@@ -88,12 +88,14 @@ class DevocionalController extends Controller
             'contenido' => 'required|string',
             'categoria' => 'required|string',
             'imagen' => 'required|string|url', // Asegúrate de que 'imagen' sea una cadena y tenga un tamaño máximo
+            'autor' => 'nullable|string|max:255'
         ]);
 
         $devocional = Devocional::create([
             'contenido' => $request->input('contenido'),
             'categoria' => $request->input('categoria'),
-            'imagen' => $request->input('imagen') // Asegúrate de que 'imagen' esté en el request
+            'imagen' => $request->input('imagen'), // Asegúrate de que 'imagen' esté en el request
+            'autor' => $request->input('autor')
         ]);
 
         return response()->json([
