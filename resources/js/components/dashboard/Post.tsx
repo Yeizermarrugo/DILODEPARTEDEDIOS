@@ -10,21 +10,15 @@ const Post = ({ className }: DevocionalesProps) => {
         <>
             <div className={className}>
                 <div className="blog-hero" data-aos="fade-up" data-aos-delay="100" style={{ width: '100%', height: '100%', padding: '0' }}>
-                    <article className="blog-item featured" data-aos="fade-up">
-                        <img src="/assets/img/blog/Devocionales.jpg" alt="Blog Image" className="img-fluid" />
-                        <div className="blog-content">
-                            <div className="post-meta">
-                                <span className="date">
-                                    {new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
-                                </span>
+                    <a href="/postImage" title="Devocionales - Daily Inspirations">
+                        <article className="blog-item featured" data-aos="fade-up">
+                            <img src="/assets/img/blog/uploadImage.png" alt="Blog Image" className="img-fluid" />
+                            <div className="blog-content">
+                                <div className="post-meta"></div>
+                                <span className="post-meta"></span>
                             </div>
-                            <span className="post-meta">
-                                <a href="/postImage" title="Devocionales - Daily Inspirations">
-                                    Agregar Devocionales
-                                </a>
-                            </span>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
         </>
