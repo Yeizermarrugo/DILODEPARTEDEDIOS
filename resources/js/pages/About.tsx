@@ -137,14 +137,14 @@ const About = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="row mt-5">
+                        {/* <div className="row mt-5">
                             <div className="col-lg-12" data-aos="zoom-in" data-aos-delay="200">
                                 <div className="video-box">
                                     <img src="assets/img/about/about-wide-1.webp" className="img-fluid" alt="Video Thumbnail" />
                                     <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" className="glightbox pulsating-play-btn"></a>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </section>
 
