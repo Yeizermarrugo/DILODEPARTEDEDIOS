@@ -3,6 +3,7 @@
 use App\Http\Controllers\DevocionalController;
 use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\TTSController;
 use App\Http\Controllers\YouTubeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -64,6 +65,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::post('/upload-post-image', [ImageUploadController::class, 'post'])->middleware(['auth', 'verified']);
 Route::get('/post-images', [PostController::class, 'index']);
 Route::delete('/post-image/{id}', [PostController::class, 'delete'])->middleware(['auth', 'verified']);
+
+Route::get('/api/tts', [TTSController::class, 'voiceRss']);
+Route::get('/api/tts/voices', [TTSController::class, 'voices']);
 
 
 require __DIR__ . '/settings.php';
