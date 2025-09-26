@@ -18,28 +18,33 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
     const [computerVoiceIdx, setComputerVoiceIdx] = useState<number | null>(null);
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-    useEffect(() => {
-        setWords(texto.trim().split(/\s+/));
-    }, [texto]);
-
+    // Solo una vez al montar
     useEffect(() => {
         setIsMobile(isMobileDevice());
     }, []);
+
+    // Actualiza las palabras al cambiar el texto
+    useEffect(() => {
+        setWords(texto.trim().split(/\s+/));
+    }, [texto]);
 
     // Carga voces disponibles y selecciona según el dispositivo
     useEffect(() => {
         const loadVoices = () => {
             const allVoices = window.speechSynthesis.getVoices();
             const spanishVoices = allVoices.filter((v) => v.lang.startsWith('es'));
-            setVoices(spanishVoices.length ? spanishVoices : allVoices);
-
-            // En computadoras: busca la voz 'es-DO'
             if (!isMobile) {
+                setVoices(spanishVoices.length ? spanishVoices : allVoices);
+                // En computadoras: busca la voz 'es-DO'
                 const idx = spanishVoices.findIndex((v) => v.lang === 'es-DO');
                 setComputerVoiceIdx(idx >= 0 ? idx : null);
                 setSelectedVoiceIndex(idx >= 0 ? idx : 0);
             } else {
-                setSelectedVoiceIndex(0);
+                // En móviles: muestra todas las voces disponibles
+                setVoices(allVoices);
+                // Selecciona la primera española si existe, si no, la primera
+                const idx = allVoices.findIndex((v) => v.lang.startsWith('es'));
+                setSelectedVoiceIndex(idx >= 0 ? idx : 0);
                 setComputerVoiceIdx(null);
             }
         };
@@ -173,27 +178,26 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                     )}
                 </div>
 
-                {/* Selector de voz SOLO en móviles */}
-                {isMobile && (
-                    <select
-                        aria-label="Seleccionar voz"
-                        value={selectedVoiceIndex}
-                        onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
-                        style={{
-                            ...mainBtnStyle,
-                            background: '#f4f4f4',
-                            color: '#333',
-                            minWidth: 150,
-                            fontSize: '1em',
-                        }}
-                    >
-                        {voices.map((voice, idx) => (
-                            <option key={voice.voiceURI} value={idx}>
-                                {voice.name} ({voice.lang})
-                            </option>
-                        ))}
-                    </select>
-                )}
+                {/* Selector de voz en todos los dispositivos, pero muestra todas en móvil */}
+                <select
+                    aria-label="Seleccionar voz"
+                    value={selectedVoiceIndex}
+                    onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
+                    style={{
+                        ...mainBtnStyle,
+                        background: '#f4f4f4',
+                        color: '#333',
+                        minWidth: 150,
+                        fontSize: '1em',
+                        maxWidth: '100%',
+                    }}
+                >
+                    {voices.map((voice, idx) => (
+                        <option key={voice.voiceURI} value={idx}>
+                            {voice.name} ({voice.lang})
+                        </option>
+                    ))}
+                </select>
                 {/* Si está en PC y no existe 'es-DO', muestra advertencia */}
                 {!isMobile && computerVoiceIdx === null && voices.length > 0 && (
                     <span style={{ color: '#a00', fontSize: '0.95em' }}>
