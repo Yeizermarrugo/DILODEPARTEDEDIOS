@@ -1,117 +1,124 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-function isMobileDevice() {
-    if (typeof navigator === 'undefined') return false;
-    return /android|iphone|ipad|ipod|mobile|opera mini/i.test(navigator.userAgent);
+const LANG = 'es-mx';
+const MAX_LENGTH = 900;
+
+// Lista de voces de Voice RSS para español (México)
+const VOICES = [
+    { label: 'Juana (femenino)', value: 'Juana', available: true },
+    { label: 'Silvia (femenino)', value: 'Silvia', available: true },
+    { label: 'Teresa (femenino)', value: 'Teresa', available: true },
+    { label: 'Jose (masculino)', value: 'Jose', available: true },
+];
+
+function splitText(text: string, maxLength = MAX_LENGTH): string[] {
+    const parts = [];
+    let i = 0;
+    while (i < text.length) {
+        let end = i + maxLength;
+        if (end < text.length) {
+            const lastDot = text.lastIndexOf('.', end);
+            if (lastDot > i) end = lastDot + 1;
+            end = lastDot > i ? lastDot + 1 : end;
+        }
+        parts.push(text.slice(i, end).trim());
+        i = end;
+    }
+    return parts;
 }
 
 export default function TextToSpeechButton({ texto }: { texto: string }) {
-    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-    const [selectedVoiceIndex, setSelectedVoiceIndex] = useState<number>(0);
+    const [selectedVoice, setSelectedVoice] = useState(VOICES[0].value);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [rate, setRate] = useState(1);
     const [showSpeed, setShowSpeed] = useState(false);
-    const [currentWordIdx, setCurrentWordIdx] = useState(0);
-    const [words, setWords] = useState<string[]>([]);
-    const [isMobile, setIsMobile] = useState(false);
-    const [computerVoiceIdx, setComputerVoiceIdx] = useState<number | null>(null);
-    const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [currentPartIdx, setCurrentPartIdx] = useState(0);
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const parts = splitText(texto);
 
-    // Solo una vez al montar
-    useEffect(() => {
-        setIsMobile(isMobileDevice());
-    }, []);
+    // Reproduce la parte actual (usando backend Laravel)
+    const playPart = async (idx: number) => {
+        setLoading(true);
+        setAudioUrl(null);
 
-    // Actualiza las palabras al cambiar el texto
-    useEffect(() => {
-        setWords(texto.trim().split(/\s+/));
-    }, [texto]);
+        const rateParam = Math.round((rate - 1) * 10);
+        const url = `/api/tts?texto=${encodeURIComponent(parts[idx])}&lang=${LANG}&r=${rateParam}&v=${selectedVoice}`;
 
-    // Carga voces disponibles y selecciona según el dispositivo
-    useEffect(() => {
-        const loadVoices = () => {
-            const allVoices = window.speechSynthesis.getVoices();
-            const spanishVoices = allVoices.filter((v) => v.lang.startsWith('es'));
-            if (!isMobile) {
-                setVoices(spanishVoices.length ? spanishVoices : allVoices);
-                // En computadoras: busca la voz 'es-DO'
-                const idx = spanishVoices.findIndex((v) => v.lang === 'es-DO');
-                setComputerVoiceIdx(idx >= 0 ? idx : null);
-                setSelectedVoiceIndex(idx >= 0 ? idx : 0);
-            } else {
-                // En móviles: muestra todas las voces disponibles
-                setVoices(allVoices);
-                // Selecciona la primera española si existe, si no, la primera
-                const idx = allVoices.findIndex((v) => v.lang.startsWith('es'));
-                setSelectedVoiceIndex(idx >= 0 ? idx : 0);
-                setComputerVoiceIdx(null);
+        try {
+            const res = await fetch(url);
+            if (!res.ok) {
+                const errorText = await res.text();
+                setLoading(false);
+                alert('Error generando el audio:\n' + errorText);
+                setIsPlaying(false);
+                return;
             }
-        };
-        loadVoices();
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-        return () => window.speechSynthesis.cancel();
-    }, [isMobile]);
+            const blob = await res.blob();
+            const urlAudio = URL.createObjectURL(blob);
+            setAudioUrl(urlAudio);
 
-    // PLAY (desde inicio)
-    const handlePlay = () => {
-        window.speechSynthesis.cancel();
-        setCurrentWordIdx(0);
-        const utterance = new window.SpeechSynthesisUtterance(texto);
-        const voice = !isMobile && computerVoiceIdx !== null ? voices[computerVoiceIdx] : voices[selectedVoiceIndex];
-
-        utterance.voice = voice || null;
-        utterance.rate = rate;
-        utterance.onend = () => {
+            setTimeout(() => {
+                audioRef.current?.play();
+                setIsPlaying(true);
+                setIsPaused(false);
+            }, 100);
+        } catch {
+            setLoading(false);
             setIsPlaying(false);
-            setIsPaused(false);
-            setCurrentWordIdx(words.length);
-        };
-        utterance.onboundary = (event) => {
-            if (event.name === 'word') {
-                const idx = texto.slice(0, event.charIndex).trim().split(/\s+/).length;
-                setCurrentWordIdx(idx);
-            }
-        };
-        utterance.onpause = () => setIsPaused(true);
-        utterance.onresume = () => setIsPaused(false);
-        window.speechSynthesis.speak(utterance);
-        utteranceRef.current = utterance;
-        setIsPlaying(true);
-        setIsPaused(false);
+            alert('Error generando el audio.');
+        }
     };
 
-    const handlePause = () => {
-        window.speechSynthesis.pause();
-        setIsPaused(true);
-    };
-
-    const handleResume = () => {
-        window.speechSynthesis.resume();
-        setIsPaused(false);
-    };
-
-    const handleStop = () => {
-        window.speechSynthesis.cancel();
+    const playAllParts = async () => {
+        setCurrentPartIdx(0);
+        for (let idx = 0; idx < parts.length; idx++) {
+            setCurrentPartIdx(idx);
+            await playPartSync(idx);
+        }
         setIsPlaying(false);
-        setIsPaused(false);
-        setCurrentWordIdx(0);
+        setCurrentPartIdx(0);
     };
 
-    const progress = words.length ? Math.min(currentWordIdx / words.length, 1) : 0;
+    const playPartSync = async (idx: number) => {
+        await playPart(idx);
+        await new Promise<void>((resolve) => {
+            if (audioRef.current) {
+                audioRef.current.onended = () => resolve();
+            } else {
+                resolve();
+            }
+        });
+    };
 
     const handleMainClick = () => {
-        if (!isPlaying) handlePlay();
-        else if (isPlaying && !isPaused) handlePause();
-        else if (isPlaying && isPaused) handleResume();
+        if (!isPlaying && !loading) {
+            playAllParts();
+        } else if (isPlaying && !isPaused) {
+            audioRef.current?.pause();
+            setIsPaused(true);
+        } else if (isPlaying && isPaused) {
+            audioRef.current?.play();
+            setIsPaused(false);
+        }
     };
 
     const handleStopClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
-        handleStop();
+        audioRef.current?.pause();
+        if (audioRef.current) audioRef.current.currentTime = 0;
+        setIsPlaying(false);
+        setIsPaused(false);
+        setLoading(false);
+        setCurrentPartIdx(0);
     };
 
-    // Estilos responsivos y modernos
+    const onEnded = () => {
+        setLoading(false);
+    };
+
     return (
         <div style={{ margin: '12px 0', width: '100%' }}>
             <div
@@ -123,20 +130,44 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                     justifyContent: 'center',
                 }}
             >
-                {/* Botón único Play/Pause/Resume */}
-                <button aria-label={isPlaying ? (isPaused ? 'Reanudar' : 'Pausa') : 'Play'} onClick={handleMainClick} style={mainBtnStyle}>
-                    {!isPlaying && <span>▶️</span>}
-                    {isPlaying && !isPaused && <span>⏸</span>}
-                    {isPlaying && isPaused && <span>▶️</span>}
+                <button
+                    aria-label={isPlaying ? (isPaused ? 'Reanudar' : 'Pausa') : 'Play'}
+                    onClick={handleMainClick}
+                    disabled={loading}
+                    style={mainBtnStyle}
+                >
+                    {loading && <span>⏳</span>}
+                    {!isPlaying && !loading && <span>▶️</span>}
+                    {isPlaying && !isPaused && !loading && <span>⏸</span>}
+                    {isPlaying && isPaused && !loading && <span>▶️</span>}
                 </button>
-                {/* Botón Stop sólo visible en reproducción */}
                 {isPlaying && (
                     <button aria-label="Stop" onClick={handleStopClick} style={{ ...mainBtnStyle, background: '#6C63FF' }}>
                         ⏹
                     </button>
                 )}
 
-                {/* Selector de velocidad compacto */}
+                {/* Selector de voz */}
+                <select
+                    aria-label="Seleccionar voz"
+                    value={selectedVoice}
+                    onChange={(e) => setSelectedVoice(e.target.value)}
+                    style={{
+                        ...mainBtnStyle,
+                        background: '#f4f4f4',
+                        color: '#333',
+                        minWidth: 150,
+                        fontSize: '1em',
+                        maxWidth: '100%',
+                    }}
+                >
+                    {VOICES.map((voice) => (
+                        <option key={voice.value} value={voice.value} disabled={!voice.available}>
+                            {voice.label} {!voice.available && '(No disponible)'}
+                        </option>
+                    ))}
+                </select>
+
                 <div style={{ position: 'relative', minWidth: 56 }}>
                     <button
                         aria-label="Velocidad"
@@ -160,7 +191,6 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                                     onClick={() => {
                                         setRate(r);
                                         setShowSpeed(false);
-                                        if (isPlaying) handlePlay();
                                     }}
                                     style={{
                                         ...mainBtnStyle,
@@ -177,68 +207,21 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                         </div>
                     )}
                 </div>
+            </div>
+            <audio
+                ref={audioRef}
+                src={audioUrl || undefined}
+                onEnded={onEnded}
+                onPause={() => setIsPaused(true)}
+                onPlay={() => setIsPaused(false)}
+                style={{ display: 'none' }}
+            />
 
-                {/* Selector de voz en todos los dispositivos, pero muestra todas en móvil */}
-                <select
-                    aria-label="Seleccionar voz"
-                    value={selectedVoiceIndex}
-                    onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
-                    style={{
-                        ...mainBtnStyle,
-                        background: '#f4f4f4',
-                        color: '#333',
-                        minWidth: 150,
-                        fontSize: '1em',
-                        maxWidth: '100%',
-                    }}
-                >
-                    {voices.map((voice, idx) => (
-                        <option key={voice.voiceURI} value={idx}>
-                            {voice.name} ({voice.lang})
-                        </option>
-                    ))}
-                </select>
-                {/* Si está en PC y no existe 'es-DO', muestra advertencia */}
-                {!isMobile && computerVoiceIdx === null && voices.length > 0 && (
-                    <span style={{ color: '#a00', fontSize: '0.95em' }}>
-                        ⚠️ Voz no disponible, usando {voices[selectedVoiceIndex]?.name || 'voz por defecto'}.
-                    </span>
-                )}
-            </div>
-            {/* Barra de progreso por palabras */}
-            <div
-                style={{
-                    width: '100%',
-                    height: '8px',
-                    background: '#eee',
-                    borderRadius: '5px',
-                    marginTop: '16px',
-                    position: 'relative',
-                    maxWidth: '400px',
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                }}
-            >
-                <div
-                    style={{
-                        width: `${progress * 100}%`,
-                        height: '100%',
-                        background: '#6C63FF',
-                        borderRadius: '5px',
-                        transition: 'width .2s',
-                    }}
-                />
-            </div>
-            <div
-                style={{
-                    fontSize: '0.88em',
-                    marginTop: '4px',
-                    textAlign: 'right',
-                    maxWidth: '400px',
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                }}
-            >{`${Math.round(progress * 100)}% leído`}</div>
+            {parts.length > 1 && isPlaying && (
+                <div style={{ textAlign: 'center', marginTop: 12, fontSize: '0.95em', color: '#6C63FF' }}>
+                    Fragmento {currentPartIdx + 1} de {parts.length}
+                </div>
+            )}
         </div>
     );
 }
@@ -261,7 +244,6 @@ const mainBtnStyle = {
     justifyContent: 'center',
 };
 
-// Menú de velocidades
 const speedMenuStyle: React.CSSProperties = {
     position: 'absolute',
     top: '110%',
