@@ -5,10 +5,10 @@ const MAX_LENGTH = 900;
 
 // Lista de voces de Voice RSS para español (México)
 const VOICES = [
+    { label: 'Jose (masculino)', value: 'Jose', available: true },
     { label: 'Juana (femenino)', value: 'Juana', available: true },
     { label: 'Silvia (femenino)', value: 'Silvia', available: true },
     { label: 'Teresa (femenino)', value: 'Teresa', available: true },
-    { label: 'Jose (masculino)', value: 'Jose', available: true },
 ];
 
 function splitText(text: string, maxLength = MAX_LENGTH): string[] {
@@ -56,9 +56,11 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                 setIsPlaying(false);
                 return;
             }
-            const blob = await res.blob();
-            const urlAudio = URL.createObjectURL(blob);
-            setAudioUrl(urlAudio);
+            const data = await res.json();
+            const audioUrl = data.url.startsWith('http') ? data.url : window.location.origin + data.url;
+
+            setAudioUrl(audioUrl);
+            console.log('audioUrl', audioUrl);
 
             setTimeout(() => {
                 audioRef.current?.play();
@@ -71,6 +73,7 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
             alert('Error generando el audio.');
         }
     };
+    console.log('audioUrl', audioUrl);
 
     const playAllParts = async () => {
         setCurrentPartIdx(0);
