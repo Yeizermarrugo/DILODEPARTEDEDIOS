@@ -7,6 +7,7 @@ type Devocional = {
     contenido: string;
     imagen: string;
     created_at?: string;
+    autor?: string;
 };
 
 interface props {
@@ -100,7 +101,10 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
                 <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
             </section>
-            <div style={{ marginTop: '8px', color: '#888' }}>
+            <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
+                {devocional.autor ? `${devocional.autor}` : ''}
+            </p>
+            <div style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 10px 0' }}>
                 {devocional.created_at
                     ? new Date(devocional.created_at).toLocaleDateString('es-ES', {
                           year: 'numeric',
