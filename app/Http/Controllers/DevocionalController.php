@@ -53,8 +53,10 @@ class DevocionalController extends Controller
      */
     public function show($id)
     {
-        // Encuentra el devocional por ID y lo devuelve como JSON
         $devocional = Devocional::find($id);
+        if (!$devocional) {
+            abort(404);
+        }
         return Inertia::render('DevocionalDetails', [
             'devocional' => $devocional
         ]);
