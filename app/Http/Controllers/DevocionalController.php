@@ -23,9 +23,16 @@ class DevocionalController extends Controller
             ->selectRaw('categoria, COUNT(*) as count')
             ->get();
 
+        $autores = Devocional::whereNotNull('autor')
+            ->where('autor', '!=', '')
+            ->groupBy('autor')
+            ->selectRaw('autor, COUNT(*) as count')
+            ->get();
+
         return response()->json([
             'devocionales' => $devocionales,
             'categorias' => $categorias,
+            'autores' => $autores,
         ]);
     }
 

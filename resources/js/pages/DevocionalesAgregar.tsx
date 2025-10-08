@@ -194,9 +194,9 @@ const DevocionalesAgregar = () => {
                         }}
                     >
                         <option value="">Selecciona un Autor</option>
-                        {autores.map((cat) => (
-                            <option key={cat} value={cat}>
-                                {cat}
+                        {autores.map((aut) => (
+                            <option key={aut} value={aut}>
+                                {aut}
                             </option>
                         ))}
                         <option value="nuevo">Agregar nuevo autor...</option>
