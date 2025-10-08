@@ -43,9 +43,15 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
 
     const devocionalContent = removeFirstTag(devocional.contenido);
 
+    const decodeHtmlEntities = (str: string): string => {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+    };
+
     const H1Custom = ({ contenido }: { contenido: string }) => {
         const h1Text = getH1Text(contenido);
-        const [parte1, parte2, parte3] = splitH1Parts(h1Text);
+        const [parte1, parte2, parte3] = splitH1Parts(decodeHtmlEntities(h1Text));
         return (
             <header
                 className="header-modal"

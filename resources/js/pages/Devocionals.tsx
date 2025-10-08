@@ -126,6 +126,12 @@ function Devocionals() {
         window.history.pushState({}, '', window.location.pathname);
     };
 
+    const decodeHtmlEntities = (str: string): string => {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+    };
+
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
         if (match) {
@@ -345,7 +351,7 @@ function Devocionals() {
                                                             devocionales={[
                                                                 {
                                                                     ...devocional,
-                                                                    titulo: obtenerPrimerEtiqueta(devocional.contenido),
+                                                                    titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
                                                                     contenido: devocional.contenido,
                                                                 },
                                                             ]}

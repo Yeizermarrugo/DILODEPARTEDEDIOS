@@ -18,7 +18,6 @@ const DevocionalDetails = ({ devocional }: props) => {
     // const { devocional } = usePage().props as unknown as { devocional: Devocional };
     const [loading, setLoading] = useState(true);
     const imageLoaded = useImagePreload(devocional.imagen);
-    console.log('devocional', devocional);
 
     useEffect(() => {
         setLoading(true);
