@@ -9,6 +9,7 @@ interface Devocional {
     titulo: string;
     contenido: string;
     categoria: string;
+    autor: string;
 }
 
 interface DevocionalCardProps {
@@ -106,8 +107,13 @@ export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
                         </Typography>
                         <Typography
                             variant="body2"
-                            sx={{ color: 'rgba(119, 119, 119, 0.81)', padding: 0, margin: 0 }}
-                            dangerouslySetInnerHTML={{ __html: getPlainTextAfterH1(dev.contenido).split(' ').slice(0, 20).join(' ') + '...' }}
+                            sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingBottom: 0, margin: 0 }}
+                            dangerouslySetInnerHTML={{ __html: getPlainTextAfterH1(dev.contenido).split(' ').slice(0, 5).join(' ') + '...' }}
+                        />
+                        <Typography
+                            variant="body2"
+                            sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingTop: 1, margin: 0, fontSize: '12px', fontStyle: 'italic' }}
+                            dangerouslySetInnerHTML={{ __html: `${dev.autor ? 'Autor: ' + dev.autor : ''}` }}
                         />
                     </CardContent>
                     {/* <CardActions sx={{ mt: 'auto' }}>
