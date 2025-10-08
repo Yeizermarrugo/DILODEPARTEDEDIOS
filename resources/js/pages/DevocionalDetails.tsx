@@ -100,9 +100,11 @@ const DevocionalDetails = ({ devocional }: props) => {
 
                 <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
                 {/* Display autor if it exists */}
-                <p style={{ color: '#888' }}>{devocional.autor ? `Autor: ${devocional.autor}` : ''}</p>
+                <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
+                    {devocional.autor ? `${devocional.autor}` : ''}
+                </p>
             </section>
-            <div style={{ marginTop: '8px', color: '#888' }}>
+            <div style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 10px 0' }}>
                 {devocional.created_at
                     ? new Date(devocional.created_at).toLocaleDateString('es-ES', {
                           year: 'numeric',
