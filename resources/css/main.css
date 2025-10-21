@@ -1078,6 +1078,10 @@ section,
     font-family: var(--heading-font);
 }
 
+ .blog-hero .blog-item .devocional-title h1, .post-title h1 {
+    font-size: 2rem;
+}
+
 .blog-hero .blog-item .devocional-title a {
     color: var(--contrast-color);
     text-decoration: none;
@@ -1130,12 +1134,21 @@ section,
     .featured-posts .blog-post-item {
         height: 400px;
     }
+
+     .blog-hero .blog-item .devocional-title h1, .post-title h1 {
+    font-size: 1.2rem;
+}
 }
 
 @media (max-width: 768px) {
     .featured-posts .blog-post-item {
         height: 450px;
     }
+
+    .blog-hero .blog-item .devocional-title h1, .post-title h1 {
+    font-size: 1.2rem;
+}
+
 }
 
 .featured-posts .blog-post-item img {

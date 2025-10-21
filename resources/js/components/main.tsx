@@ -145,11 +145,11 @@ export default function MainContent() {
                                     </span>
                                     {/* <span className="category">Technology</span> */}
                                 </div>
-                                <h2 className="devocional-title">
+                                <h3 className="devocional-title">
                                     <button onClick={() => abrirModal(dev[0])}>
                                         <TituloDevocional contenido={dev[0]?.contenido} />
                                     </button>
-                                </h2>
+                                </h3>
                             </div>
                         </article>
 

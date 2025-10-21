@@ -56,7 +56,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
             <header
                 className="header-modal"
                 style={{
-                    background: `url(${devocional.imagen}) 0% 30% no-repeat`,
+                    background: `url(${devocional.imagen}) center center no-repeat`,
                     backgroundSize: 'cover',
                     paddingTop: '40%',
                     fontFamily: "'Sucrose Bold Two'",
@@ -105,7 +105,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                 }}
             >
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
-                <p style={{ fontSize: '20px', padding: '10px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
+                <p style={{ padding: '5px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
             </section>
             <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
                 {devocional.autor ? `${devocional.autor}` : ''}

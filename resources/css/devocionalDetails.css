@@ -59,7 +59,7 @@ body {
     font-size: 4rem;
     max-width: 30%;
     line-height: 1;
-    margin: 0 0 1rem 0;
+    margin: 0 0 -4rem 0;
     text-align: center;
     text-shadow: 0 2px 12px #2227;
     padding: 1rem 0;
@@ -125,6 +125,7 @@ body {
     .header-modal .title {
         font-size: 2.1rem;
         max-width: 30%;
+        margin: 0 0 -10rem 0;
     }
     .header-modal .title span {
         font-size: 2.1rem;
@@ -148,11 +149,25 @@ body {
     .header-modal .title {
         font-size: 1.4rem;
         max-width: 30%;
-        margin: 0 0 -4rem 0;
+        margin: 0 0 -5rem 0;
     }
     .header-modal .title span {
         font-size: 1.4rem;
     }
+    .devocional p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #222;
+    margin: 0;
+    word-break: break-word;
+}
+.devocional-details p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #222;
+    margin: 0;
+    word-break: break-word;
+}
 }
 
 @media (max-width: 400px) {
@@ -165,9 +180,24 @@ body {
     .header-modal .title {
         font-size: 1.4rem;
         max-width: 30%;
-        margin: 0 0 -4rem 0;
+        margin: 0 0 -10rem 0;
     }
     .header-modal .title span {
         font-size: 1.4rem;
     }
+    .devocional p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #222;
+    margin: 0;
+    word-break: break-word;
+}
+
+.devocional-details p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #222;
+    margin: 0;
+    word-break: break-word;
+}
 }
