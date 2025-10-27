@@ -353,6 +353,7 @@ function Devocionals() {
                                                                     ...devocional,
                                                                     titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
                                                                     contenido: devocional.contenido,
+                                                                    autor: devocional.autor || '',
                                                                 },
                                                             ]}
                                                         />
