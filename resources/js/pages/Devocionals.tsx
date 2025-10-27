@@ -198,7 +198,7 @@ function Devocionals() {
         );
     };
 
-    const PAGE_LIMIT = 15; // Cambia este valor si tu backend usa otro límite
+    const PAGE_LIMIT = 16; // Cambia este valor si tu backend usa otro límite
 
     const showPaginator = () => {
         if (!searchTerm.trim()) {
