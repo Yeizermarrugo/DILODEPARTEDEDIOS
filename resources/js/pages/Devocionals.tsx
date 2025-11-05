@@ -63,8 +63,6 @@ function Devocionals() {
         fetch(url, { signal: controller.signal })
             .then((r) => r.json())
             .then((data) => {
-                console.log('URL enviada:', url);
-                console.log('Respuesta backend:', data);
 
                 if (!selectedCategory && query.trim() === '') {
                     setCategories(data.categorias || []);
