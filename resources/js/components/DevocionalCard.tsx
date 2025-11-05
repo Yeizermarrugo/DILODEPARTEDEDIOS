@@ -4,8 +4,8 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 
 interface Devocional {
+    id: string;
     imagen: string;
-    // Add other properties as needed, e.g.:
     titulo: string;
     contenido: string;
     categoria: string;
@@ -14,6 +14,7 @@ interface Devocional {
 
 interface DevocionalCardProps {
     devocionales: Devocional[];
+    todasLasCategorias: string[];
 }
 
 const colorArray = [
@@ -39,9 +40,26 @@ const colorArray = [
     // '#AEEA00',
 ];
 
-// Mapa global de categoría a color
-const categoryColorMap: { [category: string]: string } = {};
-export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
+// function buildCategoryColorMap(devocionales: Devocional[]) {
+//     const categoriasUnicas = Array.from(
+//         new Set(devocionales.map(dev => dev.categoria.trim().toLowerCase()))
+//     ).sort(); // Orden alfabético para todos igual
+//     const map: { [categoria: string]: string } = {};
+//     categoriasUnicas.forEach((cat, idx) => {
+//         map[cat] = colorArray[idx] ?? '#FFFFFF';
+//     });
+//     return map;
+// }
+function buildCategoryColorMap(todasLasCategorias: string[]) {
+    const map: { [categoria: string]: string } = {};
+    todasLasCategorias.forEach((cat, idx) => {
+        map[cat] = colorArray[idx] ?? '#FFFFFF';
+    });
+    return map;
+}
+
+export default function DevocionalCard({ devocionales, todasLasCategorias }: DevocionalCardProps) {
+    const categoryColorMap = buildCategoryColorMap(todasLasCategorias);
     /**
      * Asigna un color único e inmutable por categoría.
      * Siempre retorna el mismo color para la misma categoría.
@@ -58,70 +76,80 @@ export default function DevocionalCard({ devocionales }: DevocionalCardProps) {
         return plainText;
     }
 
-    function stringToColor(str: string): string {
-        const normalized = str.trim().toLowerCase();
+    // function stringToColor(str: string): string {
+    //     const normalized = str.trim().toLowerCase();
 
-        if (categoryColorMap[normalized]) {
-            return categoryColorMap[normalized];
-        }
+    //     if (categoryColorMap[normalized]) {
+    //         return categoryColorMap[normalized];
+    //     }
 
-        for (const color of colorArray) {
-            if (!Object.values(categoryColorMap).includes(color)) {
-                categoryColorMap[normalized] = color;
-                return color;
-            }
-        }
+    //     for (const color of colorArray) {
+    //         if (!Object.values(categoryColorMap).includes(color)) {
+    //             categoryColorMap[normalized] = color;
+    //             return color;
+    //         }
+    //     }
 
-        // Si no hay colores disponibles, retorna blanco
-        return '#FFFFFF';
-    }
+    //     // Si no hay colores disponibles, retorna blanco
+    //     return '#FFFFFF';
+    // }
+
 
     return (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
-            {devocionales.map((dev, idx) => (
-                <Card
-                    sx={{
-                        width: 170,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        height: 280,
-                        backgroundColor: `${dev.categoria ? stringToColor(dev.categoria) : '#ffffffff'}`,
-                    }}
-                    key={idx}
-                >
-                    {/* <CardMedia sx={{ height: 140 }} image={dev.imagen} /> */}
-                    <CardMedia
-                        component="img"
-                        image={dev.imagen}
-                        alt="Descripción"
-                        sx={{
-                            height: 150, // Altura fija para todas las imágenes
-                            width: '100%',
-                            objectFit: 'cover', // Recorta y centra la imagen uniformemente
-                            objectPosition: 'center',
-                        }}
-                    />
-                    <CardContent sx={{ flex: '1 1 auto', overflow: 'hidden', paddingBottom: 0 }}>
-                        <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div">
-                            {dev.titulo}
-                        </Typography>
-                        <Typography
-                            variant="body2"
-                            sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingBottom: 0, margin: 0 }}
-                            dangerouslySetInnerHTML={{ __html: getPlainTextAfterH1(dev.contenido).split(' ').slice(0, 5).join(' ') + '...' }}
-                        />
-                        <Typography
-                            variant="body2"
-                            sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingTop: 1, margin: 0, fontSize: '12px', fontStyle: 'italic' }}
-                            dangerouslySetInnerHTML={{ __html: `${dev.autor ? 'Autor: ' + dev.autor : ''}` }}
-                        />
-                    </CardContent>
-                    {/* <CardActions sx={{ mt: 'auto' }}>
-                        <Button size="small">Share</Button>
-                        <Button size="small">Learn More</Button>
-                    </CardActions> */}
-                </Card>
-            ))}
+            {devocionales.map((dev, idx) => {
+                const normalizedCat = dev.categoria.trim().toLowerCase();
+                const cardBg = categoryColorMap[normalizedCat] || '#ffffffff';
+
+                return (
+                    <a
+                        key={idx}
+                        href={`/devocional/${dev.id}`}
+                        style={{ textDecoration: 'none' }}
+                    >
+
+                        <Card
+                            sx={{
+                                width: 170,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: 280,
+                                backgroundColor: cardBg,
+                            }}
+                            key={idx}
+                        >
+                            <CardMedia
+                                component="img"
+                                image={dev.imagen}
+                                alt="Descripción"
+                                sx={{
+                                    height: 150,
+                                    width: '100%',
+                                    objectFit: 'cover',
+                                    objectPosition: 'center',
+                                }}
+                            />
+                            <CardContent sx={{ flex: '1 1 auto', overflow: 'hidden', paddingBottom: 0 }}>
+                                <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div">
+                                    {dev.titulo}
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingBottom: 0, margin: 0 }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: getPlainTextAfterH1(dev.contenido).split(' ').slice(0, 5).join(' ') + '...'
+                                    }}
+                                />
+                                <Typography
+                                    variant="body2"
+                                    sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingTop: 1, margin: 0, fontSize: '12px', fontStyle: 'italic' }}
+                                    dangerouslySetInnerHTML={{ __html: dev.autor ? `Autor: ${dev.autor}` : '' }}
+                                />
+                            </CardContent>
+                        </Card>
+                    </a>
+                );
+            })}
         </div>
     );
 }
