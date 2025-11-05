@@ -130,8 +130,10 @@ export default function DevocionalCard({ devocionales, todasLasCategorias }: Dev
                                 }}
                             />
                             <CardContent sx={{ flex: '1 1 auto', overflow: 'hidden', paddingBottom: 0 }}>
-                                <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div">
-                                    {dev.titulo}
+                                <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div"
+                                    dangerouslySetInnerHTML={{
+                                        __html: dev.titulo.split(' ').slice(0, 4).join(' ') + (dev.titulo.split(' ').length > 4 ? '...' : '')
+                                    }}>
                                 </Typography>
                                 <Typography
                                     variant="body2"
