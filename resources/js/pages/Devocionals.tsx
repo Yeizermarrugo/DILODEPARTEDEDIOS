@@ -278,10 +278,10 @@ function Devocionals() {
                                 <time dateTime="2020-01-01">
                                     {post.created_at
                                         ? new Date(post.created_at).toLocaleDateString('es-ES', {
-                                              year: 'numeric',
-                                              month: 'long',
-                                              day: 'numeric',
-                                          })
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })
                                         : ''}
                                 </time>
                             </button>
@@ -292,6 +292,10 @@ function Devocionals() {
             ))}
         </div>
     );
+
+    const todasLasCategorias = categories.map(cat =>
+        cat.categoria.trim().toLowerCase()
+    ).sort();
 
     return (
         <div className="blog-details-page">
@@ -339,27 +343,22 @@ function Devocionals() {
                                                     {searchTerm
                                                         ? `Resultados de búsqueda "${searchTerm}"`
                                                         : selectedCategory
-                                                          ? `Categoría - ${selectedCategory}`
-                                                          : 'Todos los Devocionales'}
+                                                            ? `Categoría - ${selectedCategory}`
+                                                            : 'Todos los Devocionales'}
                                                 </h2>
                                             </div>
                                             <div className="cards-container">
-                                                {devocionales.map((devocional, index) => (
-                                                    <a href={`/devocional/${devocional.id}`} style={{ textDecoration: 'none' }}>
-                                                        <DevocionalCard
-                                                            key={index}
-                                                            devocionales={[
-                                                                {
-                                                                    ...devocional,
-                                                                    titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
-                                                                    contenido: devocional.contenido,
-                                                                    autor: devocional.autor || '',
-                                                                },
-                                                            ]}
-                                                        />
-                                                    </a>
-                                                ))}
+                                                <DevocionalCard
+                                                    devocionales={devocionales.map(devocional => ({
+                                                        ...devocional,
+                                                        titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
+                                                        contenido: devocional.contenido,
+                                                        autor: devocional.autor || '',
+                                                    }))}
+                                                    todasLasCategorias={todasLasCategorias}
+                                                />
                                             </div>
+
                                             {showPaginator() && renderPaginator()}
                                         </>
                                     )}
