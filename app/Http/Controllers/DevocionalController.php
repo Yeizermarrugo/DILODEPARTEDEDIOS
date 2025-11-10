@@ -40,6 +40,7 @@ class DevocionalController extends Controller
     {
         $perPage = $request->input('per_page', 16);
         $devocionales = Devocional::where('categoria', $categoria)
+            ->where('is_devocional', true)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -51,7 +52,13 @@ class DevocionalController extends Controller
     //devolver los ultimos 5 devocionales
     public function latest()
     {
-        $devocionales = Devocional::orderBy('created_at', 'desc')->take(5)->get();
+        $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', true)->take(5)->get();
+        return response()->json($devocionales);
+    }
+
+    public function libros()
+    {
+        $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', false)->get();
         return response()->json($devocionales);
     }
 
@@ -65,7 +72,8 @@ class DevocionalController extends Controller
             abort(404);
         }
         return Inertia::render('DevocionalDetails', [
-            'devocional' => $devocional
+            'devocional' => $devocional,
+            'is_devocional' => $devocional->is_devocional
         ]);
     }
 
@@ -74,7 +82,8 @@ class DevocionalController extends Controller
         // Encuentra el devocional por ID y lo devuelve como JSON
         $devocional = Devocional::find($id);
         return Inertia::render('DevocionalDetailsPage', [
-            'devocional' => $devocional
+            'devocional' => $devocional,
+            'is_devocional' => $devocional->is_devocional
         ]);
     }
 
@@ -97,14 +106,16 @@ class DevocionalController extends Controller
             'contenido' => 'required|string',
             'categoria' => 'required|string',
             'imagen' => 'required|string|url', // Asegúrate de que 'imagen' sea una cadena y tenga un tamaño máximo
-            'autor' => 'nullable|string|max:255'
+            'autor' => 'nullable|string|max:255',
+            'is_devocional' => 'required|boolean',
         ]);
 
         $devocional = Devocional::create([
             'contenido' => $request->input('contenido'),
             'categoria' => $request->input('categoria'),
             'imagen' => $request->input('imagen'), // Asegúrate de que 'imagen' esté en el request
-            'autor' => $request->input('autor')
+            'autor' => $request->input('autor'),
+            'is_devocional' => $request->input('is_devocional'),
         ]);
 
         return response()->json([

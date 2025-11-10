@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/coverflowCarousel.css';
 
 interface PostImage {
@@ -30,14 +30,6 @@ export default function CoverflowCarousel() {
             });
     };
 
-    useEffect(() => {
-        if (!visibleImages.length) return;
-        const interval = setInterval(() => {
-            handleRight();
-        }, intervalTime);
-        return () => clearInterval(interval);
-    }, [visibleImages, center]);
-
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         touchStartX.current = e.touches[0].clientX;
     };
@@ -52,9 +44,18 @@ export default function CoverflowCarousel() {
     function handleLeft() {
         setCenter((prev) => (prev === 0 ? itemsLength - 1 : prev - 1));
     }
-    function handleRight() {
+    const handleRight = useCallback(() => {
         setCenter((prev) => (prev === itemsLength - 1 ? 0 : prev + 1));
-    }
+    }, [itemsLength]);
+
+    useEffect(() => {
+        if (!visibleImages.length) return;
+        const interval = setInterval(() => {
+            handleRight();
+        }, intervalTime);
+        return () => clearInterval(interval);
+    }, [visibleImages, center, handleRight]);
+
 
     function getImageClass(idx: number) {
         if (idx === center) return 'img_center';

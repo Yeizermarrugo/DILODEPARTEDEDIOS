@@ -54,6 +54,7 @@ Route::get('/podcast', function () {
 Route::get('/libros', function () {
     return Inertia::render('Libros');
 });
+Route::get('/estudios', [DevocionalController::class, 'libros']);
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
