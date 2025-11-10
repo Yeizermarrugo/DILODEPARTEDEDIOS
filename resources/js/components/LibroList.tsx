@@ -30,8 +30,9 @@ type Libro = {
 };
 
 export default function LibroList() {
-    const [openCategoria, setOpenCategoria] = useState<{ [key: string]: boolean }>({});
+    const [openCategoria, setOpenCategoria] = useState<Record<string, boolean>>({});
     const [libros, setLibros] = useState<Libro[]>([]);
+
 
     useEffect(() => {
         fetch('/estudios')
@@ -80,21 +81,26 @@ export default function LibroList() {
                             },
                         },
                     },
+                    palette: {
+                        mode: 'dark',
+                        primary: { main: 'rgb(102, 157, 246)' },
+                        background: { paper: 'rgb(5, 30, 52)' },
+                    },
                 })}
             >
                 <Paper elevation={0} sx={{ maxWidth: 320 }}>
                     <FireNav component="nav" disablePadding>
                         <Divider />
-                        {/* <ListItem component="div" disablePadding /> */}
                         <Divider />
                         <Box>
-                            {categoriasUnicas.map((categoria: any) => {
+                            {categoriasUnicas.map((categoria) => {
                                 const nombre = categoria.nombre;
                                 const isOpen = openCategoria[nombre] ?? false;
-                                // Filtrar libros por la categoría actual
-                                const librosCategoria = libros.filter((libro: any) => {
+
+                                // Filtrar libros por la categoría actual (Libro)
+                                const librosCategoria = libros.filter((libro: Libro) => {
                                     if (Array.isArray(libro.categoria)) {
-                                        return libro.categoria.some((cat: any) =>
+                                        return libro.categoria.some((cat: Categoria) =>
                                             (typeof cat === 'object' ? cat.nombre : cat) === nombre
                                         );
                                     }
@@ -114,12 +120,8 @@ export default function LibroList() {
                                             sx={[
                                                 { px: 3, pt: 2.5 },
                                                 isOpen
-                                                    ? {
-                                                        bgcolor: 'rgba(71, 98, 130, 0.2)',
-                                                    }
-                                                    : {
-                                                        bgcolor: null,
-                                                    },
+                                                    ? { bgcolor: 'rgba(71, 98, 130, 0.2)' }
+                                                    : { bgcolor: null },
                                                 isOpen ? { pb: 0 } : { pb: 2.5 },
                                                 {
                                                     '&:hover, &:focus': {
@@ -137,8 +139,7 @@ export default function LibroList() {
                                                         lineHeight: '20px',
                                                         mb: '2px',
                                                         color: isOpen ? 'text.primary' : 'primary.main',
-
-                                                    }
+                                                    },
                                                 }}
                                                 sx={{ my: 0 }}
                                             />
@@ -153,16 +154,12 @@ export default function LibroList() {
                                         </ListItemButton>
                                         {/* Libros de la categoría expandida */}
                                         {isOpen &&
-                                            librosCategoria.map((libro: any) => (
+                                            librosCategoria.map((libro) => (
                                                 <ListItemButton
                                                     key={libro.id}
                                                     sx={[isOpen
-                                                        ? {
-                                                            bgcolor: 'rgba(71, 98, 130, 0.07)',
-                                                        }
-                                                        : {
-                                                            bgcolor: null,
-                                                        }, {
+                                                        ? { bgcolor: 'rgba(71, 98, 130, 0.07)' }
+                                                        : { bgcolor: null }, {
                                                         py: 0,
                                                         minHeight: 32,
                                                         color: 'rgba(110, 110, 110, 0.88)',
