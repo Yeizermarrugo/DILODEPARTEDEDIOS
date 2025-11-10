@@ -22,6 +22,13 @@ const FireNav = styled(List)<{ component?: React.ElementType }>({
     },
 });
 
+type Categoria = string | { nombre: string };
+type Libro = {
+    id: string | number;
+    categoria: Categoria | Categoria[];
+    contenido: string;
+};
+
 export default function LibroList() {
     const [openCategoria, setOpenCategoria] = useState<{ [key: string]: boolean }>({});
     const [libros, setLibros] = useState<any[]>([]);
@@ -35,7 +42,7 @@ export default function LibroList() {
 
     // Obtener todas las categorías en array (deduplicadas por nombre)
     const todasCategorias = libros
-        .map((libro: any) =>
+        .map((libro) =>
             Array.isArray(libro.categoria)
                 ? libro.categoria
                 : [libro.categoria].filter(Boolean)
@@ -78,11 +85,6 @@ export default function LibroList() {
                             },
                         },
                     },
-                    // palette: {
-                    //     mode: 'dark',
-                    //     primary: { main: 'rgb(102, 157, 246)' },
-                    //     background: { paper: 'rgb(5, 30, 52)' },
-                    // },
                 })}
             >
                 <Paper elevation={0} sx={{ maxWidth: 320 }}>
