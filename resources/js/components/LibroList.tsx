@@ -31,15 +31,14 @@ type Libro = {
 
 export default function LibroList() {
     const [openCategoria, setOpenCategoria] = useState<{ [key: string]: boolean }>({});
-    const [libros, setLibros] = useState<any[]>([]);
+    const [libros, setLibros] = useState<Libro[]>([]);
 
     useEffect(() => {
         fetch('/estudios')
             .then((response) => response.json())
-            .then((data: any) => setLibros(Array.isArray(data) ? data : []))
+            .then((data: Libro[]) => setLibros(Array.isArray(data) ? data : []))
             .catch((error) => console.error('Error fetching libros:', error));
     }, []);
-
     // Obtener todas las categorías en array (deduplicadas por nombre)
     const todasCategorias = libros
         .map((libro) =>
@@ -49,20 +48,16 @@ export default function LibroList() {
         )
         .flat();
 
-    const categoriasUnicas = todasCategorias.reduce((acc: any[], curr: any) => {
+    const categoriasUnicas = todasCategorias.reduce<{ nombre: string }[]>((acc, curr) => {
         if (!curr) return acc;
         const nombre = typeof curr === 'object' ? curr.nombre : curr;
-        if (!acc.find((item) => item.nombre === nombre))
-            acc.push({ nombre });
+        if (!acc.find((item) => item.nombre === nombre)) acc.push({ nombre });
         return acc;
     }, []);
 
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
-        if (match) {
-            const innerText = match[2].replace(/<[^>]+>/g, '');
-            return innerText;
-        }
+        if (match) return match[2].replace(/<[^>]+>/g, '');
         return '';
     };
 
