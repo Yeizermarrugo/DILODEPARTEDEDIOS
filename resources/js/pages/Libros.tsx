@@ -1,5 +1,6 @@
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
+import LibroList from '@/components/LibroList';
 import '../../css/main.css';
 import '../../css/podcast.css';
 
@@ -35,7 +36,7 @@ export default function Libros() {
 
             {/* Main Content */}
             <main className="centered-main">
-                <img src="/assets/img/Estamos%20trabajando.png" alt="Estamos trabajando" className="trabajando" />
+                <LibroList />
             </main>
 
             {/* Footer */}
