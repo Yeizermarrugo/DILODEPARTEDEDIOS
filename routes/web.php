@@ -41,6 +41,7 @@ Route::get('/devocionals-latest', [DevocionalController::class, 'latest']);
 Route::post('/devocionalesadd', [DevocionalController::class, 'store'])->middleware(['auth', 'verified']);
 Route::post('/upload-image', [ImageUploadController::class, 'store']);
 Route::get('/devocionales-search', [DevocionalController::class, 'index']);
+Route::get('/devocionales-searchCategories', [DevocionalController::class, 'searchCategories']);
 Route::get('/devocionales/categoria/{categoria}', [DevocionalController::class, 'porCategoria']);
 Route::get('/devocional/{id}', [DevocionalController::class, 'details']);
 

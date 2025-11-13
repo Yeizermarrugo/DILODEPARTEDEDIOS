@@ -38,6 +38,31 @@ class DevocionalController extends Controller
         ]);
     }
 
+     public function searchCategories(Request $request)
+    {
+
+        $perPage = $request->input('per_page', 16); // Puedes cambiar 10 por 20 si prefieres
+        $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
+
+        $categorias = Devocional::whereNotNull('categoria')
+            ->where('categoria', '!=', '')
+            ->groupBy('categoria')
+            ->selectRaw('categoria, COUNT(*) as count')
+            ->get();
+
+        $autores = Devocional::whereNotNull('autor')
+            ->where('autor', '!=', '')
+            ->groupBy('autor')
+            ->selectRaw('autor, COUNT(*) as count')
+            ->get();
+
+        return response()->json([
+            'devocionales' => $devocionales,
+            'categorias' => $categorias,
+            'autores' => $autores,
+        ]);
+    }
+
     public function porCategoria(Request $request, $categoria)
     {
         $perPage = $request->input('per_page', 16);
