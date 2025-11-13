@@ -35,8 +35,11 @@ export default function Libros() {
             </div>
 
             {/* Main Content */}
-            <main className="centered-main">
-                <LibroList />
+            <main className="page-title">
+                <div className="title-wrapper">
+
+                    <LibroList />
+                </div>
             </main>
 
             {/* Footer */}

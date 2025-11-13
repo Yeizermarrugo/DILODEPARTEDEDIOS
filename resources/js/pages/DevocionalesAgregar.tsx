@@ -22,6 +22,7 @@ const DevocionalesAgregar = () => {
     const [nuevoAutor, setNuevoAutor] = useState('');
     const [useNuevaCategoria, setUseNuevaCategoria] = useState(false);
     const [useNuevoAutor, setUseNuevoAutor] = useState(false);
+    const [is_devocional, setIsDevocional] = useState(true);
 
     // Loader visible si TinyMCE está cargando o si se está guardando/subiendo algo
     const showLoader = isLoading || isSubmitting;
@@ -86,6 +87,7 @@ const DevocionalesAgregar = () => {
                     imagen: urlImagenFinal,
                     categoria: useNuevaCategoria ? nuevaCategoria : categoria,
                     autor: useNuevoAutor ? nuevoAutor : autor,
+                    is_devocional: is_devocional,
                 },
                 {
                     headers: {
@@ -210,6 +212,15 @@ const DevocionalesAgregar = () => {
                             onChange={(e) => setNuevoAutor(e.target.value)}
                         />
                     )}
+                </div>
+                <div>
+                    <label>¿Es un devocional?</label>
+                    <input
+                        type="checkbox"
+                        checked={is_devocional}
+                        onChange={(e) => setIsDevocional(e.target.checked)}
+                        style={{ marginLeft: '8px' }}
+                    />
                 </div>
                 <Editor
                     apiKey="pc7pp06765v04kvyv0e65n2ja3v0c3hn5law9o9vpchu0erd"

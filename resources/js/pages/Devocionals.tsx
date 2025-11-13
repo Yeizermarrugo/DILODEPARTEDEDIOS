@@ -63,7 +63,6 @@ function Devocionals() {
         fetch(url, { signal: controller.signal })
             .then((r) => r.json())
             .then((data) => {
-
                 if (!selectedCategory && query.trim() === '') {
                     setCategories(data.categorias || []);
                     setTotal(data.devocionales?.total || 0);
