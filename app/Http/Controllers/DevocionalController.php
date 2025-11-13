@@ -15,16 +15,18 @@ class DevocionalController extends Controller
     {
 
         $perPage = $request->input('per_page', 16); // Puedes cambiar 10 por 20 si prefieres
-        $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
+        $devocionales = Devocional::where('is_devocional', true)->orderBy('created_at', 'desc')->paginate($perPage);
 
         $categorias = Devocional::whereNotNull('categoria')
             ->where('categoria', '!=', '')
+            ->where('is_devocional', true)
             ->groupBy('categoria')
             ->selectRaw('categoria, COUNT(*) as count')
             ->get();
 
         $autores = Devocional::whereNotNull('autor')
             ->where('autor', '!=', '')
+            ->where('is_devocional', true)
             ->groupBy('autor')
             ->selectRaw('autor, COUNT(*) as count')
             ->get();
