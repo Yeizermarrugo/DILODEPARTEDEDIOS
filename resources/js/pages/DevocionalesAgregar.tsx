@@ -29,7 +29,7 @@ const DevocionalesAgregar = () => {
 
     // Cargar categorías existentes al montar
     useEffect(() => {
-        axios.get('/devocionales-search').then((res) => {
+        axios.get('/devocionales-searchCategories').then((res) => {
             const cats = res.data.categorias.map((c: { categoria: string }) => c.categoria);
             setCategorias(cats);
 
