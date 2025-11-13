@@ -81,14 +81,14 @@ export default function LibroList() {
                             },
                         },
                     },
-                    palette: {
-                        mode: 'dark',
-                        primary: { main: 'rgb(102, 157, 246)' },
-                        background: { paper: 'rgb(5, 30, 52)' },
-                    },
+                    // palette: {
+                    //     mode: 'dark',
+                    //     primary: { main: 'rgb(102, 157, 246)' },
+                    //     background: { paper: 'rgb(5, 30, 52)' },
+                    // },
                 })}
             >
-                <Paper elevation={0} sx={{ maxWidth: 320 }}>
+                <Paper elevation={0} sx={{ maxWidth: 600, width: '100%', minHeight: 400 }}>
                     <FireNav component="nav" disablePadding>
                         <Divider />
                         <Divider />
@@ -121,7 +121,7 @@ export default function LibroList() {
                                                 { px: 3, pt: 2.5 },
                                                 isOpen
                                                     ? { bgcolor: 'rgba(71, 98, 130, 0.2)' }
-                                                    : { bgcolor: null },
+                                                    : { bgcolor: null, borderBlockEnd: '1px solid', borderColor: 'divider' },
                                                 isOpen ? { pb: 0 } : { pb: 2.5 },
                                                 {
                                                     '&:hover, &:focus': {
@@ -163,8 +163,18 @@ export default function LibroList() {
                                                         py: 0,
                                                         minHeight: 32,
                                                         color: 'rgba(110, 110, 110, 0.88)',
+                                                        // backgroundColor: 'transparent',
+                                                        '&:hover': { backgroundColor: 'rgba(71, 98, 130, 0.19)' },
+                                                        '& .MuiListItemText-primary': {
+                                                            fontSize: 13,
+                                                        },
                                                         pl: 5,
-                                                    }]}
+                                                    },
+                                                    {
+                                                        '&:hover, &:focus': {
+                                                            '& svg': { opacity: 1 },
+                                                        },
+                                                    },]}
                                                 >
                                                     <ListItemText
                                                         primary={<TituloDevocional contenido={libro.contenido} />}
