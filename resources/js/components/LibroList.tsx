@@ -62,11 +62,25 @@ export default function LibroList() {
         return '';
     };
 
+    const obtenerSegundaEtiqueta = (html: string) => {
+        const match = html.match(/<h2[^>]*>(.*?)<\/h2>/i);
+        if (match) return match[1].replace(/<[^>]+>/g, '');
+        return '';
+    };
+
     const TituloDevocional = ({ contenido }: { contenido: string }) => {
         const titulo = obtenerPrimerEtiqueta(contenido);
         return (
             <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }}
                 dangerouslySetInnerHTML={{ __html: titulo }} />
+        );
+    };
+
+    const Heading2Devocional = ({ contenido }: { contenido: string }) => {
+        const h2 = obtenerSegundaEtiqueta(contenido);
+        return (
+            <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }}
+                dangerouslySetInnerHTML={{ __html: h2 }} />
         );
     };
 
@@ -177,7 +191,24 @@ export default function LibroList() {
                                                     },]}
                                                 >
                                                     <ListItemText
-                                                        primary={<TituloDevocional contenido={libro.contenido} />}
+                                                        primary={<div style={{
+                                                            display: 'flex',
+                                                            alignItems: 'baseline',
+                                                            gap: '6px',
+                                                            fontSize: '15px'
+                                                        }}>
+                                                            <span>
+                                                                <TituloDevocional contenido={libro.contenido} />
+                                                            </span>
+                                                            <span style={{ fontWeight: 400, color: '#aaa' }}>
+                                                                –
+                                                            </span>
+                                                            <span style={{ color: '#7a7a7a', fontWeight: 400 }}>
+                                                                <Heading2Devocional contenido={libro.contenido} />
+                                                            </span>
+                                                        </div>
+
+                                                        }
                                                         slotProps={{
                                                             primary: {
                                                                 fontSize: 14,
