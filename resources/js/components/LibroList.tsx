@@ -190,32 +190,38 @@ export default function LibroList() {
                                                         },
                                                     },]}
                                                 >
-                                                    <ListItemText
-                                                        primary={<div style={{
-                                                            display: 'flex',
-                                                            alignItems: 'baseline',
-                                                            gap: '6px',
-                                                            fontSize: '15px'
-                                                        }}>
-                                                            <span>
-                                                                <TituloDevocional contenido={libro.contenido} />
-                                                            </span>
-                                                            <span style={{ fontWeight: 400, color: '#aaa' }}>
-                                                                –
-                                                            </span>
-                                                            <span style={{ color: '#7a7a7a', fontWeight: 400 }}>
-                                                                <Heading2Devocional contenido={libro.contenido} />
-                                                            </span>
-                                                        </div>
+                                                    <a
+                                                        key={libro.id}
+                                                        href={`/devocional/${libro.id}`}
+                                                        style={{ textDecoration: 'none' }}
+                                                    >
+                                                        <ListItemText
+                                                            primary={<div style={{
+                                                                display: 'flex',
+                                                                alignItems: 'baseline',
+                                                                gap: '6px',
+                                                                fontSize: '15px'
+                                                            }}>
+                                                                <span>
+                                                                    <TituloDevocional contenido={libro.contenido} />
+                                                                </span>
+                                                                <span style={{ fontWeight: 400, color: '#aaa' }}>
+                                                                    –
+                                                                </span>
+                                                                <span style={{ color: '#7a7a7a', fontWeight: 400 }}>
+                                                                    <Heading2Devocional contenido={libro.contenido} />
+                                                                </span>
+                                                            </div>
 
-                                                        }
-                                                        slotProps={{
-                                                            primary: {
-                                                                fontSize: 14,
-                                                                fontWeight: 'medium',
-                                                            },
-                                                        }}
-                                                    />
+                                                            }
+                                                            slotProps={{
+                                                                primary: {
+                                                                    fontSize: 14,
+                                                                    fontWeight: 'medium',
+                                                                },
+                                                            }}
+                                                        />
+                                                    </a>
                                                 </ListItemButton>
                                             ))}
                                     </Box>
@@ -226,6 +232,6 @@ export default function LibroList() {
                     </FireNav>
                 </Paper>
             </ThemeProvider>
-        </Box>
+        </Box >
     );
 }
