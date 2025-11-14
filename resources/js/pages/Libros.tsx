@@ -38,7 +38,7 @@ export default function Libros() {
             <main className="page-title">
                 <div className="title-wrapper">
 
-                  {  <LibroList />}
+                    <LibroList />
                 </div>
             </main>
 
