@@ -18,7 +18,7 @@ interface DevocionalCardProps {
 }
 
 const colorArray = [
-    // '#FF5252',
+    '#FF5252',
     '#ff990086',
     '#c511627c',
     '#ffd6408c',
@@ -27,12 +27,12 @@ const colorArray = [
     '#00e67791',
     '#7c4dff85',
     '#ff408085',
-    // '#FFD600',
-    // '#69F0AE',
-    // '#00B8D4',
-    // '#2979FF',
-    // '#304FFE',
-    // '#AA00FF',
+    '#FFD600',
+    '#69F0AE',
+    '#00B8D4',
+    '#2979FF',
+    '#304FFE',
+    '#AA00FF',
     // '#6200EA',
     // '#0091EA',
     // '#00BFAE',
@@ -40,16 +40,6 @@ const colorArray = [
     // '#AEEA00',
 ];
 
-// function buildCategoryColorMap(devocionales: Devocional[]) {
-//     const categoriasUnicas = Array.from(
-//         new Set(devocionales.map(dev => dev.categoria.trim().toLowerCase()))
-//     ).sort(); // Orden alfabético para todos igual
-//     const map: { [categoria: string]: string } = {};
-//     categoriasUnicas.forEach((cat, idx) => {
-//         map[cat] = colorArray[idx] ?? '#FFFFFF';
-//     });
-//     return map;
-// }
 function buildCategoryColorMap(todasLasCategorias: string[]) {
     const map: { [categoria: string]: string } = {};
     todasLasCategorias.forEach((cat, idx) => {
@@ -71,29 +61,9 @@ export default function DevocionalCard({ devocionales, todasLasCategorias }: Dev
         if (!match) return '';
         const index = (match.index ?? 0) + match[0].length;
         const afterH1 = html.slice(index);
-        // Elimina todas las etiquetas HTML
         const plainText = afterH1.replace(/<[^>]+>/g, '').trim();
         return plainText;
     }
-
-    // function stringToColor(str: string): string {
-    //     const normalized = str.trim().toLowerCase();
-
-    //     if (categoryColorMap[normalized]) {
-    //         return categoryColorMap[normalized];
-    //     }
-
-    //     for (const color of colorArray) {
-    //         if (!Object.values(categoryColorMap).includes(color)) {
-    //             categoryColorMap[normalized] = color;
-    //             return color;
-    //         }
-    //     }
-
-    //     // Si no hay colores disponibles, retorna blanco
-    //     return '#FFFFFF';
-    // }
-
 
     return (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
@@ -132,16 +102,9 @@ export default function DevocionalCard({ devocionales, todasLasCategorias }: Dev
                             <CardContent sx={{ flex: '1 1 auto', overflow: 'hidden', paddingBottom: 0 }}>
                                 <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div"
                                     dangerouslySetInnerHTML={{
-                                        __html: dev.titulo.split(' ').slice(0, 4).join(' ') + (dev.titulo.split(' ').length > 4 ? '...' : '')
+                                        __html: dev.titulo.split(' ').slice(0, 7).join(' ').toUpperCase() + (dev.titulo.split(' ').length > 7 ? '...' : '')
                                     }}>
                                 </Typography>
-                                <Typography
-                                    variant="body2"
-                                    sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingBottom: 0, margin: 0 }}
-                                    dangerouslySetInnerHTML={{
-                                        __html: getPlainTextAfterH1(dev.contenido).split(' ').slice(0, 5).join(' ') + '...'
-                                    }}
-                                />
                                 <Typography
                                     variant="body2"
                                     sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingTop: 1, margin: 0, fontSize: '12px', fontStyle: 'italic' }}
