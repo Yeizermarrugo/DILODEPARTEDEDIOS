@@ -3915,6 +3915,29 @@ section,
     }
 }
 
+@media (max-width: 400px) {
+    .cards-container {
+    display: flex;
+    width: 100%;
+    max-width: 120%;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    /* gap: 50px; */
+    height: auto;
+}
+    .cards-container a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        height: auto;
+        width: 135.5px;
+    }
+    
+}
+
 /* Optional: paginator styling */
 .paginator-btn.active {
     background: #007bff !important;

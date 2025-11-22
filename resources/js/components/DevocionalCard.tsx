@@ -55,15 +55,15 @@ export default function DevocionalCard({ devocionales, todasLasCategorias }: Dev
      * Siempre retorna el mismo color para la misma categoría.
      * Si se acaban los colores, las extras serán blancas.
      */
-    function getPlainTextAfterH1(html: string) {
-        const regex = /<h1\b[^>]*>.*?<\/h1>/i;
-        const match = html.match(regex);
-        if (!match) return '';
-        const index = (match.index ?? 0) + match[0].length;
-        const afterH1 = html.slice(index);
-        const plainText = afterH1.replace(/<[^>]+>/g, '').trim();
-        return plainText;
-    }
+    // function getPlainTextAfterH1(html: string) {
+    //     const regex = /<h1\b[^>]*>.*?<\/h1>/i;
+    //     const match = html.match(regex);
+    //     if (!match) return '';
+    //     const index = (match.index ?? 0) + match[0].length;
+    //     const afterH1 = html.slice(index);
+    //     const plainText = afterH1.replace(/<[^>]+>/g, '').trim();
+    //     return plainText;
+    // }
 
     return (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
