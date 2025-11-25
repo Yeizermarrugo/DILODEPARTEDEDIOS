@@ -58,7 +58,7 @@ body {
     /* font-family: 'Sucrose Bold Two', cursive; */
     font-weight: bold;
     font-size: 3rem;
-    max-width: 35%;
+    max-width: 10%;
     line-height: 1;
     margin: 0 0 -4rem 0;
     text-align: center;
@@ -115,9 +115,9 @@ body {
 
 @media (min-width: 800px) {
     .header-modal .title {
-        font-size: 3rem;
-        max-width: 80%;
-        margin: 0 0 8rem 0;
+        font-size: 1.8rem;
+        max-width: 40%;
+        margin: 0 0 -1rem 0;
     }
 }
 
