@@ -66,6 +66,7 @@ const DevocionalesAgregar = () => {
                 formData.append('file', selectedImageFile);
                 const response = await axios.post('/upload-image', formData, {
                     headers: {
+                        'Content-Type': 'multipart/form-data',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     },
                 });
