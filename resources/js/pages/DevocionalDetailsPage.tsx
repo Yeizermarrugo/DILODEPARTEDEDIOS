@@ -65,7 +65,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                 style={{
                     background: `url(${devocional.imagen}) center center no-repeat`,
                     backgroundSize: 'cover',
-                    paddingTop: '61.93333333%',
+                    paddingTop: '60%',
                     // fontFamily: "'Sucrose Bold Two'",
                     position: 'relative',
                     paddingBottom: '200px',
@@ -73,7 +73,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                     zIndex: -2,
                 }}
             >
-                <h1 className="title" style={{ paddingTop: '70px' }}>
+                <h1 className="title" style={{ paddingTop: '70px', marginBottom: '0px', paddingBottom: '150px' }}>
                     {parte1}
                     {' '}
                     {parte2}
