@@ -371,7 +371,7 @@ export default function MainContent() {
                         )}
 
                         {/* Cards de Video */}
-                        {videos?.map((video) => (
+                        {videos?.slice(0, 3).map((video) => (
                             <div className="col-lg-3 col-md-6 d-flex" key={video.id.videoId}>
                                 <div className="card video-card h-100 w-100 shadow-sm">
                                     <div className="ratio ratio-16x9">
