@@ -108,7 +108,7 @@ export default function MainContent() {
     };
     const TituloDevocional = ({ contenido }: { contenido: string }) => {
         const titulo = obtenerPrimerEtiqueta(contenido);
-        return <div dangerouslySetInnerHTML={{ __html: titulo }} />;
+        return <div dangerouslySetInnerHTML={{ __html: titulo }} style={{ textTransform: 'uppercase' }} />;
     };
 
     const dev = devocionales.slice(0, 5);
@@ -137,10 +137,10 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[0]?.created_at
                                             ? new Date(dev[0]?.created_at).toLocaleDateString('es-ES', {
-                                                  year: 'numeric',
-                                                  month: 'long',
-                                                  day: 'numeric',
-                                              })
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })
                                             : ''}
                                     </span>
                                     {/* <span className="category">Technology</span> */}
@@ -163,10 +163,10 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[1]?.created_at
                                             ? new Date(dev[1]?.created_at).toLocaleDateString('es-ES', {
-                                                  year: 'numeric',
-                                                  month: 'long',
-                                                  day: 'numeric',
-                                              })
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
@@ -185,10 +185,10 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[2]?.created_at
                                             ? new Date(dev[2]?.created_at).toLocaleDateString('es-ES', {
-                                                  year: 'numeric',
-                                                  month: 'long',
-                                                  day: 'numeric',
-                                              })
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
@@ -207,10 +207,10 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[3]?.created_at
                                             ? new Date(dev[3]?.created_at).toLocaleDateString('es-ES', {
-                                                  year: 'numeric',
-                                                  month: 'long',
-                                                  day: 'numeric',
-                                              })
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
@@ -229,10 +229,10 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[4]?.created_at
                                             ? new Date(dev[4]?.created_at).toLocaleDateString('es-ES', {
-                                                  year: 'numeric',
-                                                  month: 'long',
-                                                  day: 'numeric',
-                                              })
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
