@@ -73,7 +73,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                     zIndex: -2,
                 }}
             >
-                <h1 className="title" style={{ paddingTop: '70px', marginBottom: '0px', paddingBottom: '150px' }}>
+                <h1 className="title" style={{ paddingTop: '70px' }}>
                     {parte1}
                     {' '}
                     {parte2}
