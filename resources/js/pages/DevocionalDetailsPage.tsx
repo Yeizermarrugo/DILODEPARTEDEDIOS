@@ -65,7 +65,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                 style={{
                     background: `url(${devocional.imagen}) center center no-repeat`,
                     backgroundSize: 'cover',
-                    paddingTop: '61.93333333%',
+                    paddingTop: '60%',
                     // fontFamily: "'Sucrose Bold Two'",
                     position: 'relative',
                     paddingBottom: '200px',

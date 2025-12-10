@@ -117,7 +117,9 @@ body {
     .header-modal .title {
         font-size: 1.8rem;
         max-width: 40%;
-        margin: 0 0 -1rem 0;
+        /* margin: 0 0 -1rem 0; */
+        margin-bottom: 0px; 
+        padding-bottom: 200px; 
     }
 }
 
@@ -126,7 +128,9 @@ body {
     .header-modal .title {
         font-size: 2.1rem;
         max-width: 80%;
-        margin: 0 0 -8rem 0;
+        /* margin: 0 0 -8rem 0; */
+        margin-bottom: 0px; 
+        padding-bottom: 150px; 
     }
 }
 
