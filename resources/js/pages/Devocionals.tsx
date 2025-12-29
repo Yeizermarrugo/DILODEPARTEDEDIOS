@@ -275,6 +275,7 @@ function Devocionals() {
                                 <time dateTime="2020-01-01">
                                     {post.created_at
                                         ? new Date(post.created_at).toLocaleDateString('es-ES', {
+                                            weekday: 'long',
                                             year: 'numeric',
                                             month: 'long',
                                             day: 'numeric',
