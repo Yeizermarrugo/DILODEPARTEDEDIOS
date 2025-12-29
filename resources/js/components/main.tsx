@@ -33,6 +33,7 @@ export default function MainContent() {
     const [devocionalSeleccionado, setDevocionalSeleccionado] = useState<Devocional | null>(null);
     const [videos, setVideos] = useState<YoutubeVideo[] | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [welcomeOpen, setWelcomeOpen] = useState(true)
     const URL = '/youtube/latest';
 
     useEffect(() => {
@@ -92,12 +93,16 @@ export default function MainContent() {
         }
 
         // 3. Controlar el scroll del fondo según el estado del modal
-        document.body.style.overflow = modalOpen ? 'hidden' : '';
+        if (modalOpen || welcomeOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
         return () => {
             isMounted = false;
             document.body.style.overflow = '';
         };
-    }, [loading, modalOpen]);
+    }, [loading, modalOpen, welcomeOpen]);
 
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html?.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
@@ -125,6 +130,64 @@ export default function MainContent() {
 
     return (
         <main className="main">
+            {/* Modal de bienvenida */}
+            {welcomeOpen && (
+                <div
+                    className="modal-overlay"
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        background: 'rgba(0, 0, 0, 0.7)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 2000,
+                        overflow: 'auto',
+                    }}
+                >
+                    <div
+                        className="modal-content"
+                        style={{
+                            position: 'relative',
+                            background: 'transparent',
+                            borderRadius: '8px',
+                            maxWidth: '900px',
+                            width: '100%',
+                        }}
+                    >
+                        <button
+                            onClick={() => setWelcomeOpen(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '8px',
+                                right: '8px',
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '2rem',
+                                color: '#000000ff',
+                                cursor: 'pointer',
+                                zIndex: 10,
+                            }}
+                        >
+                            &times;
+                        </button>
+
+                        <img
+                            src="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png"
+                            alt="Bienvenido"
+                            style={{
+                                width: '100%',
+                                borderRadius: '8px',
+                                display: 'block',
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Blog Hero Section */}
             <section id="blog-hero" className="blog-hero section">
                 <div className="container" data-aos="fade-up" data-aos-delay="100">
