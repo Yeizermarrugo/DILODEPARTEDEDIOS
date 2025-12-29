@@ -154,7 +154,7 @@ export default function MainContent() {
                             position: 'relative',
                             background: 'transparent',
                             borderRadius: '8px',
-                            maxWidth: '900px',
+                            maxWidth: '1000px',
                             width: '100%',
                         }}
                     >
