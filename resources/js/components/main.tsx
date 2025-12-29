@@ -154,7 +154,7 @@ export default function MainContent() {
                             position: 'relative',
                             background: 'transparent',
                             borderRadius: '8px',
-                            maxWidth: '900px',
+                            maxWidth: '1000px',
                             width: '100%',
                         }}
                     >
@@ -200,6 +200,7 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[0]?.created_at
                                             ? new Date(dev[0]?.created_at).toLocaleDateString('es-ES', {
+                                                weekday: 'long',
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
@@ -226,6 +227,7 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[1]?.created_at
                                             ? new Date(dev[1]?.created_at).toLocaleDateString('es-ES', {
+                                                weekday: 'long',
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
@@ -248,6 +250,7 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[2]?.created_at
                                             ? new Date(dev[2]?.created_at).toLocaleDateString('es-ES', {
+                                                weekday: 'long',
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
@@ -270,6 +273,7 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[3]?.created_at
                                             ? new Date(dev[3]?.created_at).toLocaleDateString('es-ES', {
+                                                weekday: 'long',
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
@@ -292,6 +296,7 @@ export default function MainContent() {
                                     <span className="date">
                                         {dev[4]?.created_at
                                             ? new Date(dev[4]?.created_at).toLocaleDateString('es-ES', {
+                                                weekday: 'long',
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
