@@ -16,8 +16,8 @@ export default function Libros() {
                     <h1>Librería Cristiana: Recursos para tu Crecimiento Espiritual</h1>
                     <br />
                     <br />
-                    <h1 style={{ fontSize: '1.4rem', display: 'flex', justifyContent: 'center' }}>¡Próximamente!</h1>
-                    <br />
+                    {/* <h1 style={{ fontSize: '1.4rem', display: 'flex', justifyContent: 'center' }}>¡Próximamente!</h1>
+                    <br /> */}
                     <p>En nuestra Librería cristiana encontrarás una variedad de recursos que te ayudarán a crecer en tu relación con Dios.</p>
                     <br />
                     <p>
