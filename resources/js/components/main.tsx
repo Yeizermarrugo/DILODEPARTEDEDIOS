@@ -195,7 +195,7 @@ export default function MainContent() {
                             style={{
                                 width: '90%',
                                 height: 'auto',
-                                margin: '0 auto',
+                                margin: '0 auto 50px auto',
                                 borderRadius: '8px',
                                 display: 'block',
                             }}
