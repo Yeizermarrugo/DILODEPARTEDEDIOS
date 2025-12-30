@@ -176,8 +176,8 @@ export default function MainContent() {
                             onClick={() => setWelcomeOpen(false)}
                             style={{
                                 position: 'absolute',
-                                top: '8px',
-                                right: '8px',
+                                top: '0px',
+                                right: '30px',
                                 background: 'none',
                                 border: 'none',
                                 fontSize: '2rem',
@@ -193,7 +193,9 @@ export default function MainContent() {
                             src={imageSrc}
                             alt="Bienvenido"
                             style={{
-                                width: '100%',
+                                width: '90%',
+                                height: 'auto',
+                                margin: '0 auto',
                                 borderRadius: '8px',
                                 display: 'block',
                             }}
