@@ -138,7 +138,7 @@ export default function MainContent() {
         );
     }
     const desktopSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png';
-    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/bQOBxdS57tsZ4v1VFclLL7TgrF6mUVvxVKiQnEiM.png';
+    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/KzpsTRcqhakYXlgDpQBzLFw37VJ8fKLQ6plshzxX.png';
 
     const imageSrc = isMobile ? mobileSrc : desktopSrc;
 
@@ -176,8 +176,8 @@ export default function MainContent() {
                             onClick={() => setWelcomeOpen(false)}
                             style={{
                                 position: 'absolute',
-                                top: '8px',
-                                right: '8px',
+                                top: '0px',
+                                right: '30px',
                                 background: 'none',
                                 border: 'none',
                                 fontSize: '2rem',
@@ -193,7 +193,9 @@ export default function MainContent() {
                             src={imageSrc}
                             alt="Bienvenido"
                             style={{
-                                width: '100%',
+                                width: '90%',
+                                height: 'auto',
+                                margin: '0 auto',
                                 borderRadius: '8px',
                                 display: 'block',
                             }}
