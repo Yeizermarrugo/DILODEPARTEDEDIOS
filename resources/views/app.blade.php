@@ -34,7 +34,7 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-    <link rel="icon" href="/cruz.jpg" sizes="any">
+    <!-- <link rel="icon" href="/cruz.jpg" sizes="any"> -->
     <link rel="icon" href="/cruz.jpg" type="image/svg+xml">
     <link rel="cruz" href="/cruz.jpg">
 
