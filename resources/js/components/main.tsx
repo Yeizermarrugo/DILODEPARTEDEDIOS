@@ -34,6 +34,7 @@ export default function MainContent() {
     const [videos, setVideos] = useState<YoutubeVideo[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [welcomeOpen, setWelcomeOpen] = useState(true)
+    const [isMobile, setIsMobile] = useState(false);
     const URL = '/youtube/latest';
 
     useEffect(() => {
@@ -98,9 +99,18 @@ export default function MainContent() {
         } else {
             document.body.style.overflow = '';
         }
+
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768); // breakpoint móvil
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
         return () => {
             isMounted = false;
             document.body.style.overflow = '';
+            window.removeEventListener('resize', checkMobile);
         };
     }, [loading, modalOpen, welcomeOpen]);
 
@@ -127,6 +137,10 @@ export default function MainContent() {
             </div>
         );
     }
+    const desktopSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png';
+    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9gdEhwfAaLhIDZupP7ccGVRCUb2c2DpE9HdsbcOl.png';
+
+    const imageSrc = isMobile ? mobileSrc : desktopSrc;
 
     return (
         <main className="main">
@@ -154,7 +168,7 @@ export default function MainContent() {
                             position: 'relative',
                             background: 'transparent',
                             borderRadius: '8px',
-                            maxWidth: '1000px',
+                            maxWidth: isMobile ? 'auto' : '1000px',
                             width: '100%',
                         }}
                     >
@@ -176,7 +190,7 @@ export default function MainContent() {
                         </button>
 
                         <img
-                            src="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png"
+                            src={imageSrc}
                             alt="Bienvenido"
                             style={{
                                 width: '100%',
