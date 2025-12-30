@@ -138,7 +138,7 @@ export default function MainContent() {
         );
     }
     const desktopSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png';
-    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9gdEhwfAaLhIDZupP7ccGVRCUb2c2DpE9HdsbcOl.png';
+    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/bQOBxdS57tsZ4v1VFclLL7TgrF6mUVvxVKiQnEiM.png';
 
     const imageSrc = isMobile ? mobileSrc : desktopSrc;
 

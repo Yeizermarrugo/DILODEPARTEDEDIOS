@@ -118,6 +118,7 @@ const DevocionalDetails = ({ devocional }: props) => {
             <div style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 10px 0' }}>
                 {devocional.created_at
                     ? new Date(devocional.created_at).toLocaleDateString('es-ES', {
+                        weekday: 'long',
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
