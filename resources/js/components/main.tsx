@@ -138,7 +138,7 @@ export default function MainContent() {
         );
     }
     const desktopSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png';
-    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/KzpsTRcqhakYXlgDpQBzLFw37VJ8fKLQ6plshzxX.png';
+    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/99BlKecqJ8PAYXlbNZ3DruEN0BxM0qGpZyjvRkp9.png';
 
     const imageSrc = isMobile ? mobileSrc : desktopSrc;
 
@@ -177,10 +177,10 @@ export default function MainContent() {
                             style={{
                                 position: 'absolute',
                                 top: '0px',
-                                right: '30px',
+                                right: isMobile ? '30px' : '65px',
                                 background: 'none',
                                 border: 'none',
-                                fontSize: '2rem',
+                                fontSize: isMobile ? '2rem' : '2.5rem',
                                 color: '#000000ff',
                                 cursor: 'pointer',
                                 zIndex: 10,
