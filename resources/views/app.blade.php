@@ -14,11 +14,18 @@
     <meta property="og:type" content="article">
     <meta property="og:title" content="{{ $meta['title'] }}">
     <meta property="og:description" content="{{ $meta['description'] }}">
-    <meta property="og:image" content="{{ $meta['image'] }}">
     <meta property="og:url" content="{{ $meta['url'] }}">
+    <meta property="og:site_name" content="Dilo de parte de Dios">
+
+    <meta property="og:image" content="{{ $meta['image'] }}">
+    <meta property="og:image:secure_url" content="{{ $meta['image'] }}">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <meta name="twitter:card" content="summary_large_image">
     @endif
+
 
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>
