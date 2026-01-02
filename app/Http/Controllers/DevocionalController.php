@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class DevocionalController extends Controller
 {
@@ -107,15 +108,34 @@ class DevocionalController extends Controller
         ]);
     }
 
+    // public function details($id)
+    // {
+    //     // Encuentra el devocional por ID y lo devuelve como JSON
+    //     $devocional = Devocional::find($id);
+    //     return Inertia::render('DevocionalDetailsPage', [
+    //         'devocional' => $devocional,
+    //         'is_devocional' => $devocional->is_devocional
+    //     ]);
+    // }
+
     public function details($id)
-    {
-        // Encuentra el devocional por ID y lo devuelve como JSON
-        $devocional = Devocional::find($id);
-        return Inertia::render('DevocionalDetailsPage', [
-            'devocional' => $devocional,
-            'is_devocional' => $devocional->is_devocional
-        ]);
-    }
+{
+    $devocional = Devocional::findOrFail($id);
+
+    return Inertia::render('DevocionalDetailsPage', [
+        'devocional' => $devocional,
+        'is_devocional' => $devocional->is_devocional,
+
+        // 👇 ESTO ES LO NUEVO
+        'meta' => [
+            'title' => $devocional->titulo,
+            'description' => Str::limit(strip_tags($devocional->contenido), 150),
+            'image' => $devocional->imagen_url, // URL pública
+            'url' => url()->current(),
+        ]
+    ]);
+}
+
 
     /**
      * Show the form for creating a new resource.
