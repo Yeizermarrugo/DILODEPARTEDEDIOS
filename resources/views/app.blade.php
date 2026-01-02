@@ -54,6 +54,7 @@
     </style>
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    <script src="https://analytics.ahrefs.com/analytics.js" data-key="tH+o+/Cdpn18Efh2crVnhQ" async></script>
 
     <!-- <link rel="icon" href="/cruz.jpg" sizes="any"> -->
     <link rel="icon" href="/cruz.jpg" type="image/svg+xml">
