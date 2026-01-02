@@ -6,6 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="facebook-domain-verification" content="61h5nmghvq2nlejfvee1cbqxyrrc56" />
 
+    @php
+        $meta = $page['props']['meta'] ?? null;
+    @endphp
+
+    @if($meta)
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ $meta['title'] }}">
+    <meta property="og:description" content="{{ $meta['description'] }}">
+    <meta property="og:image" content="{{ $meta['image'] }}">
+    <meta property="og:url" content="{{ $meta['url'] }}">
+
+    <meta name="twitter:card" content="summary_large_image">
+    @endif
+
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>
         (function() {
