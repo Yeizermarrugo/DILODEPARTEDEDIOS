@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class DevocionalController extends Controller
 {
