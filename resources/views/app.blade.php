@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="facebook-domain-verification" content="61h5nmghvq2nlejfvee1cbqxyrrc56" />
+    <meta name="ahrefs-site-verification" content="606b26e73011bbfefcc48758d92d1e7f4d3c82dc796523b618e47b8d19073037">
 
     @php
         $meta = $page['props']['meta'] ?? null;
@@ -62,7 +63,7 @@
         ahrefs_analytics_script.setAttribute('data-key', 'tH+o+/Cdpn18Efh2crVnhQ');
         document.getElementsByTagName('head')[0].appendChild(ahrefs_analytics_script);
     </script>
-
+    
     <!-- <link rel="icon" href="/cruz.jpg" sizes="any"> -->
     <link rel="icon" href="/cruz.jpg" type="image/svg+xml">
     <link rel="cruz" href="/cruz.jpg">
