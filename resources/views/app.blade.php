@@ -55,6 +55,13 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="tH+o+/Cdpn18Efh2crVnhQ" async></script>
+    <script>
+        var ahrefs_analytics_script = document.createElement('script');
+        ahrefs_analytics_script.async = true;
+        ahrefs_analytics_script.src = 'https://analytics.ahrefs.com/analytics.js';
+        ahrefs_analytics_script.setAttribute('data-key', 'tH+o+/Cdpn18Efh2crVnhQ');
+        document.getElementsByTagName('head')[0].appendChild(ahrefs_analytics_script);
+    </script>
 
     <!-- <link rel="icon" href="/cruz.jpg" sizes="any"> -->
     <link rel="icon" href="/cruz.jpg" type="image/svg+xml">
