@@ -35,7 +35,7 @@ export default function LibroList() {
 
 
     useEffect(() => {
-        fetch('/estudios')
+        fetch('/estudiosbiblicos')
             .then((response) => response.json())
             .then((data: Libro[]) => setLibros(Array.isArray(data) ? data : []))
             .catch((error) => console.error('Error fetching libros:', error));
