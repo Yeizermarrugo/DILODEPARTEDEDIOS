@@ -137,15 +137,15 @@ export default function MainContent() {
             </div>
         );
     }
-    const desktopSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png';
-    const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/99BlKecqJ8PAYXlbNZ3DruEN0BxM0qGpZyjvRkp9.png';
+    // const desktopSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/9MAYjI6lnGcZ2iEJ9RktAtVfHVeGZX0TqhnayWe3.png';
+    // const mobileSrc = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/99BlKecqJ8PAYXlbNZ3DruEN0BxM0qGpZyjvRkp9.png';
 
-    const imageSrc = isMobile ? mobileSrc : desktopSrc;
+    // const imageSrc = isMobile ? mobileSrc : desktopSrc;
 
     return (
         <main className="main">
             {/* Modal de bienvenida */}
-            {welcomeOpen && (
+            {/* {welcomeOpen && (
                 <div
                     className="modal-overlay"
                     style={{
@@ -202,7 +202,7 @@ export default function MainContent() {
                         />
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* Blog Hero Section */}
             <section id="blog-hero" className="blog-hero section">
