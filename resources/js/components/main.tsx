@@ -94,7 +94,7 @@ export default function MainContent() {
         }
 
         // 3. Controlar el scroll del fondo según el estado del modal
-        if (modalOpen || welcomeOpen) {
+        if (modalOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
@@ -112,7 +112,7 @@ export default function MainContent() {
             document.body.style.overflow = '';
             window.removeEventListener('resize', checkMobile);
         };
-    }, [loading, modalOpen, welcomeOpen]);
+    }, [loading, modalOpen]);
 
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html?.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
