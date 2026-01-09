@@ -7,7 +7,7 @@ const navLinks = [
     { href: '/about', label: 'Quienes somos?' },
     { href: '/devocionales', label: 'Devocionales' },
     { href: '/podcast', label: 'Podcast y mas' },
-    { href: '/libros', label: 'Libros' },
+    { href: '/estudios', label: 'Estudios bíblicos' },
     // { href: '/contact.html', label: 'Contact' },
 ];
 
