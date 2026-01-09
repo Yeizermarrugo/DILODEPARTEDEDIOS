@@ -4,7 +4,7 @@ import LibroList from '@/components/LibroList';
 import '../../css/main.css';
 import '../../css/podcast.css';
 
-export default function Libros() {
+export default function Estudios() {
     return (
         <div className="index-page">
             {/* Header */}

@@ -52,10 +52,10 @@ Route::get('/podcast', function () {
 });
 
 
-Route::get('/libros', function () {
-    return Inertia::render('Libros');
+Route::get('/estudios', function () {
+    return Inertia::render('Estudios');
 });
-Route::get('/estudios', [DevocionalController::class, 'libros']);
+Route::get('/estudiosbiblicos', [DevocionalController::class, 'estudios']);
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
