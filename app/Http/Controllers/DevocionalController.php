@@ -84,7 +84,7 @@ class DevocionalController extends Controller
         return response()->json($devocionales);
     }
 
-    public function libros()
+    public function estudios()
     {
         $devocionales = Devocional::where('is_devocional', false)
         ->orderBy('categoria', 'asc')
