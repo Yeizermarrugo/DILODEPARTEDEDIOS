@@ -88,6 +88,7 @@ class DevocionalController extends Controller
     {
         $devocionales = Devocional::where('is_devocional', false)
         ->orderBy('categoria', 'asc')
+        ->orderBy('contenido', 'asc')
         ->orderBy('created_at', 'asc')
         ->get();
         return response()->json($devocionales);
