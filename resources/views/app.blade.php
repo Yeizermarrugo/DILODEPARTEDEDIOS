@@ -64,9 +64,10 @@
         document.getElementsByTagName('head')[0].appendChild(ahrefs_analytics_script);
     </script>
     
-    <!-- <link rel="icon" href="/cruz.jpg" sizes="any"> -->
-    <link rel="icon" href="/cruz.jpg" type="image/svg+xml">
-    <link rel="cruz" href="/cruz.jpg">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
