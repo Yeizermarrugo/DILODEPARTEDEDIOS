@@ -131,7 +131,7 @@ class DevocionalController extends Controller
         'meta' => [
             'title' => $devocional->titulo,
             'description' => Str::limit(strip_tags($devocional->contenido), 150),
-            'image' => $devocional->imagen_url, // URL pública
+            'image' => $devocional->imagen, // URL pública
             'url' => url()->current(),
         ]
     ]);
