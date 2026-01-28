@@ -122,7 +122,7 @@ const DevocionalDetails = ({ devocional }: props) => {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
-                    })
+                    }).replace(/^\w/, (c) => c.toUpperCase())
                     : ''}
             </div>
         </div>
