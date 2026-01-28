@@ -220,7 +220,7 @@ export default function MainContent() {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
-                                            })
+                                            }).replace(/^\w/, (c) => c.toUpperCase())
                                             : ''}
                                     </span>
                                     {/* <span className="category">Technology</span> */}
@@ -247,7 +247,7 @@ export default function MainContent() {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
-                                            })
+                                            }).replace(/^\w/, (c) => c.toUpperCase())
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
@@ -270,7 +270,7 @@ export default function MainContent() {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
-                                            })
+                                            }).replace(/^\w/, (c) => c.toUpperCase())
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
@@ -293,7 +293,7 @@ export default function MainContent() {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
-                                            })
+                                            }).replace(/^\w/, (c) => c.toUpperCase())
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
@@ -316,7 +316,7 @@ export default function MainContent() {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
-                                            })
+                                            }).replace(/^\w/, (c) => c.toUpperCase())
                                             : ''}
                                     </span>
                                     {/* <span className="category">Security</span> */}
