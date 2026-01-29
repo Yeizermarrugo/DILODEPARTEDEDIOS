@@ -109,16 +109,6 @@ class DevocionalController extends Controller
         ]);
     }
 
-    // public function details($id)
-    // {
-    //     // Encuentra el devocional por ID y lo devuelve como JSON
-    //     $devocional = Devocional::find($id);
-    //     return Inertia::render('DevocionalDetailsPage', [
-    //         'devocional' => $devocional,
-    //         'is_devocional' => $devocional->is_devocional
-    //     ]);
-    // }
-
     public function details($id)
 {
     $devocional = Devocional::findOrFail($id);
@@ -136,25 +126,6 @@ class DevocionalController extends Controller
         ]
     ]);
 }
-
-// public function details($id)
-// {
-//     $devocional = Devocional::findOrFail($id);
-
-//     $meta = [
-//         'title' => $devocional->titulo,
-//         'description' => Str::limit(strip_tags($devocional->contenido), 150),
-//         'image' => $devocional->imagen, // URL pública en TU dominio
-//         'url' => url()->current(),
-//     ];
-
-//     return Inertia::render('DevocionalDetailsPage', [
-//         'devocional' => $devocional,
-//         'is_devocional' => $devocional->is_devocional,
-//     ])->withViewData([
-//         'meta' => $meta, // 👈 ESTO ES LO IMPORTANTE
-//     ]);
-// }
 
 
     /**
