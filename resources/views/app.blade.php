@@ -36,7 +36,6 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Favicon / icons -->
     <link rel="icon" type="image/png" sizes="32x32"
         href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
     <link rel="icon" type="image/png" sizes="16x16"
