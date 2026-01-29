@@ -119,21 +119,40 @@ class DevocionalController extends Controller
     //     ]);
     // }
 
-    public function details($id)
+//     public function details($id)
+// {
+//     $devocional = Devocional::findOrFail($id);
+
+//     return Inertia::render('DevocionalDetailsPage', [
+//         'devocional' => $devocional,
+//         'is_devocional' => $devocional->is_devocional,
+
+//         // 👇 ESTO ES LO NUEVO
+//         'meta' => [
+//             'title' => $devocional->titulo,
+//             'description' => Str::limit(strip_tags($devocional->contenido), 150),
+//             'image' => $devocional->imagen, // URL pública
+//             'url' => url()->current(),
+//         ]
+//     ]);
+// }
+
+public function details($id)
 {
     $devocional = Devocional::findOrFail($id);
+
+    $meta = [
+        'title' => $devocional->titulo,
+        'description' => Str::limit(strip_tags($devocional->contenido), 150),
+        'image' => $devocional->imagen, // URL pública en TU dominio
+        'url' => url()->current(),
+    ];
 
     return Inertia::render('DevocionalDetailsPage', [
         'devocional' => $devocional,
         'is_devocional' => $devocional->is_devocional,
-
-        // 👇 ESTO ES LO NUEVO
-        'meta' => [
-            'title' => $devocional->titulo,
-            'description' => Str::limit(strip_tags($devocional->contenido), 150),
-            'image' => $devocional->imagen, // URL pública
-            'url' => url()->current(),
-        ]
+    ])->withViewData([
+        'meta' => $meta, // 👈 ESTO ES LO IMPORTANTE
     ]);
 }
 
