@@ -13,24 +13,27 @@ export default function Estudios() {
             {/* Page Title */}
             <div className="page-title">
                 <div className="title-wrapper">
-                    <h1>Librería Cristiana: Recursos para tu Crecimiento Espiritual</h1>
+                    <h1 style={{ textAlign: 'center' }}>Estudios Biblicos</h1>
                     <br />
                     <br />
                     {/* <h1 style={{ fontSize: '1.4rem', display: 'flex', justifyContent: 'center' }}>¡Próximamente!</h1>
                     <br /> */}
-                    <p>En nuestra Librería cristiana encontrarás una variedad de recursos que te ayudarán a crecer en tu relación con Dios.</p>
+                    <p>Esta sección está dedicada a la <strong>enseñanza fiel de la Palabra de Dios</strong>, con el propósito de acompañar a cada persona en su crecimiento espiritual y en el conocimiento de la voluntad del Señor.</p>
                     <br />
                     <p>
-                        Descubre libros cristianos de nuestra autoría y de otros autores destacados, así como herramientas para el estudio bíblico,
-                        souvenirs, arte cristiano y otros productos que te inspirarán y motivarán en tu camino espiritual.
+                        A través de estudios bíblicos <strong>libro por libro y capítulo por capítulo</strong>, guiamos a los lectores a conocer el corazón de Dios y a vivir conforme a la verdad de Su Palabra, edificando la fe y fortaleciendo los fundamentos espirituales.
                     </p>
                     <br />
-                    <p style={{ fontWeight: 'bold' }}>¡Encuentra lo que necesitas para fortalecer tu fe y compartir el amor de Cristo con otros!</p>
+                    <p>
+                        Nuestro anhelo es <strong>que la Palabra sea comprendida, creída y vivida</strong>, produciendo fruto espiritual en quienes se acercan con un corazón dispuesto a aprender.
+                    </p>
                     <br />
-                    {/* <p style={{ fontStyle: 'italic' }}>
-                        Amado, yo deseo que tú seas prosperado en todas las cosas, y que tengas salud, así como prospera tu alma.”{' '}
-                        <span style={{ fontWeight: 'bold' }}>3 JUAN 1:2 RVR1960</span>
-                    </p> */}
+                    <p style={{ fontWeight: 'bold' }}>Comprende las palabras del que murió en la cruz</p>
+                    <br />
+                    <p style={{ fontStyle: 'italic' }}>
+                        “Toda la Escritura es inspirada por Dios, y útil para enseñar, para redargüir, para corregir, para instruir en justicia, a fin de que el hombre de Dios sea perfecto, enteramente preparado para toda buena obra.”{' '}
+                        <span style={{ fontWeight: 'bold' }}>2 TIMOTEO 3:16-17 RVR1960</span>
+                    </p>
                 </div>
             </div>
 

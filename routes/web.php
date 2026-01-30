@@ -72,5 +72,15 @@ Route::get('/api/tts', [TTSController::class, 'voiceRss']);
 Route::get('/api/tts/voices', [TTSController::class, 'voices']);
 
 
+Route::get('/libreria', function () {
+    return Inertia::render('Libreria');
+});
+
+
+Route::get('/obras', function () {
+    return Inertia::render('Obras');
+});
+
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
