@@ -1,0 +1,101 @@
+.obras-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.obras-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.obras-header h2 {
+  font-size: 2rem;
+  letter-spacing: 0.05em;
+}
+
+.obras-header p {
+  margin-top: 0.5rem;
+  color: #555;
+}
+
+.obras-header__cta {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  background: #e1306c; /* color instagram-ish */
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.obras-header__cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(225, 48, 108, 0.3);
+}
+
+.obras-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+}
+
+.obra-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.obra-card__embed {
+  background: #000;
+  max-height: 450px;
+    overflow: hidden;
+}
+
+.obra-card__body {
+  padding: 1rem 1.2rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.obra-card__body h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.obra-card__link {
+  align-self: flex-start;
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  color: #e1306c;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.obra-card__link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive tweaks */
+@media (min-width: 900px) {
+  .obras-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+
+@media (max-width: 600px) {
+  .obras-section {
+    padding: 2rem 1rem;
+  }
+
+  .obras-header h2 {
+    font-size: 1.6rem;
+  }
+}
