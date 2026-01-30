@@ -8,7 +8,8 @@ const navLinks = [
     { href: '/devocionales', label: 'Devocionales' },
     { href: '/podcast', label: 'Podcast y mas' },
     { href: '/estudios', label: 'Estudios bíblicos' },
-    // { href: '/contact.html', label: 'Contact' },
+    { href: '/libreria', label: 'Librería' },
+    { href: '/obras', label: 'Obras' },
 ];
 
 const Header = () => {
