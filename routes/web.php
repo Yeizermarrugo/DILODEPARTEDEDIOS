@@ -100,10 +100,6 @@ Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->nam
 
 Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name('devocionales.update');
 
-// Route::get('/devocionales-editar/{id}', function ($id) {
-//     return Inertia::render('Devocionales/Editar', ['id' => (int) $id]);
-// })->name('devocionales.editPage');
-
 
 
 require __DIR__ . '/settings.php';
