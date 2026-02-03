@@ -15,6 +15,7 @@ interface Devocional {
 interface DevocionalCardProps {
     devocionales: Devocional[];
     todasLasCategorias: string[];
+    buildHref?: (dev: Devocional) => string;
 }
 
 const colorArray = [
@@ -48,7 +49,7 @@ function buildCategoryColorMap(todasLasCategorias: string[]) {
     return map;
 }
 
-export default function DevocionalCard({ devocionales, todasLasCategorias }: DevocionalCardProps) {
+export default function DevocionalCard({ devocionales, todasLasCategorias, buildHref }: DevocionalCardProps) {
     const categoryColorMap = buildCategoryColorMap(todasLasCategorias);
     /**
      * Asigna un color único e inmutable por categoría.
@@ -65,16 +66,18 @@ export default function DevocionalCard({ devocionales, todasLasCategorias }: Dev
     //     return plainText;
     // }
 
+
     return (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
             {devocionales.map((dev, idx) => {
                 const normalizedCat = dev.categoria.trim().toLowerCase();
                 const cardBg = categoryColorMap[normalizedCat] || '#ffffffff';
+                const href = buildHref ? buildHref(dev) : `/devocional/${dev.id}`;
 
                 return (
                     <a
                         key={idx}
-                        href={`/devocional/${dev.id}`}
+                        href={href}
                         style={{ textDecoration: 'none' }}
                     >
 
