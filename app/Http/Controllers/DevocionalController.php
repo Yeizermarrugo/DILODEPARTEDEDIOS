@@ -164,4 +164,92 @@ class DevocionalController extends Controller
             'devocional' => $devocional
         ], 201);
     }
+
+    public function adminIndex(Request $request)
+{
+    $perPage   = $request->input('per_page', 20);
+    $search    = $request->input('search');
+    $categoria = $request->input('categoria');
+    $autor     = $request->input('autor');
+
+    $query = Devocional::query()->where('is_devocional', true);
+
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('titulo', 'like', "%{$search}%")
+              ->orWhere('contenido', 'like', "%{$search}%");
+        });
+    }
+
+    if ($categoria) {
+        $query->where('categoria', $categoria);
+    }
+
+    if ($autor) {
+        $query->where('autor', $autor);
+    }
+
+    $devocionales = $query
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage)
+        ->withQueryString();
+
+    $categorias = Devocional::whereNotNull('categoria')
+        ->where('categoria', '!=', '')
+        ->where('is_devocional', true)
+        ->groupBy('categoria')
+        ->selectRaw('categoria, COUNT(*) as count')
+        ->get();
+
+    $autores = Devocional::whereNotNull('autor')
+        ->where('autor', '!=', '')
+        ->where('is_devocional', true)
+        ->groupBy('autor')
+        ->selectRaw('autor, COUNT(*) as count')
+        ->get();
+
+    return Inertia::render('Edit', [
+        'devocionales' => $devocionales,
+        'categorias'   => $categorias,
+        'autores'      => $autores,
+        'filters'      => [
+            'search'    => $search,
+            'categoria' => $categoria,
+            'autor'     => $autor,
+        ],
+    ]);
+}
+
+public function showJson($id)
+{
+    $devocional = Devocional::findOrFail($id);
+    return response()->json($devocional);
+}
+
+public function update(Request $request, $id)
+{
+    $devocional = Devocional::findOrFail($id);
+
+    $request->validate([
+        'contenido'     => 'required|string',
+        'categoria'     => 'required|string',
+        'imagen'        => 'required|string|url',
+        'autor'         => 'nullable|string|max:255',
+        'is_devocional' => 'required|boolean',
+    ]);
+
+    $devocional->update([
+        'contenido'     => $request->input('contenido'),
+        'categoria'     => $request->input('categoria'),
+        'imagen'        => $request->input('imagen'),
+        'autor'         => $request->input('autor'),
+        'is_devocional' => $request->input('is_devocional'),
+    ]);
+
+    return response()->json([
+        'message'     => 'Devocional actualizado correctamente',
+        'devocional'  => $devocional,
+    ]);
+}
+
 }
