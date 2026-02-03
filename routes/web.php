@@ -18,11 +18,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
+
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Agregar
     Route::get('devocionalesAgregar', function () {
-        return Inertia::render('DevocionalesAgregar');
-    })->name('DevocionalesAgregar');
+        return Inertia::render('DevocionalesForm', ['mode' => 'create']);
+    })->name('devocionales.create');
+
+    // Editar
+    Route::get('/devocionales-editar/{id}', function (string $id) {
+        return Inertia::render('DevocionalesForm', [
+            'mode' => 'edit',
+            'id'   => $id,
+        ]);
+    })->name('devocionales.editPage');
 });
+
 
 // -----Inicio-----
 
@@ -80,6 +91,19 @@ Route::get('/libreria', function () {
 Route::get('/obras', function () {
     return Inertia::render('Obras');
 });
+
+//Editar o eliminar devocionales
+
+Route::get('/devocionales-edit', [DevocionalController::class, 'adminIndex']);
+
+Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->name('devocionales.showJson');
+
+Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name('devocionales.update');
+
+// Route::get('/devocionales-editar/{id}', function ($id) {
+//     return Inertia::render('Devocionales/Editar', ['id' => (int) $id]);
+// })->name('devocionales.editPage');
+
 
 
 require __DIR__ . '/settings.php';
