@@ -165,51 +165,59 @@ class DevocionalController extends Controller
         ], 201);
     }
 
-    public function adminIndex(Request $request)
+public function adminIndex(Request $request)
 {
-    $perPage   = $request->input('per_page', 20);
+    $perPage   = $request->input('per_page', 50);
     $search    = $request->input('search');
     $categoria = $request->input('categoria');
     $autor     = $request->input('autor');
 
-    $query = Devocional::query()->where('is_devocional', true);
+    // Base query con filtros comunes
+    $baseQuery = Devocional::query();
 
     if ($search) {
-        $query->where(function ($q) use ($search) {
-            $q->where('titulo', 'like', "%{$search}%")
-              ->orWhere('contenido', 'like', "%{$search}%");
+        $baseQuery->where(function ($q) use ($search) {
+            $q->where('contenido', 'like', "%{$search}%")
+              ->orWhere('categoria', 'like', "%{$search}%");
         });
     }
 
     if ($categoria) {
-        $query->where('categoria', $categoria);
+        $baseQuery->where('categoria', $categoria);
     }
 
     if ($autor) {
-        $query->where('autor', $autor);
+        $baseQuery->where('autor', $autor);
     }
 
-    $devocionales = $query
+    // Clonar la query base para cada grupo
+    $devocionales = (clone $baseQuery)
+        ->where('is_devocional', true)
         ->orderBy('created_at', 'desc')
-        ->paginate($perPage)
+        ->paginate($perPage, ['*'], 'devocionales_page')
+        ->withQueryString();
+
+    $estudios = (clone $baseQuery)
+        ->where('is_devocional', false)
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage, ['*'], 'estudios_page')
         ->withQueryString();
 
     $categorias = Devocional::whereNotNull('categoria')
         ->where('categoria', '!=', '')
-        ->where('is_devocional', true)
         ->groupBy('categoria')
         ->selectRaw('categoria, COUNT(*) as count')
         ->get();
 
     $autores = Devocional::whereNotNull('autor')
         ->where('autor', '!=', '')
-        ->where('is_devocional', true)
         ->groupBy('autor')
         ->selectRaw('autor, COUNT(*) as count')
         ->get();
 
     return Inertia::render('Edit', [
-        'devocionales' => $devocionales,
+        'devocionales' => $devocionales,   // is_devocional = true
+        'estudios'     => $estudios,       // is_devocional = false
         'categorias'   => $categorias,
         'autores'      => $autores,
         'filters'      => [
@@ -219,6 +227,7 @@ class DevocionalController extends Controller
         ],
     ]);
 }
+
 
 public function showJson($id)
 {
