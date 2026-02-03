@@ -6,11 +6,15 @@ import { useEffect, useRef, useState } from 'react';
 import type { Editor as TinyMCEEditor } from 'tinymce';
 import styles from '../../css/categoriaSelect.module.css';
 
-const DevocionalesAgregar = () => {
-    // Tipado correcto para TinyMCE Editor instance
+interface DevocionalFormProps {
+    mode: 'create' | 'edit';
+    id?: string; // requerido en modo edit
+}
+
+const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const editorRef = useRef<TinyMCEEditor | null>(null);
-    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null); // Solo guardar el archivo, no la URL
-    const [imagenUrl, setImagenUrl] = useState(''); // La URL solo se seteará tras guardar
+    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+    const [imagenUrl, setImagenUrl] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categorias, setCategorias] = useState<string[]>([]);
@@ -24,10 +28,11 @@ const DevocionalesAgregar = () => {
     const [useNuevoAutor, setUseNuevoAutor] = useState(false);
     const [is_devocional, setIsDevocional] = useState(true);
 
-    // Loader visible si TinyMCE está cargando o si se está guardando/subiendo algo
+    const [initialContent, setInitialContent] = useState('<p>This is the initial content of the editor.</p>');
+
     const showLoader = isLoading || isSubmitting;
 
-    // Cargar categorías existentes al montar
+    // Cargar categorías/autores
     useEffect(() => {
         axios.get('/devocionales-searchCategories').then((res) => {
             const cats = res.data.categorias.map((c: { categoria: string }) => c.categoria);
@@ -38,19 +43,33 @@ const DevocionalesAgregar = () => {
         });
     }, []);
 
-    // Cuando el editor esté listo, ocultar loader
+    // Si estamos en modo editar, cargar el devocional
+    useEffect(() => {
+        if (mode === 'edit' && id) {
+            axios.get(`/devocionales/${id}`).then((res) => {
+                const d = res.data;
+                setImagenUrl(d.imagen || '');
+                setCategoria(d.categoria || '');
+                setAutor(d.autor || '');
+                setIsDevocional(!!d.is_devocional);
+                setInitialContent(d.contenido || '');
+            });
+        }
+    }, [mode, id]);
+
     const handleEditorInit = (_evt: unknown, editor: TinyMCEEditor) => {
         editorRef.current = editor;
         setIsLoading(false);
     };
 
-    // Solo guardar el archivo seleccionado, NO subir aún
     const handleImageChange = (file: File | null) => {
         setSelectedImageFile(file);
-        setImagenUrl(''); // Limpiar la URL previa
+        // si estás editando y no seleccionas nueva imagen, conservas imagenUrl
+        if (file) {
+            setImagenUrl('');
+        }
     };
 
-    // Guardar devocional (sube imagen solo al guardar)
     const handleGuardar = async () => {
         if (!editorRef.current) {
             alert('Editor no encontrado');
@@ -59,7 +78,7 @@ const DevocionalesAgregar = () => {
         setIsSubmitting(true);
         let urlImagenFinal = imagenUrl;
 
-        // SUBIR imagen si existe
+        // Subir nueva imagen si se seleccionó
         if (selectedImageFile) {
             try {
                 const formData = new FormData();
@@ -67,7 +86,8 @@ const DevocionalesAgregar = () => {
                 const response = await axios.post('/upload-image', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'X-CSRF-TOKEN':
+                            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     },
                 });
                 urlImagenFinal = response.data.location || response.data.url;
@@ -79,40 +99,39 @@ const DevocionalesAgregar = () => {
             }
         }
 
-        // GUARDAR devocional
+        const payload = {
+            contenido: editorRef.current.getContent(),
+            imagen: urlImagenFinal,
+            categoria: useNuevaCategoria ? nuevaCategoria : categoria,
+            autor: useNuevoAutor ? nuevoAutor : autor,
+            is_devocional: is_devocional,
+        };
+
         try {
-            await axios.post(
-                '/devocionalesadd',
-                {
-                    contenido: editorRef.current.getContent(),
-                    imagen: urlImagenFinal,
-                    categoria: useNuevaCategoria ? nuevaCategoria : categoria,
-                    autor: useNuevoAutor ? nuevoAutor : autor,
-                    is_devocional: is_devocional,
-                },
-                {
+            if (mode === 'create') {
+                await axios.post('/devocionalesadd', payload, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'X-CSRF-TOKEN':
+                            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     },
-                },
-            );
-            alert('Devocional agregado correctamente');
-            window.location.href = '/dashboard';
-        } catch (error: unknown) {
-            alert('Hubo un error al guardar el devocional');
-            if (
-                typeof error === 'object' &&
-                error !== null &&
-                'response' in error &&
-                (error as { response?: { data?: { errors?: unknown } } }).response &&
-                (error as { response: { data?: { errors?: unknown } } }).response.data &&
-                (error as { response: { data: { errors?: unknown } } }).response.data.errors
-            ) {
-                console.error('Errores de validación:', (error as { response: { data: { errors: unknown } } }).response.data.errors);
+                });
+                alert('Devocional agregado correctamente');
+                window.location.href = '/dashboard';
             } else {
-                console.error('Error al guardar el devocional:', error);
+                await axios.put(`/devocionales/${id}`, payload, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN':
+                            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                });
+                alert('Devocional actualizado correctamente');
+                window.location.href = '/devocionales-edit';
             }
+        } catch (error) {
+            alert('Hubo un error al guardar el devocional');
+            console.error(error);
         } finally {
             setIsSubmitting(false);
         }
@@ -120,7 +139,6 @@ const DevocionalesAgregar = () => {
 
     return (
         <div style={{ position: 'relative', minHeight: 400 }}>
-            {/* Loader overlay */}
             {showLoader && (
                 <div
                     style={{
@@ -136,18 +154,39 @@ const DevocionalesAgregar = () => {
                     <LoaderBook />
                 </div>
             )}
-            {/* Formulario */}
-            <div className="aggregar-devocionales" style={{ pointerEvents: showLoader ? 'none' : 'auto', opacity: showLoader ? 0.5 : 1 }}>
+
+            <div
+                className="aggregar-devocionales"
+                style={{ pointerEvents: showLoader ? 'none' : 'auto', opacity: showLoader ? 0.5 : 1 }}
+            >
                 <ImageUpload onImageSelected={handleImageChange} />
-                {/* Preview de la imagen seleccionada */}
-                {selectedImageFile && (
+
+                {/* Preview imagen actual o nueva */}
+                {selectedImageFile ? (
                     <div style={{ margin: '16px 0' }}>
-                        <img src={URL.createObjectURL(selectedImageFile)} alt="Preview" style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }} />
+                        <img
+                            src={URL.createObjectURL(selectedImageFile)}
+                            alt="Preview"
+                            style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }}
+                        />
                     </div>
-                )}
+                ) : imagenUrl ? (
+                    <div style={{ margin: '16px 0' }}>
+                        <img
+                            src={imagenUrl}
+                            alt="Imagen actual"
+                            style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }}
+                        />
+                    </div>
+                ) : null}
+
                 <button className="btn-guardar" onClick={handleGuardar} disabled={showLoader}>
-                    Guardar
+                    {mode === 'create' ? 'Guardar' : 'Actualizar'}
                 </button>
+
+                {/* selects de categoría / autor / checkbox iguales a los tuyos */}
+                {/* ... copio tal cual tu código ... */}
+
                 <div className={styles['categoria-wrapper']}>
                     <label className={styles['categoria-label']}>Categoría:</label>
                     <select
@@ -181,6 +220,7 @@ const DevocionalesAgregar = () => {
                         />
                     )}
                 </div>
+
                 <div className={styles['autor-wrapper']}>
                     <label className={styles['autor-label']}>Autor:</label>
                     <select
@@ -214,6 +254,7 @@ const DevocionalesAgregar = () => {
                         />
                     )}
                 </div>
+
                 <div>
                     <label>¿Es un devocional?</label>
                     <input
@@ -223,21 +264,21 @@ const DevocionalesAgregar = () => {
                         style={{ marginLeft: '8px' }}
                     />
                 </div>
+
                 <Editor
                     apiKey="pc7pp06765v04kvyv0e65n2ja3v0c3hn5law9o9vpchu0erd"
                     onInit={handleEditorInit}
-                    initialValue="<p>This is the initial content of the editor.</p>"
+                    initialValue={initialContent}
                     init={{
                         height: '100%',
                         width: '100%',
                         menubar: true,
-                        automatic_uploads: false, // <--- IMPORTANTE: Desactiva uploads automáticos
+                        automatic_uploads: false,
                         plugins: [
                             'advlist',
                             'autolink',
                             'lists',
                             'link',
-                            // 'image', // <--- Puedes quitar 'image' del editor si NO quieres el botón de imagen
                             'charmap',
                             'preview',
                             'anchor',
@@ -264,4 +305,4 @@ const DevocionalesAgregar = () => {
     );
 };
 
-export default DevocionalesAgregar;
+export default DevocionalForm;
