@@ -19,7 +19,7 @@ interface DevocionalCardProps {
 }
 
 const colorArray = [
-    '#FF5252',
+    '#ffabab',
     '#ff990086',
     '#c511627c',
     '#ffd6408c',
