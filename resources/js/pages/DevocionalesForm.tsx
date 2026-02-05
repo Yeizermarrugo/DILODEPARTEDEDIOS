@@ -28,6 +28,12 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const [useNuevoAutor, setUseNuevoAutor] = useState(false);
     const [is_devocional, setIsDevocional] = useState(true);
 
+    const [series, setSeries] = useState<{ nombre: string; categorias: { categoria: string }[] }[]>([]);
+    const [serie, setSerie] = useState('');
+    const [nuevaSerie, setNuevaSerie] = useState('');
+    const [useNuevaSerie, setUseNuevaSerie] = useState(false);
+
+
     const [initialContent, setInitialContent] = useState('<p>This is the initial content of the editor.</p>');
 
     const showLoader = isLoading || isSubmitting;
@@ -40,6 +46,10 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
 
             const auts = res.data.autores.map((a: { autor: string }) => a.autor);
             setAutores(auts);
+
+            const sers = (res.data.series || []).map((s: { nombre: string }) => s);
+            setSeries(sers);
+            console.log("sers: ", sers);
         });
     }, []);
 
@@ -53,6 +63,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 setAutor(d.autor || '');
                 setIsDevocional(!!d.is_devocional);
                 setInitialContent(d.contenido || '');
+                setSerie(d.serie || '');
             });
         }
     }, [mode, id]);
@@ -105,6 +116,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             categoria: useNuevaCategoria ? nuevaCategoria : categoria,
             autor: useNuevoAutor ? nuevoAutor : autor,
             is_devocional: is_devocional,
+            serie: useNuevaSerie ? nuevaSerie : serie,
         };
 
         try {
@@ -136,6 +148,16 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             setIsSubmitting(false);
         }
     };
+
+    const categoriasDeSeries = series.flatMap((s) =>
+        s.categorias.map((c) => c.categoria),
+    );
+    const categoriasCompletas = Array.from(
+        new Set([
+            ...categorias,
+            ...categoriasDeSeries,
+        ]),
+    ).sort();
 
     return (
         <div style={{ position: 'relative', minHeight: 400 }}>
@@ -184,8 +206,42 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     {mode === 'create' ? 'Guardar' : 'Actualizar'}
                 </button>
 
-                {/* selects de categoría / autor / checkbox iguales a los tuyos */}
-                {/* ... copio tal cual tu código ... */}
+                {/* Serie (carpeta que agrupa categorías de series) */}
+                <div className={styles['categoria-wrapper']} style={{ marginTop: 16 }}>
+                    <label className={styles['categoria-label']}>Serie (opcional):</label>
+                    <select
+                        className={styles['categoria-select']}
+                        value={useNuevaSerie ? 'nueva' : serie}
+                        onChange={(e) => {
+                            if (e.target.value === 'nueva') {
+                                setUseNuevaSerie(true);
+                                setSerie('');
+                            } else {
+                                setUseNuevaSerie(false);
+                                setSerie(e.target.value);
+                            }
+                        }}
+                    >
+                        <option value="">Sin serie</option>
+                        {series.map((s) => (
+                            <option key={s.nombre} value={s.nombre}>
+                                {s.nombre}
+                            </option>
+                        ))}
+                        <option value="nueva">Agregar nueva serie...</option>
+                    </select>
+
+                    {useNuevaSerie && (
+                        <input
+                            className={styles['categoria-input']}
+                            type="text"
+                            placeholder='Nombre de la serie (ej: "Series", "Yugo desigual", etc.)'
+                            value={nuevaSerie}
+                            onChange={(e) => setNuevaSerie(e.target.value)}
+                        />
+                    )}
+                </div>
+
 
                 <div className={styles['categoria-wrapper']}>
                     <label className={styles['categoria-label']}>Categoría:</label>
@@ -203,13 +259,16 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                         }}
                     >
                         <option value="">Selecciona una categoría</option>
-                        {categorias.map((cat) => (
+
+                        {categoriasCompletas.map((cat) => (
                             <option key={cat} value={cat}>
                                 {cat}
                             </option>
                         ))}
+
                         <option value="nueva">Agregar nueva categoría...</option>
                     </select>
+
                     {useNuevaCategoria && (
                         <input
                             className={styles['categoria-input']}
