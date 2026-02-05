@@ -12,57 +12,110 @@ class DevocionalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
+   public function index(Request $request)
+{
+    $perPage = $request->input('per_page', 16);
+    $devocionales = Devocional::where('is_devocional', true)
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage);
 
-        $perPage = $request->input('per_page', 16); // Puedes cambiar 10 por 20 si prefieres
-        $devocionales = Devocional::where('is_devocional', true)->orderBy('created_at', 'desc')->paginate($perPage);
+    $categoriasRaw = Devocional::whereNotNull('categoria')
+        ->where('categoria', '!=', '')
+        ->where('is_devocional', true)
+        ->selectRaw('categoria, serie, COUNT(*) as count')
+        ->groupBy('categoria', 'serie')
+        ->get();
 
-        $categorias = Devocional::whereNotNull('categoria')
-            ->where('categoria', '!=', '')
-            ->where('is_devocional', true)
-            ->groupBy('categoria')
-            ->selectRaw('categoria, COUNT(*) as count')
-            ->get();
+    $series = [];
+    $categoriasSinSerie = [];
 
-        $autores = Devocional::whereNotNull('autor')
-            ->where('autor', '!=', '')
-            ->where('is_devocional', true)
-            ->groupBy('autor')
-            ->selectRaw('autor, COUNT(*) as count')
-            ->get();
-
-        return response()->json([
-            'devocionales' => $devocionales,
-            'categorias' => $categorias,
-            'autores' => $autores,
-        ]);
+    foreach ($categoriasRaw as $row) {
+        if ($row->serie) {
+            if (!isset($series[$row->serie])) {
+                $series[$row->serie] = [
+                    'nombre'     => $row->serie,
+                    'categorias' => [],
+                ];
+            }
+            $series[$row->serie]['categorias'][] = [
+                'categoria' => $row->categoria,
+                'count'     => $row->count,
+            ];
+        } else {
+            $categoriasSinSerie[] = [
+                'categoria' => $row->categoria,
+                'count'     => $row->count,
+            ];
+        }
     }
 
-     public function searchCategories(Request $request)
-    {
+    $autores = Devocional::whereNotNull('autor')
+        ->where('autor', '!=', '')
+        ->where('is_devocional', true)
+        ->groupBy('autor')
+        ->selectRaw('autor, COUNT(*) as count')
+        ->get();
 
-        $perPage = $request->input('per_page', 16); // Puedes cambiar 10 por 20 si prefieres
-        $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
+    return response()->json([
+        'devocionales' => $devocionales,
+        'categorias'   => $categoriasSinSerie,
+        'series'       => array_values($series),
+        'autores'      => $autores,
+    ]);
+}
 
-        $categorias = Devocional::whereNotNull('categoria')
-            ->where('categoria', '!=', '')
-            ->groupBy('categoria')
-            ->selectRaw('categoria, COUNT(*) as count')
-            ->get();
+public function searchCategories(Request $request)
+{
+    $perPage = $request->input('per_page', 16);
+    $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
 
-        $autores = Devocional::whereNotNull('autor')
-            ->where('autor', '!=', '')
-            ->groupBy('autor')
-            ->selectRaw('autor, COUNT(*) as count')
-            ->get();
+    // Todas las categorías con su serie
+    $categoriasRaw = Devocional::whereNotNull('categoria')
+        ->where('categoria', '!=', '')
+        ->selectRaw('categoria, serie, COUNT(*) as count')
+        ->groupBy('categoria', 'serie')
+        ->get();
 
-        return response()->json([
-            'devocionales' => $devocionales,
-            'categorias' => $categorias,
-            'autores' => $autores,
-        ]);
+    // Agrupar en estructura series + categorias sueltas
+    $series = [];
+    $categoriasSinSerie = [];
+
+    foreach ($categoriasRaw as $row) {
+        if ($row->serie) {
+            // Dentro de una serie
+            if (!isset($series[$row->serie])) {
+                $series[$row->serie] = [
+                    'nombre'     => $row->serie,
+                    'categorias' => [],
+                ];
+            }
+            $series[$row->serie]['categorias'][] = [
+                'categoria' => $row->categoria,
+                'count'     => $row->count,
+            ];
+        } else {
+            // Categoría suelta
+            $categoriasSinSerie[] = [
+                'categoria' => $row->categoria,
+                'count'     => $row->count,
+            ];
+        }
     }
+
+    $autores = Devocional::whereNotNull('autor')
+        ->where('autor', '!=', '')
+        ->groupBy('autor')
+        ->selectRaw('autor, COUNT(*) as count')
+        ->get();
+
+    return response()->json([
+        'devocionales'       => $devocionales,
+        'categorias'         => $categoriasSinSerie, // lo que ya usas
+        'series'             => array_values($series), // nuevo
+        'autores'            => $autores,
+    ]);
+}
+
 
     public function porCategoria(Request $request, $categoria)
     {
@@ -149,6 +202,7 @@ class DevocionalController extends Controller
             'imagen' => 'required|string|url', // Asegúrate de que 'imagen' sea una cadena y tenga un tamaño máximo
             'autor' => 'nullable|string|max:255',
             'is_devocional' => 'required|boolean',
+            'serie' => 'nullable|string|max:255',
         ]);
 
         $devocional = Devocional::create([
@@ -157,6 +211,7 @@ class DevocionalController extends Controller
             'imagen' => $request->input('imagen'), // Asegúrate de que 'imagen' esté en el request
             'autor' => $request->input('autor'),
             'is_devocional' => $request->input('is_devocional'),
+            'serie' => $request->input('serie'),
         ]);
 
         return response()->json([
@@ -245,6 +300,7 @@ public function update(Request $request, $id)
         'imagen'        => 'required|string|url',
         'autor'         => 'nullable|string|max:255',
         'is_devocional' => 'required|boolean',
+        'serie'         => 'nullable|string|max:255',
     ]);
 
     $devocional->update([
@@ -253,6 +309,7 @@ public function update(Request $request, $id)
         'imagen'        => $request->input('imagen'),
         'autor'         => $request->input('autor'),
         'is_devocional' => $request->input('is_devocional'),
+        'serie'         => $request->input('serie'),
     ]);
 
     return response()->json([
