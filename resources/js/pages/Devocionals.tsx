@@ -29,8 +29,14 @@ type DevocionalesResponse = {
     prev_page_url: string | null;
 };
 
+type Serie = {
+    nombre: string;
+    categorias: { categoria: string; count: number }[];
+};
+
 function Devocionals() {
     const [categories, setCategories] = useState<Category[]>([]);
+    const [series, setSeries] = useState<Serie[]>([]);
     const [devocionales, setDevocionales] = useState<Devocional[]>([]);
     const [latestDevocionales, setLatestDevocionales] = useState<Devocional[]>([]);
     const [pagination, setPagination] = useState<Partial<DevocionalesResponse>>({});
@@ -65,6 +71,7 @@ function Devocionals() {
             .then((data) => {
                 if (!selectedCategory && query.trim() === '') {
                     setCategories(data.categorias || []);
+                    setSeries(data.series || []);
                     setTotal(data.devocionales?.total || 0);
                 }
 
@@ -98,6 +105,7 @@ function Devocionals() {
             });
     }, []);
 
+    console.log("devocionales: ", devocionales);
     const handleSelectCategory = (cat: string | null) => {
         setSelectedCategory(cat);
         setPage(1);
@@ -247,6 +255,8 @@ function Devocionals() {
                         Todas <span>({total})</span>
                     </button>
                 </li>
+
+                {/* Categorías sueltas (sin serie) */}
                 {categories.map((cat) => (
                     <li key={cat.categoria}>
                         <button
@@ -258,9 +268,39 @@ function Devocionals() {
                         </button>
                     </li>
                 ))}
+
+                {/* Menú Series */}
+                {series.length > 0 && (
+                    <li>
+                        <details>
+                            <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Series</summary>
+                            <ul style={{ marginTop: 8, paddingLeft: 16 }}>
+                                {series.flatMap((serie) =>
+                                    serie.categorias.map((cat) => (
+                                        <li key={`${serie.nombre}-${cat.categoria}`}>
+                                            <button
+                                                className={selectedCategory === cat.categoria ? 'active' : ''}
+                                                onClick={() => handleSelectCategory(cat.categoria)}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    color: 'inherit',
+                                                }}
+                                            >
+                                                {cat.categoria} <span>({cat.count})</span>
+                                            </button>
+                                        </li>
+                                    )),
+                                )}
+                            </ul>
+                        </details>
+                    </li>
+                )}
             </ul>
         </div>
     );
+
 
     const RecentPostsWidget = () => (
         <div className="recent-posts-widget widget-item">
