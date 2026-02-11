@@ -15,6 +15,9 @@ class Devocional extends Model
     // Indica que la clave primaria no es autoincrementable y es string
     public $incrementing = false;
     protected $keyType = 'string';
+    protected $casts = [
+    'is_devocional' => 'integer', // o 'int'
+    ];
 
     // Asigna UUID automáticamente al crear un nuevo registro
     protected static function boot()
