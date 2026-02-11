@@ -15,13 +15,13 @@ class DevocionalController extends Controller
    public function index(Request $request)
 {
     $perPage = $request->input('per_page', 16);
-    $devocionales = Devocional::where('is_devocional', true)
+    $devocionales = Devocional::where('is_devocional', 1)
         ->orderBy('created_at', 'desc')
         ->paginate($perPage);
 
     $categoriasRaw = Devocional::whereNotNull('categoria')
         ->where('categoria', '!=', '')
-        ->where('is_devocional', true)
+        ->where('is_devocional', 1)
         ->selectRaw('categoria, serie, COUNT(*) as count')
         ->groupBy('categoria', 'serie')
         ->get();
@@ -51,7 +51,7 @@ class DevocionalController extends Controller
 
     $autores = Devocional::whereNotNull('autor')
         ->where('autor', '!=', '')
-        ->where('is_devocional', true)
+        ->where('is_devocional', 1)
         ->groupBy('autor')
         ->selectRaw('autor, COUNT(*) as count')
         ->get();
@@ -121,7 +121,7 @@ public function searchCategories(Request $request)
     {
         $perPage = $request->input('per_page', 16);
         $devocionales = Devocional::where('categoria', $categoria)
-            ->where('is_devocional', true)
+            ->where('is_devocional', 1)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -133,13 +133,13 @@ public function searchCategories(Request $request)
     //devolver los ultimos 5 devocionales
     public function latest()
     {
-        $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', true)->take(5)->get();
+        $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', 1)->take(5)->get();
         return response()->json($devocionales);
     }
 
     public function estudios()
     {
-        $devocionales = Devocional::where('is_devocional', false)
+        $devocionales = Devocional::where('is_devocional', 0)
         ->orderBy('categoria', 'asc')
         ->orderBy('contenido', 'asc')
         ->orderBy('created_at', 'asc')
@@ -201,7 +201,7 @@ public function searchCategories(Request $request)
             'categoria' => 'required|string',
             'imagen' => 'required|string|url', // Asegúrate de que 'imagen' sea una cadena y tenga un tamaño máximo
             'autor' => 'nullable|string|max:255',
-            'is_devocional' => 'required|boolean',
+            'is_devocional' => 'required|integer|in:0,1,2',
             'serie' => 'nullable|string|max:255',
         ]);
 
@@ -247,15 +247,21 @@ public function adminIndex(Request $request)
 
     // Clonar la query base para cada grupo
     $devocionales = (clone $baseQuery)
-        ->where('is_devocional', true)
+        ->where('is_devocional', 1)
         ->orderBy('created_at', 'desc')
         ->paginate($perPage, ['*'], 'devocionales_page')
         ->withQueryString();
 
     $estudios = (clone $baseQuery)
-        ->where('is_devocional', false)
+        ->where('is_devocional', 0)
         ->orderBy('created_at', 'desc')
         ->paginate($perPage, ['*'], 'estudios_page')
+        ->withQueryString();
+
+    $ocultos = (clone $baseQuery)
+        ->where('is_devocional', 2)
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage, ['*'], 'ocultos_page')
         ->withQueryString();
 
     $categorias = Devocional::whereNotNull('categoria')
@@ -271,8 +277,9 @@ public function adminIndex(Request $request)
         ->get();
 
     return Inertia::render('Edit', [
-        'devocionales' => $devocionales,   // is_devocional = true
-        'estudios'     => $estudios,       // is_devocional = false
+        'devocionales' => $devocionales,   // is_devocional = 1
+        'estudios'     => $estudios,       // is_devocional = 0
+        'ocultos'      => $ocultos,        // is_devocional = 2
         'categorias'   => $categorias,
         'autores'      => $autores,
         'filters'      => [
@@ -299,7 +306,7 @@ public function update(Request $request, $id)
         'categoria'     => 'required|string',
         'imagen'        => 'required|string|url',
         'autor'         => 'nullable|string|max:255',
-        'is_devocional' => 'required|boolean',
+        'is_devocional' => 'required|integer|in:0,1,2',
         'serie'         => 'nullable|string|max:255',
     ]);
 
