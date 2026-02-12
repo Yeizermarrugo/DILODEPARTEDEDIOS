@@ -54,7 +54,8 @@ Route::post('/upload-image', [ImageUploadController::class, 'store']);
 Route::get('/devocionales-search', [DevocionalController::class, 'index']);
 Route::get('/devocionales-searchCategories', [DevocionalController::class, 'searchCategories']);
 Route::get('/devocionales/categoria/{categoria}', [DevocionalController::class, 'porCategoria']);
-Route::get('/devocional/{id}', [DevocionalController::class, 'details']);
+Route::get('/devocional/{id}', [DevocionalController::class, 'details'])->name('devocional.details');
+Route::get('/estudio-biblico/{id}', [DevocionalController::class, 'details'])->name('estudio-biblico.details');
 
 // Route::inertia('/BlogDetails', 'BlogDetails');
 
