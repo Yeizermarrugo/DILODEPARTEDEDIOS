@@ -165,12 +165,14 @@ public function searchCategories(Request $request)
     public function details($id)
 {
     $devocional = Devocional::findOrFail($id);
+    $routeName = $devocional->is_devocional === 1 ? 'devocional.details' : 'estudio-biblico.details';
+
+      $url = route($routeName, ['id' => $devocional->id]);
 
     return Inertia::render('DevocionalDetailsPage', [
         'devocional' => $devocional,
         'is_devocional' => $devocional->is_devocional,
 
-        // 👇 ESTO ES LO NUEVO
         'meta' => [
             'title' => $devocional->titulo,
             'description' => Str::limit(strip_tags($devocional->contenido), 150),
