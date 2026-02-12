@@ -68,7 +68,7 @@ export default function LibroList() {
         return '';
     };
 
-    const TituloDevocional = ({ contenido }: { contenido: string }) => {
+    const TituloEstudioBiblico = ({ contenido }: { contenido: string }) => {
         const titulo = obtenerPrimerEtiqueta(contenido);
         return (
             <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }}
@@ -76,7 +76,7 @@ export default function LibroList() {
         );
     };
 
-    const Heading2Devocional = ({ contenido }: { contenido: string }) => {
+    const Heading2EstudioBiblico = ({ contenido }: { contenido: string }) => {
         const h2 = obtenerSegundaEtiqueta(contenido);
         return (
             <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }}
@@ -192,7 +192,7 @@ export default function LibroList() {
                                                 >
                                                     <a
                                                         key={libro.id}
-                                                        href={`/devocional/${libro.id}`}
+                                                        href={`/estudio-biblico/${libro.id}`}
                                                         style={{ textDecoration: 'none' }}
                                                     >
                                                         <ListItemText
@@ -203,13 +203,13 @@ export default function LibroList() {
                                                                 fontSize: '15px'
                                                             }}>
                                                                 <span>
-                                                                    <TituloDevocional contenido={libro.contenido} />
+                                                                    <TituloEstudioBiblico contenido={libro.contenido} />
                                                                 </span>
                                                                 <span style={{ fontWeight: 400, color: '#aaa' }}>
                                                                     –
                                                                 </span>
                                                                 <span style={{ color: '#7a7a7a', fontWeight: 400 }}>
-                                                                    <Heading2Devocional contenido={libro.contenido} />
+                                                                    <Heading2EstudioBiblico contenido={libro.contenido} />
                                                                 </span>
                                                             </div>
 
