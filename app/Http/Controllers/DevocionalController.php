@@ -205,6 +205,7 @@ public function searchCategories(Request $request)
             'autor' => 'nullable|string|max:255',
             'is_devocional' => 'required|integer|in:0,1,2',
             'serie' => 'nullable|string|max:255',
+            'created_at' => 'nullable|date',
         ]);
 
         $devocional = Devocional::create([
@@ -214,6 +215,7 @@ public function searchCategories(Request $request)
             'autor' => $request->input('autor'),
             'is_devocional' => $request->input('is_devocional'),
             'serie' => $request->input('serie'),
+            'created_at' => $request->input('created_at') ?: now(), // Si no se proporciona created_at, usar la fecha actual
         ]);
 
         return response()->json([
@@ -310,6 +312,7 @@ public function update(Request $request, $id)
         'autor'         => 'nullable|string|max:255',
         'is_devocional' => 'required|integer|in:0,1,2',
         'serie'         => 'nullable|string|max:255',
+        'created_at'    => 'nullable|date',
     ]);
 
     $devocional->update([
@@ -319,6 +322,7 @@ public function update(Request $request, $id)
         'autor'         => $request->input('autor'),
         'is_devocional' => $request->input('is_devocional'),
         'serie'         => $request->input('serie'),
+        'created_at'    => $request->input('created_at') ?: $devocional->created_at, // Si no se proporciona created_at, mantener el valor actual
     ]);
 
     return response()->json([
