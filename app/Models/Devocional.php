@@ -10,7 +10,7 @@ class Devocional extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['contenido', 'imagen', 'categoria', 'autor', 'is_devocional', 'serie'];
+    protected $fillable = ['contenido', 'imagen', 'categoria', 'autor', 'is_devocional', 'serie', 'created_at'];
 
     // Indica que la clave primaria no es autoincrementable y es string
     public $incrementing = false;
