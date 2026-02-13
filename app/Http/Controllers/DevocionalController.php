@@ -6,6 +6,7 @@ use App\Models\Devocional;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class DevocionalController extends Controller
 {
@@ -315,6 +316,24 @@ public function update(Request $request, $id)
         'created_at'    => 'nullable|date',
     ]);
 
+        $createdAt = $request->input('created_at'); // ej: "2026-02-13T00:00"
+
+    // if ($createdAt) {
+    //     try {
+    //         $createdAt = Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)
+    //             ->format('Y-m-d H:i:s');
+    //     } catch (\Exception $e) {
+    //         \Log::error('Error parseando created_at', [
+    //             'created_at' => $createdAt,
+    //             'msg'        => $e->getMessage(),
+    //         ]);
+    //         // opcional: devuelve 422
+    //         return response()->json([
+    //             'message' => 'Formato de fecha inválido',
+    //         ], 422);
+    //     }
+    // }
+
     $devocional->update([
         'contenido'     => $request->input('contenido'),
         'categoria'     => $request->input('categoria'),
@@ -322,7 +341,10 @@ public function update(Request $request, $id)
         'autor'         => $request->input('autor'),
         'is_devocional' => $request->input('is_devocional'),
         'serie'         => $request->input('serie'),
-        'created_at'    => $request->input('created_at') ?: $devocional->created_at, // Si no se proporciona created_at, mantener el valor actual
+        // 'created_at'    => $createdAt ?: $devocional->created_at,
+         'created_at'    => $createdAt
+            ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')
+            : $devocional->created_at,
     ]);
 
     return response()->json([

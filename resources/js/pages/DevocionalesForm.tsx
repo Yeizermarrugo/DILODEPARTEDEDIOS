@@ -126,7 +126,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             autor: useNuevoAutor ? nuevoAutor : autor,
             is_devocional: is_devocional,
             serie: useNuevaSerie ? nuevaSerie : serie,
-            created_at: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(),
+            created_at: createdAt || null,
         };
 
         try {
