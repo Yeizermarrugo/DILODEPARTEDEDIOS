@@ -37,6 +37,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
 
 
     const [initialContent, setInitialContent] = useState('<p>This is the initial content of the editor.</p>');
+    const [createdAt, setCreatedAt] = useState<string>('');
 
     const showLoader = isLoading || isSubmitting;
 
@@ -67,6 +68,11 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 setInitialContent(d.contenido || '');
                 setSerie(d.serie || '');
                 setOcultar(d.is_devocional === 2);
+                if (d.created_at) {
+                    const iso = new Date(d.created_at).toISOString();
+                    const local = iso.slice(0, 16); // "YYYY-MM-DDTHH:MM"
+                    setCreatedAt(local);
+                }
             });
         }
     }, [mode, id]);
@@ -120,6 +126,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             autor: useNuevoAutor ? nuevoAutor : autor,
             is_devocional: is_devocional,
             serie: useNuevaSerie ? nuevaSerie : serie,
+            created_at: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(),
         };
 
         try {
@@ -352,6 +359,17 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                         style={{ marginLeft: 8 }}
                     />
                 </div>
+
+                <div className={styles['autor-wrapper']} style={{ marginTop: 16 }}>
+                    <label className={styles['autor-label']}>Fecha y hora:</label>
+                    <input
+                        type="datetime-local"
+                        className={styles['autor-input']}
+                        value={createdAt}
+                        onChange={(e) => setCreatedAt(e.target.value)}
+                    />
+                </div>
+
 
                 <Editor
                     apiKey="pc7pp06765v04kvyv0e65n2ja3v0c3hn5law9o9vpchu0erd"
