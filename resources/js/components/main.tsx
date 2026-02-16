@@ -34,7 +34,7 @@ export default function MainContent() {
     const [videos, setVideos] = useState<YoutubeVideo[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     // const [welcomeOpen, setWelcomeOpen] = useState(true)
-    const [isMobile, setIsMobile] = useState(false);
+    // const [isMobile, setIsMobile] = useState(false);
     const URL = '/youtube/latest';
 
     useEffect(() => {
@@ -100,17 +100,17 @@ export default function MainContent() {
             document.body.style.overflow = '';
         }
 
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768); // breakpoint móvil
-        };
+        // const checkMobile = () => {
+        //     setIsMobile(window.innerWidth <= 768); // breakpoint móvil
+        // };
 
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
+        // checkMobile();
+        // window.addEventListener('resize', checkMobile);
 
         return () => {
             isMounted = false;
             document.body.style.overflow = '';
-            window.removeEventListener('resize', checkMobile);
+            // window.removeEventListener('resize', checkMobile);
         };
     }, [loading, modalOpen]);
 
