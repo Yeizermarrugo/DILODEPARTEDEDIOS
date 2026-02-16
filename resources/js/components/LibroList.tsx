@@ -99,18 +99,25 @@ export default function LibroList() {
 
     // 1) Función para extraer capítulo y versículo inicial del contenido
     const parseRefFromContenido = (html: string): { cap: number; ver: number } => {
-        // Busca "2:4" dentro del H1
         const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
         const h1Text = h1Match ? h1Match[1].replace(/<[^>]+>/g, '') : '';
 
-        const refMatch = h1Text.match(/(\d+):(\d+)/); // 2:4
-        if (!refMatch) return { cap: 0, ver: 0 };
+        // Primero intenta "2:4"
+        let refMatch = h1Text.match(/(\d+):(\d+)/);
+        if (refMatch) {
+            return { cap: Number(refMatch[1]), ver: Number(refMatch[2]) };
+        }
 
-        return {
-            cap: Number(refMatch[1]),
-            ver: Number(refMatch[2]),
-        };
+        // Si no tiene ":", intenta solo "7" (capítulo)
+        refMatch = h1Text.match(/\b(\d+)\b/);
+        if (refMatch) {
+            return { cap: Number(refMatch[1]), ver: 0 }; // versículo 0 ⇒ va antes que 1-?
+        }
+
+        // Sin número, mándalo al final
+        return { cap: 9999, ver: 9999 };
     }
+
 
 
     return (
