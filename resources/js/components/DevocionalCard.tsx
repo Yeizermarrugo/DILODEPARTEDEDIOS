@@ -50,7 +50,7 @@ function buildCategoryColorMap(todasLasCategorias: string[]) {
     return map;
 }
 
-export default function DevocionalCard({ devocionales, todasLasCategorias, categoriasDeSeries, buildHref }: DevocionalCardProps) {
+export default function DevocionalCard({ devocionales, todasLasCategorias, buildHref }: DevocionalCardProps) {
     const categoryColorMap = buildCategoryColorMap(todasLasCategorias);
     /**
      * Asigna un color único e inmutable por categoría.

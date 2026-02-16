@@ -33,7 +33,7 @@ export default function MainContent() {
     const [devocionalSeleccionado, setDevocionalSeleccionado] = useState<Devocional | null>(null);
     const [videos, setVideos] = useState<YoutubeVideo[] | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [welcomeOpen, setWelcomeOpen] = useState(true)
+    // const [welcomeOpen, setWelcomeOpen] = useState(true)
     const [isMobile, setIsMobile] = useState(false);
     const URL = '/youtube/latest';
 
