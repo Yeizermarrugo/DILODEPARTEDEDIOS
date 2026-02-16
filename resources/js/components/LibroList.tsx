@@ -37,9 +37,22 @@ export default function LibroList() {
     useEffect(() => {
         fetch('/estudiosbiblicos')
             .then((response) => response.json())
-            .then((data: Libro[]) => setLibros(Array.isArray(data) ? data : []))
+            .then((data: Libro[]) => {
+                const lista = Array.isArray(data) ? data : [];
+
+                const ordenados = [...lista].sort((a, b) => {
+                    const ra = parseRefFromContenido(a.contenido);
+                    const rb = parseRefFromContenido(b.contenido);
+
+                    if (ra.cap !== rb.cap) return ra.cap - rb.cap;
+                    return ra.ver - rb.ver;
+                });
+
+                setLibros(ordenados);
+            })
             .catch((error) => console.error('Error fetching libros:', error));
     }, []);
+
     // Obtener todas las categorías en array (deduplicadas por nombre)
     const todasCategorias = libros
         .map((libro) =>
@@ -54,7 +67,7 @@ export default function LibroList() {
         const nombre = typeof curr === 'object' ? curr.nombre : curr;
         if (!acc.find((item) => item.nombre === nombre)) acc.push({ nombre });
         return acc;
-    }, []);
+    }, []).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
 
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
@@ -83,6 +96,22 @@ export default function LibroList() {
                 dangerouslySetInnerHTML={{ __html: h2 }} />
         );
     };
+
+    // 1) Función para extraer capítulo y versículo inicial del contenido
+    const parseRefFromContenido = (html: string): { cap: number; ver: number } => {
+        // Busca "2:4" dentro del H1
+        const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        const h1Text = h1Match ? h1Match[1].replace(/<[^>]+>/g, '') : '';
+
+        const refMatch = h1Text.match(/(\d+):(\d+)/); // 2:4
+        if (!refMatch) return { cap: 0, ver: 0 };
+
+        return {
+            cap: Number(refMatch[1]),
+            ver: Number(refMatch[2]),
+        };
+    }
+
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -113,6 +142,7 @@ export default function LibroList() {
 
                                 // Filtrar libros por la categoría actual (Libro)
                                 const librosCategoria = libros.filter((libro: Libro) => {
+                                    console.log("libro: ", libro);
                                     if (Array.isArray(libro.categoria)) {
                                         return libro.categoria.some((cat: Categoria) =>
                                             (typeof cat === 'object' ? cat.nombre : cat) === nombre
