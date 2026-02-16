@@ -20,10 +20,6 @@ interface DevocionalesPagination {
     total: number;
 }
 
-interface DevocionalesProps {
-    className?: string;
-}
-
 interface Categoria { categoria: string; count: number }
 interface Autor { autor: string; count: number }
 
@@ -35,7 +31,7 @@ interface PageProps {
     autores: Autor[];
     filters: { search?: string; categoria?: string; autor?: string };
     todasLasCategorias: string[];
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export default function Edit() {
