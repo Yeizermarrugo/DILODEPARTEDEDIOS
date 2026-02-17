@@ -102,9 +102,25 @@ body {
     font-size: 1.25rem;
     line-height: 1.7;
     color: #222;
-    margin: 0;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
     word-break: break-word;
 }
+
+.devocional ul,
+.devocional ol {
+  list-style-position: outside;
+  padding-left: 1.5rem;
+}
+
+.devocional ul {
+  list-style-type: disc;
+}
+
+.devocional ol {
+  list-style-type: decimal;
+}
+
 
 .devocional .date {
     margin-top: 1.5rem;
