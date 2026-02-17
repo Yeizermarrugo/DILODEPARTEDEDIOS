@@ -113,20 +113,20 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
             >
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
                 <p style={{ padding: '5px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
+                <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
+                    {devocional.autor ? `${devocional.autor}` : ''}
+                </p>
+                <div style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 10px 0' }}>
+                    {devocional.created_at
+                        ? new Date(devocional.created_at).toLocaleDateString('es-ES', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                        }).replace(/^\w/, (c) => c.toUpperCase())
+                        : ''}
+                </div>
             </section>
-            <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
-                {devocional.autor ? `${devocional.autor}` : ''}
-            </p>
-            <div style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 10px 0' }}>
-                {devocional.created_at
-                    ? new Date(devocional.created_at).toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                    }).replace(/^\w/, (c) => c.toUpperCase())
-                    : ''}
-            </div>
         </div>
     );
 };
