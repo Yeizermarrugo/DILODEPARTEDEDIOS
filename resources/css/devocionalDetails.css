@@ -129,6 +129,38 @@ body {
     text-align: right;
 }
 
+.back-floating-button {
+  position: fixed;       /* se fija al viewport, no al scroll */
+  top: 16px;             /* distancia desde arriba */
+  left: 16px;            /* distancia desde la izquierda */
+  z-index: 1000;         /* por encima del contenido */
+  
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #6c757d;
+  background-color: #ffffff5e;
+  color: #202427;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.back-floating-button:hover {
+  background-color: #6c757d;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+}
+
+.back-floating-button i {
+  font-size: 16px;
+}
+
+
 
 @media (min-width: 800px) {
     .header-modal .title {
