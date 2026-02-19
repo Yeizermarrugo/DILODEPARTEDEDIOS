@@ -118,7 +118,7 @@ export default function Edit() {
         <div className="blog-details-page" style={{ padding: '20px' }}>
             <button
                 type="button"
-                onClick={() => history.back()}
+                onClick={() => router.visit(route('dashboard'))}
                 className="back-floating-button"
             >
                 <i className="bi bi-arrow-left" />
