@@ -116,6 +116,14 @@ export default function Edit() {
 
     return (
         <div className="blog-details-page" style={{ padding: '20px' }}>
+            <button
+                type="button"
+                onClick={() => history.back()}
+                className="back-floating-button"
+            >
+                <i className="bi bi-arrow-left" />
+                Atrás
+            </button>
             {/* Buscador */}
             <form onSubmit={handleSearchSubmit} className="mb-4 flex gap-2">
                 <input

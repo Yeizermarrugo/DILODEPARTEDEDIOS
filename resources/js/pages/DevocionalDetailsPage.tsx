@@ -100,6 +100,15 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
 
     return (
         <div className="devocional">
+            <button
+                type="button"
+                onClick={() => history.back()}
+                className="back-floating-button"
+            >
+                <i className="bi bi-arrow-left" />
+                Atrás
+            </button>
+
             <H1Custom contenido={devocional.contenido} />
 
             <section
