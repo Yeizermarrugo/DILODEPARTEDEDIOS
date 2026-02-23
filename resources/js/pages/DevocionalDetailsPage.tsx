@@ -1,5 +1,6 @@
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
+import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
@@ -102,7 +103,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
         <div className="devocional">
             <button
                 type="button"
-                onClick={() => history.back()}
+                onClick={() => router.visit(route('dashboard'))}
                 className="back-floating-button"
             >
                 <i className="bi bi-arrow-left" />
@@ -121,7 +122,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                 }}
             >
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
-                <p style={{ padding: '5px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
+                <p style={{ padding: '5px', textAlign: 'justify' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
                 <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
                     {devocional.autor ? `${devocional.autor}` : ''}
                 </p>
