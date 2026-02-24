@@ -98,11 +98,26 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
         );
     }
 
+    const handleBack = () => {
+        const path = window.location.pathname;
+
+        if (path.startsWith('/estudio-biblico')) {
+            window.location.href = '/estudios-biblicos';
+        } else if (path.startsWith('/devocional')) {
+            window.location.href = '/devocionales';
+        } else {
+            history.back(); // fallback
+        }
+
+    };
+
+
+
     return (
         <div className="devocional">
             <button
                 type="button"
-                onClick={() => history.back()}
+                onClick={handleBack}
                 className="back-floating-button"
             >
                 <i className="bi bi-arrow-left" />
@@ -121,7 +136,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
                 }}
             >
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
-                <p style={{ padding: '5px' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
+                <p style={{ padding: '5px', textAlign: 'justify' }} dangerouslySetInnerHTML={{ __html: devocionalContent }} />
                 <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
                     {devocional.autor ? `${devocional.autor}` : ''}
                 </p>
