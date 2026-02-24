@@ -103,7 +103,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
         <div className="devocional">
             <button
                 type="button"
-                onClick={() => router.visit(route('dashboard'))}
+                onClick={() => windows.history.back()}
                 className="back-floating-button"
             >
                 <i className="bi bi-arrow-left" />
