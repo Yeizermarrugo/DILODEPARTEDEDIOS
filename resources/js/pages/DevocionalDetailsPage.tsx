@@ -1,5 +1,6 @@
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
+import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
