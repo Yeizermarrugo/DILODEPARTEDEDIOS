@@ -103,7 +103,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
         const path = window.location.pathname;
 
         if (path.startsWith('/estudio-biblico')) {
-            window.location.href = '/estudios-biblicos';
+            window.location.href = '/estudios';
         } else if (path.startsWith('/devocional')) {
             window.location.href = '/devocionales';
         } else {
