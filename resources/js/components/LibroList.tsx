@@ -149,7 +149,6 @@ export default function LibroList() {
 
                                 // Filtrar libros por la categoría actual (Libro)
                                 const librosCategoria = libros.filter((libro: Libro) => {
-                                    console.log("libro: ", libro);
                                     if (Array.isArray(libro.categoria)) {
                                         return libro.categoria.some((cat: Categoria) =>
                                             (typeof cat === 'object' ? cat.nombre : cat) === nombre

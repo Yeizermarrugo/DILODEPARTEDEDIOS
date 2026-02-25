@@ -99,11 +99,26 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
         );
     }
 
+    const handleBack = () => {
+        const path = window.location.pathname;
+
+        if (path.startsWith('/estudio-biblico')) {
+            window.location.href = '/estudios-biblicos';
+        } else if (path.startsWith('/devocional')) {
+            window.location.href = '/devocionales';
+        } else {
+            history.back(); // fallback
+        }
+
+    };
+
+
+
     return (
         <div className="devocional">
             <button
                 type="button"
-                onClick={() => windows.history.back()}
+                onClick={handleBack}
                 className="back-floating-button"
             >
                 <i className="bi bi-arrow-left" />
