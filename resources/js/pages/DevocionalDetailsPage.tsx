@@ -1,5 +1,6 @@
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
+import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
@@ -102,7 +103,7 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
         const path = window.location.pathname;
 
         if (path.startsWith('/estudio-biblico')) {
-            window.location.href = '/estudios-biblicos';
+            window.location.href = '/estudio-biblico';
         } else if (path.startsWith('/devocional')) {
             window.location.href = '/devocionales';
         } else {
