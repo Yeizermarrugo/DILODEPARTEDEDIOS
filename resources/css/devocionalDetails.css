@@ -108,18 +108,23 @@ body {
 }
 
 .devocional ul,
-.devocional ol {
+.devocional ol,
+.devocional-details ul,
+.devocional-details ol {
   list-style-position: outside;
   padding-left: 1.5rem;
 }
 
-.devocional ul {
+.devocional ul,
+.devocional-details ul {
   list-style-type: disc;
 }
 
-.devocional ol {
+.devocional ol,
+.devocional-details ol {
   list-style-type: decimal;
 }
+
 
 
 .devocional .date {
