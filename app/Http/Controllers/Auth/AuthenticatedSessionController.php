@@ -33,6 +33,17 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+      if (! $request->user()->hasVerifiedEmail()) {
+        Auth::logout();
+
+        return back()
+            ->withErrors([
+                'email' => 'Debes verificar tu correo antes de iniciar sesión.',
+            ])
+            ->onlyInput('email');
+    }
+
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
