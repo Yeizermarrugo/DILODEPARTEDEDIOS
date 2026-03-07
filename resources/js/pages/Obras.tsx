@@ -18,11 +18,11 @@ const Obras = () => {
                     <br />
                     {/* <h1 style={{ fontSize: '1.4rem', display: 'flex', justifyContent: 'center' }}>¡Próximamente!</h1>
                     <br /> */}
-                    <p>Esta sección refleja la fe puesta en acción a través del servicio que realizamos como ministerio, participando en las obras y espacios que el Señor nos permite, en ocasiones junto a otros hermanos en la fe.
+                    <p>En esta sección compartimos las obras y acciones sociales que realizamos como ministerio, sirviendo a otros con el amor de Cristo y llevando esperanza a quienes más lo necesitan.
                     </p>
                     <br />
                     <p>
-                        Creemos que Dios nos ha enviado a mostrar nuestras buenas obras para que otros glorifiquen su nombre (Mateo 5:16), llevando esperanza, amor y oportunidades a quienes más lo necesitan, manifestando el Evangelio con hechos y verdad.
+                        Creemos que el Evangelio no solo se predica con palabras, sino también con hechos que reflejan la gracia de Dios.
                     </p>
                     <br />
                     <p style={{ fontWeight: 'bold' }}>Tu apoyo nos ayuda a seguir sirviendo y alcanzando más vidas</p>
@@ -32,6 +32,17 @@ const Obras = () => {
                         “Hijitos, nuestro amor no debe ser solo de palabras, pues el verdadero amor se demuestra con hechos.”{' '}
                         <span style={{ fontWeight: 'bold' }}>1 Juan 3:18 PDT</span>
                     </p>
+                    <br />
+                    {/* <div style={{ display: 'flex', justifyContent: 'center', alignContent: 'center' }}>
+                        <a style={{}}
+                            href="https://checkout.nequi.wompi.co/l/VPOS_FXXUBu"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="obras-header__cta"
+                        >
+                            Done a nuestro ministerio
+                        </a>
+                    </div> */}
                 </div>
             </div>
 

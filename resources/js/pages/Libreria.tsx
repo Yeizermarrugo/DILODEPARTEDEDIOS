@@ -17,14 +17,11 @@ const Libreria = () => {
                     <br />
                     {/* <h1 style={{ fontSize: '1.4rem', display: 'flex', justifyContent: 'center' }}>¡Próximamente!</h1>
                     <br /> */}
-                    <p>En nuestra Librería cristiana encontrarás una variedad de recursos que te ayudarán a crecer en tu relación con Dios.</p>
+                    <p>En esta sección encontrarás recursos diseñados para fortalecer tu fe y ayudarte a crecer en tu relación con Dios.</p>
                     <br />
                     <p>
-                        Descubre libros cristianos de nuestra autoría y de otros autores destacados, así como herramientas para el estudio bíblico,
-                        souvenirs, arte cristiano y otros productos que te inspirarán y motivarán en tu camino espiritual.
+                        Aquí podrás acceder a libros cristianos, cursos, programas, herramientas para el estudio bíblico y materiales que te inspirarán a conocer más la verdad de la Palabra y a compartir el amor de Cristo con otros.
                     </p>
-                    <br />
-                    <p style={{ fontWeight: 'bold' }}>¡Encuentra lo que necesitas para fortalecer tu fe y compartir el amor de Cristo con otros!</p>
                     <br />
                     <p style={{ fontStyle: 'italic' }}>
 
