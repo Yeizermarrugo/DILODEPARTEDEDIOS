@@ -1,6 +1,6 @@
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
-import { router } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
@@ -11,14 +11,29 @@ type Devocional = {
     autor?: string;
 };
 
-interface props {
+interface Props {
     devocional: Devocional;
 }
 
-const DevocionalDetailsPage = ({ devocional }: props) => {
+const DevocionalDetailsPage = (props: Props) => {
     // const { devocional } = usePage().props as unknown as { devocional: Devocional };
+    const page = usePage().props as any;
+    const devocional: Devocional | undefined =
+        props.devocional ?? page.devocional;
+
+    if (!devocional) {
+        return <div>No se encontró el devocional.</div>;
+    }
+
     const [loading, setLoading] = useState(true);
     const imageLoaded = useImagePreload(devocional.imagen);
+
+    useEffect(() => {
+        setLoading(true);
+        const t = setTimeout(() => setLoading(false), 1000);
+        return () => clearTimeout(t);
+    }, []);
+
 
     useEffect(() => {
         setLoading(true);
@@ -102,14 +117,26 @@ const DevocionalDetailsPage = ({ devocional }: props) => {
     const handleBack = () => {
         const path = window.location.pathname;
 
+        // /estudio-biblico/123  ->  /estudios
         if (path.startsWith('/estudio-biblico')) {
             window.location.href = '/estudios';
-        } else if (path.startsWith('/devocional')) {
-            window.location.href = '/devocionales';
-        } else {
-            history.back(); // fallback
+            return;
         }
 
+        // /devocional/123  ->  /devocionales
+        if (path.startsWith('/devocional')) {
+            window.location.href = '/devocionales';
+            return;
+        }
+
+        // /ensenanzas/...  ->  /ensenanzas  (sin ñ en la ruta)
+        if (path.startsWith('/ensenanzas')) {
+            window.location.href = '/ensenanzas';
+            return;
+        }
+
+        // Fallback: historial del navegador
+        window.history.back();
     };
 
 
