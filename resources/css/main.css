@@ -4014,12 +4014,7 @@ section,
   max-width: 32%;
 }
 
-.ensenanzas-cards p {
-  margin: 10px 20px 0px 0px;
-  text-align: justify;
-}
-
-/* Pantallas medianas (tipo laptop): 2 por fila */
+/* Pantallas medianas (laptop): 2 por fila */
 @media (max-width: 1199px) {
   .ensenanzas-cards > * {
     flex: 1 1 300px;
@@ -4031,26 +4026,17 @@ section,
 @media (max-width: 991px) {
   .ensenanzas-cards > * {
     flex: 1 1 100%;
-    max-width: 100%;       /* antes tenías 50% */
+    max-width: 100%;
   }
 
-  /* La propia card ocupa todo el ancho del contenedor */
   .ensenanza-card {
     width: 100% !important;
     max-width: 100% !important;
   }
-}
 
-/* Layout específico de la parte superior de la card en móvil */
-@media (max-width: 991px) {
   .ensenanza-card-top {
     flex-direction: column !important;
   }
- 
-  .ensenanzas-cards p {
-  margin: 0px 10px 0px 0px;
-  text-align: justify;
-}
 
   .ensenanza-card-top > div:first-child {
     flex: 0 0 auto !important;
