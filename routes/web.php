@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\DevocionalController;
+use App\Http\Controllers\EnsenanzaController;
+use App\Http\Controllers\PdfUploadController;
 use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TTSController;
@@ -68,6 +70,24 @@ Route::get('/estudios', function () {
     return Inertia::render('Estudios');
 });
 Route::get('/estudiosbiblicos', [DevocionalController::class, 'estudios']);
+
+Route::get('/ensenanzas', function () {
+    return Inertia::render('Enseñanzas');
+});
+
+Route::get('/ensenanzas-search', [EnsenanzaController::class, 'index']);
+Route::get('/ensenanzas/{id}', [EnsenanzaController::class, 'details'])
+    ->name('ensenanza.details');
+
+
+Route::get('/podcast', function () {
+    return Inertia::render('Podcast');
+});
+
+Route::get('/api/ensenanzas', [EnsenanzaController::class, 'listSimple']);
+
+
+Route::post('/upload-pdf', [PdfUploadController::class, 'store'])->name('upload.pdf');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
