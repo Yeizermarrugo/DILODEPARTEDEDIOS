@@ -34,7 +34,6 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
         ensenanza.autores.length === 0
             ? 'Autor desconocido'
             : ensenanza.autores.join(', ');
-    console.log("ensenanza: ", ensenanza);
 
     return (
         <div
