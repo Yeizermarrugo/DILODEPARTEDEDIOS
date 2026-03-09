@@ -5,6 +5,7 @@ import { useState } from 'react';
 type DevocionalEnsenanza = {
     id: string;
     titulo: string;
+    contenido: string;
     autor?: string | null;
     pdf?: string | null;
     instagram?: string | null;
@@ -29,6 +30,7 @@ type Props = {
 export default function EnsenanzaCard({ ensenanza }: Props) {
     const [open, setOpen] = useState(false);
 
+    console.log(ensenanza);
 
     const autoresLabel =
         ensenanza.autores.length === 0
