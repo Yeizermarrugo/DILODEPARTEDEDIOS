@@ -303,12 +303,14 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
                         <ActionRow
                             label="Formato reducido"
                             href={devocional.instagram}
+                            target='_blank'
                         />
                     )}
                     {devocional.tiktok && (
                         <ActionRow
                             label="Formato reels"
                             href={devocional.tiktok}
+                            target='_blank'
                         />
                     )}
                 </div>

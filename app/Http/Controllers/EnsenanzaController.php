@@ -11,104 +11,113 @@ use Carbon\Carbon;
 
 class EnsenanzaController extends Controller
 {
-   
-   public function index(Request $request)
-{
-    $perPage = (int) $request->get('per_page', 10);
 
-    $ensenanzas = Ensenanza::query()
-        ->with(['devocionales' => function ($q) {
-            $q->soloEnsenanzas()
-                ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at')
-                ->orderBy('created_at', 'asc');
-        }])
-        ->withCount('devocionales')
-        ->paginate($perPage);
+    public function index(Request $request)
+    {
+        $perPage = (int) $request->get('per_page', 10);
 
-    $ensenanzas->getCollection()->transform(function ($ensenanza) {
-        // Autores únicos
-        $autores = $ensenanza->devocionales
-            ->pluck('autor')
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+        $ensenanzas = Ensenanza::query()
+            ->with(['devocionales' => function ($q) {
+                $q->soloEnsenanzas()
+                    ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at')
+                    ->orderBy('created_at', 'asc');
+            }])
+            ->withCount('devocionales')
+            ->paginate($perPage);
 
-        // Devocionales simplificados
-        $devocionales = $ensenanza->devocionales->map(function ($dev) {
-            $contenido = $dev->contenido ?? '';
+        $ensenanzas->getCollection()->transform(function ($ensenanza) {
+            // Autores únicos
+            $autores = $ensenanza->devocionales
+                ->pluck('autor')
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
-            // Buscar primer <h2>...</h2>
-            if (preg_match('/<h2[^>]*>(.*?)<\/h2>/is', $contenido, $matches)) {
-                $titulo = strip_tags($matches[1]);
-            } else {
-                // Fallback: quitar tags y usar primeras palabras
-                $titulo = trim(preg_replace('/\s+/', ' ', strip_tags($contenido)));
-            }
+            // Devocionales simplificados
+            $devocionales = $ensenanza->devocionales->map(function ($dev) {
+                $contenido = $dev->contenido ?? '';
 
-            // Opcional: limitar longitud del título
-            $titulo = Str::limit($titulo, 120);
+                $contenido = $dev->contenido ?? '';
+
+                if (preg_match('/<h2[^>]*>(.*?)<\/h2>/is', $contenido, $matches)) {
+                    $titulo = $matches[1];
+                } else {
+                    $titulo = strip_tags($contenido);
+                }
+
+                // 1. Quitar etiquetas
+                $titulo = strip_tags($titulo);
+
+                // 2. Decodificar entidades HTML (&Oacute; -> Ó, &nbsp; -> espacio, etc.)
+                $titulo = html_entity_decode($titulo, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                // 3. Normalizar espacios
+                $titulo = preg_replace('/\s+/u', ' ', trim($titulo));
+
+                // 4. Limitar longitud
+                $titulo = Str::limit($titulo, 120);
+
+
+                return [
+                    'id'         => $dev->id,
+                    'titulo'     => $titulo ?: 'Devocional',
+                    'autor'      => $dev->autor,
+                    'contenido'  => $dev->contenido,
+                    'pdf'        => $dev->pdf,
+                    'tiktok'     => $dev->tiktok,
+                    'instagram'  => $dev->instagram,
+                ];
+            })->values()->all();
 
             return [
-                'id'         => $dev->id,
-                'titulo'     => $titulo ?: 'Devocional',
-                'autor'      => $dev->autor,
-                'contenido'  => $dev->contenido,
-                'pdf'        => $dev->pdf,
-                'tiktok'     => $dev->tiktok,
-                'instagram'  => $dev->instagram,
+                'id'               => $ensenanza->id,
+                'slug'             => $ensenanza->slug,
+                'titulo'           => $ensenanza->titulo,
+                'descripcion'      => $ensenanza->descripcion,
+                'imagen'           => $ensenanza->imagen,
+                'ensenanzas_count' => $ensenanza->devocionales_count,
+                'pdf'              => $ensenanza->pdf,
+                'tiktok'           => $ensenanza->tiktok,
+                'instagram'        => $ensenanza->instagram,
+                'autores'          => $autores,
+                'devocionales'     => $devocionales,
             ];
-        })->values()->all();
+        });
 
-        return [
-            'id'               => $ensenanza->id,
-            'slug'             => $ensenanza->slug,
-            'titulo'           => $ensenanza->titulo,
-            'descripcion'      => $ensenanza->descripcion,
-            'imagen'           => $ensenanza->imagen,
-            'ensenanzas_count' => $ensenanza->devocionales_count,
-            'pdf'              => $ensenanza->pdf,
-            'tiktok'           => $ensenanza->tiktok,
-            'instagram'        => $ensenanza->instagram,
-            'autores'          => $autores,
-            'devocionales'     => $devocionales,
-        ];
-    });
-
-    return response()->json($ensenanzas);
-}
+        return response()->json($ensenanzas);
+    }
 
     public function details($id)
     {
-    //     $ensenanza = Ensenanza::with(['devocionales' => function ($q) {
-    //     $q->soloEnsenanzas()
-    //       ->orderBy('created_at', 'asc');
-    // }])->findOrFail($id);
+        //     $ensenanza = Ensenanza::with(['devocionales' => function ($q) {
+        //     $q->soloEnsenanzas()
+        //       ->orderBy('created_at', 'asc');
+        // }])->findOrFail($id);
 
-    $devocional = Devocional::findOrFail($id);
-    $routeName = $devocional->is_devocional === 1 ? 'devocional.details' : 'estudio-biblico.details';
+        $devocional = Devocional::findOrFail($id);
+        $routeName = $devocional->is_devocional === 1 ? 'devocional.details' : 'estudio-biblico.details';
 
-      $url = route($routeName, ['id' => $devocional->id]);
+        $url = route($routeName, ['id' => $devocional->id]);
 
-    return Inertia::render('DevocionalDetailsPage', [
-        'devocional' => $devocional,
-        'is_devocional' => $devocional->is_devocional,
+        return Inertia::render('DevocionalDetailsPage', [
+            'devocional' => $devocional,
+            'is_devocional' => $devocional->is_devocional,
 
-        'meta' => [
-            'title' => $devocional->titulo,
-            'description' => Str::limit(strip_tags($devocional->contenido), 150),
-            'image' => $devocional->imagen, // URL pública
-            'url' => url()->current(),
-        ]
-    ]);
-    
+            'meta' => [
+                'title' => $devocional->titulo,
+                'description' => Str::limit(strip_tags($devocional->contenido), 150),
+                'image' => $devocional->imagen, // URL pública
+                'url' => url()->current(),
+            ]
+        ]);
     }
 
     public function listSimple()
-{
-    return Ensenanza::query()
-        ->select('id', 'titulo')
-        ->orderBy('titulo')
-        ->get();
-}
+    {
+        return Ensenanza::query()
+            ->select('id', 'titulo')
+            ->orderBy('titulo')
+            ->get();
+    }
 }
