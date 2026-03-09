@@ -177,6 +177,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         <strong>Enseñanzas</strong>
                     </span>
                     <KeyboardArrowDown
+                        key={ensenanza.id}
                         style={{
                             transition: 'transform 0.2s ease',
                             transform: open ? 'rotate(-180deg)' : 'rotate(0deg)',
@@ -267,6 +268,7 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
                     </span>
                 </div>
                 <KeyboardArrowDown
+                    key={devocional.id}
                     style={{
                         fontSize: 20,
                         transition: 'transform 0.2s ease',
