@@ -30,8 +30,6 @@ type Props = {
 export default function EnsenanzaCard({ ensenanza }: Props) {
     const [open, setOpen] = useState(false);
 
-    console.log(ensenanza);
-
     const autoresLabel =
         ensenanza.autores.length === 0
             ? 'Autor desconocido'
@@ -51,6 +49,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
         >
             {/* Parte superior: card horizontal */}
             <div
+                className="ensenanza-card-top"
                 style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -125,7 +124,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                     {/* Descripción */}
                     <p
                         style={{
-                            margin: 0,
+                            margin: '0px 20px 0px 0px',
                             fontSize: 12,
                             color: '#495057',
                             lineHeight: 1.5,
@@ -287,23 +286,31 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
                         overflow: 'hidden',
                     }}
                 >
-                    {devocional.id && <ActionRow
-                        label="Leer"
-                        href={`/ensenanzas/${devocional.id}`}
-                    />}
-                    {devocional.pdf && < ActionRow
-                        label="Descargar PDF"
-                        href={devocional.pdf}
-                    />}
-                    {devocional.instagram &&
+                    {devocional.id && (
+                        <ActionRow
+                            label="Leer"
+                            href={`/ensenanzas/${devocional.id}`}
+                        />
+                    )}
+                    {devocional.pdf && (
+                        <ActionRow
+                            label="Descargar PDF"
+                            href={devocional.pdf}
+                            target="_blank"
+                        />
+                    )}
+                    {devocional.instagram && (
                         <ActionRow
                             label="Formato reducido"
                             href={devocional.instagram}
-                        />}
-                    {devocional.tiktok && < ActionRow
-                        label="Formato reels"
-                        href={devocional.tiktok}
-                    />}
+                        />
+                    )}
+                    {devocional.tiktok && (
+                        <ActionRow
+                            label="Formato reels"
+                            href={devocional.tiktok}
+                        />
+                    )}
                 </div>
             )}
         </div>
@@ -313,9 +320,10 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
 type RowProps = {
     label: string;
     href: string;
+    target?: string;
 };
 
-function ActionRow({ label, href }: RowProps) {
+function ActionRow({ label, href, target }: RowProps) {
     return (
         <a
             href={href}
@@ -323,7 +331,7 @@ function ActionRow({ label, href }: RowProps) {
                 textDecoration: 'none',
                 color: 'inherit',
             }}
-            target='_blank'
+            target={target}
         >
             <div
                 style={{
