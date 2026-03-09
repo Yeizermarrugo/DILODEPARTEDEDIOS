@@ -4008,25 +4008,61 @@ section,
   gap: 20px;
 }
 
-/* Cada card ocupa base 360px, máximo ~32% para 3 por fila */
+/* Desktop grande: 3 por fila */
 .ensenanzas-cards > * {
   flex: 1 1 360px;
   max-width: 32%;
 }
 
-/* En pantallas medianas, 2 por fila si no caben 3 cómodas */
-@media (max-width: 1100px) {
+.ensenanzas-cards p {
+  margin: 10px 20px 0px 0px;
+  text-align: justify;
+}
+
+/* Pantallas medianas (tipo laptop): 2 por fila */
+@media (max-width: 1199px) {
   .ensenanzas-cards > * {
     flex: 1 1 300px;
     max-width: 48%;
   }
 }
 
-/* En móvil, 1 por fila */
-@media (max-width: 768px) {
+/* De 0 a 991 px: vista móvil (1 card por fila, ancho completo) */
+@media (max-width: 991px) {
   .ensenanzas-cards > * {
     flex: 1 1 100%;
-    max-width: 100%;
+    max-width: 100%;       /* antes tenías 50% */
+  }
+
+  /* La propia card ocupa todo el ancho del contenedor */
+  .ensenanza-card {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 
+/* Layout específico de la parte superior de la card en móvil */
+@media (max-width: 991px) {
+  .ensenanza-card-top {
+    flex-direction: column !important;
+  }
+ 
+  .ensenanzas-cards p {
+  margin: 0px 10px 0px 0px;
+  text-align: justify;
+}
+
+  .ensenanza-card-top > div:first-child {
+    flex: 0 0 auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .ensenanza-card-top > div:first-child img {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: cover;
+    display: block;
+  }
+}
