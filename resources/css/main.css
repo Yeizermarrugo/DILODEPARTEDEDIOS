@@ -3998,3 +3998,35 @@ section,
 .back-floating-button i {
   font-size: 16px;
 }
+
+
+/* Enseñanzas Cards */
+
+.ensenanzas-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Cada card ocupa base 360px, máximo ~32% para 3 por fila */
+.ensenanzas-cards > * {
+  flex: 1 1 360px;
+  max-width: 32%;
+}
+
+/* En pantallas medianas, 2 por fila si no caben 3 cómodas */
+@media (max-width: 1100px) {
+  .ensenanzas-cards > * {
+    flex: 1 1 300px;
+    max-width: 48%;
+  }
+}
+
+/* En móvil, 1 por fila */
+@media (max-width: 768px) {
+  .ensenanzas-cards > * {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
