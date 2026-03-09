@@ -28,12 +28,22 @@ type Props = {
 };
 
 export default function EnsenanzaCard({ ensenanza }: Props) {
+    // devocionales “reales”
+    const devocionales = ensenanza.devocionales ?? [];
+    const tieneDevocionales = devocionales.length > 0;
+
     const [open, setOpen] = useState(false);
 
     const autoresLabel =
         ensenanza.autores.length === 0
             ? 'Autor desconocido'
             : ensenanza.autores.join(', ');
+
+    const toggleOpen = () => {
+        // Si NO hay devocionales, no abras nada
+        if (!tieneDevocionales) return;
+        setOpen((o) => !o);
+    };
 
     return (
         <div
@@ -142,7 +152,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         {ensenanza.descripcion}
                     </p>
 
-                    {/* Autores (sin marginTop:auto para que no genere huecos raros) */}
+                    {/* Autores */}
                     <div
                         style={{
                             fontSize: 11,
@@ -166,7 +176,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
             >
                 {/* Cabecera del dropdown de devocionales */}
                 <button
-                    onClick={() => setOpen((o) => !o)}
+                    onClick={toggleOpen}
                     style={{
                         width: '100%',
                         display: 'flex',
@@ -175,11 +185,12 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         padding: '8px 10px',
                         border: 'none',
                         background: 'transparent',
-                        cursor: 'pointer',
+                        cursor: tieneDevocionales ? 'pointer' : 'default',
                         fontSize: 13,
                         fontWeight: 500,
                         color: '#343a40',
                         textTransform: 'uppercase',
+                        opacity: tieneDevocionales ? 1 : 0.6,
                     }}
                 >
                     <span>
@@ -189,11 +200,13 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         style={{
                             transition: 'transform 0.2s ease',
                             transform: open ? 'rotate(-180deg)' : 'rotate(0deg)',
+                            opacity: tieneDevocionales ? 1 : 0.3,
                         }}
                     />
                 </button>
 
-                {open && (
+                {/* Solo renderiza contenido si hay devocionales y está abierto */}
+                {tieneDevocionales && open && (
                     <div
                         style={{
                             borderTop: '1px solid #e9ecef',
@@ -201,27 +214,13 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                             flexDirection: 'column',
                         }}
                     >
-                        {(ensenanza.devocionales || []).map((dev) => (
+                        {devocionales.map((dev) => (
                             <DevocionalRow
                                 key={dev.id}
                                 ensenanzaId={ensenanza.id}
                                 devocional={dev}
                             />
                         ))}
-
-                        {(!ensenanza.devocionales ||
-                            ensenanza.devocionales.length === 0) && (
-                                <div
-                                    style={{
-                                        padding: '10px 16px',
-                                        fontSize: 13,
-                                        color: '#868e96',
-                                        borderTop: '1px solid #e9ecef',
-                                    }}
-                                >
-                                    No hay devocionales registrados para esta enseñanza todavía.
-                                </div>
-                            )}
                     </div>
                 )}
             </div>
