@@ -37,6 +37,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
 
     return (
         <div
+            className="ensenanza-card"
             style={{
                 borderRadius: 10,
                 overflow: 'hidden',
@@ -44,7 +45,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 marginBottom: 12,
                 backgroundColor: '#fff',
                 boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                width: '70%',
+                width: '100%',
             }}
         >
             {/* Parte superior: card horizontal */}
@@ -83,7 +84,14 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 </div>
 
                 {/* Info derecha */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div
+                    style={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8,
+                    }}
+                >
                     {/* Fila título + count */}
                     <div
                         style={{
@@ -124,23 +132,24 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                     {/* Descripción */}
                     <p
                         style={{
-                            margin: '0px 20px 0px 0px',
+                            margin: '8px 20px 0 0',
                             fontSize: 12,
                             color: '#495057',
                             lineHeight: 1.5,
+                            textAlign: 'justify',
                         }}
                     >
                         {ensenanza.descripcion}
                     </p>
 
-                    {/* Autores */}
+                    {/* Autores (sin marginTop:auto para que no genere huecos raros) */}
                     <div
                         style={{
-                            marginTop: 'auto',
                             fontSize: 11,
                             color: '#6c757d',
                             borderTop: '1px solid #e9ecef',
                             paddingTop: 6,
+                            marginTop: 8,
                         }}
                     >
                         <strong>Autor(es):</strong> {autoresLabel}
@@ -177,7 +186,6 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         <strong>Enseñanzas</strong>
                     </span>
                     <KeyboardArrowDown
-                        key={ensenanza.id}
                         style={{
                             transition: 'transform 0.2s ease',
                             transform: open ? 'rotate(-180deg)' : 'rotate(0deg)',
@@ -201,18 +209,19 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                             />
                         ))}
 
-                        {(!ensenanza.devocionales || ensenanza.devocionales.length === 0) && (
-                            <div
-                                style={{
-                                    padding: '10px 16px',
-                                    fontSize: 13,
-                                    color: '#868e96',
-                                    borderTop: '1px solid #e9ecef',
-                                }}
-                            >
-                                No hay devocionales registrados para esta enseñanza todavía.
-                            </div>
-                        )}
+                        {(!ensenanza.devocionales ||
+                            ensenanza.devocionales.length === 0) && (
+                                <div
+                                    style={{
+                                        padding: '10px 16px',
+                                        fontSize: 13,
+                                        color: '#868e96',
+                                        borderTop: '1px solid #e9ecef',
+                                    }}
+                                >
+                                    No hay devocionales registrados para esta enseñanza todavía.
+                                </div>
+                            )}
                     </div>
                 )}
             </div>
@@ -268,7 +277,6 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
                     </span>
                 </div>
                 <KeyboardArrowDown
-                    key={devocional.id}
                     style={{
                         fontSize: 20,
                         transition: 'transform 0.2s ease',
@@ -305,14 +313,14 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
                         <ActionRow
                             label="Formato reducido"
                             href={devocional.instagram}
-                            target='_blank'
+                            target="_blank"
                         />
                     )}
                     {devocional.tiktok && (
                         <ActionRow
                             label="Formato reels"
                             href={devocional.tiktok}
-                            target='_blank'
+                            target="_blank"
                         />
                     )}
                 </div>
