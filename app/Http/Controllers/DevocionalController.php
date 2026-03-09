@@ -17,12 +17,14 @@ class DevocionalController extends Controller
 {
     $perPage = $request->input('per_page', 16);
     $devocionales = Devocional::where('is_devocional', 1)
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage);
-
+    ->where('ensenanza_id', '=', null)
+    ->orderBy('created_at', 'desc')
+    ->paginate($perPage);
+    
     $categoriasRaw = Devocional::whereNotNull('categoria')
-        ->where('categoria', '!=', '')
-        ->where('is_devocional', 1)
+    ->where('categoria', '!=', '')
+    ->where('is_devocional', 1)
+    ->where('ensenanza_id', '=', null)
         ->selectRaw('categoria, serie, COUNT(*) as count')
         ->groupBy('categoria', 'serie')
         ->get();
@@ -123,6 +125,7 @@ public function searchCategories(Request $request)
         $perPage = $request->input('per_page', 16);
         $devocionales = Devocional::where('categoria', $categoria)
             ->where('is_devocional', 1)
+    ->where('ensenanza_id', '=', null)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -134,7 +137,9 @@ public function searchCategories(Request $request)
     //devolver los ultimos 5 devocionales
     public function latest()
     {
-        $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', 1)->take(5)->get();
+        $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', 1)
+    ->where('ensenanza_id', '=', null)
+        ->take(5)->get();
         return response()->json($devocionales);
     }
 
@@ -207,6 +212,10 @@ public function searchCategories(Request $request)
             'is_devocional' => 'required|integer|in:0,1,2',
             'serie' => 'nullable|string|max:255',
             'created_at' => 'nullable|date',
+            'pdf' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'tiktok' => 'nullable|string|max:255',
+            'ensenanza_id'  => 'nullable|string',
         ]);
 
         $devocional = Devocional::create([
@@ -217,6 +226,10 @@ public function searchCategories(Request $request)
             'is_devocional' => $request->input('is_devocional'),
             'serie' => $request->input('serie'),
             'created_at' => $request->input('created_at') ?: now(), // Si no se proporciona created_at, usar la fecha actual
+            'pdf' => $request->input('pdf'),
+            'instagram' => $request->input('instagram'),
+            'tiktok' => $request->input('tiktok'),
+            'ensenanza_id' => $request->input('ensenanza_id'),
         ]);
 
         return response()->json([
@@ -309,48 +322,41 @@ public function update(Request $request, $id)
     $request->validate([
         'contenido'     => 'required|string',
         'categoria'     => 'required|string',
-        'imagen'        => 'required|string|url',
+        // permite que imagen venga null o string; si viene vacía, conservamos la anterior
+        'imagen'        => 'nullable|string|url',
         'autor'         => 'nullable|string|max:255',
         'is_devocional' => 'required|integer|in:0,1,2',
         'serie'         => 'nullable|string|max:255',
         'created_at'    => 'nullable|date',
+        'pdf'           => 'nullable|string|max:255',
+        'instagram'     => 'nullable|string|max:255',
+        'tiktok'        => 'nullable|string|max:255',
+        'ensenanza_id'  => 'nullable|string',
     ]);
 
-        $createdAt = $request->input('created_at'); // ej: "2026-02-13T00:00"
-
-    // if ($createdAt) {
-    //     try {
-    //         $createdAt = Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)
-    //             ->format('Y-m-d H:i:s');
-    //     } catch (\Exception $e) {
-    //         \Log::error('Error parseando created_at', [
-    //             'created_at' => $createdAt,
-    //             'msg'        => $e->getMessage(),
-    //         ]);
-    //         // opcional: devuelve 422
-    //         return response()->json([
-    //             'message' => 'Formato de fecha inválido',
-    //         ], 422);
-    //     }
-    // }
+    $createdAt = $request->input('created_at');
 
     $devocional->update([
         'contenido'     => $request->input('contenido'),
         'categoria'     => $request->input('categoria'),
-        'imagen'        => $request->input('imagen'),
+        'imagen'        => $request->input('imagen') ?: $devocional->imagen,
         'autor'         => $request->input('autor'),
         'is_devocional' => $request->input('is_devocional'),
         'serie'         => $request->input('serie'),
-        // 'created_at'    => $createdAt ?: $devocional->created_at,
-         'created_at'    => $createdAt
+        'created_at'    => $createdAt
             ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')
             : $devocional->created_at,
+        'pdf'           => $request->input('pdf'),
+        'instagram'     => $request->input('instagram'),
+        'tiktok'        => $request->input('tiktok'),
+        'ensenanza_id'  => $request->input('ensenanza_id'),
     ]);
 
     return response()->json([
-        'message'     => 'Devocional actualizado correctamente',
-        'devocional'  => $devocional,
+        'message'    => 'Devocional actualizado correctamente',
+        'devocional' => $devocional,
     ]);
 }
+
 
 }
