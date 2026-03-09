@@ -71,7 +71,7 @@ function Devocionals() {
             .then((data) => {
                 if (!selectedCategory && query.trim() === '') {
                     setCategories(data.categorias || []);
-                    setSeries(data.series || []);
+                    // setSeries(data.series || []);
                     setTotal(data.devocionales?.total || 0);
                 }
 
@@ -105,7 +105,6 @@ function Devocionals() {
             });
     }, []);
 
-    console.log("devocionales: ", devocionales);
     const handleSelectCategory = (cat: string | null) => {
         setSelectedCategory(cat);
         setPage(1);
@@ -270,7 +269,7 @@ function Devocionals() {
                 ))}
 
                 {/* Menú Series */}
-                {series.length > 0 && (
+                {/* {series.length > 0 && (
                     <li>
                         <details>
                             <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Series</summary>
@@ -296,7 +295,7 @@ function Devocionals() {
                             </ul>
                         </details>
                     </li>
-                )}
+                )} */}
             </ul>
         </div>
     );

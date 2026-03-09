@@ -30,14 +30,21 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const [ocultar, setOcultar] = useState(false);
 
 
-    const [series, setSeries] = useState<{ nombre: string; categorias: { categoria: string }[] }[]>([]);
+    const [series, setSeries] = useState<{ id: string; nombre: string }[]>([]);
     const [serie, setSerie] = useState('');
+    const [ensenanzas, setEnsenanzas] = useState<{ id: string; titulo: string }[]>([]);
+    const [ensenanzaId, setEnsenanzaId] = useState(''); // ya lo tienes definido, reúsalo aquí
     const [nuevaSerie, setNuevaSerie] = useState('');
     const [useNuevaSerie, setUseNuevaSerie] = useState(false);
 
 
     const [initialContent, setInitialContent] = useState('<p>This is the initial content of the editor.</p>');
     const [createdAt, setCreatedAt] = useState<string>('');
+
+    const [pdf, setPdf] = useState('');
+    const [instagram, setInstagram] = useState('');
+    const [tiktok, setTiktok] = useState('');
+
 
     const showLoader = isLoading || isSubmitting;
 
@@ -50,9 +57,12 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             const auts = res.data.autores.map((a: { autor: string }) => a.autor);
             setAutores(auts);
 
-            const sers = (res.data.series || []).map((s: { nombre: string }) => s);
+            const sers = (res.data.series || []).map((s: { id: string; nombre: string }) => s);
             setSeries(sers);
-            console.log("sers: ", sers);
+
+            axios.get('/api/ensenanzas').then((res) => {
+                setEnsenanzas(res.data);
+            });
         });
     }, []);
 
@@ -68,6 +78,10 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 setInitialContent(d.contenido || '');
                 setSerie(d.serie || '');
                 setOcultar(d.is_devocional === 2);
+                setPdf(d.pdf || '');
+                setInstagram(d.instagram || '');
+                setTiktok(d.tiktok || '');
+                setEnsenanzaId(d.ensenanza_id || '');
                 if (d.created_at) {
                     const iso = new Date(d.created_at).toISOString();
                     const local = iso.slice(0, 16); // "YYYY-MM-DDTHH:MM"
@@ -89,6 +103,27 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             setImagenUrl('');
         }
     };
+
+    const handlePdfChange = async (file: File | null) => {
+        if (!file) return;
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await axios.post('/upload-pdf', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRF-TOKEN':
+                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+            setPdf(response.data.location);
+        } catch (e) {
+            console.error(e);
+            alert('Error al subir el PDF');
+        }
+    };
+
+
 
     const handleGuardar = async () => {
         if (!editorRef.current) {
@@ -127,6 +162,10 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             is_devocional: is_devocional,
             serie: useNuevaSerie ? nuevaSerie : serie,
             created_at: createdAt || null,
+            ensenanza_id: ensenanzaId || null,
+            pdf: pdf || null,
+            instagram: instagram || null,
+            tiktok: tiktok || null,
         };
 
         try {
@@ -159,13 +198,9 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
         }
     };
 
-    const categoriasDeSeries = series.flatMap((s) =>
-        s.categorias.map((c) => c.categoria),
-    );
     const categoriasCompletas = Array.from(
         new Set([
             ...categorias,
-            ...categoriasDeSeries,
         ]),
     ).sort();
 
@@ -252,6 +287,26 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     )}
                 </div>
 
+                {/* Nuevo select Enseñanza, visible solo si hay serie seleccionada */}
+                {(serie || useNuevaSerie) && (
+                    <div className={styles['categoria-wrapper']} style={{ marginTop: 8 }}>
+                        <label className={styles['categoria-label']}>Enseñanza:</label>
+                        <select
+                            className={styles['categoria-select']}
+                            value={ensenanzaId}
+                            onChange={(e) => setEnsenanzaId(e.target.value)}
+                        >
+                            <option value="">Selecciona una enseñanza</option>
+                            {ensenanzas.map((e) => (
+                                <option key={e.id} value={e.id}>
+                                    {e.titulo}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+
 
                 <div className={styles['categoria-wrapper']}>
                     <label className={styles['categoria-label']}>Categoría:</label>
@@ -323,6 +378,53 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                         />
                     )}
                 </div>
+
+                {/* Solo mostrar estos campos cuando la serie esté activa */}
+                {(serie || useNuevaSerie) && (
+                    <>
+                        <div className={styles['autor-wrapper']} style={{ marginTop: 16 }}>
+                            <label className={styles['autor-label']}>PDF (opcional):</label>
+                            <input
+                                type="file"
+                                accept="application/pdf"
+                                className={styles['autor-input']}
+                                onChange={(e) => handlePdfChange(e.target.files?.[0] || null)}
+                            />
+                            {pdf && (
+                                <div style={{ marginTop: 6 }}>
+                                    <a href={pdf} target="_blank" rel="noopener noreferrer">
+                                        Ver PDF subido
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+
+
+                        <div className={styles['autor-wrapper']} style={{ marginTop: 8 }}>
+                            <label className={styles['autor-label']}>Instagram (URL opcional):</label>
+                            <input
+                                type="url"
+                                className={styles['autor-input']}
+                                placeholder="https://www.instagram.com/..."
+                                value={instagram}
+                                onChange={(e) => setInstagram(e.target.value)}
+                            />
+                        </div>
+
+                        <div className={styles['autor-wrapper']} style={{ marginTop: 8 }}>
+                            <label className={styles['autor-label']}>TikTok (URL opcional):</label>
+                            <input
+                                type="url"
+                                className={styles['autor-input']}
+                                placeholder="https://www.tiktok.com/..."
+                                value={tiktok}
+                                onChange={(e) => setTiktok(e.target.value)}
+                            />
+                        </div>
+                    </>
+                )}
+
+
 
                 <div>
                     <label>¿Es un devocional?</label>
