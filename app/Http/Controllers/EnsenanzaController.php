@@ -11,60 +11,72 @@ use Carbon\Carbon;
 
 class EnsenanzaController extends Controller
 {
+   
    public function index(Request $request)
-    {
-        $perPage = (int) $request->get('per_page', 10);
+{
+    $perPage = (int) $request->get('per_page', 10);
 
-        $ensenanzas = Ensenanza::query()
-            ->with(['devocionales' => function ($q) {
-                $q->soloEnsenanzas()
-                  ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at')
-                    ->orderBy('created_at', 'asc');
-                  
-            }])
-            ->withCount('devocionales') // devocionales_count
-            ->paginate($perPage);
+    $ensenanzas = Ensenanza::query()
+        ->with(['devocionales' => function ($q) {
+            $q->soloEnsenanzas()
+                ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at')
+                ->orderBy('created_at', 'asc');
+        }])
+        ->withCount('devocionales')
+        ->paginate($perPage);
 
-        $ensenanzas->getCollection()->transform(function ($ensenanza) {
-            // Autores únicos
-            $autores = $ensenanza->devocionales
-                ->pluck('autor')
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
+    $ensenanzas->getCollection()->transform(function ($ensenanza) {
+        // Autores únicos
+        $autores = $ensenanza->devocionales
+            ->pluck('autor')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
-            // Devocionales simplificados (id, titulo, autor)
-            $devocionales = $ensenanza->devocionales->map(function ($dev) {
-                // Extraer título del contenido HTML (primer <h1> o similar)
-                $titulo = preg_replace('/<[^>]+>/', '', $dev->contenido ?? '');
-                return [
-                    'id'     => $dev->id,
-                    'titulo' => trim($titulo) ?: 'Devocional',
-                    'autor'  => $dev->autor,
-                    'pdf'    => $dev->pdf,
-                    'tiktok' => $dev->tiktok,
-                    'instagram' => $dev->instagram,
-                ];
-            })->values()->all();
+        // Devocionales simplificados
+        $devocionales = $ensenanza->devocionales->map(function ($dev) {
+            $contenido = $dev->contenido ?? '';
+
+            // Buscar primer <h2>...</h2>
+            if (preg_match('/<h2[^>]*>(.*?)<\/h2>/is', $contenido, $matches)) {
+                $titulo = strip_tags($matches[1]);
+            } else {
+                // Fallback: quitar tags y usar primeras palabras
+                $titulo = trim(preg_replace('/\s+/', ' ', strip_tags($contenido)));
+            }
+
+            // Opcional: limitar longitud del título
+            $titulo = Str::limit($titulo, 120);
 
             return [
-                'id'               => $ensenanza->id,
-                'slug'             => $ensenanza->slug,
-                'titulo'           => $ensenanza->titulo,
-                'descripcion'      => $ensenanza->descripcion,
-                'imagen'           => $ensenanza->imagen,
-                'ensenanzas_count' => $ensenanza->devocionales_count,
-                'pdf'              => $ensenanza->pdf,
-                'tiktok'           => $ensenanza->tiktok,
-                'instagram'        => $ensenanza->instagram,
-                'autores'          => $autores,
-                'devocionales'     => $devocionales,
+                'id'         => $dev->id,
+                'titulo'     => $titulo ?: 'Devocional',
+                'autor'      => $dev->autor,
+                'contenido'  => $dev->contenido,
+                'pdf'        => $dev->pdf,
+                'tiktok'     => $dev->tiktok,
+                'instagram'  => $dev->instagram,
             ];
-        });
+        })->values()->all();
 
-        return response()->json($ensenanzas);
-    }
+        return [
+            'id'               => $ensenanza->id,
+            'slug'             => $ensenanza->slug,
+            'titulo'           => $ensenanza->titulo,
+            'descripcion'      => $ensenanza->descripcion,
+            'imagen'           => $ensenanza->imagen,
+            'ensenanzas_count' => $ensenanza->devocionales_count,
+            'pdf'              => $ensenanza->pdf,
+            'tiktok'           => $ensenanza->tiktok,
+            'instagram'        => $ensenanza->instagram,
+            'autores'          => $autores,
+            'devocionales'     => $devocionales,
+        ];
+    });
+
+    return response()->json($ensenanzas);
+}
 
     public function details($id)
     {
