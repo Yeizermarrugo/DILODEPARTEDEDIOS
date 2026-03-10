@@ -4,9 +4,9 @@ import '../../css/header.css';
 
 const navLinks = [
     { href: '/', label: 'Inicio' },
-    { href: '/about', label: 'Quienes somos?' },
+    { href: '/about', label: 'Quiénes somos' },
     { href: '/devocionales', label: 'Devocionales' },
-    { href: '/ensenanzas', label: 'Enseñanzas' },
+    { href: '/ensenanzas', label: 'Series' },
     { href: '/estudios', label: 'Estudios bíblicos' },
     { href: '/libreria', label: 'Librería' },
     { href: '/podcast', label: 'Podcast y mas' },
