@@ -12,38 +12,39 @@ const ImageUpload = ({ onImageSelected }: ImageUploadProps) => {
     const [dragActive, setDragActive] = useState(false);
 
     const handleButtonClick = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
+        fileInputRef.current?.click();
+    };
+
+    const processFile = (file: File | null) => {
+        if (!file) {
+            setImage(null);
+            setImageTitle('');
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            onImageSelected?.(null, null);
+            return;
         }
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            if (ev.target && typeof ev.target.result === 'string') {
+                setImage(ev.target.result);
+                setImageTitle(file.name);
+                onImageSelected?.(file, ev.target.result);
+            }
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files && e.target.files[0];
-        console.log('file', file);
-        console.log('image', image);
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (ev.target && typeof ev.target.result === 'string') {
-                    setImage(ev.target.result);
-                    setImageTitle(file.name);
-                    if (onImageSelected) {
-                        onImageSelected(file, ev.target.result);
-                        console.log('onImageSelected', JSON.stringify(onImageSelected(file, ev.target.result)));
-                    }
-                }
-            };
-            reader.readAsDataURL(file);
-        } else {
-            removeUpload();
-        }
+        const file = e.target.files?.[0] || null;
+        processFile(file);
     };
 
-    const removeUpload = () => {
-        setImage(null);
-        setImageTitle('');
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        if (onImageSelected) onImageSelected(null, null);
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setDragActive(false);
+        const file = e.dataTransfer.files?.[0] || null;
+        processFile(file);
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -56,21 +57,8 @@ const ImageUpload = ({ onImageSelected }: ImageUploadProps) => {
         setDragActive(false);
     };
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setDragActive(false);
-        const file = e.dataTransfer.files && e.dataTransfer.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (ev.target && typeof ev.target.result === 'string') {
-                    setImage(ev.target.result);
-                    setImageTitle(file.name);
-                    if (onImageSelected) onImageSelected(file, ev.target.result);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+    const removeUpload = () => {
+        processFile(null);
     };
 
     return (
@@ -80,12 +68,18 @@ const ImageUpload = ({ onImageSelected }: ImageUploadProps) => {
             </button>
             {!image ? (
                 <div
-                    className={`image-upload-wrap${dragActive ? 'image-dropping' : ''}`}
+                    className={`image-upload-wrap${dragActive ? ' image-dropping' : ''}`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                 >
-                    <input className="file-upload-input" type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
+                    <input
+                        className="file-upload-input"
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                    />
                     <div className="drag-text">
                         <h3>Drag and drop a file or select add Image</h3>
                     </div>
