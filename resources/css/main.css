@@ -4003,52 +4003,103 @@ section,
 /* Enseñanzas Cards */
 
 .ensenanzas-cards {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  /* Define 3 columnas iguales */
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  /* IMPORTANTE: align-items al inicio evita que una card estire a la de al lado al abrirse */
+  align-items: flex-start;
 }
 
-/* Desktop grande: 3 por fila */
-.ensenanzas-cards > * {
-  flex: 1 1 360px;
-  max-width: 32%;
+.ensenanza-card {
+  display: flex;
+  flex-direction: column;
+  /* NO pongas height: 100% ni fit-content aquí */
+  margin-bottom: 12px;
 }
 
-/* Pantallas medianas (laptop): 2 por fila */
+.ensenanza-card-top {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  padding: 10px;
+  /* ESTO ES LO QUE ESTABAS BUSCANDO: Forzamos el mismo alto mínimo para todas cerradas */
+  min-height: 220px; 
+}
+
+/* Contenedor de info derecha (título, desc, autor) */
+.ensenanza-card-info-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* Esto distribuye el espacio, mandando el autor al fondo de la sección top */
+  justify-content: space-between; 
+}
+
+/* Bloque de autores */
+.ensenanza-card-author {
+  font-size: 11px;
+  color: #6c757d;
+  border-top: 1px solid #e9ecef;
+  padding-top: 6px;
+  margin-top: auto; /* Seguro extra para empujar hacia abajo */
+}
+
+/* Contenedor del Dropdown (el bloque gris) */
+.ensenanza-card-dropdown {
+  border-top: 1px solid #e9ecef;
+  background-color: #ebebeb;
+}
+
+.ensenanza-card-dropdown button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: '#343a40';
+  text-transform: uppercase;
+}
+
+.ensenanza-card-devocionales-list {
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+}
+
+/* Responsivo: Tablet (2 columnas) */
 @media (max-width: 1199px) {
-  .ensenanzas-cards > * {
-    flex: 1 1 300px;
-    max-width: 48%;
+  .ensenanzas-cards {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* De 0 a 991 px: vista móvil (1 card por fila, ancho completo) */
+/* Responsivo: Móvil (1 columna + Imagen Full) */
 @media (max-width: 991px) {
-  .ensenanzas-cards > * {
-    flex: 1 1 100%;
-    max-width: 100%;
-  }
-
-  .ensenanza-card {
-    width: 100% !important;
-    max-width: 100% !important;
+  .ensenanzas-cards {
+    grid-template-columns: 1fr;
   }
 
   .ensenanza-card-top {
     flex-direction: column !important;
+    min-height: auto !important; /* En móvil que fluya según contenido */
+    padding: 0;
   }
 
   .ensenanza-card-top > div:first-child {
-    flex: 0 0 auto !important;
     max-width: 100% !important;
     width: 100% !important;
-    height: auto !important;
+    height: 200px !important;
+    border-radius: 0;
   }
 
-  .ensenanza-card-top > div:first-child img {
-    width: 100% !important;
-    height: auto !important;
-    object-fit: cover;
-    display: block;
+  .ensenanza-card-info-right {
+    padding: 15px;
   }
 }
