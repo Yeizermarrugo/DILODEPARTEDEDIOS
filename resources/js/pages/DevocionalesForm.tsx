@@ -8,15 +8,17 @@ import styles from '../../css/categoriaSelect.module.css';
 
 interface DevocionalFormProps {
     mode: 'create' | 'edit';
-    id?: string; // requerido en modo edit
+    id?: string;
 }
 
 const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const editorRef = useRef<TinyMCEEditor | null>(null);
+
     const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
     const [imagenUrl, setImagenUrl] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
     const [categorias, setCategorias] = useState<string[]>([]);
     const [autores, setAutores] = useState<string[]>([]);
 
@@ -26,17 +28,22 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const [nuevoAutor, setNuevoAutor] = useState('');
     const [useNuevaCategoria, setUseNuevaCategoria] = useState(false);
     const [useNuevoAutor, setUseNuevoAutor] = useState(false);
+
     const [is_devocional, setIsDevocional] = useState<0 | 1 | 2>(1);
     const [ocultar, setOcultar] = useState(false);
-
 
     const [series, setSeries] = useState<{ id: string; nombre: string }[]>([]);
     const [serie, setSerie] = useState('');
     const [ensenanzas, setEnsenanzas] = useState<{ id: string; titulo: string }[]>([]);
-    const [ensenanzaId, setEnsenanzaId] = useState(''); // ya lo tienes definido, reúsalo aquí
+    const [ensenanzaId, setEnsenanzaId] = useState('');
     const [nuevaSerie, setNuevaSerie] = useState('');
     const [useNuevaSerie, setUseNuevaSerie] = useState(false);
 
+    const [useNuevaEnsenanza, setUseNuevaEnsenanza] = useState(false);
+    const [nuevaEnsenanzaTitulo, setNuevaEnsenanzaTitulo] = useState('');
+    const [nuevaEnsenanzaDescripcion, setNuevaEnsenanzaDescripcion] = useState('');
+    const [nuevaEnsenanzaImagenFile, setNuevaEnsenanzaImagenFile] = useState<File | null>(null);
+    const [nuevaEnsenanzaImagenUrl, setNuevaEnsenanzaImagenUrl] = useState('');
 
     const [initialContent, setInitialContent] = useState('<p>This is the initial content of the editor.</p>');
     const [createdAt, setCreatedAt] = useState<string>('');
@@ -45,10 +52,9 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const [instagram, setInstagram] = useState('');
     const [tiktok, setTiktok] = useState('');
 
-
     const showLoader = isLoading || isSubmitting;
 
-    // Cargar categorías/autores
+    // Cargar categorías / autores / series / enseñanzas
     useEffect(() => {
         axios.get('/devocionales-searchCategories').then((res) => {
             const cats = res.data.categorias.map((c: { categoria: string }) => c.categoria);
@@ -60,13 +66,13 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             const sers = (res.data.series || []).map((s: { id: string; nombre: string }) => s);
             setSeries(sers);
 
-            axios.get('/api/ensenanzas').then((res) => {
-                setEnsenanzas(res.data);
+            axios.get('/api/ensenanzas').then((res2) => {
+                setEnsenanzas(res2.data);
             });
         });
     }, []);
 
-    // Si estamos en modo editar, cargar el devocional
+    // Cargar devocional en modo edición
     useEffect(() => {
         if (mode === 'edit' && id) {
             axios.get(`/devocionales/${id}`).then((res) => {
@@ -84,7 +90,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 setEnsenanzaId(d.ensenanza_id || '');
                 if (d.created_at) {
                     const iso = new Date(d.created_at).toISOString();
-                    const local = iso.slice(0, 16); // "YYYY-MM-DDTHH:MM"
+                    const local = iso.slice(0, 16); // YYYY-MM-DDTHH:MM
                     setCreatedAt(local);
                 }
             });
@@ -96,13 +102,14 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
         setIsLoading(false);
     };
 
-    const handleImageChange = (file: File | null) => {
+    const handleImageChange = (file: File | null, _dataUrl: string | null) => {
+        console.log('handleImageChange file', file);
         setSelectedImageFile(file);
-        // si estás editando y no seleccionas nueva imagen, conservas imagenUrl
         if (file) {
             setImagenUrl('');
         }
     };
+
 
     const handlePdfChange = async (file: File | null) => {
         if (!file) return;
@@ -123,86 +130,123 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
         }
     };
 
-
+    const handleEnsenanzaImageChange = async (file: File | null) => {
+        if (!file) {
+            setNuevaEnsenanzaImagenFile(null);
+            setNuevaEnsenanzaImagenUrl('');
+            return;
+        }
+        try {
+            setNuevaEnsenanzaImagenFile(file);
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await axios.post('/upload-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRF-TOKEN':
+                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+            const url = response.data.location || response.data.url;
+            setNuevaEnsenanzaImagenUrl(url);
+        } catch (e) {
+            console.error(e);
+            alert('Error al subir la imagen de la enseñanza');
+        }
+    };
 
     const handleGuardar = async () => {
+        if (isSubmitting) return;
+
         if (!editorRef.current) {
             alert('Editor no encontrado');
             return;
         }
-        setIsSubmitting(true);
-        let urlImagenFinal = imagenUrl;
 
-        // Subir nueva imagen si se seleccionó
-        if (selectedImageFile) {
-            try {
+        setIsSubmitting(true);
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const standardHeaders = { 'X-CSRF-TOKEN': csrfToken };
+
+            let urlImagenFinal = imagenUrl;
+
+            // 1. Subir imagen principal si existe
+            if (selectedImageFile) {
                 const formData = new FormData();
                 formData.append('file', selectedImageFile);
                 const response = await axios.post('/upload-image', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'X-CSRF-TOKEN':
-                            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
+                    headers: { ...standardHeaders, 'Content-Type': 'multipart/form-data' },
                 });
                 urlImagenFinal = response.data.location || response.data.url;
-                setImagenUrl(urlImagenFinal);
-            } catch {
-                alert('Error al subir la imagen');
-                setIsSubmitting(false);
-                return;
             }
-        }
 
-        const payload = {
-            contenido: editorRef.current.getContent(),
-            imagen: urlImagenFinal,
-            categoria: useNuevaCategoria ? nuevaCategoria : categoria,
-            autor: useNuevoAutor ? nuevoAutor : autor,
-            is_devocional: is_devocional,
-            serie: useNuevaSerie ? nuevaSerie : serie,
-            created_at: createdAt || null,
-            ensenanza_id: ensenanzaId || null,
-            pdf: pdf || null,
-            instagram: instagram || null,
-            tiktok: tiktok || null,
-        };
+            // 2. Crear nueva enseñanza si es necesario
+            let ensenanzaIdFinal: string | null = ensenanzaId || null;
+            if ((serie || useNuevaSerie) && useNuevaEnsenanza) {
+                if (!nuevaEnsenanzaTitulo.trim()) {
+                    alert('El título de la enseñanza es obligatorio');
+                    setIsSubmitting(false);
+                    return;
+                }
 
-        try {
-            if (mode === 'create') {
-                await axios.post('/devocionalesadd', payload, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN':
-                            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
-                });
-                alert('Devocional agregado correctamente');
-                window.location.href = '/dashboard';
+                const resEnsenanza = await axios.post('/api/ensenanzas', {
+                    titulo: nuevaEnsenanzaTitulo.trim(),
+                    descripcion: nuevaEnsenanzaDescripcion.trim(),
+                    imagen: nuevaEnsenanzaImagenUrl || null,
+                }, { headers: standardHeaders });
+
+                ensenanzaIdFinal = resEnsenanza.data.id?.toString();
+            }
+
+            // 3. Payload final
+            const payload = {
+                contenido: editorRef.current.getContent(),
+                imagen: urlImagenFinal,
+                categoria: useNuevaCategoria ? nuevaCategoria : categoria,
+                autor: useNuevoAutor ? nuevoAutor : autor,
+                is_devocional: is_devocional,
+                serie: useNuevaSerie ? nuevaSerie : serie,
+                created_at: createdAt || null,
+                ensenanza_id: ensenanzaIdFinal,
+                pdf: pdf || null,
+                instagram: instagram || null,
+                tiktok: tiktok || null,
+            };
+
+            // 4. Enviar a Laravel
+            const endpoint = mode === 'create' ? '/devocionalesadd' : `/devocionales/${id}`;
+            const method = mode === 'create' ? 'post' : 'put';
+
+            await axios[method](endpoint, payload, { headers: standardHeaders });
+
+            alert(mode === 'create' ? '¡Guardado con éxito!' : '¡Actualizado con éxito!');
+            window.location.href = mode === 'create' ? '/dashboard' : '/devocionales-edit';
+
+        } catch (error: any) {
+            if (axios.isAxiosError(error)) {
+                const status = error.response?.status;
+                const data = error.response?.data;
+
+                if (status === 422) {
+                    // Error de validación: Falta algo en el formulario
+                    const errores = data.errors ? Object.values(data.errors).flat().join('\n') : data.message;
+                    alert(`⚠️ Datos incompletos o incorrectos:\n\n${errores}`);
+                } else if (status === 500) {
+                    // Error de servidor: Probablemente un duplicado
+                    console.error('Detalle 500:', data);
+                    alert('🔥 Error 500: El servidor no pudo procesar la solicitud. Posiblemente el título o el slug ya existen en la base de datos.');
+                } else {
+                    alert(`Error inesperado (${status}): ${data?.message || 'Consulta la consola'}`);
+                }
             } else {
-                await axios.put(`/devocionales/${id}`, payload, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN':
-                            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
-                });
-                alert('Devocional actualizado correctamente');
-                window.location.href = '/devocionales-edit';
+                alert('Error de conexión o de red.');
             }
-        } catch (error) {
-            alert('Hubo un error al guardar el devocional');
-            console.error(error);
         } finally {
             setIsSubmitting(false);
         }
     };
-
-    const categoriasCompletas = Array.from(
-        new Set([
-            ...categorias,
-        ]),
-    ).sort();
+    const categoriasCompletas = Array.from(new Set([...categorias])).sort();
 
     return (
         <div style={{ position: 'relative', minHeight: 400 }}>
@@ -251,7 +295,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     {mode === 'create' ? 'Guardar' : 'Actualizar'}
                 </button>
 
-                {/* Serie (carpeta que agrupa categorías de series) */}
+                {/* Serie */}
                 <div className={styles['categoria-wrapper']} style={{ marginTop: 16 }}>
                     <label className={styles['categoria-label']}>Serie (opcional):</label>
                     <select
@@ -287,14 +331,22 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     )}
                 </div>
 
-                {/* Nuevo select Enseñanza, visible solo si hay serie seleccionada */}
+                {/* Enseñanza */}
                 {(serie || useNuevaSerie) && (
                     <div className={styles['categoria-wrapper']} style={{ marginTop: 8 }}>
                         <label className={styles['categoria-label']}>Enseñanza:</label>
                         <select
                             className={styles['categoria-select']}
-                            value={ensenanzaId}
-                            onChange={(e) => setEnsenanzaId(e.target.value)}
+                            value={useNuevaEnsenanza ? 'nueva' : ensenanzaId}
+                            onChange={(e) => {
+                                if (e.target.value === 'nueva') {
+                                    setUseNuevaEnsenanza(true);
+                                    setEnsenanzaId('');
+                                } else {
+                                    setUseNuevaEnsenanza(false);
+                                    setEnsenanzaId(e.target.value);
+                                }
+                            }}
                         >
                             <option value="">Selecciona una enseñanza</option>
                             {ensenanzas.map((e) => (
@@ -302,12 +354,52 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                                     {e.titulo}
                                 </option>
                             ))}
+                            <option value="nueva">Agregar nueva enseñanza...</option>
                         </select>
+
+                        {useNuevaEnsenanza && (
+                            <div style={{ marginTop: 8 }}>
+                                <input
+                                    className={styles['categoria-input']}
+                                    type="text"
+                                    placeholder="Título de la nueva enseñanza"
+                                    value={nuevaEnsenanzaTitulo}
+                                    onChange={(e) => setNuevaEnsenanzaTitulo(e.target.value)}
+                                />
+
+                                <textarea
+                                    className={styles['categoria-input']}
+                                    placeholder="Descripción de la enseñanza"
+                                    value={nuevaEnsenanzaDescripcion}
+                                    onChange={(e) => setNuevaEnsenanzaDescripcion(e.target.value)}
+                                    style={{ marginTop: 8, minHeight: 80 }}
+                                />
+
+                                <div style={{ marginTop: 8 }}>
+                                    <label style={{ display: 'block', marginBottom: 4 }}>
+                                        Imagen de la enseñanza (opcional):
+                                    </label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleEnsenanzaImageChange(e.target.files?.[0] || null)}
+                                    />
+                                    {nuevaEnsenanzaImagenUrl && (
+                                        <div style={{ marginTop: 6 }}>
+                                            <img
+                                                src={nuevaEnsenanzaImagenUrl}
+                                                alt="Imagen enseñanza"
+                                                style={{ maxWidth: 200, borderRadius: 8 }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
-
-
+                {/* Categoría */}
                 <div className={styles['categoria-wrapper']}>
                     <label className={styles['categoria-label']}>Categoría:</label>
                     <select
@@ -324,13 +416,11 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                         }}
                     >
                         <option value="">Selecciona una categoría</option>
-
                         {categoriasCompletas.map((cat) => (
                             <option key={cat} value={cat}>
                                 {cat}
                             </option>
                         ))}
-
                         <option value="nueva">Agregar nueva categoría...</option>
                     </select>
 
@@ -345,6 +435,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     )}
                 </div>
 
+                {/* Autor */}
                 <div className={styles['autor-wrapper']}>
                     <label className={styles['autor-label']}>Autor:</label>
                     <select
@@ -379,7 +470,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     )}
                 </div>
 
-                {/* Solo mostrar estos campos cuando la serie esté activa */}
+                {/* PDF / IG / TikTok: solo cuando hay serie */}
                 {(serie || useNuevaSerie) && (
                     <>
                         <div className={styles['autor-wrapper']} style={{ marginTop: 16 }}>
@@ -398,7 +489,6 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                                 </div>
                             )}
                         </div>
-
 
                         <div className={styles['autor-wrapper']} style={{ marginTop: 8 }}>
                             <label className={styles['autor-label']}>Instagram (URL opcional):</label>
@@ -424,8 +514,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     </>
                 )}
 
-
-
+                {/* Flags devocional / oculto */}
                 <div>
                     <label>¿Es un devocional?</label>
                     <input
@@ -462,6 +551,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     />
                 </div>
 
+                {/* Fecha y hora */}
                 <div className={styles['autor-wrapper']} style={{ marginTop: 16 }}>
                     <label className={styles['autor-label']}>Fecha y hora:</label>
                     <input
@@ -472,7 +562,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     />
                 </div>
 
-
+                {/* Editor */}
                 <Editor
                     apiKey="pc7pp06765v04kvyv0e65n2ja3v0c3hn5law9o9vpchu0erd"
                     onInit={handleEditorInit}
