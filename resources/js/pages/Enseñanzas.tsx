@@ -195,13 +195,13 @@ function Enseñanzas() {
                                                     gap: 12,
                                                 }}
                                             >
-                                                <h2 style={{ color: '#212529', margin: 0 }}>
+                                                {/* <h2 style={{ color: '#212529', margin: 0 }}>
                                                     {searchTerm
                                                         ? `Resultados de búsqueda "${searchTerm}"`
                                                         : 'Series de enseñanzas'}
-                                                </h2>
+                                                </h2> */}
 
-                                                <form
+                                                {/* <form
                                                     onSubmit={onSubmitSearch}
                                                     style={{
                                                         display: 'flex',
@@ -209,8 +209,8 @@ function Enseñanzas() {
                                                         gap: 8,
                                                         alignItems: 'center',
                                                     }}
-                                                >
-                                                    <input
+                                                > */}
+                                                {/* <input
                                                         type="text"
                                                         value={searchTerm}
                                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -220,8 +220,8 @@ function Enseñanzas() {
                                                             minWidth: 0,
                                                             padding: '6px 10px',
                                                         }}
-                                                    />
-                                                    <button type="submit">Buscar</button>
+                                                    /> */}
+                                                {/* <button type="submit">Buscar</button>
                                                     {searchTerm && (
                                                         <button
                                                             type="button"
@@ -230,8 +230,8 @@ function Enseñanzas() {
                                                         >
                                                             Limpiar
                                                         </button>
-                                                    )}
-                                                </form>
+                                                    )} */}
+                                                {/* </form> */}
                                             </div>
 
                                             {/* Cards */}
