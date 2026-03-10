@@ -85,6 +85,8 @@ Route::get('/podcast', function () {
 });
 
 Route::get('/api/ensenanzas', [EnsenanzaController::class, 'listSimple']);
+Route::post('/api/ensenanzas', [EnsenanzaController::class, 'store']);
+Route::put('/api/ensenanzas/{id}', [EnsenanzaController::class, 'update']);
 
 
 Route::post('/upload-pdf', [PdfUploadController::class, 'store'])->name('upload.pdf');

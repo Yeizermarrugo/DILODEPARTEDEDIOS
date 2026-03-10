@@ -7,7 +7,6 @@ use App\Models\Ensenanza;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class EnsenanzaController extends Controller
 {
@@ -119,5 +118,54 @@ class EnsenanzaController extends Controller
             ->select('id', 'titulo')
             ->orderBy('titulo')
             ->get();
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'titulo'      => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'imagen'      => 'nullable|string|url',
+        ]);
+
+        // Generar slug base
+        $slugBase = Str::slug($data['titulo']);
+        $slug = $slugBase;
+
+        // Lógica para garantizar que el slug sea único
+        $count = 1;
+        while (\App\Models\Ensenanza::where('slug', $slug)->exists()) {
+            $slug = $slugBase . '-' . $count;
+            $count++;
+        }
+
+        $ensenanza = Ensenanza::create([
+            'titulo'      => $data['titulo'],
+            'slug'        => $slug,
+            'descripcion' => $data['descripcion'] ?? '',
+            'imagen'      => $data['imagen'] ?? null,
+        ]);
+
+        return response()->json($ensenanza, 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $ensenanza = Ensenanza::findOrFail($id);
+
+        $data = $request->validate([
+            'titulo'      => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'imagen'      => 'nullable|string|url',
+        ]);
+
+        $ensenanza->update([
+            'titulo'      => $data['titulo'],
+            'slug'        => Str::slug($data['titulo']),
+            'descripcion' => $data['descripcion'] ?? '',
+            'imagen'      => $data['imagen'] ?? $ensenanza->imagen,
+        ]);
+
+        return response()->json($ensenanza);
     }
 }

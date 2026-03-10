@@ -32,6 +32,7 @@ class Devocional extends Model
 
     protected $casts = [
         'is_devocional' => 'integer',
+        'created_at' => 'datetime',
     ];
 
     protected static function boot()

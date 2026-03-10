@@ -13,111 +13,111 @@ class DevocionalController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function index(Request $request)
-{
-    $perPage = $request->input('per_page', 16);
-    $devocionales = Devocional::where('is_devocional', 1)
-    ->where('ensenanza_id', '=', null)
-    ->orderBy('created_at', 'desc')
-    ->paginate($perPage);
-    
-    $categoriasRaw = Devocional::whereNotNull('categoria')
-    ->where('categoria', '!=', '')
-    ->where('is_devocional', 1)
-    ->where('ensenanza_id', '=', null)
-        ->selectRaw('categoria, serie, COUNT(*) as count')
-        ->groupBy('categoria', 'serie')
-        ->get();
+    public function index(Request $request)
+    {
+        $perPage = $request->input('per_page', 16);
+        $devocionales = Devocional::where('is_devocional', 1)
+            ->where('ensenanza_id', '=', null)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
 
-    $series = [];
-    $categoriasSinSerie = [];
+        $categoriasRaw = Devocional::whereNotNull('categoria')
+            ->where('categoria', '!=', '')
+            ->where('is_devocional', 1)
+            ->where('ensenanza_id', '=', null)
+            ->selectRaw('categoria, serie, COUNT(*) as count')
+            ->groupBy('categoria', 'serie')
+            ->get();
 
-    foreach ($categoriasRaw as $row) {
-        if ($row->serie) {
-            if (!isset($series[$row->serie])) {
-                $series[$row->serie] = [
-                    'nombre'     => $row->serie,
-                    'categorias' => [],
+        $series = [];
+        $categoriasSinSerie = [];
+
+        foreach ($categoriasRaw as $row) {
+            if ($row->serie) {
+                if (!isset($series[$row->serie])) {
+                    $series[$row->serie] = [
+                        'nombre'     => $row->serie,
+                        'categorias' => [],
+                    ];
+                }
+                $series[$row->serie]['categorias'][] = [
+                    'categoria' => $row->categoria,
+                    'count'     => $row->count,
+                ];
+            } else {
+                $categoriasSinSerie[] = [
+                    'categoria' => $row->categoria,
+                    'count'     => $row->count,
                 ];
             }
-            $series[$row->serie]['categorias'][] = [
-                'categoria' => $row->categoria,
-                'count'     => $row->count,
-            ];
-        } else {
-            $categoriasSinSerie[] = [
-                'categoria' => $row->categoria,
-                'count'     => $row->count,
-            ];
         }
+
+        $autores = Devocional::whereNotNull('autor')
+            ->where('autor', '!=', '')
+            ->where('is_devocional', 1)
+            ->groupBy('autor')
+            ->selectRaw('autor, COUNT(*) as count')
+            ->get();
+
+        return response()->json([
+            'devocionales' => $devocionales,
+            'categorias'   => $categoriasSinSerie,
+            'series'       => array_values($series),
+            'autores'      => $autores,
+        ]);
     }
 
-    $autores = Devocional::whereNotNull('autor')
-        ->where('autor', '!=', '')
-        ->where('is_devocional', 1)
-        ->groupBy('autor')
-        ->selectRaw('autor, COUNT(*) as count')
-        ->get();
+    public function searchCategories(Request $request)
+    {
+        $perPage = $request->input('per_page', 16);
+        $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
 
-    return response()->json([
-        'devocionales' => $devocionales,
-        'categorias'   => $categoriasSinSerie,
-        'series'       => array_values($series),
-        'autores'      => $autores,
-    ]);
-}
+        // Todas las categorías con su serie
+        $categoriasRaw = Devocional::whereNotNull('categoria')
+            ->where('categoria', '!=', '')
+            ->selectRaw('categoria, serie, COUNT(*) as count')
+            ->groupBy('categoria', 'serie')
+            ->get();
 
-public function searchCategories(Request $request)
-{
-    $perPage = $request->input('per_page', 16);
-    $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
+        // Agrupar en estructura series + categorias sueltas
+        $series = [];
+        $categoriasSinSerie = [];
 
-    // Todas las categorías con su serie
-    $categoriasRaw = Devocional::whereNotNull('categoria')
-        ->where('categoria', '!=', '')
-        ->selectRaw('categoria, serie, COUNT(*) as count')
-        ->groupBy('categoria', 'serie')
-        ->get();
-
-    // Agrupar en estructura series + categorias sueltas
-    $series = [];
-    $categoriasSinSerie = [];
-
-    foreach ($categoriasRaw as $row) {
-        if ($row->serie) {
-            // Dentro de una serie
-            if (!isset($series[$row->serie])) {
-                $series[$row->serie] = [
-                    'nombre'     => $row->serie,
-                    'categorias' => [],
+        foreach ($categoriasRaw as $row) {
+            if ($row->serie) {
+                // Dentro de una serie
+                if (!isset($series[$row->serie])) {
+                    $series[$row->serie] = [
+                        'nombre'     => $row->serie,
+                        'categorias' => [],
+                    ];
+                }
+                $series[$row->serie]['categorias'][] = [
+                    'categoria' => $row->categoria,
+                    'count'     => $row->count,
+                ];
+            } else {
+                // Categoría suelta
+                $categoriasSinSerie[] = [
+                    'categoria' => $row->categoria,
+                    'count'     => $row->count,
                 ];
             }
-            $series[$row->serie]['categorias'][] = [
-                'categoria' => $row->categoria,
-                'count'     => $row->count,
-            ];
-        } else {
-            // Categoría suelta
-            $categoriasSinSerie[] = [
-                'categoria' => $row->categoria,
-                'count'     => $row->count,
-            ];
         }
+
+        $autores = Devocional::whereNotNull('autor')
+            ->where('autor', '!=', '')
+            ->groupBy('autor')
+            ->selectRaw('autor, COUNT(*) as count')
+            ->get();
+
+        return response()->json([
+            'devocionales'       => $devocionales,
+            'categorias'         => $categoriasSinSerie, // lo que ya usas
+            'series'             => array_values($series), // nuevo
+            'autores'            => $autores,
+        ]);
     }
-
-    $autores = Devocional::whereNotNull('autor')
-        ->where('autor', '!=', '')
-        ->groupBy('autor')
-        ->selectRaw('autor, COUNT(*) as count')
-        ->get();
-
-    return response()->json([
-        'devocionales'       => $devocionales,
-        'categorias'         => $categoriasSinSerie, // lo que ya usas
-        'series'             => array_values($series), // nuevo
-        'autores'            => $autores,
-    ]);
-}
 
 
     public function porCategoria(Request $request, $categoria)
@@ -125,7 +125,7 @@ public function searchCategories(Request $request)
         $perPage = $request->input('per_page', 16);
         $devocionales = Devocional::where('categoria', $categoria)
             ->where('is_devocional', 1)
-    ->where('ensenanza_id', '=', null)
+            ->where('ensenanza_id', '=', null)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -138,18 +138,18 @@ public function searchCategories(Request $request)
     public function latest()
     {
         $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', 1)
-    ->where('ensenanza_id', '=', null)
-        ->take(5)->get();
+            ->where('ensenanza_id', '=', null)
+            ->take(5)->get();
         return response()->json($devocionales);
     }
 
     public function estudios()
     {
         $devocionales = Devocional::where('is_devocional', 0)
-        ->orderBy('categoria', 'asc')
-        ->orderBy('contenido', 'asc')
-        ->orderBy('created_at', 'asc')
-        ->get();
+            ->orderBy('categoria', 'asc')
+            ->orderBy('contenido', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
         return response()->json($devocionales);
     }
 
@@ -169,24 +169,24 @@ public function searchCategories(Request $request)
     }
 
     public function details($id)
-{
-    $devocional = Devocional::findOrFail($id);
-    $routeName = $devocional->is_devocional === 1 ? 'devocional.details' : 'estudio-biblico.details';
+    {
+        $devocional = Devocional::findOrFail($id);
+        $routeName = $devocional->is_devocional === 1 ? 'devocional.details' : 'estudio-biblico.details';
 
-      $url = route($routeName, ['id' => $devocional->id]);
+        $url = route($routeName, ['id' => $devocional->id]);
 
-    return Inertia::render('DevocionalDetailsPage', [
-        'devocional' => $devocional,
-        'is_devocional' => $devocional->is_devocional,
+        return Inertia::render('DevocionalDetailsPage', [
+            'devocional' => $devocional,
+            'is_devocional' => $devocional->is_devocional,
 
-        'meta' => [
-            'title' => $devocional->titulo,
-            'description' => Str::limit(strip_tags($devocional->contenido), 150),
-            'image' => $devocional->imagen, // URL pública
-            'url' => url()->current(),
-        ]
-    ]);
-}
+            'meta' => [
+                'title' => $devocional->titulo,
+                'description' => Str::limit(strip_tags($devocional->contenido), 150),
+                'image' => $devocional->imagen, // URL pública
+                'url' => url()->current(),
+            ]
+        ]);
+    }
 
 
     /**
@@ -204,159 +204,158 @@ public function searchCategories(Request $request)
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'contenido' => 'required|string',
-            'categoria' => 'required|string',
-            'imagen' => 'required|string|url', // Asegúrate de que 'imagen' sea una cadena y tenga un tamaño máximo
-            'autor' => 'nullable|string|max:255',
+        $validated = $request->validate([
+            'contenido'     => 'required|string',
+            'categoria'     => 'required|string',
+            'imagen'        => 'nullable|string',
+            'autor'         => 'nullable|string|max:255',
             'is_devocional' => 'required|integer|in:0,1,2',
-            'serie' => 'nullable|string|max:255',
-            'created_at' => 'nullable|date',
-            'pdf' => 'nullable|string|max:255',
-            'instagram' => 'nullable|string|max:255',
-            'tiktok' => 'nullable|string|max:255',
+            'serie'         => 'nullable|string|max:255',
+            'created_at'    => 'nullable|date',
+            'pdf'           => 'nullable|string|max:255',
+            'instagram'     => 'nullable|string|max:255',
+            'tiktok'        => 'nullable|string|max:255',
             'ensenanza_id'  => 'nullable|string',
         ]);
 
+        // Creamos el registro usando SOLO los campos que existen en la DB
         $devocional = Devocional::create([
-            'contenido' => $request->input('contenido'),
-            'categoria' => $request->input('categoria'),
-            'imagen' => $request->input('imagen'), // Asegúrate de que 'imagen' esté en el request
-            'autor' => $request->input('autor'),
-            'is_devocional' => $request->input('is_devocional'),
-            'serie' => $request->input('serie'),
-            'created_at' => $request->input('created_at') ?: now(), // Si no se proporciona created_at, usar la fecha actual
-            'pdf' => $request->input('pdf'),
-            'instagram' => $request->input('instagram'),
-            'tiktok' => $request->input('tiktok'),
-            'ensenanza_id' => $request->input('ensenanza_id'),
+            'contenido'     => $validated['contenido'],
+            'categoria'     => $validated['categoria'],
+            'imagen'        => $validated['imagen'] ?? null,
+            'autor'         => $validated['autor'] ?? null,
+            'is_devocional' => $validated['is_devocional'],
+            'serie'         => $validated['serie'] ?? null,
+            'created_at'    => $validated['created_at'] ?: now(),
+            'pdf'           => $validated['pdf'] ?? null,
+            'instagram'     => $validated['instagram'] ?? null,
+            'tiktok'        => $validated['tiktok'] ?? null,
+            'ensenanza_id'  => $validated['ensenanza_id'] ?? null,
         ]);
 
         return response()->json([
-            'message' => 'Devocional guardado correctamente',
+            'message' => '¡Guardado con éxito!',
             'devocional' => $devocional
         ], 201);
     }
 
-public function adminIndex(Request $request)
-{
-    $perPage   = $request->input('per_page', 50);
-    $search    = $request->input('search');
-    $categoria = $request->input('categoria');
-    $autor     = $request->input('autor');
+    public function adminIndex(Request $request)
+    {
+        $perPage   = $request->input('per_page', 50);
+        $search    = $request->input('search');
+        $categoria = $request->input('categoria');
+        $autor     = $request->input('autor');
 
-    // Base query con filtros comunes
-    $baseQuery = Devocional::query();
+        // Base query con filtros comunes
+        $baseQuery = Devocional::query();
 
-    if ($search) {
-        $baseQuery->where(function ($q) use ($search) {
-            $q->where('contenido', 'like', "%{$search}%")
-              ->orWhere('categoria', 'like', "%{$search}%");
-        });
+        if ($search) {
+            $baseQuery->where(function ($q) use ($search) {
+                $q->where('contenido', 'like', "%{$search}%")
+                    ->orWhere('categoria', 'like', "%{$search}%");
+            });
+        }
+
+        if ($categoria) {
+            $baseQuery->where('categoria', $categoria);
+        }
+
+        if ($autor) {
+            $baseQuery->where('autor', $autor);
+        }
+
+        // Clonar la query base para cada grupo
+        $devocionales = (clone $baseQuery)
+            ->where('is_devocional', 1)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'devocionales_page')
+            ->withQueryString();
+
+        $estudios = (clone $baseQuery)
+            ->where('is_devocional', 0)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'estudios_page')
+            ->withQueryString();
+
+        $ocultos = (clone $baseQuery)
+            ->where('is_devocional', 2)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'ocultos_page')
+            ->withQueryString();
+
+        $categorias = Devocional::whereNotNull('categoria')
+            ->where('categoria', '!=', '')
+            ->groupBy('categoria')
+            ->selectRaw('categoria, COUNT(*) as count')
+            ->get();
+
+        $autores = Devocional::whereNotNull('autor')
+            ->where('autor', '!=', '')
+            ->groupBy('autor')
+            ->selectRaw('autor, COUNT(*) as count')
+            ->get();
+
+        return Inertia::render('Edit', [
+            'devocionales' => $devocionales,   // is_devocional = 1
+            'estudios'     => $estudios,       // is_devocional = 0
+            'ocultos'      => $ocultos,        // is_devocional = 2
+            'categorias'   => $categorias,
+            'autores'      => $autores,
+            'filters'      => [
+                'search'    => $search,
+                'categoria' => $categoria,
+                'autor'     => $autor,
+            ],
+        ]);
     }
 
-    if ($categoria) {
-        $baseQuery->where('categoria', $categoria);
+
+    public function showJson($id)
+    {
+        $devocional = Devocional::findOrFail($id);
+        return response()->json($devocional);
     }
 
-    if ($autor) {
-        $baseQuery->where('autor', $autor);
+    public function update(Request $request, $id)
+    {
+        $devocional = Devocional::findOrFail($id);
+
+        $request->validate([
+            'contenido'     => 'required|string',
+            'categoria'     => 'required|string',
+            // permite que imagen venga null o string; si viene vacía, conservamos la anterior
+            'imagen'        => 'nullable|string|url',
+            'autor'         => 'nullable|string|max:255',
+            'is_devocional' => 'required|integer|in:0,1,2',
+            'serie'         => 'nullable|string|max:255',
+            'created_at'    => 'nullable|date',
+            'pdf'           => 'nullable|string|max:255',
+            'instagram'     => 'nullable|string|max:255',
+            'tiktok'        => 'nullable|string|max:255',
+            'ensenanza_id'  => 'nullable|string',
+        ]);
+
+        $createdAt = $request->input('created_at');
+
+        $devocional->update([
+            'contenido'     => $request->input('contenido'),
+            'categoria'     => $request->input('categoria'),
+            'imagen'        => $request->input('imagen') ?: $devocional->imagen,
+            'autor'         => $request->input('autor'),
+            'is_devocional' => $request->input('is_devocional'),
+            'serie'         => $request->input('serie'),
+            'created_at'    => $createdAt
+                ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')
+                : $devocional->created_at,
+            'pdf'           => $request->input('pdf'),
+            'instagram'     => $request->input('instagram'),
+            'tiktok'        => $request->input('tiktok'),
+            'ensenanza_id'  => $request->input('ensenanza_id'),
+        ]);
+
+        return response()->json([
+            'message'    => 'Devocional actualizado correctamente',
+            'devocional' => $devocional,
+        ]);
     }
-
-    // Clonar la query base para cada grupo
-    $devocionales = (clone $baseQuery)
-        ->where('is_devocional', 1)
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage, ['*'], 'devocionales_page')
-        ->withQueryString();
-
-    $estudios = (clone $baseQuery)
-        ->where('is_devocional', 0)
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage, ['*'], 'estudios_page')
-        ->withQueryString();
-
-    $ocultos = (clone $baseQuery)
-        ->where('is_devocional', 2)
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage, ['*'], 'ocultos_page')
-        ->withQueryString();
-
-    $categorias = Devocional::whereNotNull('categoria')
-        ->where('categoria', '!=', '')
-        ->groupBy('categoria')
-        ->selectRaw('categoria, COUNT(*) as count')
-        ->get();
-
-    $autores = Devocional::whereNotNull('autor')
-        ->where('autor', '!=', '')
-        ->groupBy('autor')
-        ->selectRaw('autor, COUNT(*) as count')
-        ->get();
-
-    return Inertia::render('Edit', [
-        'devocionales' => $devocionales,   // is_devocional = 1
-        'estudios'     => $estudios,       // is_devocional = 0
-        'ocultos'      => $ocultos,        // is_devocional = 2
-        'categorias'   => $categorias,
-        'autores'      => $autores,
-        'filters'      => [
-            'search'    => $search,
-            'categoria' => $categoria,
-            'autor'     => $autor,
-        ],
-    ]);
-}
-
-
-public function showJson($id)
-{
-    $devocional = Devocional::findOrFail($id);
-    return response()->json($devocional);
-}
-
-public function update(Request $request, $id)
-{
-    $devocional = Devocional::findOrFail($id);
-
-    $request->validate([
-        'contenido'     => 'required|string',
-        'categoria'     => 'required|string',
-        // permite que imagen venga null o string; si viene vacía, conservamos la anterior
-        'imagen'        => 'nullable|string|url',
-        'autor'         => 'nullable|string|max:255',
-        'is_devocional' => 'required|integer|in:0,1,2',
-        'serie'         => 'nullable|string|max:255',
-        'created_at'    => 'nullable|date',
-        'pdf'           => 'nullable|string|max:255',
-        'instagram'     => 'nullable|string|max:255',
-        'tiktok'        => 'nullable|string|max:255',
-        'ensenanza_id'  => 'nullable|string',
-    ]);
-
-    $createdAt = $request->input('created_at');
-
-    $devocional->update([
-        'contenido'     => $request->input('contenido'),
-        'categoria'     => $request->input('categoria'),
-        'imagen'        => $request->input('imagen') ?: $devocional->imagen,
-        'autor'         => $request->input('autor'),
-        'is_devocional' => $request->input('is_devocional'),
-        'serie'         => $request->input('serie'),
-        'created_at'    => $createdAt
-            ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')
-            : $devocional->created_at,
-        'pdf'           => $request->input('pdf'),
-        'instagram'     => $request->input('instagram'),
-        'tiktok'        => $request->input('tiktok'),
-        'ensenanza_id'  => $request->input('ensenanza_id'),
-    ]);
-
-    return response()->json([
-        'message'    => 'Devocional actualizado correctamente',
-        'devocional' => $devocional,
-    ]);
-}
-
-
 }
