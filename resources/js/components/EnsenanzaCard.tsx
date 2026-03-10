@@ -28,10 +28,8 @@ type Props = {
 };
 
 export default function EnsenanzaCard({ ensenanza }: Props) {
-    // devocionales “reales”
     const devocionales = ensenanza.devocionales ?? [];
     const tieneDevocionales = devocionales.length > 0;
-
     const [open, setOpen] = useState(false);
 
     const autoresLabel =
@@ -40,7 +38,6 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
             : ensenanza.autores.join(', ');
 
     const toggleOpen = () => {
-        // Si NO hay devocionales, no abras nada
         if (!tieneDevocionales) return;
         setOpen((o) => !o);
     };
@@ -52,13 +49,12 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 borderRadius: 10,
                 overflow: 'hidden',
                 border: '1px solid #e0e0e0',
-                marginBottom: 12,
                 backgroundColor: '#fff',
                 boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                 width: '100%',
             }}
         >
-            {/* Parte superior: card horizontal */}
+            {/* Parte superior */}
             <div
                 className="ensenanza-card-top"
                 style={{
@@ -69,151 +65,45 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 }}
             >
                 {/* Imagen izquierda */}
-                <div
-                    style={{
-                        flex: '0 0 150px',
-                        maxWidth: 150,
-                        height: 120,
-                        borderRadius: 8,
-                        overflow: 'hidden',
-                        backgroundColor: '#f5f5f5',
-                    }}
-                >
+                <div style={{ flex: '0 0 150px', maxWidth: 150, height: 120, borderRadius: 8, overflow: 'hidden', backgroundColor: '#f5f5f5' }}>
                     {ensenanza.imagen && (
-                        <img
-                            src={ensenanza.imagen}
-                            alt={ensenanza.titulo}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                display: 'block',
-                            }}
-                        />
+                        <img src={ensenanza.imagen} alt={ensenanza.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     )}
                 </div>
 
-                {/* Info derecha */}
-                <div
-                    style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 8,
-                    }}
-                >
-                    {/* Fila título + count */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            gap: 12,
-                        }}
-                    >
-                        <h3
-                            style={{
-                                margin: 0,
-                                fontSize: '1rem',
-                                fontWeight: 600,
-                                color: '#212529',
-                                textTransform: 'uppercase',
-                            }}
-                        >
-                            Serie: {ensenanza.titulo}
-                        </h3>
-
-                        <div
-                            style={{
-                                minWidth: 52,
-                                textAlign: 'center',
-                                padding: '2px 8px',
-                                borderRadius: 16,
-                                backgroundColor: '#f1f3f5',
-                                fontSize: 11,
-                                fontWeight: 500,
-                                color: '#495057',
-                            }}
-                        >
-                            {ensenanza.ensenanzas_count}
+                {/* Info derecha: Usamos esta estructura para space-between en CSS */}
+                <div className="ensenanza-card-info-right">
+                    {/* Agrupamos Título y Descripción */}
+                    <div className="ensenanza-card-text-block">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#212529', textTransform: 'uppercase' }}>
+                                Serie: {ensenanza.titulo}
+                            </h3>
+                            <div style={{ minWidth: 52, textAlign: 'center', padding: '2px 8px', borderRadius: 16, backgroundColor: '#f1f3f5', fontSize: 11, fontWeight: 500, color: '#495057' }}>
+                                {ensenanza.ensenanzas_count}
+                            </div>
                         </div>
+                        <p style={{ margin: '8px 20px 0 0', fontSize: 12, color: '#495057', lineHeight: 1.5, textAlign: 'justify' }}>
+                            {ensenanza.descripcion}
+                        </p>
                     </div>
 
-                    {/* Descripción */}
-                    <p
-                        style={{
-                            margin: '8px 20px 0 0',
-                            fontSize: 12,
-                            color: '#495057',
-                            lineHeight: 1.5,
-                            textAlign: 'justify',
-                        }}
-                    >
-                        {ensenanza.descripcion}
-                    </p>
-
                     {/* Autores */}
-                    <div
-                        style={{
-                            fontSize: 11,
-                            color: '#6c757d',
-                            borderTop: '1px solid #e9ecef',
-                            paddingTop: 6,
-                            marginTop: 8,
-                        }}
-                    >
+                    <div className="ensenanza-card-author">
                         <strong>Autor(es):</strong> {autoresLabel}
                     </div>
                 </div>
             </div>
 
             {/* Dropdown / lista de devocionales */}
-            <div
-                style={{
-                    borderTop: '1px solid #e9ecef',
-                    backgroundColor: '#ebebeb',
-                }}
-            >
-                {/* Cabecera del dropdown de devocionales */}
-                <button
-                    onClick={toggleOpen}
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '8px 10px',
-                        border: 'none',
-                        background: 'transparent',
-                        cursor: tieneDevocionales ? 'pointer' : 'default',
-                        fontSize: 13,
-                        fontWeight: 500,
-                        color: '#343a40',
-                        textTransform: 'uppercase',
-                        opacity: tieneDevocionales ? 1 : 0.6,
-                    }}
-                >
-                    <span>
-                        <strong>Enseñanzas</strong>
-                    </span>
-                    <KeyboardArrowDown
-                        style={{
-                            transition: 'transform 0.2s ease',
-                            transform: open ? 'rotate(-180deg)' : 'rotate(0deg)',
-                            opacity: tieneDevocionales ? 1 : 0.3,
-                        }}
-                    />
+            <div className="ensenanza-card-dropdown">
+                <button onClick={toggleOpen}>
+                    <span><strong>Enseñanzas</strong></span>
+                    <KeyboardArrowDown style={{ transition: 'transform 0.2s ease', transform: open ? 'rotate(-180deg)' : 'rotate(0deg)' }} />
                 </button>
 
-                {/* Solo renderiza contenido si hay devocionales y está abierto */}
                 {tieneDevocionales && open && (
-                    <div
-                        style={{
-                            borderTop: '1px solid #e9ecef',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
+                    <div className="ensenanza-card-devocionales-list">
                         {devocionales.map((dev) => (
                             <DevocionalRow
                                 key={dev.id}
