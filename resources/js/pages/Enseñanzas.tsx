@@ -150,7 +150,7 @@ function Enseñanzas() {
                 <div className="page-title">
                     <div className="breadcrumbs" />
                     <div className="title-wrapper">
-                        <h1 style={{ textAlign: 'center' }}>Enseñanzas Bíblicas</h1>
+                        <h1 style={{ textAlign: 'center' }}>Series Temáticas</h1>
                         <br />
                         <p>
                             En esta sección encontrarás enseñanzas basadas en la Palabra de Dios, organizadas en series,
