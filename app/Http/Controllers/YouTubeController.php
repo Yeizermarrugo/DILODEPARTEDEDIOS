@@ -12,7 +12,8 @@ class YouTubeController extends Controller
     public function latestVideos(Request $request)
     {
         $channelId  = $request->get('channelId', env('YOUTUBE_CHANNEL_ID'));
-        $maxResults = $request->get('maxResults', 10); // Aumenta para capturar más
+        // Aumentamos a 50 para tener más margen de filtrado
+        $maxResults = $request->get('maxResults', 50);
 
         $cacheKey = "yt-clases-{$channelId}-{$maxResults}";
 
@@ -33,17 +34,20 @@ class YouTubeController extends Controller
 
             $items = collect($data['items'] ?? [])
                 ->filter(function ($item) {
-                    $title = trim($item['snippet']['title'] ?? '');
-                    return str_starts_with(strtoupper($title), 'CLASE');
+                    $title = strtoupper(trim($item['snippet']['title'] ?? ''));
+                    // Usamos str_contains si la palabra "CLASE" puede no estar al puro inicio
+                    return str_contains($title, 'CLASE');
                 })
-                ->take(3) // Limita a 3 después de filtrar
-                ->values()
-                ->all();
+                ->take(3)
+                ->values();
 
-            $data['items'] = $items;
-            $data['pageInfo']['totalResults'] = count($items); // Actualiza total
-
-            return $data;
+            // Reestructuramos la respuesta para que mantenga el formato original de YT
+            return [
+                'items' => $items,
+                'pageInfo' => [
+                    'totalResults' => $items->count()
+                ]
+            ];
         });
 
         return response()->json($videos);
