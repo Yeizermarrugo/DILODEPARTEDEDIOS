@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark'=> ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    class="{{ ($appearance ?? 'system') == 'dark' ? 'dark' : '' }}">
 
 <head>
     <meta charset="utf-8">
@@ -9,40 +10,70 @@
 
     @php
     $meta = $page['props']['meta'] ?? null;
+    $currentPath = request()->path();
+
+    // Mapeo de secciones
+    $sections = [
+    'about' => '| Quiénes somos',
+    'devocionales' => '| Devocionales',
+    'ensenanzas' => '| Series',
+    'estudios' => '| Estudios bíblicos',
+    'libreria' => '| Librería',
+    'podcast' => '| Podcast y más',
+    'obras' => '| Obras',
+    'login' => '| Iniciar sesión',
+    'dashboard' => '| Dashboard',
+    'devocionales-edit' => '| Editar devocionales',
+    'devocionalesAgregar' => '| Agregar devocionales'
+    ];
+
+    // Lógica para detectar si es una subpágina de devocional (ej: devocional/id)
+    $sectionName = '';
+    if (str_starts_with($currentPath, 'devocional/')) {
+    $sectionName = '| Devocional';
+    } else {
+    $sectionName = $sections[$currentPath] ?? '';
+    }
+
+    if ($currentPath == '/' || empty($currentPath)) {
+    $sectionName = '';
+    }
+
+    $defaultTitle = "Dilo de parte de Dios " . $sectionName;
+
+    $currentTitle = $meta['title'] ?? $defaultTitle;
+    $currentDesc = $meta['description'] ?? "Plataforma de recursos cristianos para conectar con Dios a través de
+    estudios bíblicos, series temáticas y herramientas de crecimiento espiritual.";
+    $currentUrl = $meta['url'] ?? url()->current();
+    $currentImage = $meta['image'] ??
+    'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg';
     @endphp
 
-    @if($meta)
-    <!-- Open Graph -->
-    <meta property="og:type" content="article">
-    <meta property="og:site_name" content="Dilo de parte de Dios">
-    <meta property="og:title" content="{{ $meta['title'] }}">
-    <meta property="og:description" content="{{ $meta['description'] }}">
-    <meta property="og:url" content="{{ $meta['url'] }}">
+    <title>{{ $currentTitle }}</title>
+    <meta name="description" content="{{ $currentDesc }}">
+    <link rel="canonical" href="{{ url()->current() }}">
 
-    <meta property="og:image" content="{{ $meta['image'] }}">
-    <meta property="og:image:secure_url" content="{{ $meta['image'] }}">
+    <meta property="og:type" content="{{ $meta ? 'article' : 'website' }}">
+    <meta property="og:site_name" content="Dilo de parte de Dios">
+    <meta property="og:title" content="{{ $currentTitle }}">
+    <meta property="og:description" content="{{ $currentDesc }}">
+    <meta property="og:url" content="{{ $currentUrl }}">
+    <meta property="og:image" content="{{ $currentImage }}">
+    <meta property="og:image:secure_url" content="{{ $currentImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="{{ $meta['title'] }}">
+    <meta property="og:image:alt" content="{{ $currentTitle }}">
 
-    <!-- Twitter (WhatsApp lo usa en móvil) -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $meta['title'] }}">
-    <meta name="twitter:description" content="{{ $meta['description'] }}">
-    <meta name="twitter:image" content="{{ $meta['image'] }}">
-
-    @endif
-
-    <title>{{ config('app.name', 'Dilo de parte de Dios') }}</title>
+    <meta name="twitter:title" content="{{ $currentTitle }}">
+    <meta name="twitter:description" content="{{ $currentDesc }}">
+    <meta name="twitter:image" content="{{ $currentImage }}">
 
     <link rel="icon" type="image/png" sizes="32x32"
-        href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
-    <link rel="icon" type="image/png" sizes="16x16"
         href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
     <link rel="apple-touch-icon" sizes="180x180"
         href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
 
-    <!-- Fuentes y estilos principales -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -54,7 +85,6 @@
 </head>
 
 <body class="font-sans antialiased">
-    {{-- Dark mode + estilos de fondo (mover aquí para no interferir con previews) --}}
     <script>
     (function() {
         const appearance = '{{ $appearance ?? "system" }}';
@@ -77,11 +107,9 @@
     }
     </style>
 
-    <!-- Ahrefs analytics: una sola vez -->
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="tH+o+/Cdpn18Efh2crVnhQ" async></script>
 
     @inertia
 </body>
-
 
 </html>
