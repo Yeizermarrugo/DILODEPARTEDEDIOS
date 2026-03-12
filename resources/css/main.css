@@ -4004,17 +4004,14 @@ section,
 
 .ensenanzas-cards {
   display: grid;
-  /* Define 3 columnas iguales */
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  /* IMPORTANTE: align-items al inicio evita que una card estire a la de al lado al abrirse */
   align-items: flex-start;
 }
 
 .ensenanza-card {
   display: flex;
   flex-direction: column;
-  /* NO pongas height: 100% ni fit-content aquí */
   margin-bottom: 12px;
 }
 
@@ -4023,29 +4020,53 @@ section,
   flex-direction: row;
   gap: 10px;
   padding: 10px;
-  /* ESTO ES LO QUE ESTABAS BUSCANDO: Forzamos el mismo alto mínimo para todas cerradas */
+  /* Altura fija para que todas se vean iguales a la del medio */
   min-height: 220px; 
 }
 
-/* Contenedor de info derecha (título, desc, autor) */
+/* --- LÓGICA DE TRUNCADO POR LÍNEAS --- */
+.descripcion-wrapper {
+  display: flex;
+  flex-direction: column; /* Alinea el botón debajo del texto truncado */
+}
+
+.descripcion-texto.colapsada {
+  display: -webkit-box;
+  -webkit-line-clamp: 7; /* Subimos a 7 para llenar el espacio blanco */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.descripcion-texto.expandida {
+  display: block;
+}
+
+.ver-mas-btn {
+  align-self: flex-start; /* Alinea el "ver más" a la izquierda */
+  background: white; /* Asegura que no se transparente si hay algo detrás */
+}
+/* -------------------------------------- */
+
+.ensenanza-card-text-block {
+  flex-grow: 1;
+}
+
 .ensenanza-card-info-right {
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* Esto distribuye el espacio, mandando el autor al fondo de la sección top */
   justify-content: space-between; 
 }
 
-/* Bloque de autores */
 .ensenanza-card-author {
   font-size: 11px;
   color: #6c757d;
   border-top: 1px solid #e9ecef;
   padding-top: 6px;
-  margin-top: auto; /* Seguro extra para empujar hacia abajo */
+  margin-top: auto;
 }
 
-/* Contenedor del Dropdown (el bloque gris) */
 .ensenanza-card-dropdown {
   border-top: 1px solid #e9ecef;
   background-color: #ebebeb;
@@ -4062,7 +4083,7 @@ section,
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  color: '#343a40';
+  color: #343a40;
   text-transform: uppercase;
 }
 
@@ -4073,33 +4094,14 @@ section,
   background-color: #fff;
 }
 
-/* Responsivo: Tablet (2 columnas) */
+/* Responsivo */
 @media (max-width: 1199px) {
-  .ensenanzas-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .ensenanzas-cards { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Responsivo: Móvil (1 columna + Imagen Full) */
 @media (max-width: 991px) {
-  .ensenanzas-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .ensenanza-card-top {
-    flex-direction: column !important;
-    min-height: auto !important; /* En móvil que fluya según contenido */
-    padding: 0;
-  }
-
-  .ensenanza-card-top > div:first-child {
-    max-width: 100% !important;
-    width: 100% !important;
-    height: 200px !important;
-    border-radius: 0;
-  }
-
-  .ensenanza-card-info-right {
-    padding: 15px;
-  }
+  .ensenanzas-cards { grid-template-columns: 1fr; }
+  .ensenanza-card-top { flex-direction: column !important; min-height: auto !important; padding: 0; }
+  .ensenanza-card-top > div:first-child { max-width: 100% !important; width: 100% !important; height: 200px !important; border-radius: 0; }
+  .ensenanza-card-info-right { padding: 15px; }
 }
