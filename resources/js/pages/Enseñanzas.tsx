@@ -46,7 +46,6 @@ function Enseñanzas() {
         fetch(url, { signal: controller.signal })
             .then((r) => r.json())
             .then((data: EnsenanzasResponse | any) => {
-                console.log('dataL: ', data);
                 if (Array.isArray(data.data)) {
                     setEnsenanzas(data.data);
                     setPagination(data);
@@ -236,9 +235,10 @@ function Enseñanzas() {
 
                                             {/* Cards */}
                                             <div className="ensenanzas-cards">
-                                                {ensenanzas.map((ens) => (
-                                                    <EnsenanzaCard key={ens.id} ensenanza={ens} />
-                                                ))}
+                                                {ensenanzas.map((ens) => {
+                                                    if (ens.ensenanzas_count === 0) return null;
+                                                    return <EnsenanzaCard key={ens.id} ensenanza={ens} />;
+                                                })}
                                             </div>
 
                                             {showPaginator() && renderPaginator()}
