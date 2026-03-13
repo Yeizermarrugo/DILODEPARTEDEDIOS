@@ -70,22 +70,26 @@ class DevocionalController extends Controller
     public function searchCategories(Request $request)
     {
         $perPage = $request->input('per_page', 16);
+        // Nota: Agregué el paginate() que faltaba en tu segundo bloque de código
         $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
 
-        // Todas las categorías con su serie
+        // 1. LISTA REAL DE TODAS LAS CATEGORÍAS (Sin importar la serie)
+        $todasLasCategorias = Devocional::whereNotNull('categoria')
+            ->where('categoria', '!=', '')
+            ->selectRaw('categoria, COUNT(*) as count')
+            ->groupBy('categoria')
+            ->get();
+
+        // 2. ESTRUCTURA DE SERIES (Para navegación jerárquica)
         $categoriasRaw = Devocional::whereNotNull('categoria')
             ->where('categoria', '!=', '')
             ->selectRaw('categoria, serie, COUNT(*) as count')
             ->groupBy('categoria', 'serie')
             ->get();
 
-        // Agrupar en estructura series + categorias sueltas
         $series = [];
-        $categoriasSinSerie = [];
-
         foreach ($categoriasRaw as $row) {
             if ($row->serie) {
-                // Dentro de una serie
                 if (!isset($series[$row->serie])) {
                     $series[$row->serie] = [
                         'nombre'     => $row->serie,
@@ -93,12 +97,6 @@ class DevocionalController extends Controller
                     ];
                 }
                 $series[$row->serie]['categorias'][] = [
-                    'categoria' => $row->categoria,
-                    'count'     => $row->count,
-                ];
-            } else {
-                // Categoría suelta
-                $categoriasSinSerie[] = [
                     'categoria' => $row->categoria,
                     'count'     => $row->count,
                 ];
@@ -112,10 +110,10 @@ class DevocionalController extends Controller
             ->get();
 
         return response()->json([
-            'devocionales'       => $devocionales,
-            'categorias'         => $categoriasSinSerie, // lo que ya usas
-            'series'             => array_values($series), // nuevo
-            'autores'            => $autores,
+            'devocionales' => $devocionales,
+            'categorias'   => $todasLasCategorias, // <--- AQUÍ ESTARÁN TODAS
+            'series'       => array_values($series),
+            'autores'      => $autores,
         ]);
     }
 
