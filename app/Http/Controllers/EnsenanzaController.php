@@ -18,7 +18,7 @@ class EnsenanzaController extends Controller
         $ensenanzas = Ensenanza::query()
             ->with(['devocionales' => function ($q) {
                 $q->soloEnsenanzas()
-                    ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at')
+                    ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at', 'is_devocional')
                     ->orderBy('created_at', 'asc');
             }])
             ->withCount('devocionales')
@@ -66,6 +66,7 @@ class EnsenanzaController extends Controller
                     'pdf'        => $dev->pdf,
                     'tiktok'     => $dev->tiktok,
                     'instagram'  => $dev->instagram,
+                    'is_devocional' => $dev->is_devocional,
                 ];
             })->values()->all();
 
