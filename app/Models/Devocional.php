@@ -52,7 +52,7 @@ class Devocional extends Model
     public function scopeSoloEnsenanzas($query)
     {
         return $query->where('serie', 'Series')
-                     ->where('is_devocional', 1);
+            ->where('is_devocional', [1, 2]);
     }
 
     /**
