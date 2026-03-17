@@ -236,7 +236,6 @@ function Enseñanzas() {
                                             {/* Cards */}
                                             <div className="ensenanzas-cards">
                                                 {ensenanzas.map((ens) => {
-                                                    if (ens.ensenanzas_count === 0) return null;
                                                     return <EnsenanzaCard key={ens.id} ensenanza={ens} />;
                                                 })}
                                             </div>
