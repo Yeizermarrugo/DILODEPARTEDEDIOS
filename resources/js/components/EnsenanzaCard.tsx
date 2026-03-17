@@ -9,6 +9,7 @@ type DevocionalEnsenanza = {
     pdf?: string | null;
     instagram?: string | null;
     tiktok?: string | null;
+    is_devocional: boolean;
 };
 
 type EnsenanzaItem = {
@@ -28,9 +29,18 @@ type Props = {
 
 export default function EnsenanzaCard({ ensenanza }: Props) {
     const devocionales = ensenanza.devocionales ?? [];
-    const tieneDevocionales = devocionales.length > 0;
 
-    const [open, setOpen] = useState(false);
+    // 1. Lógica para detectar si hay contenido "Próximamente"
+    // Verifica si algún devocional tiene un valor distinto de 0 o 1
+    const publishedDevotionals = devocionales.filter(
+        (item) => String(item.is_devocional) === "1"
+    );
+
+
+    const isComingSoon = ensenanza.ensenanzas_count === 0 || (devocionales.length > 0 && publishedDevotionals.length === 0);
+    const isDropdownDisabled = publishedDevotionals.length === 0;
+
+    const [isOpen, setIsOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showBtn, setShowBtn] = useState(false); // Nuevo: estado para saber si mostrar el botón
     const textRef = useRef<HTMLParagraphElement>(null);
@@ -117,22 +127,67 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
             </div>
 
             {/* Dropdown de enseñanzas se mantiene igual... */}
-            <div className="ensenanza-card-dropdown">
-                <button onClick={() => tieneDevocionales && setOpen(!open)}>
-                    <span><strong>Enseñanzas</strong></span>
-                    <KeyboardArrowDown style={{ transition: 'transform 0.2s ease', transform: open ? 'rotate(-180deg)' : 'rotate(0deg)' }} />
-                </button>
-                {tieneDevocionales && open && (
-                    <div className="ensenanza-card-devocionales-list">
-                        {devocionales.map((dev) => (
-                            <DevocionalRow key={dev.id} ensenanzaId={ensenanza.id} devocional={dev} />
-                        ))}
+            <div className="ensenanza-card-dropdown" style={{ borderTop: '1px solid #e9ecef' }}>
+                {isComingSoon ? (
+                    /* Restricted State: Coming Soon UI */
+                    <div style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        backgroundColor: '#f8f9fa',
+                        color: '#adb5bd',
+                        textAlign: 'center',
+                        fontSize: 13,
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase',
+                        cursor: 'not-allowed'
+                    }}>
+                        Próximamente
                     </div>
+                ) : (
+                    /* Active State: Standard Dropdown UI */
+                    <>
+                        <button
+                            disabled={isDropdownDisabled}
+                            onClick={() => setIsOpen(!isOpen)}
+                            style={{
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px 16px',
+                                border: 'none',
+                                background: '#fff',
+                                cursor: isDropdownDisabled ? 'default' : 'pointer',
+                            }}
+                        >
+                            <span style={{ color: isDropdownDisabled ? '#adb5bd' : 'inherit' }}>
+                                <strong>Enseñanzas</strong>
+                            </span>
+
+                            {!isDropdownDisabled && (
+                                <KeyboardArrowDown style={{
+                                    transition: 'transform 0.2s ease',
+                                    transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)',
+                                    color: '#666'
+                                }} />
+                            )}
+                        </button>
+
+                        {/* Expandable List */}
+                        {isOpen && !isDropdownDisabled && (
+                            <div className="ensenanza-card-devocionales-list">
+                                {publishedDevotionals.map((dev) => (
+                                    <DevocionalRow key={dev.id} devocional={dev} ensenanzaId={ensenanza.id} />
+                                ))}
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
     );
 }
+
 // Subcomponentes se mantienen igual (DevocionalRow y ActionRow)
 type DevRowProps = {
     ensenanzaId: string;
