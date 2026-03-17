@@ -40,7 +40,6 @@ class Ensenanza extends Model
      */
     public function devocionales()
     {
-        return $this->hasMany(Devocional::class)
-                    ->soloEnsenanzas();
+        return $this->hasMany(Devocional::class);
     }
 }

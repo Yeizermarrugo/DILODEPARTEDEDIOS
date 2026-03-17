@@ -37,7 +37,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
     );
 
 
-    const isComingSoon = ensenanza.ensenanzas_count === 0 || (devocionales.length > 0 && publishedDevotionals.length === 0);
+    const isComingSoon = publishedDevotionals.length === 0;
     const isDropdownDisabled = publishedDevotionals.length === 0;
 
     const [isOpen, setIsOpen] = useState(false);
