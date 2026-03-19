@@ -42,6 +42,14 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
 
     const href = buildHref ? buildHref(dev) : `/devocional/${id}`;
 
+    // Función para agregar transparencia a cualquier color HEX
+    const addAlpha = (hex: string, opacity: number) => {
+        // Si el color es #ffffff86 (ya tiene alpha), le quitamos los últimos 2 caracteres primero
+        const cleanHex = hex.length > 7 ? hex.substring(0, 7) : hex;
+        const alpha = Math.round(opacity * 255).toString(16).padStart(2, '0');
+        return `${cleanHex}${alpha}`;
+    };
+
 
     return (
         <div className="card-wrapper-link" onClick={onClick} style={{ cursor: 'pointer' }}>
@@ -58,7 +66,10 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                         <div className="date">
                             <span
                                 className="category-badge"
-                                style={{ backgroundColor: categoryColor }}
+                                style={{
+                                   backgroundColor: addAlpha(categoryColor, 0.9),
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                }}
                             >
                                 {categoria}
                             </span>

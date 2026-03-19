@@ -207,6 +207,12 @@ export default function MainContent() {
             {/* Blog Hero Section */}
             <section id="blog-hero" className="blog-hero section">
                 <div className="container" data-aos="fade-up" data-aos-delay="100">
+                    <div className="section-title container" data-aos="fade-up">
+                        <h2>Recientes</h2>
+                        <div>
+                            <span>Devocionales</span> <span className="description-title"></span>
+                        </div>
+                    </div>
                     <div className="blog-grid">
                         {/* Featured Post (Large) */}
                         <article className="blog-item featured" data-aos="fade-up">
@@ -332,56 +338,58 @@ export default function MainContent() {
                 </div>
             </section>
             {/* Modal */}
-            {modalOpen && devocionalSeleccionado && (
-                <div
-                    className="modal-overlay"
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        background: 'rgba(0, 0, 0, 0.7)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000,
-                        overflow: 'auto',
-                    }}
-                    onClick={cerrarModal}
-                >
+            {
+                modalOpen && devocionalSeleccionado && (
                     <div
-                        className="modal-content"
+                        className="modal-overlay"
                         style={{
-                            background: '#fff',
-                            padding: '24px',
-                            borderRadius: '8px',
-                            maxWidth: '800px',
-                            width: '100%',
-                            position: 'relative',
-                            maxHeight: '90vh', // Limita el alto
-                            overflowY: 'auto',
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            width: '100vw',
+                            height: '100vh',
+                            background: 'rgba(0, 0, 0, 0.7)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000,
+                            overflow: 'auto',
                         }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={cerrarModal}
                     >
-                        <button
+                        <div
+                            className="modal-content"
                             style={{
-                                position: 'absolute',
-                                top: '8px',
-                                right: '8px',
-                                background: 'none',
-                                border: 'none',
-                                fontSize: '1.5em',
-                                cursor: 'pointer',
+                                background: '#fff',
+                                padding: '24px',
+                                borderRadius: '8px',
+                                maxWidth: '800px',
+                                width: '100%',
+                                position: 'relative',
+                                maxHeight: '90vh', // Limita el alto
+                                overflowY: 'auto',
                             }}
-                            onClick={cerrarModal}
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            &times;
-                        </button>
-                        <DevocionalDetails devocional={devocionalSeleccionado} />
+                            <button
+                                style={{
+                                    position: 'absolute',
+                                    top: '8px',
+                                    right: '8px',
+                                    background: 'none',
+                                    border: 'none',
+                                    fontSize: '1.5em',
+                                    cursor: 'pointer',
+                                }}
+                                onClick={cerrarModal}
+                            >
+                                &times;
+                            </button>
+                            <DevocionalDetails devocional={devocionalSeleccionado} />
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
             {/* Featured Posts Section */}
             <section id="featured-posts" className="featured-posts section">
                 <div className="section-title container" data-aos="fade-up">
@@ -678,6 +686,6 @@ export default function MainContent() {
                 </div>
             </section> */}
             {/* /Call To Action Section */}
-        </main>
+        </main >
     );
 }
