@@ -1,0 +1,248 @@
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;       /* Permite que las cards bajen a la siguiente línea */
+    justify-content: center; /* Centra las tarjetas si sobra espacio */
+    gap: 20px;            /* Espacio entre tarjetas */
+    width: 100%;
+    margin: 0 auto;
+}
+
+.cards-container a{
+    text-decoration: none; /* Elimina el subrayado de los enlaces */
+    justify-content: flex-start !important;
+}
+
+/* Contenedor que imita a tus links de MUI */
+.card-wrapper-link {
+    width: 170px; 
+    height: 280px;
+    display: flex;
+    perspective: 1000px;
+    transition: all 0.3s ease;
+}
+
+/* Estilos de la Tarjeta */
+.card-custom {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.card-custom .wrapper {
+    background-color: #fff;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px; /* Para que combine con MUI */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.575);
+    background-size: cover;
+    background-position: center;
+}
+.card-custom .title {
+    margin: 0;
+    padding: 0;
+    /* Altura fija inicial para mantener la alineación */
+    height: 34px; 
+    overflow: hidden;
+    line-height: 1.2;
+    /* Suavizamos la expansión del título */
+    transition: height 0.3s ease;
+}
+
+.card-custom .title span {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limitado a 2 líneas por defecto */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* EFECTO HOVER: Mostramos el título completo */
+.card-custom .wrapper:hover .title {
+    /* Permitimos que la caja crezca para mostrar todo el texto */
+    height: auto; 
+    min-height: 34px;
+}
+
+.card-custom .wrapper:hover .title span {
+    /* Quitamos el límite de líneas y los puntos suspensivos (...) */
+    display: block; 
+    overflow: visible;
+    -webkit-line-clamp: initial; 
+}
+
+/* Ajuste en el degradado para que al crecer el texto no se pierda la lectura */
+.card-custom .data {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Aumentamos un poco el área negra en hover para títulos largos */
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 80%, transparent 100%);
+    transform: translateY(40px); 
+    transition: transform 0.3s ease-in-out;
+    color: white;
+    /* Asegura que el contenido extra no se corte si el título es muy largo */
+    max-height: 100%;
+}
+.card-custom .wrapper:hover .data {
+    transform: translateY(0);
+}
+
+.card-custom .content {
+    padding: 10px;
+    position: relative;
+    /* Forzamos una altura mínima para que todas las cajas midan lo mismo */
+    min-height: 100px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.card-custom .author {
+    font-size: 10px;
+    opacity: 0.8;
+    display: block;
+    margin-bottom: 2px;
+    padding-bottom: 7px;
+    /* Evita que el autor salte de línea y desalinee el título */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* El botón "Leer más" siempre aparecerá en el mismo lugar al hacer hover */
+
+/* Badge de Categoría superior */
+.category-badge {
+    background: var(--bermuda, #77d7b9);
+    padding: 2px 8px;
+    font-size: 10px;
+    border-radius: 4px;
+    color: white;
+}
+
+.card-custom .header {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+.card-custom .menu-content {
+    float: right;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.card-custom .menu-content li {
+    margin: 0 5px;
+    position: relative;
+    display: inline-block;
+}
+
+.card-custom .menu-content i {
+    color: white;
+    font-size: 16px; /* Ajustado para el tamaño de 170px */
+}
+
+/* Estilo para los números (contadores) */
+.card-custom .menu-content span {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Open Sans';
+    transform: translate(-50%, 0); /* Posición inicial sobre el icono */
+    color: white;
+    opacity: 0; /* Oculto por defecto */
+    transition: all 0.3s ease; /* Suaviza la aparición */
+}
+
+/* EFECTO HOVER: Los números suben y aparecen */
+.card-custom .wrapper:hover .menu-content span {
+    transform: translate(-50%, -12px); /* Sube 12px sobre el icono */
+    opacity: 1; /* Se hace visible */
+}
+
+/* Asegúrate de que los iconos no se muevan, solo los números */
+.card-custom .menu-content i {
+    display: block;
+    position: relative;
+    z-index: 2;
+}
+
+/* Botón Read More */
+.button-read {
+    display: inline-block;
+    font-size: 11px;
+    color: #77d7b9;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+/* --- TABLETS Y PANTALLAS MEDIANAS (700px a 992px) --- */
+/* Aquí caben perfectamente 3 o 4 tarjetas si el contenedor es de ~800px */
+@media (max-width: 992px) {
+    .card-wrapper-link {
+        width: 160px;
+        height: 270px;
+    }
+}
+
+/* --- PANTALLAS PEQUEÑAS / TABLETS MINI (500px a 700px) --- */
+/* En 700px, con este ancho de 150px, te cabrán 4 tarjetas por fila */
+@media (max-width: 700px) {
+    .card-wrapper-link {
+        width: 150px;
+        height: 250px;
+    }
+    .card-custom .title {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 800px) {
+    .cards-container {
+        gap: 12px; /* Reducimos el espacio entre ellas para ganar aire */
+        padding: 0 10px;
+    }
+    
+    .card-wrapper-link {
+        /* Usamos un ancho fijo un poco menor para asegurar 2-3 por fila */
+        width: 145px; 
+        height: 240px;
+    }
+
+    .card-custom .title {
+        font-size: 13px;
+    }
+}
+
+/* --- MÓVILES (Menos de 500px) --- */
+@media (max-width: 500px) {
+    .card-wrapper-link { 
+        /* En móviles pequeños, ajustamos a un tamaño que permita 2 por fila */
+        width: calc(50% - 15px); 
+        min-width: 125px;
+        height: 220px; 
+    }
+    
+    .card-custom .menu-content i {
+        font-size: 13px;
+    }
+}
+
+/* --- MÓVILES PEQUEÑOS (Menos de 400px) --- */
+/* Aquí caben 2 tarjetas cómodamente */
+@media (max-width: 400px) {
+    .card-wrapper-link { 
+        width: 140px; /* Un poquito más grandes para que se lean bien */
+        height: 240px; 
+    }
+}
