@@ -3766,7 +3766,7 @@ section,
 .search-widget form:is(:focus-within) {
     border-color: var(--accent-color);
 }
-
+/* ------------Categories widget---------- */
 .categories-widget ul {
     list-style: none;
     padding: 0;
@@ -3795,6 +3795,96 @@ section,
     color: color-mix(in srgb, var(--default-color), transparent 50%);
     font-size: 14px;
 }
+
+/* Forzar contenedor flexible y con salto de línea */
+.top-categories-container .categories-widget {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+.top-categories-container ul {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important; /* ESTO HACE QUE SALTEN DE LÍNEA */
+    gap: 10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+    justify-content: flex-start !important;
+}
+
+.top-categories-container ul li {
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important; /* Evita que crezcan o se encojan de forma rara */
+}
+
+/* Estilo de los botones para que parezcan etiquetas modernas */
+.top-categories-container ul li button {
+    white-space: nowrap !important;
+    padding: 8px 16px !important;
+    background-color: #f1f3f5 !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 50px !important;
+    font-size: 14px !important;
+    color: #495057 !important;
+    transition: all 0.2s ease !important;
+}
+
+.top-categories-container ul li button.active {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+}
+
+/* Para el efecto Sticky */
+.top-categories-sticky-wrapper {
+    position: sticky;
+    top: 0; /* Ajusta según tu header, ej: 70px */
+    z-index: 2;
+    background-color: #ffffff;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+/* --- Ajustes para Móviles (Pantallas menores a 768px) --- */
+@media (max-width: 768px) {
+    
+    /* Tamaño de letra de los botones de categoría */
+    .top-categories-container ul li button {
+        font-size: 12px !important; /* Letra más pequeña */
+        padding: 6px 12px !important; /* Menos espacio interno para que quepan más */
+    }
+
+    /* Tamaño del número dentro del paréntesis (ej: (17)) */
+    .top-categories-container ul li button span {
+        font-size: 10px !important;
+    }
+
+    /* Reducir el espacio entre botones para ganar ancho */
+    .top-categories-container ul {
+        gap: 6px !important;
+    }
+
+    /* Opcional: Reducir un poco el título de la sección para móviles */
+    .col-12 h2 {
+        font-size: 1.2rem !important;
+    }
+}
+
+/* --- Ajuste extra para móviles muy pequeños (menos de 400px) --- */
+@media (max-width: 400px) {
+    .top-categories-container ul li button {
+        font-size: 11px !important;
+        padding: 5px 10px !important;
+    }
+}
+
+/* ------------- */
 
 .recent-posts-widget .post-item {
     display: flex;
