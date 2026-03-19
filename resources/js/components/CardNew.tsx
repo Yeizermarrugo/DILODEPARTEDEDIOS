@@ -63,10 +63,10 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                                 {categoria}
                             </span>
                         </div>
-                        <ul className="menu-content">
+                        {/* <ul className="menu-content">
                             <li><i className="fa fa-heart-o"></i><span>{likes}</span></li>
                             <li><i className="fa fa-comment-o"></i><span>{comments}</span></li>
-                        </ul>
+                        </ul> */}
                     </div>
                     <div className="data">
                         <div className="content">
