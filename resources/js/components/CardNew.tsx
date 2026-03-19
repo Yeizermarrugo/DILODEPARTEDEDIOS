@@ -72,7 +72,7 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                         <div className="content">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span className="author">{autor}</span>
-                                {/* <ul className="menu-content-inline">
+                                {/* <ul className="menu-content" style={{ width: 'auto', display: 'flex', marginBottom: '12px' }}>
                                     <li><i className="fa fa-heart-o"></i> <span>{likes}</span></li>
                                     <li><i className="fa fa-comment-o"></i> <span>{comments}</span></li>
                                 </ul> */}
