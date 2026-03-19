@@ -1,4 +1,4 @@
-import DevocionalCard from '@/components/DevocionalCard';
+import CardNew from '@/components/CardNew';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { useEffect, useState } from 'react';
@@ -32,6 +32,14 @@ type DevocionalesResponse = {
 type Serie = {
     nombre: string;
     categorias: { categoria: string; count: number }[];
+};
+
+const categoryColorMap: Record<string, string> = {
+    'general': '#77d7b9',
+    'biblia': '#ff6b6b',
+    'oracion': '#4ecdc4',
+    'fe': '#ffe66d',
+    'reflexion': '#95e1d3',
 };
 
 function Devocionals() {
@@ -385,7 +393,21 @@ function Devocionals() {
                                                 </h2>
                                             </div>
                                             <div className="cards-container">
-                                                <DevocionalCard
+                                                {devocionales.map((devocional, idx) => (
+                                                    <CardNew
+                                                        key={devocional.id || idx}
+                                                        dev={{
+                                                            id: devocional.id,
+                                                            imagen: devocional.imagen,
+                                                            titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
+                                                            autor: devocional.autor || '',
+                                                            categoria: devocional.categoria
+                                                        }}
+                                                        // Pasamos el array de categorías que ya tienes en el estado
+                                                        todasLasCategorias={todasLasCategorias}
+                                                    />
+                                                ))}
+                                                {/* <DevocionalCard
                                                     devocionales={devocionales.map(devocional => ({
                                                         ...devocional,
                                                         titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
@@ -393,7 +415,7 @@ function Devocionals() {
                                                         autor: devocional.autor || '',
                                                     }))}
                                                     todasLasCategorias={todasLasCategorias}
-                                                />
+                                                /> */}
                                             </div>
 
                                             {showPaginator() && renderPaginator()}
