@@ -70,11 +70,14 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                     </div>
                     <div className="data">
                         <div className="content">
-                            <span className="author">{autor || 'Anónimo'}</span>
-                            <h1 className="title">
-                                {/* Quitamos el substring de JS para que el CSS maneje las 2 líneas */}
-                                <span>{titulo}</span>
-                            </h1>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="author">{autor}</span>
+                                {/* <ul className="menu-content-inline">
+                                    <li><i className="fa fa-heart-o"></i> <span>{likes}</span></li>
+                                    <li><i className="fa fa-comment-o"></i> <span>{comments}</span></li>
+                                </ul> */}
+                            </div>
+                            <h1 className="title"><span>{titulo}</span></h1>
                             <span className="button-read" style={{ color: categoryColor }}>
                                 <a key={id}
                                     href={href}
