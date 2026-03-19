@@ -238,6 +238,68 @@
     }
 }
 
+/* 1. RANGO TABLET/SM (576px a 768px) - FORZAR 3 CARDS */
+/* ============================================================
+   CLEANUP & OPTIMIZACIÓN DE ESPACIOS (576px a 768px)
+   ============================================================ */
+
+@media (min-width: 576px) and (max-width: 768px) {
+    /* 1. Limpiamos el contenedor del template antiguo */
+    .cards-container {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important; /* Centra el grupo */
+        gap: 12px !important;    /* Espacio entre cards */
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 10px !important;
+        margin: 0 auto !important;
+    }
+
+    /* 2. Forzamos a que las etiquetas <a> no ocupen ancho fijo de 160px */
+    .cards-container a {
+        width: calc(33.33% - 12px) !important; /* Forzar 3 columnas reales */
+        min-width: 140px !important;
+        height: auto !important;
+        display: block !important; /* Evita comportamientos flex extraños del template */
+    }
+
+    /* 3. Ajustamos el wrapper interno para que use el 100% del <a> */
+    .card-wrapper-link {
+        width: 100% !important; 
+        height: 270px !important;
+    }
+
+    /* 4. Quitamos el padding del col-sm-8 que asfixia el contenido */
+    div[class*="col-sm-8"] {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+}
+
+/* ============================================================
+   AJUSTE PARA MÓVILES (350px a 575px)
+   ============================================================ */
+@media (min-width: 350px) and (max-width: 575px) {
+    .cards-container {
+        gap: 10px !important;
+        padding: 0 10px !important;
+    }
+
+    .cards-container a {
+        /* Para 2 tarjetas por fila */
+        width: calc(50% - 10px) !important;
+        min-width: 135px !important;
+    }
+
+    .card-wrapper-link {
+        width: 100% !important;
+        height: 230px !important;
+    }
+}
+
 /* --- MÓVILES PEQUEÑOS (Menos de 400px) --- */
 /* Aquí caben 2 tarjetas cómodamente */
 @media (max-width: 400px) {
@@ -246,3 +308,43 @@
         height: 240px; 
     }
 }
+
+/* --- RANGO CRÍTICO: 350px a 500px --- */
+/*@media (min-width: 350px) and (max-width: 500px) {
+    .cards-container {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important; 
+        gap: 10px !important;    
+        padding: 0 5px !important;
+        width: 100% !important;
+    }
+
+    .card-wrapper-link {
+        width: calc(50% - 10px) !important; 
+        min-width: 140px !important; 
+        height: 240px !important;
+        flex: 0 0 calc(50% - 10px) !important; /* Evita que crezcan o se encojan de más 
+    }
+
+
+    .card-custom .content {
+        padding: 8px !important;
+        min-height: 80px !important;
+    }
+
+    .card-custom .title span {
+        font-size: 11px !important;
+        line-height: 1.1 !important;
+    }
+
+    .card-custom .author {
+        font-size: 9px !important;
+    }
+
+    .category-badge {
+        font-size: 8px !important;
+        padding: 2px 4px !important;
+        max-width: 60px !important;
+    }
+} */
