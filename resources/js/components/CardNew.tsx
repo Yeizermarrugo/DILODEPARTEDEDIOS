@@ -81,10 +81,10 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                             <span className="button-read" style={{ color: categoryColor }}>
                                 <a key={id}
                                     href={href}
-                                    style={{ textDecoration: 'none', color: categoryColor }}
+                                    style={{ textDecoration: 'none', color: 'white' }}
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    Leer más
+                                    Leer
                                 </a>
                             </span>
                         </div>

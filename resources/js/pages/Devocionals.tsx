@@ -3,7 +3,6 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { useEffect, useState } from 'react';
 import '../../css/main.css';
-import DevocionalDetails from './DevocionalDetails';
 
 type Category = {
     categoria: string;
@@ -251,7 +250,7 @@ function Devocionals() {
 
     const CategoriesWidget = () => (
         <div className="categories-widget widget-item">
-            <h3 className="widget-title">Categories</h3>
+            <h3 className="widget-title">Categorías</h3>
             <ul className="mt-3">
                 <li>
                     <button
@@ -309,34 +308,34 @@ function Devocionals() {
     );
 
 
-    const RecentPostsWidget = () => (
-        <div className="recent-posts-widget widget-item">
-            <h3 className="widget-title">Recent Posts</h3>
-            {latestDevocionales.map((post, idx) => (
-                <div className="post-item" key={idx}>
-                    <img src={post.imagen} alt="" className="flex-shrink-0" />
-                    <div>
-                        <h4 style={{ color: '#212529' }} className="recent-post-title">
-                            <button onClick={() => abrirModal(post)}>
-                                <TituloDevocional contenido={post.contenido} />
-                                <time dateTime="2020-01-01">
-                                    {post.created_at
-                                        ? new Date(post.created_at).toLocaleDateString('es-ES', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                        })
-                                        : ''}
-                                </time>
-                            </button>
-                        </h4>
-                        <time dateTime="2020-01-01">{post.date}</time>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+    // const RecentPostsWidget = () => (
+    //     <div className="recent-posts-widget widget-item">
+    //         <h3 className="widget-title">Recent Posts</h3>
+    //         {latestDevocionales.map((post, idx) => (
+    //             <div className="post-item" key={idx}>
+    //                 <img src={post.imagen} alt="" className="flex-shrink-0" />
+    //                 <div>
+    //                     <h4 style={{ color: '#212529' }} className="recent-post-title">
+    //                         <button onClick={() => abrirModal(post)}>
+    //                             <TituloDevocional contenido={post.contenido} />
+    //                             <time dateTime="2020-01-01">
+    //                                 {post.created_at
+    //                                     ? new Date(post.created_at).toLocaleDateString('es-ES', {
+    //                                         weekday: 'long',
+    //                                         year: 'numeric',
+    //                                         month: 'long',
+    //                                         day: 'numeric',
+    //                                     })
+    //                                     : ''}
+    //                             </time>
+    //                         </button>
+    //                     </h4>
+    //                     <time dateTime="2020-01-01">{post.date}</time>
+    //                 </div>
+    //             </div>
+    //         ))}
+    //     </div>
+    // );
 
     const todasLasCategorias = categories.map(cat =>
         cat.categoria.trim().toLowerCase()
@@ -358,19 +357,21 @@ function Devocionals() {
 
                 <div className="container">
                     <div className="row">
-                        {/* Mobile widgets: Search, Categories y Recent Posts */}
-                        <div className="mobile-widgets d-block d-lg-none" style={{ width: '100%' }}>
-                            <div className="widgets-container" data-aos="fade-up" data-aos-delay="200">
-                                {/* <SearchWidget /> */}
-                                <CategoriesWidget />
-                                <RecentPostsWidget />
-                            </div>
-                        </div>
+                        {/* Columna de ancho completo */}
+                        <div className="col-12">
 
-                        {/* Blog Content */}
-                        <div className="col-sm-8">
-                            <section id="blog-details" className="blog-grid section">
-                                <div className="container" data-aos="fade-up">
+                            {/* 1. Widget de Categorías ubicado arriba */}
+                            <div className="top-categories-sticky-wrapper">
+                                <div className="container">
+                                    {/* Usamos una clase limpia para evitar conflictos con estilos viejos de la plantilla */}
+                                    <div className="top-categories-container">
+                                        <CategoriesWidget />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <section id="blog-details" className="blog-grid section pt-0">
+                                <div className="container p-0">
                                     {loading ? (
                                         <div style={{ textAlign: 'center', padding: '40px' }}>
                                             <div id="preloader" className="d-flex align-items-center justify-content-center">
@@ -383,8 +384,8 @@ function Devocionals() {
                                         <p>No hay devocionales para esta búsqueda.</p>
                                     ) : (
                                         <>
-                                            <div style={{ paddingBottom: '30px', marginBottom: '30px' }}>
-                                                <h2 style={{ color: '#212529' }}>
+                                            <div style={{ paddingBottom: '20px', marginBottom: '20px' }}>
+                                                <h2 style={{ color: '#212529', fontSize: '1.5rem', borderLeft: '4px solid var(--accent-color)', paddingLeft: '15px' }}>
                                                     {searchTerm
                                                         ? `Resultados de búsqueda "${searchTerm}"`
                                                         : selectedCategory
@@ -392,6 +393,7 @@ function Devocionals() {
                                                             : 'Todos los Devocionales'}
                                                 </h2>
                                             </div>
+
                                             <div className="cards-container">
                                                 {devocionales.map((devocional, idx) => (
                                                     <CardNew
@@ -403,19 +405,9 @@ function Devocionals() {
                                                             autor: devocional.autor || '',
                                                             categoria: devocional.categoria
                                                         }}
-                                                        // Pasamos el array de categorías que ya tienes en el estado
                                                         todasLasCategorias={todasLasCategorias}
                                                     />
                                                 ))}
-                                                {/* <DevocionalCard
-                                                    devocionales={devocionales.map(devocional => ({
-                                                        ...devocional,
-                                                        titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
-                                                        contenido: devocional.contenido,
-                                                        autor: devocional.autor || '',
-                                                    }))}
-                                                    todasLasCategorias={todasLasCategorias}
-                                                /> */}
                                             </div>
 
                                             {showPaginator() && renderPaginator()}
@@ -424,67 +416,7 @@ function Devocionals() {
                                 </div>
                             </section>
                         </div>
-
-                        {/* Modal */}
-                        {modalOpen && devocionalSeleccionado && (
-                            <div
-                                className="modal-overlay"
-                                style={{
-                                    position: 'fixed',
-                                    top: 0,
-                                    left: 0,
-                                    width: '100vw',
-                                    height: '100vh',
-                                    background: 'rgba(0, 0, 0, 0.7)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    zIndex: 1000,
-                                    overflow: 'auto',
-                                }}
-                                onClick={cerrarModal}
-                            >
-                                <div
-                                    className="modal-content"
-                                    style={{
-                                        background: '#fff',
-                                        padding: '24px',
-                                        borderRadius: '8px',
-                                        maxWidth: '800px',
-                                        width: '100%',
-                                        position: 'relative',
-                                        maxHeight: '90vh',
-                                        overflowY: 'auto',
-                                    }}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <button
-                                        style={{
-                                            position: 'absolute',
-                                            top: '8px',
-                                            right: '8px',
-                                            background: 'none',
-                                            border: 'none',
-                                            fontSize: '1.5em',
-                                            cursor: 'pointer',
-                                        }}
-                                        onClick={cerrarModal}
-                                    >
-                                        &times;
-                                    </button>
-                                    <DevocionalDetails devocional={devocionalSeleccionado} />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Sidebar widgets (visible solo en escritorio) */}
-                        <div className="col-lg-4 sidebar d-none d-lg-block">
-                            <div className="widgets-container" data-aos="fade-up" data-aos-delay="200">
-                                {/* <SearchWidget /> */}
-                                <CategoriesWidget />
-                                <RecentPostsWidget />
-                            </div>
-                        </div>
+                        {/* Nota: Se eliminó el sidebar lateral col-lg-4 para dar espacio completo */}
                     </div>
                 </div>
             </main>
