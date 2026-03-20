@@ -45,25 +45,27 @@ const DevocionalDetailsPage = (props: Props) => {
     }, []);
 
     useEffect(() => {
-        // Intentamos sacar el ID de todas las fuentes posibles que tienes
-        const devocionalId = props.devocional?.id || page.devocional?.id || (props.devocional as any)?.id;
+        const devocionalId = (props.devocional as any)?.id || page.devocional?.id;
 
         if (devocionalId) {
-            console.log("Intentando registrar vista para ID:", devocionalId);
+            // Capturamos la hora local en formato ISO para que Laravel la entienda
+            // Ejemplo: 2026-03-19T20:30:00
+            const now = new Date();
+            const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ');
+
             fetch(`/devocionales/${devocionalId}/view`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
                 },
-            })
-                .then(response => response.json())
-                .then(data => console.log("Respuesta servidor:", data))
-                .catch(error => console.error("Error en fetch:", error));
-        } else {
-            console.warn("No se encontró ID para registrar la vista");
+                body: JSON.stringify({ local_time: localTime }) // Enviamos la hora exacta del usuario
+            });
         }
-    }, [devocional?.id]); // Cambia [] por [devocional?.id] para asegurar que dispare cuando el objeto cargue
+    }, [devocional?.id]);
 
     const getH1Text = (html: string): string => {
         const match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
