@@ -361,52 +361,53 @@ class DevocionalController extends Controller
     }
     public function trackView(Request $request, $id)
     {
-        $rawIp = $request->ip(); // IP Real (ej: 181.131.10.25)
+        $rawIp = $request->ip();
 
         // --- ANONIMIZACIÓN DE IP ---
-        // Convierte 181.131.10.25 en 181.131.10.0
         $ipParts = explode('.', $rawIp);
         if (count($ipParts) === 4) {
             $ipParts[3] = '0';
             $ip = implode('.', $ipParts);
         } else {
-            $ip = $rawIp; // En caso de IPv6 o IPs malformadas
+            $ip = $rawIp;
         }
 
-        // Inicializamos el detector de agentes
         $agent = new Agent();
         $agent->setUserAgent($request->userAgent());
 
-        // 1. FILTRO: Ignorar tus IPs (Usamos la IP anonimizada para el check si tus env están anonimizados, 
-        // o comparamos contra la rawIp. Mejor usar la rawIp para tus filtros del .env)
+        // 1. FILTRO: Ignorar tus IPs
         $ignoredIps = explode(',', env('RECORDS_IGNORE_IPS', ''));
         if (in_array($rawIp, $ignoredIps)) {
             return response()->json(['status' => 'ignored_dev']);
         }
 
         // 2. ANALÍTICA (Filtro 1 hora)
-        // Buscamos por la IP anonimizada para mantener la coherencia
         $recentAnalytic = DevocionalView::where('devocional_id', $id)
             ->where('ip_address', $ip)
             ->where('created_at', '>', now()->subHour())
             ->exists();
 
         if (!$recentAnalytic) {
-            // Obtenemos ubicación usando la IP REAL (para no perder precisión)
             $loc = Location::get($rawIp);
 
             $browserName = $agent->browser();
             $browserVersion = $agent->version($browserName);
             $platformName = $agent->platform();
 
+            // -------------------------------------------------------
+            // CAPTURAMOS LA HORA LOCAL ENVIADA DESDE EL FRONTEND
+            // -------------------------------------------------------
+            $localTime = $request->input('local_time');
+
             // Creamos el registro detallado
             DevocionalView::create([
                 'devocional_id'  => $id,
-                'ip_address'     => $ip, // Guardamos la IP ANONIMIZADA
+                'ip_address'     => $ip,
                 'country'        => $loc ? $loc->countryName : 'Desconocido',
                 'browser'        => $browserName . ' ' . $browserVersion,
                 'platform'       => $platformName,
-                'accepted_terms' => true, // Marcamos que aceptó la política (vía el banner)
+                'accepted_terms' => true,
+                'local_time'     => $localTime, // <-- Guardamos la hora del país del usuario
             ]);
 
             // 3. CONTADOR PÚBLICO (Filtro 24 horas)
@@ -425,7 +426,8 @@ class DevocionalController extends Controller
             return response()->json([
                 'status' => 'recorded',
                 'browser' => $browserName,
-                'platform' => $platformName
+                'platform' => $platformName,
+                'local_time_saved' => $localTime // Para verificar en consola
             ]);
         }
 
