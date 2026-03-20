@@ -359,6 +359,80 @@ class DevocionalController extends Controller
             'devocional' => $devocional,
         ]);
     }
+    // public function trackView(Request $request, $id)
+    // {
+    //     $rawIp = $request->ip();
+
+    //     // --- ANONIMIZACIÓN DE IP ---
+    //     $ipParts = explode('.', $rawIp);
+    //     if (count($ipParts) === 4) {
+    //         $ipParts[3] = '0';
+    //         $ip = implode('.', $ipParts);
+    //     } else {
+    //         $ip = $rawIp;
+    //     }
+
+    //     $agent = new Agent();
+    //     $agent->setUserAgent($request->userAgent());
+
+    //     // 1. FILTRO: Ignorar tus IPs
+    //     $ignoredIps = explode(',', env('RECORDS_IGNORE_IPS', ''));
+    //     if (in_array($rawIp, $ignoredIps)) {
+    //         return response()->json(['status' => 'ignored_dev']);
+    //     }
+
+    //     // 2. ANALÍTICA (Filtro 1 hora)
+    //     $recentAnalytic = DevocionalView::where('devocional_id', $id)
+    //         ->where('ip_address', $ip)
+    //         ->where('created_at', '>', now()->subHour())
+    //         ->exists();
+
+    //     if (!$recentAnalytic) {
+    //         $loc = Location::get($rawIp);
+
+    //         $browserName = $agent->browser();
+    //         $browserVersion = $agent->version($browserName);
+    //         $platformName = $agent->platform();
+
+    //         // -------------------------------------------------------
+    //         // CAPTURAMOS LA HORA LOCAL ENVIADA DESDE EL FRONTEND
+    //         // -------------------------------------------------------
+
+    //         // Creamos el registro detallado
+    //         DevocionalView::create([
+    //             'devocional_id'  => $id,
+    //             'ip_address'     => $ip,
+    //             'country'        => $loc ? $loc->countryName : 'Desconocido',
+    //             'browser'        => $browserName . ' ' . $browserVersion,
+    //             'platform'       => $platformName,
+    //             'accepted_terms' => true,
+    //             'local_time'     => $request->input('local_time'), // <-- Guardamos la hora del país del usuario
+    //         ]);
+
+    //         // 3. CONTADOR PÚBLICO (Filtro 24 horas)
+    //         $dayCheck = DevocionalView::where('devocional_id', $id)
+    //             ->where('ip_address', $ip)
+    //             ->where('created_at', '>', now()->subDay())
+    //             ->count();
+
+    //         if ($dayCheck === 1) {
+    //             $devocional = Devocional::find($id);
+    //             if ($devocional) {
+    //                 $devocional->increment('views_count');
+    //             }
+    //         }
+
+    //         return response()->json([
+    //             'status' => 'recorded',
+    //             'browser' => $browserName,
+    //             'platform' => $platformName,
+    //             'local_time_saved' => $request->input('local_time'), // Para verificar en consola
+    //         ]);
+    //     }
+
+    //     return response()->json(['status' => 'throttled']);
+    // }
+
     public function trackView(Request $request, $id)
     {
         $rawIp = $request->ip();
@@ -381,23 +455,26 @@ class DevocionalController extends Controller
             return response()->json(['status' => 'ignored_dev']);
         }
 
+        // Usamos el local_time enviado para todas las comparaciones de tiempo
+        $localTime = $request->input('local_time');
+
         // 2. ANALÍTICA (Filtro 1 hora)
+        // Comparamos contra el localTime enviado para ser consistentes
         $recentAnalytic = DevocionalView::where('devocional_id', $id)
             ->where('ip_address', $ip)
-            ->where('created_at', '>', now()->subHour())
+            ->where('created_at', '>', Carbon::parse($localTime)->subHour())
             ->exists();
 
         if (!$recentAnalytic) {
             $loc = Location::get($rawIp);
-            $localTime = $request->input('local_time'); // Viene de React: "2026-03-20 21:00:00"
 
-            // 1. Creamos la instancia sin guardar todavía
+            // 1. Creamos la instancia
             $view = new DevocionalView();
 
-            // 2. Desactivamos los timestamps automáticos para este objeto
+            // 2. Desactivamos timestamps automáticos
             $view->timestamps = false;
 
-            // 3. Asignamos los campos manualmente
+            // 3. Asignamos campos
             $view->devocional_id = $id;
             $view->ip_address = $ip;
             $view->country = $loc ? $loc->countryName : 'Desconocido';
@@ -405,20 +482,22 @@ class DevocionalController extends Controller
             $view->platform = $agent->platform();
             $view->accepted_terms = true;
 
-            // 4. FORZAMOS la hora del dispositivo en los campos del sistema
+            // 4. Forzamos la hora recibida
             $view->created_at = $localTime;
             $view->updated_at = $localTime;
-            $view->local_time = $localTime; // (Opcional, si quieres mantener tu columna extra)
 
-            // 5. Guardamos manualmente
+            // 5. Guardamos
             $view->save();
 
-            // --- (Continúa con tu lógica del contador de 24 horas) ---
+            // --- 3. CONTADOR PÚBLICO (Filtro 24 horas) ---
+            // IMPORTANTE: Aquí comparamos usando Carbon::parse($localTime) 
+            // para que el rango de 24 horas sea relativo a la hora del usuario, no del servidor.
             $dayCheck = DevocionalView::where('devocional_id', $id)
                 ->where('ip_address', $ip)
-                ->where('created_at', '>', now()->subDay())
+                ->where('created_at', '>', Carbon::parse($localTime)->subDay())
                 ->count();
 
+            // Si es 1, significa que el registro que acabamos de crear es el único en 24h
             if ($dayCheck === 1) {
                 $devocional = Devocional::find($id);
                 if ($devocional) {
@@ -426,7 +505,11 @@ class DevocionalController extends Controller
                 }
             }
 
-            return response()->json(['status' => 'recorded', 'time_sent' => $localTime]);
+            return response()->json([
+                'status' => 'recorded',
+                'time_sent' => $localTime,
+                'is_new_view' => ($dayCheck === 1)
+            ]);
         }
 
         return response()->json(['status' => 'throttled']);
