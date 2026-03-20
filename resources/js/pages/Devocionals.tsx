@@ -15,7 +15,8 @@ type Devocional = {
     imagen: string;
     categoria: string;
     created_at?: string;
-    [key: string]: string | undefined;
+    views_count?: number;
+    [key: string]: string | number | undefined;
 };
 
 type DevocionalesResponse = {
@@ -403,7 +404,8 @@ function Devocionals() {
                                                             imagen: devocional.imagen,
                                                             titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
                                                             autor: devocional.autor || '',
-                                                            categoria: devocional.categoria
+                                                            categoria: devocional.categoria,
+                                                            views_count: devocional.views_count || 0,
                                                         }}
                                                         todasLasCategorias={todasLasCategorias}
                                                     />
