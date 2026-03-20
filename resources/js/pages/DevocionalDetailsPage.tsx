@@ -48,13 +48,16 @@ const DevocionalDetailsPage = (props: Props) => {
         const devocionalId = (props.devocional as any)?.id || page.devocional?.id;
 
         if (devocionalId) {
-            // Capturamos la hora local en formato ISO para que Laravel la entienda
-            // Ejemplo: 2026-03-19T20:30:00
-            const now = new Date();
-            const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-                .toISOString()
-                .slice(0, 19)
-                .replace('T', ' ');
+            // Captura la hora real del reloj del usuario
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            const formatLocal = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
             fetch(`/devocionales/${devocionalId}/view`, {
                 method: 'POST',
@@ -62,10 +65,11 @@ const DevocionalDetailsPage = (props: Props) => {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
                 },
-                body: JSON.stringify({ local_time: localTime }) // Enviamos la hora exacta del usuario
+                body: JSON.stringify({ local_time: formatLocal })
             });
         }
     }, [devocional?.id]);
+
 
     const getH1Text = (html: string): string => {
         const match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
