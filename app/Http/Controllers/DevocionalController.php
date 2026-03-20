@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Devocional;
+use App\Models\DevocionalView;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Jenssegers\Agent\Agent;
+use Stevebauman\Location\Facades\Location;
 
 class DevocionalController extends Controller
 {
@@ -355,5 +358,65 @@ class DevocionalController extends Controller
             'message'    => 'Devocional actualizado correctamente',
             'devocional' => $devocional,
         ]);
+    }
+    public function trackView(Request $request, $id)
+    {
+        $ip = $request->ip();
+
+        // Inicializamos el detector de agentes (Navegador/SO)
+        $agent = new Agent();
+        $agent->setUserAgent($request->userAgent());
+
+        // 1. FILTRO: Ignorar tus IPs (Configuradas en el .env)
+        $ignoredIps = explode(',', env('RECORDS_IGNORE_IPS', ''));
+        if (in_array($ip, $ignoredIps)) {
+            return response()->json(['status' => 'ignored_dev']);
+        }
+
+        // 2. ANALÍTICA (Filtro 1 hora)
+        $recentAnalytic = DevocionalView::where('devocional_id', $id)
+            ->where('ip_address', $ip)
+            ->where('created_at', '>', now()->subHour())
+            ->exists();
+
+        if (!$recentAnalytic) {
+            // Intentamos obtener la ubicación por IP
+            $loc = Location::get($ip);
+
+            // Extraemos datos limpios
+            $browserName = $agent->browser(); // Ej: Chrome, Safari, Edge
+            $browserVersion = $agent->version($browserName);
+            $platformName = $agent->platform(); // Ej: Windows, Android, iOS
+
+            // Creamos el registro detallado
+            DevocionalView::create([
+                'devocional_id' => $id,
+                'ip_address'    => $ip,
+                'country'       => $loc ? $loc->countryName : 'Desconocido',
+                'browser'       => $browserName . ' ' . $browserVersion, // Ej: "Chrome 122"
+                'platform'      => $platformName, // Ej: "Windows" o "Android"
+            ]);
+
+            // 3. CONTADOR PÚBLICO (Filtro 24 horas)
+            $dayCheck = DevocionalView::where('devocional_id', $id)
+                ->where('ip_address', $ip)
+                ->where('created_at', '>', now()->subDay())
+                ->count();
+
+            if ($dayCheck === 1) {
+                $devocional = Devocional::find($id);
+                if ($devocional) {
+                    $devocional->increment('views_count');
+                }
+            }
+
+            return response()->json([
+                'status' => 'recorded',
+                'browser' => $browserName,
+                'platform' => $platformName
+            ]);
+        }
+
+        return response()->json(['status' => 'throttled']);
     }
 }
