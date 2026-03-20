@@ -361,40 +361,52 @@ class DevocionalController extends Controller
     }
     public function trackView(Request $request, $id)
     {
-        $ip = $request->ip();
+        $rawIp = $request->ip(); // IP Real (ej: 181.131.10.25)
 
-        // Inicializamos el detector de agentes (Navegador/SO)
+        // --- ANONIMIZACIÓN DE IP ---
+        // Convierte 181.131.10.25 en 181.131.10.0
+        $ipParts = explode('.', $rawIp);
+        if (count($ipParts) === 4) {
+            $ipParts[3] = '0';
+            $ip = implode('.', $ipParts);
+        } else {
+            $ip = $rawIp; // En caso de IPv6 o IPs malformadas
+        }
+
+        // Inicializamos el detector de agentes
         $agent = new Agent();
         $agent->setUserAgent($request->userAgent());
 
-        // 1. FILTRO: Ignorar tus IPs (Configuradas en el .env)
+        // 1. FILTRO: Ignorar tus IPs (Usamos la IP anonimizada para el check si tus env están anonimizados, 
+        // o comparamos contra la rawIp. Mejor usar la rawIp para tus filtros del .env)
         $ignoredIps = explode(',', env('RECORDS_IGNORE_IPS', ''));
-        if (in_array($ip, $ignoredIps)) {
+        if (in_array($rawIp, $ignoredIps)) {
             return response()->json(['status' => 'ignored_dev']);
         }
 
         // 2. ANALÍTICA (Filtro 1 hora)
+        // Buscamos por la IP anonimizada para mantener la coherencia
         $recentAnalytic = DevocionalView::where('devocional_id', $id)
             ->where('ip_address', $ip)
             ->where('created_at', '>', now()->subHour())
             ->exists();
 
         if (!$recentAnalytic) {
-            // Intentamos obtener la ubicación por IP
-            $loc = Location::get($ip);
+            // Obtenemos ubicación usando la IP REAL (para no perder precisión)
+            $loc = Location::get($rawIp);
 
-            // Extraemos datos limpios
-            $browserName = $agent->browser(); // Ej: Chrome, Safari, Edge
+            $browserName = $agent->browser();
             $browserVersion = $agent->version($browserName);
-            $platformName = $agent->platform(); // Ej: Windows, Android, iOS
+            $platformName = $agent->platform();
 
             // Creamos el registro detallado
             DevocionalView::create([
-                'devocional_id' => $id,
-                'ip_address'    => $ip,
-                'country'       => $loc ? $loc->countryName : 'Desconocido',
-                'browser'       => $browserName . ' ' . $browserVersion, // Ej: "Chrome 122"
-                'platform'      => $platformName, // Ej: "Windows" o "Android"
+                'devocional_id'  => $id,
+                'ip_address'     => $ip, // Guardamos la IP ANONIMIZADA
+                'country'        => $loc ? $loc->countryName : 'Desconocido',
+                'browser'        => $browserName . ' ' . $browserVersion,
+                'platform'       => $platformName,
+                'accepted_terms' => true, // Marcamos que aceptó la política (vía el banner)
             ]);
 
             // 3. CONTADOR PÚBLICO (Filtro 24 horas)
@@ -418,5 +430,26 @@ class DevocionalController extends Controller
         }
 
         return response()->json(['status' => 'throttled']);
+    }
+
+    public function acceptPrivacy(Request $request)
+    {
+        $rawIp = $request->ip();
+
+        // Aplicamos la misma anonimización para encontrar el registro
+        $ipParts = explode('.', $rawIp);
+        if (count($ipParts) === 4) {
+            $ipParts[3] = '0';
+            $anonIp = implode('.', $ipParts);
+        } else {
+            $anonIp = $rawIp;
+        }
+
+        // Actualizamos el registro más reciente de esta IP que esté en false
+        DevocionalView::where('ip_address', $anonIp)
+            ->where('accepted_terms', false)
+            ->update(['accepted_terms' => true]);
+
+        return response()->json(['status' => 'consent_recorded']);
     }
 }

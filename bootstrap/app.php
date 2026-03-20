@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
             'devocionales/*/view',
+            'privacy/accept',
         ]);
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
