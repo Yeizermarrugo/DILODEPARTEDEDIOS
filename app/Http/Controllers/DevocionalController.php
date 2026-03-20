@@ -389,28 +389,31 @@ class DevocionalController extends Controller
 
         if (!$recentAnalytic) {
             $loc = Location::get($rawIp);
+            $localTime = $request->input('local_time'); // Viene de React: "2026-03-20 21:00:00"
 
-            $browserName = $agent->browser();
-            $browserVersion = $agent->version($browserName);
-            $platformName = $agent->platform();
+            // 1. Creamos la instancia sin guardar todavía
+            $view = new DevocionalView();
 
-            // -------------------------------------------------------
-            // CAPTURAMOS LA HORA LOCAL ENVIADA DESDE EL FRONTEND
-            // -------------------------------------------------------
-            $localTime = $request->input('local_time');
+            // 2. Desactivamos los timestamps automáticos para este objeto
+            $view->timestamps = false;
 
-            // Creamos el registro detallado
-            DevocionalView::create([
-                'devocional_id'  => $id,
-                'ip_address'     => $ip,
-                'country'        => $loc ? $loc->countryName : 'Desconocido',
-                'browser'        => $browserName . ' ' . $browserVersion,
-                'platform'       => $platformName,
-                'accepted_terms' => true,
-                'local_time'     => $localTime, // <-- Guardamos la hora del país del usuario
-            ]);
+            // 3. Asignamos los campos manualmente
+            $view->devocional_id = $id;
+            $view->ip_address = $ip;
+            $view->country = $loc ? $loc->countryName : 'Desconocido';
+            $view->browser = $agent->browser() . ' ' . $agent->version($agent->browser());
+            $view->platform = $agent->platform();
+            $view->accepted_terms = true;
 
-            // 3. CONTADOR PÚBLICO (Filtro 24 horas)
+            // 4. FORZAMOS la hora del dispositivo en los campos del sistema
+            $view->created_at = $localTime;
+            $view->updated_at = $localTime;
+            $view->local_time = $localTime; // (Opcional, si quieres mantener tu columna extra)
+
+            // 5. Guardamos manualmente
+            $view->save();
+
+            // --- (Continúa con tu lógica del contador de 24 horas) ---
             $dayCheck = DevocionalView::where('devocional_id', $id)
                 ->where('ip_address', $ip)
                 ->where('created_at', '>', now()->subDay())
@@ -423,12 +426,7 @@ class DevocionalController extends Controller
                 }
             }
 
-            return response()->json([
-                'status' => 'recorded',
-                'browser' => $browserName,
-                'platform' => $platformName,
-                'local_time_saved' => $localTime // Para verificar en consola
-            ]);
+            return response()->json(['status' => 'recorded', 'time_sent' => $localTime]);
         }
 
         return response()->json(['status' => 'throttled']);
