@@ -25,7 +25,7 @@ interface CardNewProps {
         categoria: string;
         likes?: number;
         comments?: number;
-
+        views_count?: number;
     };
     todasLasCategorias: string[]; // Recibe la lista completa para calcular su color
     onClick?: () => void;
@@ -33,7 +33,7 @@ interface CardNewProps {
 }
 
 const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) => {
-    const { id, imagen, titulo, autor, categoria, likes = 0, comments = 0 } = dev;
+    const { id, imagen, titulo, autor, categoria, likes = 0, comments = 0, views_count } = dev;
 
     // 3. Calculamos el color aquí mismo
     const categoryColorMap = buildCategoryColorMap(todasLasCategorias);
@@ -67,17 +67,21 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                             <span
                                 className="category-badge"
                                 style={{
-                                   backgroundColor: addAlpha(categoryColor, 0.9),
+                                    backgroundColor: addAlpha(categoryColor, 0.9),
                                     textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
                                 }}
                             >
                                 {categoria}
                             </span>
                         </div>
-                        {/* <ul className="menu-content">
-                            <li><i className="fa fa-heart-o"></i><span>{likes}</span></li>
-                            <li><i className="fa fa-comment-o"></i><span>{comments}</span></li>
-                        </ul> */}
+                        <ul className="menu-content" style={{ width: 'auto', display: 'flex', marginTop: '10px' }}>
+                            {/* <li><i className="fa fa-heart-o"></i><span>{likes}</span></li>
+                            <li><i className="fa fa-comment-o"></i><span>{comments}</span></li> */}
+                            <li>
+                                <i className="bi bi-eye"></i> {/* Usando Bootstrap Icons */}
+                                <span>{views_count}</span>
+                            </li>
+                        </ul>
                     </div>
                     <div className="data">
                         <div className="content">

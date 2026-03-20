@@ -153,21 +153,22 @@
 .card-custom .menu-content span {
     position: absolute;
     left: 50%;
-    top: 0;
+    top: -12px; /* Posicionado justo encima del icono */
     font-size: 10px;
     font-weight: 700;
     font-family: 'Open Sans';
     transform: translate(-50%, 0); /* Posición inicial sobre el icono */
     color: white;
-    opacity: 0; /* Oculto por defecto */
+    opacity: 1; /* Oculto por defecto */
     transition: all 0.3s ease; /* Suaviza la aparición */
 }
 
 /* EFECTO HOVER: Los números suben y aparecen */
-.card-custom .wrapper:hover .menu-content span {
+/* .card-custom .wrapper:hover .menu-content span {
     transform: translate(-50%, -12px); /* Sube 12px sobre el icono */
-    opacity: 1; /* Se hace visible */
-}
+    /* opacity: 1;  */
+    /* Se hace visible */
+/* }  */
 
 /* Asegúrate de que los iconos no se muevan, solo los números */
 .card-custom .menu-content i {
