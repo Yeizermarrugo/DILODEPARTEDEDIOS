@@ -123,7 +123,8 @@ Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->nam
 
 Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name('devocionales.update');
 
-
+// Trackviews
+Route::post('/devocionales/{id}/view', [DevocionalController::class, 'trackView']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

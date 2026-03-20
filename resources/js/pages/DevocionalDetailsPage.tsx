@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
 type Devocional = {
+    id?: string;
     contenido: string;
     imagen: string;
     created_at?: string;
@@ -42,6 +43,27 @@ const DevocionalDetailsPage = (props: Props) => {
             setLoading(false);
         }, 1000);
     }, []);
+
+    useEffect(() => {
+        // Intentamos sacar el ID de todas las fuentes posibles que tienes
+        const devocionalId = props.devocional?.id || page.devocional?.id || (props.devocional as any)?.id;
+
+        if (devocionalId) {
+            console.log("Intentando registrar vista para ID:", devocionalId);
+            fetch(`/devocionales/${devocionalId}/view`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(data => console.log("Respuesta servidor:", data))
+                .catch(error => console.error("Error en fetch:", error));
+        } else {
+            console.warn("No se encontró ID para registrar la vista");
+        }
+    }, [devocional?.id]); // Cambia [] por [devocional?.id] para asegurar que dispare cuando el objeto cargue
 
     const getH1Text = (html: string): string => {
         const match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
