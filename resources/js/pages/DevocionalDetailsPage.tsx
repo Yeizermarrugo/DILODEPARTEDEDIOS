@@ -45,25 +45,31 @@ const DevocionalDetailsPage = (props: Props) => {
     }, []);
 
     useEffect(() => {
-        // Intentamos sacar el ID de todas las fuentes posibles que tienes
-        const devocionalId = props.devocional?.id || page.devocional?.id || (props.devocional as any)?.id;
+        const devocionalId = (props.devocional as any)?.id || page.devocional?.id;
 
         if (devocionalId) {
-            console.log("Intentando registrar vista para ID:", devocionalId);
+            // Captura la hora real del reloj del usuario
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            const formatLocal = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
             fetch(`/devocionales/${devocionalId}/view`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
                 },
-            })
-                .then(response => response.json())
-                .then(data => console.log("Respuesta servidor:", data))
-                .catch(error => console.error("Error en fetch:", error));
-        } else {
-            console.warn("No se encontró ID para registrar la vista");
+                body: JSON.stringify({ local_time: formatLocal })
+            });
         }
-    }, [devocional?.id]); // Cambia [] por [devocional?.id] para asegurar que dispare cuando el objeto cargue
+    }, [devocional?.id]);
+
 
     const getH1Text = (html: string): string => {
         const match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);

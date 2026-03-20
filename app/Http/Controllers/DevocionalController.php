@@ -361,55 +361,59 @@ class DevocionalController extends Controller
     }
     public function trackView(Request $request, $id)
     {
-        $rawIp = $request->ip(); // IP Real (ej: 181.131.10.25)
+        $rawIp = $request->ip();
 
         // --- ANONIMIZACIÓN DE IP ---
-        // Convierte 181.131.10.25 en 181.131.10.0
         $ipParts = explode('.', $rawIp);
         if (count($ipParts) === 4) {
             $ipParts[3] = '0';
             $ip = implode('.', $ipParts);
         } else {
-            $ip = $rawIp; // En caso de IPv6 o IPs malformadas
+            $ip = $rawIp;
         }
 
-        // Inicializamos el detector de agentes
         $agent = new Agent();
         $agent->setUserAgent($request->userAgent());
 
-        // 1. FILTRO: Ignorar tus IPs (Usamos la IP anonimizada para el check si tus env están anonimizados, 
-        // o comparamos contra la rawIp. Mejor usar la rawIp para tus filtros del .env)
+        // 1. FILTRO: Ignorar tus IPs
         $ignoredIps = explode(',', env('RECORDS_IGNORE_IPS', ''));
         if (in_array($rawIp, $ignoredIps)) {
             return response()->json(['status' => 'ignored_dev']);
         }
 
         // 2. ANALÍTICA (Filtro 1 hora)
-        // Buscamos por la IP anonimizada para mantener la coherencia
         $recentAnalytic = DevocionalView::where('devocional_id', $id)
             ->where('ip_address', $ip)
             ->where('created_at', '>', now()->subHour())
             ->exists();
 
         if (!$recentAnalytic) {
-            // Obtenemos ubicación usando la IP REAL (para no perder precisión)
             $loc = Location::get($rawIp);
+            $localTime = $request->input('local_time'); // Viene de React: "2026-03-20 21:00:00"
 
-            $browserName = $agent->browser();
-            $browserVersion = $agent->version($browserName);
-            $platformName = $agent->platform();
+            // 1. Creamos la instancia sin guardar todavía
+            $view = new DevocionalView();
 
-            // Creamos el registro detallado
-            DevocionalView::create([
-                'devocional_id'  => $id,
-                'ip_address'     => $ip, // Guardamos la IP ANONIMIZADA
-                'country'        => $loc ? $loc->countryName : 'Desconocido',
-                'browser'        => $browserName . ' ' . $browserVersion,
-                'platform'       => $platformName,
-                'accepted_terms' => true, // Marcamos que aceptó la política (vía el banner)
-            ]);
+            // 2. Desactivamos los timestamps automáticos para este objeto
+            $view->timestamps = false;
 
-            // 3. CONTADOR PÚBLICO (Filtro 24 horas)
+            // 3. Asignamos los campos manualmente
+            $view->devocional_id = $id;
+            $view->ip_address = $ip;
+            $view->country = $loc ? $loc->countryName : 'Desconocido';
+            $view->browser = $agent->browser() . ' ' . $agent->version($agent->browser());
+            $view->platform = $agent->platform();
+            $view->accepted_terms = true;
+
+            // 4. FORZAMOS la hora del dispositivo en los campos del sistema
+            $view->created_at = $localTime;
+            $view->updated_at = $localTime;
+            $view->local_time = $localTime; // (Opcional, si quieres mantener tu columna extra)
+
+            // 5. Guardamos manualmente
+            $view->save();
+
+            // --- (Continúa con tu lógica del contador de 24 horas) ---
             $dayCheck = DevocionalView::where('devocional_id', $id)
                 ->where('ip_address', $ip)
                 ->where('created_at', '>', now()->subDay())
@@ -422,11 +426,7 @@ class DevocionalController extends Controller
                 }
             }
 
-            return response()->json([
-                'status' => 'recorded',
-                'browser' => $browserName,
-                'platform' => $platformName
-            ]);
+            return response()->json(['status' => 'recorded', 'time_sent' => $localTime]);
         }
 
         return response()->json(['status' => 'throttled']);
