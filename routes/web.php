@@ -125,6 +125,7 @@ Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name(
 
 // Trackviews
 Route::post('/devocionales/{id}/view', [DevocionalController::class, 'trackView']);
+Route::post('/privacy/accept', [DevocionalController::class, 'acceptPrivacy']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
