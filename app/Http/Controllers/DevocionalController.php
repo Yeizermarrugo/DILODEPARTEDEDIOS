@@ -436,69 +436,75 @@ class DevocionalController extends Controller
     public function trackView(Request $request, $id)
     {
         $rawIp = $request->ip();
-
-        // --- ANONIMIZACIÓN DE IP ---
-        $ipParts = explode('.', $rawIp);
-        if (count($ipParts) === 4) {
-            $ipParts[3] = '0';
-            $ip = implode('.', $ipParts);
-        } else {
-            $ip = $rawIp;
-        }
-
+        $localTime = $request->input('local_time');
         $agent = new Agent();
         $agent->setUserAgent($request->userAgent());
 
-        // 1. FILTRO: Ignorar tus IPs
+        // 1. DETERMINAR SI ES UNA IP DE TRABAJO (Tú o tu pareja)
         $ignoredIps = explode(',', env('RECORDS_IGNORE_IPS', ''));
-        if (in_array($rawIp, $ignoredIps)) {
-            return response()->json(['status' => 'ignored_dev']);
+        $isWorkIp = in_array($rawIp, $ignoredIps);
+
+        // 2. DEFINIR LA IP QUE SE GUARDARÁ EN BD
+        // Si eres tú, guardamos la REAL. Si es otro, ANONIMIZAMOS con .0
+        if ($isWorkIp) {
+            $ipToSave = $rawIp;
+        } else {
+            $ipParts = explode('.', $rawIp);
+            $ipToSave = (count($ipParts) === 4) ? implode('.', array_slice($ipParts, 0, 3)) . '.0' : $rawIp;
         }
 
-        // Usamos el local_time enviado para todas las comparaciones de tiempo
-        $localTime = $request->input('local_time');
+        // 3. REGLA ESPECIAL PARA TU EQUIPO (isWorkIp)
+        if ($isWorkIp) {
+            $alreadyExists = DevocionalView::where('devocional_id', $id)
+                ->where('ip_address', $ipToSave)
+                ->exists();
 
-        // 2. ANALÍTICA (Filtro 1 hora)
-        // Comparamos contra el localTime enviado para ser consistentes
+            if ($alreadyExists) {
+                return response()->json(['status' => 'work_ip_already_tracked']);
+            }
+        }
+
+        // 4. ANALÍTICA GENERAL (Filtro 1 hora para evitar duplicidad de logs rápida)
         $recentAnalytic = DevocionalView::where('devocional_id', $id)
-            ->where('ip_address', $ip)
+            ->where('ip_address', $ipToSave)
             ->where('created_at', '>', Carbon::parse($localTime)->subHour())
             ->exists();
 
         if (!$recentAnalytic) {
             $loc = Location::get($rawIp);
 
-            // 1. Creamos la instancia
+            // Guardado Manual para forzar timestamps del dispositivo
             $view = new DevocionalView();
-
-            // 2. Desactivamos timestamps automáticos
             $view->timestamps = false;
-
-            // 3. Asignamos campos
             $view->devocional_id = $id;
-            $view->ip_address = $ip;
+            $view->ip_address = $ipToSave;
             $view->country = $loc ? $loc->countryName : 'Desconocido';
             $view->browser = $agent->browser() . ' ' . $agent->version($agent->browser());
             $view->platform = $agent->platform();
             $view->accepted_terms = true;
-
-            // 4. Forzamos la hora recibida
             $view->created_at = $localTime;
             $view->updated_at = $localTime;
-
-            // 5. Guardamos
             $view->save();
 
-            // --- 3. CONTADOR PÚBLICO (Filtro 24 horas) ---
-            // IMPORTANTE: Aquí comparamos usando Carbon::parse($localTime) 
-            // para que el rango de 24 horas sea relativo a la hora del usuario, no del servidor.
-            $dayCheck = DevocionalView::where('devocional_id', $id)
-                ->where('ip_address', $ip)
-                ->where('created_at', '>', Carbon::parse($localTime)->subDay())
-                ->count();
+            // 5. LÓGICA DE INCREMENTO DE VIEWS_COUNT
+            $shouldIncrement = false;
 
-            // Si es 1, significa que el registro que acabamos de crear es el único en 24h
-            if ($dayCheck === 1) {
+            if ($isWorkIp) {
+                // Si es tu IP y pasó el check del punto 3, es su primera vez
+                $shouldIncrement = true;
+            } else {
+                // Para cualquier otra persona (incluyendo invitados en tu WiFi no registrados)
+                $dayCheck = DevocionalView::where('devocional_id', $id)
+                    ->where('ip_address', $ipToSave)
+                    ->where('created_at', '>', Carbon::parse($localTime)->subDay())
+                    ->count();
+
+                if ($dayCheck === 1) {
+                    $shouldIncrement = true;
+                }
+            }
+
+            if ($shouldIncrement) {
                 $devocional = Devocional::find($id);
                 if ($devocional) {
                     $devocional->increment('views_count');
@@ -507,8 +513,8 @@ class DevocionalController extends Controller
 
             return response()->json([
                 'status' => 'recorded',
-                'time_sent' => $localTime,
-                'is_new_view' => ($dayCheck === 1)
+                'is_work_log' => $isWorkIp,
+                'ip_stored' => $ipToSave
             ]);
         }
 
