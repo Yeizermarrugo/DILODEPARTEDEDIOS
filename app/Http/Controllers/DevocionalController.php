@@ -479,6 +479,7 @@ class DevocionalController extends Controller
             $view->devocional_id = $id;
             $view->ip_address = $ipToSave;
             $view->country = $loc ? $loc->countryName : 'Desconocido';
+            $view->city = $loc ? $loc->cityName : 'Desconocida';
             $view->browser = $agent->browser() . ' ' . $agent->version($agent->browser());
             $view->platform = $agent->platform();
             $view->accepted_terms = true;
