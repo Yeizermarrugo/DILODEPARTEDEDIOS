@@ -7,8 +7,10 @@ use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TTSController;
 use App\Http\Controllers\YouTubeController;
+use App\Models\DevocionalView;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Stevebauman\Location\Facades\Location;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -126,6 +128,29 @@ Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name(
 // Trackviews
 Route::post('/devocionales/{id}/view', [DevocionalController::class, 'trackView']);
 Route::post('/privacy/accept', [DevocionalController::class, 'acceptPrivacy']);
+
+Route::get('/reparar-ciudades', function () {
+    $viewsSinCiudad = DevocionalView::whereNull('city')->get();
+    $contador = 0;
+
+    foreach ($viewsSinCiudad as $view) {
+        // Ignoramos IPs locales porque no tienen ubicación geográfica
+        if ($view->ip_address !== '127.0.0.1' && $view->ip_address !== '127.0.0.0' && !str_ends_with($view->ip_address, '.0')) {
+
+            $loc = Location::get($view->ip_address);
+
+            if ($loc && $loc->cityName) {
+                $view->timestamps = false; // Para no alterar created_at
+                $view->city = $loc->cityName;
+                $view->country = $loc->countryName;
+                $view->save();
+                $contador++;
+            }
+        }
+    }
+
+    return "Se actualizaron $contador registros con éxito.";
+});
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
