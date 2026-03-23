@@ -1,66 +1,90 @@
-/* Estilo para el contenedor principal de la página legal */
-.index-page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Asegura que el footer siempre esté abajo */
-}
-
-.centered-main {
-    flex: 1;
-    background-color: #f8f9fa; /* Un gris muy suave de fondo para dar contraste */
-    padding-top: 40px;
-    padding-bottom: 40px;
-}
-
-/* El "papel" donde va el texto */
+/* Contenedor tipo documento */
 .legal-container {
     background: #ffffff;
-    padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    max-width: 900px; /* Ancho ideal para lectura */
+    padding: 50px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    max-width: 900px;
     margin: 0 auto;
+    border: 1px solid #eaeaea;
 }
 
-/* Títulos y jerarquía */
+/* Títulos */
 .legal-container h2 {
     color: #2c3e50;
     font-weight: 700;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 15px;
+    font-size: 1.8rem;
 }
 
 .legal-container h4 {
     font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
 }
 
-/* Listas decoradas */
+/* Listas */
 .legal-container ul {
     list-style: none;
     padding-left: 0;
 }
 
 .legal-container ul li {
+    margin-bottom: 10px;
+    padding-left: 20px;
     position: relative;
-    padding-left: 25px;
-    margin-bottom: 12px;
+    color: #444;
 }
 
 .legal-container ul li::before {
     content: "•";
     position: absolute;
     left: 0;
-    color: #999;
+    color: #77d7b9; /* El color de tu marca */
     font-weight: bold;
+}
+
+/* Caja de Privacidad */
+.privacy-box {
+    background-color: #fcfcfc;
+    border-left: 4px solid #77d7b9;
+    padding: 25px;
+    border-radius: 0 8px 8px 0;
+}
+
+.privacy-box h5 {
+    color: #333;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 15px;
+}
+
+.privacy-box p {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+/* Forzamos que el área principal sea clara */
+.centered-main {
+    background-color: #f4f7f6 !important; /* Un gris/celeste muy suave */
+    display: flex;
+    flex-direction: column;
+    min-height: 80vh; /* Asegura que cubra la pantalla */
+}
+
+
+/* Si el body tiene fondo negro por defecto en tu proyecto */
+.index-page {
+    background-color: #f4f7f6;
 }
 
 /* Responsividad */
 @media (max-width: 768px) {
     .legal-container {
-        padding: 20px;
-        margin: 15px;
+        padding: 25px;
+        margin: 10px;
+    }
+    
+    .legal-container h2 {
+        font-size: 1.5rem;
     }
 }
