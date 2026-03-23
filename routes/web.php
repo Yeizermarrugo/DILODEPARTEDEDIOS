@@ -152,5 +152,9 @@ Route::get('/reparar-ciudades', function () {
     return "Se actualizaron $contador registros con éxito.";
 });
 
+Route::get('/content-usage', function () {
+    return Inertia::render('PaginaLegal');
+});
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
