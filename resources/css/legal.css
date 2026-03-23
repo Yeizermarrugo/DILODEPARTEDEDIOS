@@ -1,0 +1,66 @@
+/* Estilo para el contenedor principal de la página legal */
+.index-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Asegura que el footer siempre esté abajo */
+}
+
+.centered-main {
+    flex: 1;
+    background-color: #f8f9fa; /* Un gris muy suave de fondo para dar contraste */
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+/* El "papel" donde va el texto */
+.legal-container {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    max-width: 900px; /* Ancho ideal para lectura */
+    margin: 0 auto;
+}
+
+/* Títulos y jerarquía */
+.legal-container h2 {
+    color: #2c3e50;
+    font-weight: 700;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+}
+
+.legal-container h4 {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+/* Listas decoradas */
+.legal-container ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.legal-container ul li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 12px;
+}
+
+.legal-container ul li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #999;
+    font-weight: bold;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .legal-container {
+        padding: 20px;
+        margin: 15px;
+    }
+}
