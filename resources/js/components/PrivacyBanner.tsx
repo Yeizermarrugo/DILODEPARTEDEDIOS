@@ -47,10 +47,10 @@ const PrivacyBanner = () => {
                     En <strong>Dilo de parte de Dios</strong>, valoramos tu privacidad.
                     Utilizamos registros anónimos (como tu ubicación general y tipo de dispositivo)
                     para entender el alcance de nuestros recursos educativos y espirituales y mejorar tu experiencia.
-                    Al continuar, aceptas nuestra Política de Privacidad
-                    {/* <a href="/privacidad" style={{ color: '#77d7b9', textDecoration: 'underline' }}> */}
-
-                    {/* </a>. */}
+                    Al continuar, aceptas nuestra{' '}
+                    <a href="/content-usage" style={{ color: '#77d7b9', textDecoration: 'underline' }}>
+                        Política de Privacidad
+                    </a>.
                 </p>
             </div>
             <button
