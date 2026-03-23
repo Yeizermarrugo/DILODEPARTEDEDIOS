@@ -13,7 +13,7 @@ const PaginaLegal = () => {
                     <section id="copyright" className="mb-5">
                         <h2 className="mb-4">📃Derechos de Autor y Uso del Contenido</h2>
                         <p className="lead" style={{ color: '#555' }}>
-                            Todo el contenido publicado en esta plataforma es propiedad de la escuela <strong>Dilo de parte de Dios</strong>.
+                            Todo el contenido publicado en esta plataforma es propiedad de la escuela <strong><span style={{ fontWeight: '800' }}>Dilo de parte de Dios</span></strong>.
                         </p>
 
                         <hr className="my-4" />
@@ -66,13 +66,13 @@ const PaginaLegal = () => {
                     <footer className="mt-5 pt-4 border-top text-center">
                         <p className="text-muted" style={{ fontSize: '0.9rem', fontStyle: 'italic' }}>
                             Última actualización: Marzo 2026. <br />
-                            © 2025 - {new Date().getFullYear()} Dilo de parte de Dios. Todos los derechos reservados.
+                            © 2025 - {new Date().getFullYear()} <strong>Dilo de parte de Dios</strong>. Todos los derechos reservados.
                         </p>
                     </footer>
                 </div>
-            </main>
+            </main >
             <Footer />
-        </div>
+        </div >
     );
 };
 
