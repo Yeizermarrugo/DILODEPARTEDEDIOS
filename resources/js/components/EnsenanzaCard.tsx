@@ -213,7 +213,7 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
                     gap: 8,
                 }}
             >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', gap: 2, flex: 1 }}>
                     <span style={{ fontSize: 14, fontWeight: 500, color: '#212529' }}>
                         <strong>{devocional.titulo}</strong>
                     </span>
@@ -224,6 +224,7 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
                         transition: 'transform 0.2s ease',
                         transform: open ? 'rotate(-180deg)' : 'rotate(0deg)',
                         color: '#868e96',
+                        flexShrink: 0
                     }}
                 />
             </button>
