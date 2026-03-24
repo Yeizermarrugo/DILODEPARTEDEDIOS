@@ -54,17 +54,15 @@ const About = () => {
                             <div className="mision col-lg-5">
                                 <h2 className="about-title">Misión</h2>
                                 <p className="about-description">
-                                    Preparar y capacitar al pueblo de Dios de manera que puedan lograr el completo desarrollo de sus capacidades
-                                    espirituales y naturales, para que vivan con excelencia una vida basada en los principios bíblicos, y de ese modo
-                                    cumplan la voluntad de Dios para sus vidas y sirvan como instrumento para los planes de Dios en la vida de otros.
+                                    <strong>Capacitar al pueblo de Dios para vivir con excelencia</strong> según los principios bíblicos, desarrollando su potencial espiritual y personal.
+                                    Nuestro enfoque es claro: ayudar a las personas a <strong>comprender las palabras del que murió en la cruz</strong>, para que vivan la voluntad de Dios y se conviertan en instrumentos en Sus planes para otros.
                                 </p>
                             </div>
                             <div className="vision col-lg-6">
                                 <h2 className="about-title">Visión</h2>
                                 <p className="about-description">
-                                    Ser líderes a nivel mundial en fomentar la cultura de la lectura bíblica, brindando herramientas para su correcta
-                                    comprensión e interpretación, la cual se da de manera efectiva teniendo y manteniendo comunión con el Espíritu
-                                    Santo de Dios, quien nos enseña, nos redarguye, nos corrige y nos instruye para poder entenderla y vivirla.
+                                    Ser líderes a nivel mundial en <strong>fomentar la lectura, comprensión y aplicación de la Palabra de Dios</strong>, brindando herramientas para su correcta interpretación.
+                                    Esta se desarrolla de manera efectiva al tener y mantener <strong>comunión con el Espíritu Santo</strong>, quien nos enseña, nos redarguye, nos corrige y nos instruye para entenderla y vivirla.
                                 </p>
                             </div>
                         </div>
