@@ -69,9 +69,13 @@
     <meta name="twitter:description" content="{{ $currentDesc }}">
     <meta name="twitter:image" content="{{ $currentImage }}">
 
-    <link rel="icon" type="image/png" sizes="32x32"
+    <link rel="icon" type="image/jpeg"
         href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
-    <link rel="apple-touch-icon" sizes="180x180"
+
+    <link rel="apple-touch-icon"
+        href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+
+    <link rel="shortcut icon"
         href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -87,25 +91,25 @@
 
 <body class="font-sans antialiased">
     <script>
-        (function() {
-            const appearance = '{{ $appearance ?? "system" }}';
-            if (appearance === 'system') {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
-                    document.documentElement.classList.add('dark');
-                }
+    (function() {
+        const appearance = '{{ $appearance ?? "system" }}';
+        if (appearance === 'system') {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                document.documentElement.classList.add('dark');
             }
-        })();
+        }
+    })();
     </script>
 
     <style>
-        html {
-            background-color: oklch(1 0 0);
-        }
+    html {
+        background-color: oklch(1 0 0);
+    }
 
-        html.dark {
-            background-color: oklch(0.145 0 0);
-        }
+    html.dark {
+        background-color: oklch(0.145 0 0);
+    }
     </style>
 
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="tH+o+/Cdpn18Efh2crVnhQ" async></script>
