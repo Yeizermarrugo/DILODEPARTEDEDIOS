@@ -109,10 +109,10 @@ const DevocionalDetailsPage = (props: Props) => {
                 style={{
                     background: `url(${devocional.imagen}) center center no-repeat`,
                     backgroundSize: 'cover',
-                    paddingTop: '60%',
+                    // paddingTop: '60%',
                     // fontFamily: "'Sucrose Bold Two'",
                     position: 'relative',
-                    paddingBottom: '200px',
+                    // paddingBottom: '200px',
                     color: 'white',
                     zIndex: -2,
                 }}
