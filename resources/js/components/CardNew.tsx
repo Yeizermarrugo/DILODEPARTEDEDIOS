@@ -92,7 +92,7 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                                     <li><i className="fa fa-comment-o"></i> <span>{comments}</span></li>
                                 </ul> */}
                             </div>
-                            <h1 className="title"><span>{titulo.toUpperCase()}</span></h1>
+                            <h1 className="title"><span>{titulo}</span></h1>
                             <span className="button-read" style={{ color: categoryColor }}>
                                 <a key={id}
                                     href={href}

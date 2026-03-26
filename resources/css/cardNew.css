@@ -50,14 +50,39 @@
     transition: height 0.3s ease;
 }
 
-.card-custom .title span {
+/* .card-custom .title span {
+    text-transform: uppercase;
     font-size: 14px;
     font-weight: 700;
     color: #fff;
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limitado a 2 líneas por defecto */
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+} */
+
+.card-custom .title span {
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    
+    /* 1. Forzar renderizado limpio (Esto suele arreglar la Ñ) */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
+    /* 2. Dar espacio a los acentos/tildes */
+    line-height: 1.4; 
+
+    /* 3. El motor de recorte */
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    
+    /* 4. Evitar que el navegador invente la negrita si no existe */
+    font-synthesis: none; 
 }
 
 /* EFECTO HOVER: Mostramos el título completo */
