@@ -1,3 +1,4 @@
+import { LikeButton } from '@/components/LikeButton';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { useEffect, useRef, useState } from 'react';
 
@@ -30,39 +31,35 @@ type Props = {
 export default function EnsenanzaCard({ ensenanza }: Props) {
     const devocionales = ensenanza.devocionales ?? [];
 
-    // 1. Lógica para detectar si hay contenido "Próximamente"
-    // Verifica si algún devocional tiene un valor distinto de 0 o 1
     const publishedDevotionals = devocionales.filter(
-        (item) => String(item.is_devocional) === "1"
+        (item) => String(item.is_devocional) === '1',
     );
-
 
     const isComingSoon = publishedDevotionals.length === 0;
     const isDropdownDisabled = publishedDevotionals.length === 0;
 
     const [isOpen, setIsOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [showBtn, setShowBtn] = useState(false); // Nuevo: estado para saber si mostrar el botón
+    const [showBtn, setShowBtn] = useState(false);
     const textRef = useRef<HTMLParagraphElement>(null);
 
-    // Lógica para detectar si el texto realmente se desborda
     useEffect(() => {
-        const checkOverflow = () => {
-            if (textRef.current) {
-                const isOverflowing = textRef.current.scrollHeight > textRef.current.clientHeight;
-                setShowBtn(isOverflowing);
-            }
+        const check = () => {
+            if (textRef.current) setShowBtn(textRef.current.scrollHeight > textRef.current.clientHeight);
         };
-
-        checkOverflow();
-        window.addEventListener('resize', checkOverflow); // Por si cambia el ancho de la pantalla
-        return () => window.removeEventListener('resize', checkOverflow);
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
     }, [ensenanza.descripcion]);
 
     const autoresLabel = ensenanza.autores.join(', ') || 'Autor desconocido';
 
     return (
-        <div className="ensenanza-card" style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e0e0e0', backgroundColor: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', width: '100%' }}>
+        <div
+            className="ensenanza-card"
+            style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e0e0e0', backgroundColor: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', width: '100%' }}
+        >
+            {/* ── Cabecera: imagen + info ── */}
             <div className="ensenanza-card-top" style={{ display: 'flex', flexDirection: 'row', gap: 10, padding: 10 }}>
                 {/* Imagen */}
                 <div style={{ flex: '0 0 150px', maxWidth: 150, height: 120, borderRadius: 8, overflow: 'hidden', backgroundColor: '#f5f5f5' }}>
@@ -85,34 +82,16 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
 
                         <div style={{ position: 'relative' }}>
                             <p
-                                ref={textRef} // Referencia para medir el texto
+                                ref={textRef}
                                 className={`descripcion-texto ${isExpanded ? 'expandida' : 'colapsada'}`}
-                                style={{
-                                    margin: '8px 0 0 0',
-                                    fontSize: 12,
-                                    color: '#495057',
-                                    lineHeight: '1.4',
-                                    textAlign: 'justify'
-                                }}
+                                style={{ margin: '8px 0 0 0', fontSize: 12, color: '#495057', lineHeight: '1.4', textAlign: 'justify' }}
                             >
                                 {ensenanza.descripcion}
                             </p>
-
-                            {/* SOLO aparece si el texto se desborda o si ya está expandido */}
                             {(showBtn || isExpanded) && (
                                 <span
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsExpanded(!isExpanded);
-                                    }}
-                                    style={{
-                                        fontSize: 12,
-                                        color: '#007bff',
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold',
-                                        display: 'block',
-                                        marginTop: '2px'
-                                    }}
+                                    onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                                    style={{ fontSize: 12, color: '#007bff', cursor: 'pointer', fontWeight: 'bold', display: 'block', marginTop: '2px' }}
                                 >
                                     {isExpanded ? '...ver menos' : '...ver más'}
                                 </span>
@@ -126,54 +105,27 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 </div>
             </div>
 
-            {/* Dropdown de enseñanzas se mantiene igual... */}
+            {/* ── Dropdown de enseñanzas ── */}
             <div className="ensenanza-card-dropdown" style={{ borderTop: '1px solid #e9ecef' }}>
                 {isComingSoon ? (
-                    /* Restricted State: Coming Soon UI */
-                    <div style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        backgroundColor: '#f8f9fa',
-                        color: '#adb5bd',
-                        textAlign: 'center',
-                        fontSize: 13,
-                        fontWeight: 'bold',
-                        textTransform: 'uppercase',
-                        cursor: 'not-allowed'
-                    }}>
+                    <div style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f8f9fa', color: '#adb5bd', textAlign: 'center', fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase', cursor: 'not-allowed' }}>
                         Próximamente
                     </div>
                 ) : (
-                    /* Active State: Standard Dropdown UI */
                     <>
                         <button
                             disabled={isDropdownDisabled}
                             onClick={() => setIsOpen(!isOpen)}
-                            style={{
-                                width: '100%',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                padding: '10px 16px',
-                                border: 'none',
-                                background: '#fff',
-                                cursor: isDropdownDisabled ? 'default' : 'pointer',
-                            }}
+                            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', border: 'none', background: '#fff', cursor: isDropdownDisabled ? 'default' : 'pointer' }}
                         >
                             <span style={{ color: isDropdownDisabled ? '#adb5bd' : 'inherit' }}>
                                 <strong>Enseñanzas</strong>
                             </span>
-
                             {!isDropdownDisabled && (
-                                <KeyboardArrowDown style={{
-                                    transition: 'transform 0.2s ease',
-                                    transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)',
-                                    color: '#666'
-                                }} />
+                                <KeyboardArrowDown style={{ transition: 'transform 0.2s ease', transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)', color: '#666' }} />
                             )}
                         </button>
 
-                        {/* Expandable List */}
                         {isOpen && !isDropdownDisabled && (
                             <div className="ensenanza-card-devocionales-list">
                                 {publishedDevotionals.map((dev) => (
@@ -188,47 +140,43 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
     );
 }
 
-// Subcomponentes se mantienen igual (DevocionalRow y ActionRow)
+// ─── DevocionalRow — fila expandible con LikeButton ──────────────────────────
 type DevRowProps = {
     ensenanzaId: string;
     devocional: DevocionalEnsenanza;
 };
 
-function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
+function DevocionalRow({ devocional }: DevRowProps) {
     const [open, setOpen] = useState(false);
 
     return (
         <div style={{ borderTop: '1px solid #e9ecef' }}>
+            {/* Cabecera de la fila */}
             <button
                 onClick={() => setOpen((o) => !o)}
-                style={{
-                    width: '100%',
-                    padding: '10px 16px',
-                    border: 'none',
-                    background: '#f8f9fa',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: 8,
-                }}
+                style={{ width: '100%', padding: '10px 16px', border: 'none', background: '#f8f9fa', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', gap: 2, flex: 1 }}>
                     <span style={{ fontSize: 14, fontWeight: 500, color: '#212529' }}>
                         <strong>{devocional.titulo}</strong>
                     </span>
                 </div>
+
+                {/* Like compacto visible siempre en la fila — para que se vea sin abrir */}
+                <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', marginRight: 4 }}>
+                    <LikeButton
+                        type="ensenanza"
+                        id={devocional.id}
+                        variant="default"
+                    />
+                </div>
+
                 <KeyboardArrowDown
-                    style={{
-                        fontSize: 20,
-                        transition: 'transform 0.2s ease',
-                        transform: open ? 'rotate(-180deg)' : 'rotate(0deg)',
-                        color: '#868e96',
-                        flexShrink: 0
-                    }}
+                    style={{ fontSize: 20, transition: 'transform 0.2s ease', transform: open ? 'rotate(-180deg)' : 'rotate(0deg)', color: '#868e96', flexShrink: 0 }}
                 />
             </button>
 
+            {/* Acciones expandidas */}
             {open && (
                 <div style={{ borderTop: '1px solid #e9ecef', display: 'grid' }}>
                     {devocional.id && <ActionRow label="Leer" href={`/ensenanzas/${devocional.id}`} />}
@@ -244,17 +192,7 @@ function DevocionalRow({ ensenanzaId, devocional }: DevRowProps) {
 function ActionRow({ label, href, target }: { label: string; href: string; target?: string }) {
     return (
         <a href={href} style={{ textDecoration: 'none', color: 'inherit' }} target={target}>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '8px 10px',
-                fontSize: 13,
-                borderRight: '1px solid #e9ecef',
-                borderBottom: '1px solid #e9ecef',
-                cursor: 'pointer',
-                backgroundColor: '#fff',
-            }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', fontSize: 13, borderRight: '1px solid #e9ecef', borderBottom: '1px solid #e9ecef', cursor: 'pointer', backgroundColor: '#fff' }}>
                 <span>{label}</span>
             </div>
         </a>

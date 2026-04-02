@@ -35,14 +35,14 @@ const ObrasList = () => {
                 <p>
                     Mira algunos momentos de servicio y síguenos en Instagram para ver más.
                 </p>
-                <a
+                {/* <a
                     href="https://www.instagram.com/dilodepartededios"
                     target="_blank"
                     rel="noreferrer"
                     className="obras-header__cta"
                 >
                     Ir a nuestro Instagram
-                </a>
+                </a> */}
             </header>
 
             <div className="obras-grid">

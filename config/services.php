@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'epayco' => [
+        'customer_id' => env('EPAYCO_CUSTOMER_ID'),
+        'p_key' => env('EPAYCO_P_KEY'),
+        'public_key' => env('EPAYCO_PUBLIC_KEY'),
+    ],
+
 ];
