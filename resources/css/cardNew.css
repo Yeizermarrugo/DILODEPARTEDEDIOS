@@ -118,6 +118,7 @@
 
 .card-custom .content {
     padding: 10px;
+    padding-right: 45px;
     position: relative;
     /* Forzamos una altura mínima para que todas las cajas midan lo mismo */
     min-height: 100px; 
@@ -210,6 +211,16 @@
     text-transform: uppercase;
     font-weight: 700;
     margin-top: 5px;
+}
+
+
+
+/* ── Like fijo: esquina inferior derecha, inmune al hover ── */
+.card-like-fixed {
+    position: absolute;
+    bottom: 10px;
+    right: 6px;
+    z-index: 10;          /* por encima del .data que se desliza */
 }
 
 /* --- TABLETS Y PANTALLAS MEDIANAS (700px a 992px) --- */
