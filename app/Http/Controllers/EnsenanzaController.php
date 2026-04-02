@@ -90,25 +90,17 @@ class EnsenanzaController extends Controller
 
     public function details($id)
     {
-        //     $ensenanza = Ensenanza::with(['devocionales' => function ($q) {
-        //     $q->soloEnsenanzas()
-        //       ->orderBy('created_at', 'asc');
-        // }])->findOrFail($id);
-
         $devocional = Devocional::findOrFail($id);
-        $routeName = $devocional->is_devocional === 1 ? 'devocional.details' : 'estudio-biblico.details';
-
-        $url = route($routeName, ['id' => $devocional->id]);
 
         return Inertia::render('DevocionalDetailsPage', [
-            'devocional' => $devocional,
+            'devocional'    => $devocional,
             'is_devocional' => $devocional->is_devocional,
-
+            'like_type'     => 'ensenanza', // ← forzamos el tipo correcto
             'meta' => [
-                'title' => $devocional->titulo,
+                'title'       => $devocional->titulo,
                 'description' => Str::limit(strip_tags($devocional->contenido), 150),
-                'image' => $devocional->imagen, // URL pública
-                'url' => url()->current(),
+                'image'       => $devocional->imagen,
+                'url'         => url()->current(),
             ]
         ]);
     }

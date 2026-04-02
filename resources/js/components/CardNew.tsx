@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import '../../css/cardNew.css';
 import LikeButton from './LikeButton';
 
@@ -23,7 +24,7 @@ interface CardNewProps {
         autor: string;
         categoria: string;
         views_count?: number;
-        is_devocional?: number; // 0=estudio | 1=devocional | 2=ensenanza
+        is_devocional?: number;
     };
     todasLasCategorias: string[];
     onClick?: () => void;
@@ -61,7 +62,7 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                         borderBottom: `4px solid ${categoryColor}`,
                     }}
                 >
-                    {/* ── HEADER: categoría + vistas + like ── */}
+                    {/* ── HEADER: categoría + vistas ── */}
                     <div className="header">
                         <div className="date">
                             <span
@@ -75,52 +76,58 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                             </span>
                         </div>
 
-                        <ul
-                            className="menu-content"
-                            style={{ width: 'auto', display: 'flex', marginTop: '10px', alignItems: 'center', gap: '6px' }}
-                        >
-                            {/* Vistas */}
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'white' }}>
-                                <i className="bi bi-eye" />
-                                <span>{views_count ?? 0}</span>
+                        {/* Vistas — esquina superior derecha */}
+                        <div className="card-views">
+                            <ul
+                                className="menu-content"
+                                style={{ width: 'auto', display: 'flex', marginTop: '10px', alignItems: 'center', gap: '6px' }}
+                            >
+                                {/* Vistas */}
+                                <li style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'white' }}>
+                                    <i className="bi bi-eye" />
+                                    <span>{views_count ?? 0}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* ── LIKE fijo — esquina inferior derecha, FUERA del .data ── */}
+                    <div
+                        className="card-like-fixed"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <ul className="menu-content" style={{ width: 'auto', display: 'flex' }}>
+                            <li style={{ display: 'flex', alignItems: 'center' }}>
+                                <LikeButton
+                                    type={contentType}
+                                    id={id}
+                                    variant="default"
+                                    className="text-white"
+                                />
                             </li>
+                            {/* <li><i className="fa fa-comment-o"></i> <span>{comments}</span></li> */}
                         </ul>
                     </div>
 
-                    {/* ── FOOTER: autor + título + botón leer ── */}
+                    {/* ── FOOTER: autor + título + leer ── */}
                     <div className="data">
                         <div className="content">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span className="author">{autor}</span>
-                                <ul className="menu-content" style={{ width: 'auto', display: 'flex', marginBottom: '12px' }}>
-                                    {/* Like compacto — solo corazón, blanco sobre imagen */}
-                                    <li style={{ display: 'flex', alignItems: 'center' }}>
-                                        <LikeButton
-                                            type={contentType}
-                                            id={id}
-                                            variant="default"
-                                            className="text-white"
-                                        />
-                                    </li>
-                                    {/* <li><i className="fa fa-comment-o"></i> <span>{comments}</span></li> */}
-                                </ul>
-                            </div>
+                            <span className="author">{autor}</span>
                             <h1 className="title"><span>{titulo}</span></h1>
-                            <span className="button-read" style={{ color: categoryColor }}>
-                                <a
-                                    href={href}
-                                    style={{ textDecoration: 'none', color: 'white' }}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    Leer
-                                </a>
-                            </span>
+                            <a
+                                className="button-read"
+                                href={href}
+                                style={{ textDecoration: 'none', color: 'white' }}
+                                onClick={(e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
+                            >
+                                Leer
+                            </a>
                         </div>
                     </div>
 
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
