@@ -82,7 +82,7 @@ const Obras = () => {
                     <br />
 
                     {/* Botón Principal que abre TU modal */}
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    {/* <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <button
                             onClick={() => setShowSelectionModal(true)}
                             className="obras-header__cta"
@@ -90,7 +90,7 @@ const Obras = () => {
                         >
                             Apoyar esta obra
                         </button>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
