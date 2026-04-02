@@ -1,4 +1,4 @@
-import { LikeButton } from '@/components/LikeButton';
+import LikeButton from '@/components/LikeButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
 import { usePage } from '@inertiajs/react';
@@ -14,13 +14,15 @@ type Devocional = {
     is_devocional?: number; // 0=estudio | 1=devocional | 2=ensenanza
 };
 
-interface Props {
+type Props = {
     devocional: Devocional;
-}
+    like_type?: 'devocional' | 'estudio' | 'ensenanza'; // ← nuevo prop
+};
 
-function getContentType(is_devocional?: number): 'devocional' | 'estudio' | 'ensenanza' {
-    if (is_devocional === 0) return 'estudio';
-    if (is_devocional === 2) return 'ensenanza';
+function getContentType(is_devocional?: number | string): 'devocional' | 'estudio' | 'ensenanza' {
+    const val = Number(is_devocional);
+    if (val === 0) return 'estudio';
+    if (val === 2) return 'ensenanza';
     return 'devocional';
 }
 
@@ -32,7 +34,8 @@ const DevocionalDetailsPage = (props: Props) => {
 
     const [loading, setLoading] = useState(true);
     const imageLoaded = useImagePreload(devocional.imagen);
-    const contentType = getContentType(devocional.is_devocional);
+    const likeType = props.like_type ?? page.like_type ?? getContentType(devocional.is_devocional);
+
 
     useEffect(() => {
         const t = setTimeout(() => setLoading(false), 1000);
@@ -160,7 +163,7 @@ const DevocionalDetailsPage = (props: Props) => {
                         marginTop: '8px',
                         color: '#888',
                     }}>
-                        <LikeButton type={contentType} id={devocional.id} variant="default" />
+                        <LikeButton type={likeType} id={devocional.id} variant="default" />
                     </div>
                 )}
             </section>
