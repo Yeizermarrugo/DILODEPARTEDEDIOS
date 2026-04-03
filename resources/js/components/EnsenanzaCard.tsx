@@ -85,7 +85,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                     <div style={{
                         position: 'absolute',
                         inset: 0,
-                        backgroundColor: 'rgba(255,255,255,0.55)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.73)',
                     }} />
 
                     {/* Franja diagonal */}
@@ -100,9 +100,21 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         textAlign: 'center',
                         boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
                     }}>
+                        <div>
+                            <span style={{
+                                color: '#1a1a2e',
+                                fontSize: 15,
+                                fontWeight: 900,
+                                letterSpacing: '6px',
+                                textTransform: 'uppercase',
+                                fontFamily: 'serif',
+                            }}>
+                                {ensenanza.titulo}
+                            </span>
+                        </div>
                         <span style={{
                             color: '#1a1a2e',
-                            fontSize: 18,
+                            fontSize: 20,
                             fontWeight: 900,
                             letterSpacing: '6px',
                             textTransform: 'uppercase',
