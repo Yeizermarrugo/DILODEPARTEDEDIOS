@@ -56,6 +56,7 @@ function Devocionals() {
     const [total, setTotal] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
     const [query, setQuery] = useState(searchTerm);
+    const [sort, setSort] = useState<'latest' | 'likes' | 'views'>('latest');
 
     // Fetch devocionales (paginación y search siempre backend)
     useEffect(() => {
@@ -67,11 +68,11 @@ function Devocionals() {
         let url = '';
         if (query.trim() !== '') {
             // Si tu backend usa ?query= en lugar de ?search= cámbialo aquí:
-            url = `/devocionales-search?search=${encodeURIComponent(query)}&page=${page}`;
+            url = `/devocionales-search?search=${encodeURIComponent(query)}&page=${page}&sort=${sort}`;
         } else if (selectedCategory) {
-            url = `/devocionales/categoria/${encodeURIComponent(selectedCategory)}?page=${page}`;
+            url = `/devocionales/categoria/${encodeURIComponent(selectedCategory)}?page=${page}&sort=${sort}`;
         } else {
-            url = `/devocionales-search?page=${page}`;
+            url = `/devocionales-search?page=${page}&sort=${sort}`;
         }
 
         fetch(url, { signal: controller.signal })
@@ -99,7 +100,7 @@ function Devocionals() {
             .finally(() => setLoading(false));
 
         return () => controller.abort();
-    }, [selectedCategory, page, query]); // <- SIN searchTerm
+    }, [selectedCategory, page, query, sort]); // <- SIN searchTerm
 
     // Fetch latest posts (no depende del search)
     useEffect(() => {
@@ -249,62 +250,133 @@ function Devocionals() {
     //     </div>
     // );
 
+    const handleSortChange = (newSort: 'likes' | 'views') => {
+        setSort(prev => prev === newSort ? 'latest' : newSort);
+        setPage(1);
+    };
+
+
     const CategoriesWidget = () => (
-        <div className="categories-widget widget-item">
-            <h3 className="widget-title">Categorías</h3>
-            <ul className="mt-3">
-                <li>
-                    <button
-                        className={selectedCategory === null ? 'active' : ''}
-                        onClick={() => handleSelectCategory(null)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
-                    >
-                        Todas <span>({total})</span>
-                    </button>
-                </li>
-
-                {/* Categorías sueltas (sin serie) */}
+        <div style={{ width: '100%' }}>
+            {/* Fila 1: Categorías */}
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: 4, whiteSpace: 'nowrap' }}>
+                    Categorías
+                </span>
+                <button
+                    onClick={() => handleSelectCategory(null)}
+                    style={{
+                        padding: '5px 14px',
+                        borderRadius: 20,
+                        border: 'none',
+                        background: selectedCategory === null ? 'var(--accent-color, #e63946)' : '#f1f3f5',
+                        color: selectedCategory === null ? '#fff' : '#495057',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        fontWeight: selectedCategory === null ? 600 : 400,
+                    }}
+                >
+                    Todas ({total})
+                </button>
                 {categories.map((cat) => (
-                    <li key={cat.categoria}>
-                        <button
-                            className={selectedCategory === cat.categoria ? 'active' : ''}
-                            onClick={() => handleSelectCategory(cat.categoria)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
-                        >
-                            {cat.categoria} <span>({cat.count})</span>
-                        </button>
-                    </li>
+                    <button
+                        key={cat.categoria}
+                        onClick={() => handleSelectCategory(cat.categoria)}
+                        style={{
+                            padding: '5px 14px',
+                            borderRadius: 20,
+                            border: 'none',
+                            background: selectedCategory === cat.categoria ? 'var(--accent-color, #e63946)' : '#f1f3f5',
+                            color: selectedCategory === cat.categoria ? '#fff' : '#495057',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                            fontWeight: selectedCategory === cat.categoria ? 600 : 400,
+                        }}
+                    >
+                        {cat.categoria} ({cat.count})
+                    </button>
                 ))}
+            </div>
 
-                {/* Menú Series */}
-                {/* {series.length > 0 && (
-                    <li>
-                        <details>
-                            <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Series</summary>
-                            <ul style={{ marginTop: 8, paddingLeft: 16 }}>
-                                {series.flatMap((serie) =>
-                                    serie.categorias.map((cat) => (
-                                        <li key={`${serie.nombre}-${cat.categoria}`}>
-                                            <button
-                                                className={selectedCategory === cat.categoria ? 'active' : ''}
-                                                onClick={() => handleSelectCategory(cat.categoria)}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    color: 'inherit',
-                                                }}
-                                            >
-                                                {cat.categoria} <span>({cat.count})</span>
-                                            </button>
-                                        </li>
-                                    )),
-                                )}
-                            </ul>
-                        </details>
-                    </li>
-                )} */}
-            </ul>
+            {/* Fila 2: Ordenar por */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: 4, whiteSpace: 'nowrap' }}>
+                    Ordenar por
+                </span>
+
+                {/* Botón Más recientes — siempre visible, indica el estado por defecto */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '5px 14px',
+                    borderRadius: 20,
+                    background: sort === 'latest' ? '#f1f3f5' : 'transparent',
+                    color: '#6c757d',
+                    fontSize: 13,
+                    fontWeight: sort === 'latest' ? 600 : 400,
+                    border: '1px solid transparent',
+                }}>
+                    <span>🕐</span>
+                    <span>Más recientes</span>
+                </div>
+
+                <div style={{ width: 1, height: 20, background: '#dee2e6' }} />
+
+                {/* Toggle likes */}
+                <button
+                    onClick={() => handleSortChange('likes')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '5px 14px',
+                        borderRadius: 20,
+                        border: sort === 'likes' ? '1.5px solid #e63946' : '1.5px solid #dee2e6',
+                        background: sort === 'likes' ? '#fff0f0' : '#fff',
+                        color: sort === 'likes' ? '#e63946' : '#6c757d',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        fontWeight: sort === 'likes' ? 700 : 400,
+                        transition: 'all 0.15s ease',
+                    }}
+                >
+                    <span style={{ fontSize: 14 }}>{sort === 'likes' ? '♥' : '♡'}</span>
+                    <span>Más likes</span>
+                    {sort === 'likes' && (
+                        <span style={{ fontSize: 10, background: '#e63946', color: '#fff', borderRadius: 10, padding: '1px 6px', marginLeft: 2 }}>
+                            ✕
+                        </span>
+                    )}
+                </button>
+
+                {/* Toggle vistas */}
+                <button
+                    onClick={() => handleSortChange('views')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '5px 14px',
+                        borderRadius: 20,
+                        border: sort === 'views' ? '1.5px solid #007bff' : '1.5px solid #dee2e6',
+                        background: sort === 'views' ? '#f0f6ff' : '#fff',
+                        color: sort === 'views' ? '#007bff' : '#6c757d',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        fontWeight: sort === 'views' ? 700 : 400,
+                        transition: 'all 0.15s ease',
+                    }}
+                >
+                    <span style={{ fontSize: 14 }}>👁</span>
+                    <span>Más vistas</span>
+                    {sort === 'views' && (
+                        <span style={{ fontSize: 10, background: '#007bff', color: '#fff', borderRadius: 10, padding: '1px 6px', marginLeft: 2 }}>
+                            ✕
+                        </span>
+                    )}
+                </button>
+            </div>
         </div>
     );
 
@@ -364,8 +436,7 @@ function Devocionals() {
                             {/* 1. Widget de Categorías ubicado arriba */}
                             <div className="top-categories-sticky-wrapper">
                                 <div className="container">
-                                    {/* Usamos una clase limpia para evitar conflictos con estilos viejos de la plantilla */}
-                                    <div className="top-categories-container">
+                                    <div className="top-categories-container" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <CategoriesWidget />
                                     </div>
                                 </div>
