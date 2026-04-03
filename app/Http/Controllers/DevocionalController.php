@@ -19,10 +19,30 @@ class DevocionalController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 16);
-        $devocionales = Devocional::where('is_devocional', 1)
-            ->where('ensenanza_id', '=', null)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        $sort = $request->input('sort', 'latest');
+
+        if ($sort === 'likes') {
+            $devocionales = Devocional::where('is_devocional', 1)
+                ->where('ensenanza_id', null)
+                ->leftJoin('content_likes', function ($join) {
+                    $join->on('content_likes.content_id', '=', 'devocionals.id')
+                        ->where('content_likes.content_type', '=', \App\Models\ContentLike::TYPE_DEVOCIONAL);
+                })
+                ->selectRaw('devocionals.*, COUNT(content_likes.id) as likes_count')
+                ->groupBy('devocionals.id')
+                ->orderBy('likes_count', 'desc')
+                ->paginate($perPage);
+        } elseif ($sort === 'views') {
+            $devocionales = Devocional::where('is_devocional', 1)
+                ->where('ensenanza_id', null)
+                ->orderBy('views_count', 'desc')
+                ->paginate($perPage);
+        } else {
+            $devocionales = Devocional::where('is_devocional', 1)
+                ->where('ensenanza_id', null)
+                ->orderBy('created_at', 'desc')
+                ->paginate($perPage);
+        }
 
         $categoriasRaw = Devocional::whereNotNull('categoria')
             ->where('categoria', '!=', '')
@@ -124,15 +144,37 @@ class DevocionalController extends Controller
     public function porCategoria(Request $request, $categoria)
     {
         $perPage = $request->input('per_page', 16);
-        $devocionales = Devocional::where('categoria', $categoria)
-            ->where('is_devocional', 1)
-            ->where('ensenanza_id', '=', null)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        $sort = $request->input('sort', 'latest');
+
+        if ($sort === 'likes') {
+            $devocionales = Devocional::where('categoria', $categoria)
+                ->where('is_devocional', 1)
+                ->where('ensenanza_id', null)
+                ->leftJoin('content_likes', function ($join) {
+                    $join->on('content_likes.content_id', '=', 'devocionals.id')
+                        ->where('content_likes.content_type', '=', \App\Models\ContentLike::TYPE_DEVOCIONAL);
+                })
+                ->selectRaw('devocionals.*, COUNT(content_likes.id) as likes_count')
+                ->groupBy('devocionals.id')
+                ->orderBy('likes_count', 'desc')
+                ->paginate($perPage);
+        } elseif ($sort === 'views') {
+            $devocionales = Devocional::where('categoria', $categoria)
+                ->where('is_devocional', 1)
+                ->where('ensenanza_id', null)
+                ->orderBy('views_count', 'desc')
+                ->paginate($perPage);
+        } else {
+            $devocionales = Devocional::where('categoria', $categoria)
+                ->where('is_devocional', 1)
+                ->where('ensenanza_id', null)
+                ->orderBy('created_at', 'desc')
+                ->paginate($perPage);
+        }
 
         return response()->json([
             'devocionales' => $devocionales,
-            'categoria' => $categoria
+            'categoria'    => $categoria,
         ]);
     }
     //devolver los ultimos 5 devocionales
