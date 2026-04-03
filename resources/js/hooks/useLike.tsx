@@ -75,12 +75,18 @@ export function useLike(type: ContentType, id: string): UseLikeReturn {
 
         debounceRef.current = setTimeout(async () => {
             try {
+                // ── Hora local del dispositivo ──
+                const d = new Date();
+                const pad = (n: number) => String(n).padStart(2, '0');
+                const localTime = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
                 const res = await fetch(`/api/likes/${type}/${id}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
                     },
+                    body: JSON.stringify({ local_time: localTime }), // ← único cambio
                 });
                 if (!res.ok || !mounted.current) return;
                 const data = await res.json();

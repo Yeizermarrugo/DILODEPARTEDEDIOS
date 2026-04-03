@@ -52,7 +52,7 @@ class LikeController extends Controller
                     'content_type' => $type,
                     'visitor_hash' => $hash,
                     'ip_segment'   => $ipSegment,
-                    'created_at'   => now(),
+                    'created_at'   => $request->input('local_time') ?? now(),
                 ]);
                 $liked = true;
             } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
