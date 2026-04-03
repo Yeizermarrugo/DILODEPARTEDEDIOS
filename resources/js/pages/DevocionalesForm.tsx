@@ -66,7 +66,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             const sers = (res.data.series || []).map((s: { id: string; nombre: string }) => s);
             setSeries(sers);
 
-            axios.get('/api/ensenanzas').then((res2) => {
+            axios.get('/api/series').then((res2) => {
                 setEnsenanzas(res2.data);
             });
         });
@@ -190,7 +190,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     return;
                 }
 
-                const resEnsenanza = await axios.post('/api/ensenanzas', {
+                const resEnsenanza = await axios.post('/api/series', {
                     titulo: nuevaEnsenanzaTitulo.trim(),
                     descripcion: nuevaEnsenanzaDescripcion.trim(),
                     imagen: nuevaEnsenanzaImagenUrl || null,
