@@ -77,12 +77,21 @@ Route::get('/estudios', function () {
 });
 Route::get('/estudiosbiblicos', [DevocionalController::class, 'estudios']);
 
-Route::get('/ensenanzas', function () {
+// Redirecciones de /ensenanzas → /series (301 permanente)
+Route::redirect('/ensenanzas', '/series', 301);
+Route::get('/ensenanzas/{id}', function (string $id) {
+    return redirect("/series/{$id}", 301);
+});
+Route::get('/ensenanzas-search', function (Request $request) {
+    return redirect('/series-search?' . $request->getQueryString(), 301);
+});
+
+Route::get('/series', function () {
     return Inertia::render('Enseñanzas');
 });
 
-Route::get('/ensenanzas-search', [EnsenanzaController::class, 'index']);
-Route::get('/ensenanzas/{id}', [EnsenanzaController::class, 'details'])
+Route::get('/series-search', [EnsenanzaController::class, 'index']);
+Route::get('/series/{id}', [EnsenanzaController::class, 'details'])
     ->name('ensenanza.details');
 
 
@@ -90,9 +99,9 @@ Route::get('/podcast', function () {
     return Inertia::render('Podcast');
 });
 
-Route::get('/api/ensenanzas', [EnsenanzaController::class, 'listSimple']);
-Route::post('/api/ensenanzas', [EnsenanzaController::class, 'store']);
-Route::put('/api/ensenanzas/{id}', [EnsenanzaController::class, 'update']);
+Route::get('/api/series', [EnsenanzaController::class, 'listSimple']);
+Route::post('/api/series', [EnsenanzaController::class, 'store']);
+Route::put('/api/series/{id}', [EnsenanzaController::class, 'update']);
 
 
 Route::post('/upload-pdf', [PdfUploadController::class, 'store'])->name('upload.pdf');

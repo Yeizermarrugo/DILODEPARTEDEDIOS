@@ -6,7 +6,7 @@ const navLinks = [
     { href: '/', label: 'Inicio' },
     { href: '/about', label: 'Quiénes somos' },
     { href: '/devocionales', label: 'Devocionales' },
-    { href: '/ensenanzas', label: 'Series' },
+    { href: '/series', label: 'Series' },
     { href: '/estudios', label: 'Estudios bíblicos' },
     { href: '/libreria', label: 'Librería' },
     { href: '/podcast', label: 'Podcast y mas' },

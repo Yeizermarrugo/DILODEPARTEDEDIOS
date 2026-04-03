@@ -38,9 +38,9 @@ function Enseñanzas() {
 
         let url = '';
         if (query.trim() !== '') {
-            url = `/ensenanzas-search?search=${encodeURIComponent(query)}&page=${page}`;
+            url = `/series-search?search=${encodeURIComponent(query)}&page=${page}`;
         } else {
-            url = `/ensenanzas-search?page=${page}`;
+            url = `/series-search?page=${page}`;
         }
 
         fetch(url, { signal: controller.signal })

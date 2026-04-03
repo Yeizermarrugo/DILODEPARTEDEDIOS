@@ -251,7 +251,7 @@ function DevocionalRow({ devocional }: DevRowProps) {
 
             {open && (
                 <div style={{ borderTop: '1px solid #e9ecef', display: 'grid' }}>
-                    {devocional.id && <ActionRow label="Leer" href={`/ensenanzas/${devocional.id}`} />}
+                    {devocional.id && <ActionRow label="Leer" href={`/series/${devocional.id}`} />}
                     {devocional.pdf && <ActionRow label="Descargar PDF" href={devocional.pdf} target="_blank" />}
                     {devocional.instagram && <ActionRow label="Formato reducido" href={devocional.instagram} target="_blank" />}
                     {devocional.tiktok && <ActionRow label="Formato reels" href={devocional.tiktok} target="_blank" />}
