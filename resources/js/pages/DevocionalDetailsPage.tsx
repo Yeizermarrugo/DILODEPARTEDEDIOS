@@ -111,7 +111,7 @@ const DevocionalDetailsPage = (props: Props) => {
         const path = window.location.pathname;
         if (path.startsWith('/estudio-biblico')) { window.location.href = '/estudios'; return; }
         if (path.startsWith('/devocional')) { window.location.href = '/devocionales'; return; }
-        if (path.startsWith('/ensenanzas')) { window.location.href = '/ensenanzas'; return; }
+        if (path.startsWith('/series')) { window.location.href = '/series'; return; }
         window.history.back();
     };
 
