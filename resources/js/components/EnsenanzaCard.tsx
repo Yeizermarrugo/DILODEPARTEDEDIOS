@@ -10,6 +10,7 @@ type DevocionalEnsenanza = {
     pdf?: string | null;
     instagram?: string | null;
     tiktok?: string | null;
+    views_count?: number | null;
     is_devocional: boolean;
 };
 
@@ -237,6 +238,8 @@ function DevocionalRow({ devocional }: DevRowProps) {
                     </span>
                 </div>
 
+                <i className="bi bi-eye" />
+                <span>{devocional.views_count ?? 0}</span>
                 <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', marginRight: 4 }}>
                     <LikeButton type="ensenanza" id={devocional.id} variant="default" />
                 </div>
