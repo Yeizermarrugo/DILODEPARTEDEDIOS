@@ -22,6 +22,7 @@ class EnsenanzaController extends Controller
                     ->orderBy('created_at', 'asc');
             }])
             ->withCount('devocionales')
+            ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
         $ensenanzas->getCollection()->transform(function ($ensenanza) {
