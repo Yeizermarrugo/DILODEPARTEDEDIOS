@@ -403,7 +403,7 @@ function Devocionals() {
                                                             id: devocional.id,
                                                             imagen: devocional.imagen,
                                                             titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
-                                                            autor: devocional.autor || '',
+                                                            autor: String(devocional.autor ?? ''),
                                                             categoria: devocional.categoria,
                                                             views_count: devocional.views_count || 0,
                                                         }}
