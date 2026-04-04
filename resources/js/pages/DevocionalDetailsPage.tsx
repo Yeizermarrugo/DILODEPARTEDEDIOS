@@ -12,6 +12,7 @@ type Devocional = {
     created_at?: string;
     autor?: string;
     is_devocional?: number; // 0=estudio | 1=devocional | 2=ensenanza
+    views_count?: number;
 };
 
 type Props = {
@@ -163,6 +164,8 @@ const DevocionalDetailsPage = (props: Props) => {
                         marginTop: '8px',
                         color: '#888',
                     }}>
+                        <i className="bi bi-eye" style={{ fontSize: '20px' }} />
+                        <span>{devocional.views_count ?? 0}</span>
                         <LikeButton type={likeType} id={devocional.id} variant="default" />
                     </div>
                 )}
