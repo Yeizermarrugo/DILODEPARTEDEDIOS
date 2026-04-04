@@ -7,6 +7,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
+import LikeButton from './LikeButton';
 
 const FireNav = styled(List)<{ component?: React.ElementType }>({
     '& .MuiListItemButton-root': {
@@ -24,9 +25,11 @@ const FireNav = styled(List)<{ component?: React.ElementType }>({
 
 type Categoria = string | { nombre: string };
 type Libro = {
-    id: string | number;
+    id: string;
     categoria: Categoria | Categoria[];
     contenido: string;
+    views_count?: number;
+    is_devocional?: number; // 0=estudio | 1=devocional | 2=ensenanza
 };
 
 export default function LibroList() {
@@ -84,16 +87,22 @@ export default function LibroList() {
     const TituloEstudioBiblico = ({ contenido }: { contenido: string }) => {
         const titulo = obtenerPrimerEtiqueta(contenido);
         return (
-            <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }}
-                dangerouslySetInnerHTML={{ __html: titulo }} />
+            <div dangerouslySetInnerHTML={{ __html: titulo }} />
         );
     };
 
     const Heading2EstudioBiblico = ({ contenido }: { contenido: string }) => {
         const h2 = obtenerSegundaEtiqueta(contenido);
+        if (!h2) return null;
         return (
-            <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }}
-                dangerouslySetInnerHTML={{ __html: h2 }} />
+            <div
+                style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    minWidth: 0,
+                }}
+                dangerouslySetInnerHTML={{ __html: h2 }}
+            />
         );
     };
 
@@ -207,57 +216,79 @@ export default function LibroList() {
                                             librosCategoria.map((libro) => (
                                                 <ListItemButton
                                                     key={libro.id}
-                                                    sx={[isOpen
-                                                        ? { bgcolor: 'rgba(71, 98, 130, 0.07)' }
-                                                        : { bgcolor: null }, {
-                                                        py: 0,
-                                                        minHeight: 32,
-                                                        color: 'rgba(110, 110, 110, 0.88)',
-                                                        // backgroundColor: 'transparent',
-                                                        '&:hover': { backgroundColor: 'rgba(71, 98, 130, 0.19)' },
-                                                        '& .MuiListItemText-primary': {
-                                                            fontSize: 13,
+                                                    sx={[
+                                                        isOpen ? { bgcolor: 'rgba(71, 98, 130, 0.07)' } : { bgcolor: null },
+                                                        {
+                                                            py: 0.5,
+                                                            minHeight: 36,
+                                                            pl: 5,
+                                                            pr: 2,
+                                                            alignItems: 'center', // ← centrado vertical
+                                                            '&:hover': { backgroundColor: 'rgba(71, 98, 130, 0.19)' },
+                                                            '&:hover, &:focus': { '& svg': { opacity: 1 } },
                                                         },
-                                                        pl: 5,
-                                                    },
-                                                    {
-                                                        '&:hover, &:focus': {
-                                                            '& svg': { opacity: 1 },
-                                                        },
-                                                    },]}
+                                                    ]}
                                                 >
-                                                    <a
-                                                        key={libro.id}
-                                                        href={`/estudio-biblico/${libro.id}`}
-                                                        style={{ textDecoration: 'none' }}
-                                                    >
-                                                        <ListItemText
-                                                            primary={<div style={{
-                                                                display: 'flex',
-                                                                alignItems: 'baseline',
-                                                                gap: '6px',
-                                                                fontSize: '15px'
-                                                            }}>
-                                                                <span>
-                                                                    <TituloEstudioBiblico contenido={libro.contenido} />
-                                                                </span>
-                                                                <span style={{ fontWeight: 400, color: '#aaa' }}>
-                                                                    –
-                                                                </span>
-                                                                <span style={{ color: '#7a7a7a', fontWeight: 400 }}>
-                                                                    <Heading2EstudioBiblico contenido={libro.contenido} />
-                                                                </span>
-                                                            </div>
+                                                    {/* Wrapper externo */}
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
 
-                                                            }
-                                                            slotProps={{
-                                                                primary: {
-                                                                    fontSize: 14,
-                                                                    fontWeight: 'medium',
-                                                                },
+                                                        <Box
+                                                            component="a"
+                                                            href={`/estudio-biblico/${libro.id}`}
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px',
+                                                                minWidth: 0,
+                                                                flex: 1,
+                                                                textDecoration: 'none',
+                                                                overflow: 'hidden',
                                                             }}
-                                                        />
-                                                    </a>
+                                                        >
+                                                            {/* Título — nunca se encoge */}
+                                                            <Box sx={{
+                                                                fontSize: '14px',
+                                                                fontWeight: 500,
+                                                                flexShrink: 0,
+                                                                whiteSpace: 'nowrap',
+                                                            }}>
+                                                                <TituloEstudioBiblico contenido={libro.contenido} />
+                                                            </Box>
+
+                                                            {/* Separador + subtítulo — solo si existe */}
+                                                            {obtenerSegundaEtiqueta(libro.contenido) && (
+                                                                <>
+                                                                    <Box sx={{ color: '#aaa', flexShrink: 0 }}>–</Box>
+                                                                    <Box sx={{
+                                                                        color: '#7a7a7a',
+                                                                        fontSize: '13px',
+                                                                        minWidth: 0,
+                                                                        overflow: 'hidden',
+                                                                        display: 'flex', // ← no flex
+                                                                        flexWrap: 'wrap',
+                                                                        flex: 1,
+                                                                    }}>
+                                                                        <Heading2EstudioBiblico contenido={libro.contenido} />
+                                                                    </Box>
+                                                                </>
+                                                            )}
+                                                        </Box>
+
+                                                        {/* Contadores — siempre a la derecha, nunca se encogen */}
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                            flexShrink: 0,
+                                                            color: 'rgba(110,110,110,0.88)',
+                                                            fontSize: '13px',
+                                                        }}>
+                                                            <i className="bi bi-eye" style={{ fontSize: '14px' }} />
+                                                            <span>{libro.views_count ?? 0}</span>
+                                                            <LikeButton type="estudio" id={libro.id} variant="default" />
+                                                        </Box>
+
+                                                    </Box>
                                                 </ListItemButton>
                                             ))}
                                     </Box>
