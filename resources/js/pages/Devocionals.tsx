@@ -368,7 +368,7 @@ function Devocionals() {
                         transition: 'all 0.15s ease',
                     }}
                 >
-                    <span style={{ fontSize: 14 }}>👁</span>
+                    <i className="bi bi-eye" style={{ fontSize: '14px' }} />
                     <span>Más vistas</span>
                     {sort === 'views' && (
                         <span style={{ fontSize: 10, background: '#007bff', color: '#fff', borderRadius: 10, padding: '1px 6px', marginLeft: 2 }}>
