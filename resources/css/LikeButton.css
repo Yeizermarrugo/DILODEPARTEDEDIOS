@@ -1,0 +1,74 @@
+/* Animación: crece al llegar al centro */
+@keyframes flyHeart {
+    0%   { 
+        transform: translate(0, 0) scale(1); 
+        opacity: 1; 
+    }
+    70%  { 
+        transform: translate(calc(var(--dx) * 0.7), calc(var(--dy) * 0.7)) scale(1.8); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translate(var(--dx), var(--dy)) scale(2.5); 
+        opacity: 0; 
+    }
+}
+
+.like-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 20px;
+    opacity: 1;
+    transition: opacity 0.2s;
+    user-select: none;
+}
+
+.like-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.like-button__count {
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.18s ease;
+    line-height: 1;
+}
+
+.like-button__heart {
+    transition: all 0.18s ease;
+}
+
+/* Corazón volador — tamaño base móvil */
+.flying-heart {
+    position: fixed;
+    pointer-events: none;
+    z-index: 99999;
+    animation: flyHeart 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.flying-heart svg {
+    width: 36px;
+    height: 36px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .flying-heart svg {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+    .flying-heart svg {
+        width: 60px;
+        height: 60px;
+    }
+}
