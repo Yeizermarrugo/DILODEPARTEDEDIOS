@@ -4195,3 +4195,20 @@ section,
   .ensenanza-card-top > div:first-child { max-width: 100% !important; width: 100% !important; height: 200px !important; border-radius: 0; }
   .ensenanza-card-info-right { padding: 15px; }
 }
+
+/* ── Responsive FilterBar ── */
+.filter-desktop {
+    display: none;
+}
+.filter-mobile {
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .filter-desktop {
+        display: block;
+    }
+    .filter-mobile {
+        display: none;
+    }
+}
