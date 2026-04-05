@@ -1,6 +1,7 @@
 import CardNew from '@/components/CardNew';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
+import FilterSheet from '@/components/ui/FilterSheet';
 import { useEffect, useState } from 'react';
 import '../../css/main.css';
 
@@ -57,6 +58,9 @@ function Devocionals() {
     const [searchTerm, setSearchTerm] = useState('');
     const [query, setQuery] = useState(searchTerm);
     const [sort, setSort] = useState<'latest' | 'likes' | 'views'>('latest');
+    const [sheetOpen, setSheetOpen] = useState(false);
+    const [pendingCategory, setPendingCategory] = useState<string | null>(null);
+    const [pendingSort, setPendingSort] = useState<'latest' | 'likes' | 'views'>('latest');
 
     // Fetch devocionales (paginación y search siempre backend)
     useEffect(() => {
@@ -255,130 +259,81 @@ function Devocionals() {
         setPage(1);
     };
 
+    // Sticky bar — va donde estaba top-categories-sticky-wrapper
+    const FilterBar = () => {
+        const catLabel = selectedCategory
+            ? categories.find(c => c.categoria === selectedCategory)?.categoria ?? 'Todas'
+            : 'Todas';
+        const sortLabel = sort === 'likes' ? 'Likes' : sort === 'views' ? 'Vistas' : 'Recientes';
+        const hasFilter = selectedCategory !== null || sort !== 'latest';
 
-    const CategoriesWidget = () => (
-        <div style={{ width: '100%' }}>
-            {/* Fila 1: Categorías */}
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: 4, whiteSpace: 'nowrap' }}>
-                    Categorías
-                </span>
-                <button
-                    onClick={() => handleSelectCategory(null)}
-                    style={{
-                        padding: '5px 14px',
-                        borderRadius: 20,
-                        border: 'none',
-                        background: selectedCategory === null ? 'var(--accent-color, #e63946)' : '#f1f3f5',
-                        color: selectedCategory === null ? '#fff' : '#495057',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                        fontWeight: selectedCategory === null ? 600 : 400,
-                    }}
-                >
-                    Todas ({total})
-                </button>
-                {categories.map((cat) => (
-                    <button
-                        key={cat.categoria}
-                        onClick={() => handleSelectCategory(cat.categoria)}
-                        style={{
-                            padding: '5px 14px',
-                            borderRadius: 20,
-                            border: 'none',
-                            background: selectedCategory === cat.categoria ? 'var(--accent-color, #e63946)' : '#f1f3f5',
-                            color: selectedCategory === cat.categoria ? '#fff' : '#495057',
-                            cursor: 'pointer',
-                            fontSize: 13,
-                            fontWeight: selectedCategory === cat.categoria ? 600 : 400,
-                        }}
-                    >
-                        {cat.categoria} ({cat.count})
-                    </button>
-                ))}
-            </div>
+        return (
+            <div style={{
+                position: 'sticky', top: 0, zIndex: 20,
+                background: '#fff',
+                borderBottom: '1px solid #ebebeb',
+                padding: '10px 56px 10px 0px',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <span style={{ fontSize: 13, color: '#999' }}>
+                        {total} devocionales
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {/* Chip que resume filtros activos */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '5px 12px', borderRadius: 999,
+                            background: hasFilter ? '#f75815' : '#f1f1f1',
+                            color: hasFilter ? '#fff' : '#555',
+                            fontSize: 12, fontWeight: 500,
+                            maxWidth: 150, overflow: 'hidden', whiteSpace: 'nowrap',
+                        }}>
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {catLabel} · {sortLabel}
+                            </span>
+                            {hasFilter && (
+                                <span
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCategory(null);
+                                        setSort('latest');
+                                        setPendingCategory(null);
+                                        setPendingSort('latest');
+                                        setPage(1);
+                                    }}
+                                    style={{ cursor: 'pointer', opacity: 0.8, fontSize: 13, marginLeft: 2 }}
+                                >
+                                    ✕
+                                </span>
+                            )}
+                        </div>
 
-            {/* Fila 2: Ordenar por */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: 4, whiteSpace: 'nowrap' }}>
-                    Ordenar por
-                </span>
-
-                {/* Botón Más recientes — siempre visible, indica el estado por defecto */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '5px 14px',
-                    borderRadius: 20,
-                    background: sort === 'latest' ? '#f1f3f5' : 'transparent',
-                    color: '#6c757d',
-                    fontSize: 13,
-                    fontWeight: sort === 'latest' ? 600 : 400,
-                    border: '1px solid transparent',
-                }}>
-                    <span>🕐</span>
-                    <span>Más recientes</span>
+                        {/* Botón filtrar */}
+                        <button
+                            onClick={() => {
+                                setPendingCategory(selectedCategory);
+                                setPendingSort(sort);
+                                setSheetOpen(true);
+                            }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                padding: '7px 14px', borderRadius: 8,
+                                border: '1px solid #e0e0e0', background: '#fff',
+                                fontSize: 13, color: '#333', cursor: 'pointer',
+                            }}
+                        >
+                            <span style={{
+                                width: 7, height: 7, borderRadius: '50%',
+                                background: hasFilter ? '#f75815' : '#ccc',
+                                display: 'inline-block', flexShrink: 0,
+                            }} />
+                            Filtrar
+                        </button>
+                    </div>
                 </div>
-
-                <div style={{ width: 1, height: 20, background: '#dee2e6' }} />
-
-                {/* Toggle likes */}
-                <button
-                    onClick={() => handleSortChange('likes')}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '5px 14px',
-                        borderRadius: 20,
-                        border: sort === 'likes' ? '1.5px solid #e63946' : '1.5px solid #dee2e6',
-                        background: sort === 'likes' ? '#fff0f0' : '#fff',
-                        color: sort === 'likes' ? '#e63946' : '#6c757d',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                        fontWeight: sort === 'likes' ? 700 : 400,
-                        transition: 'all 0.15s ease',
-                    }}
-                >
-                    <span style={{ fontSize: 14 }}>{sort === 'likes' ? '♥' : '♡'}</span>
-                    <span>Más likes</span>
-                    {sort === 'likes' && (
-                        <span style={{ fontSize: 10, background: '#e63946', color: '#fff', borderRadius: 10, padding: '1px 6px', marginLeft: 2 }}>
-                            ✕
-                        </span>
-                    )}
-                </button>
-
-                {/* Toggle vistas */}
-                <button
-                    onClick={() => handleSortChange('views')}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '5px 14px',
-                        borderRadius: 20,
-                        border: sort === 'views' ? '1.5px solid #007bff' : '1.5px solid #dee2e6',
-                        background: sort === 'views' ? '#f0f6ff' : '#fff',
-                        color: sort === 'views' ? '#007bff' : '#6c757d',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                        fontWeight: sort === 'views' ? 700 : 400,
-                        transition: 'all 0.15s ease',
-                    }}
-                >
-                    <i className="bi bi-eye" style={{ fontSize: '14px' }} />
-                    <span>Más vistas</span>
-                    {sort === 'views' && (
-                        <span style={{ fontSize: 10, background: '#007bff', color: '#fff', borderRadius: 10, padding: '1px 6px', marginLeft: 2 }}>
-                            ✕
-                        </span>
-                    )}
-                </button>
             </div>
-        </div>
-    );
+        );
+    };
 
 
     // const RecentPostsWidget = () => (
@@ -436,9 +391,7 @@ function Devocionals() {
                             {/* 1. Widget de Categorías ubicado arriba */}
                             <div className="top-categories-sticky-wrapper">
                                 <div className="container">
-                                    <div className="top-categories-container" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <CategoriesWidget />
-                                    </div>
+                                    <FilterBar />
                                 </div>
                             </div>
 
@@ -494,6 +447,26 @@ function Devocionals() {
                 </div>
             </main>
             <Footer />
+            <FilterSheet
+                isOpen={sheetOpen}
+                onClose={() => setSheetOpen(false)}
+                categories={categories}
+                total={total}
+                pendingCategory={pendingCategory}
+                pendingSort={pendingSort}
+                onCategoryChange={setPendingCategory}
+                onSortChange={setPendingSort}
+                onApply={() => {
+                    setSelectedCategory(pendingCategory);
+                    setSort(pendingSort);
+                    setPage(1);
+                    setSheetOpen(false);
+                }}
+                onClear={() => {
+                    setPendingCategory(null);
+                    setPendingSort('latest');
+                }}
+            />
         </div>
     );
 }
