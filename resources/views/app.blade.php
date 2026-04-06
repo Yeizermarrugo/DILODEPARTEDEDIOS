@@ -69,11 +69,19 @@
     <meta name="twitter:description" content="{{ $currentDesc }}">
     <meta name="twitter:image" content="{{ $currentImage }}">
 
+    {{-- Web Push / PWA --}}
+    <link rel="manifest" href="/manifest.json">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Dilo de parte de Dios">
+    <meta name="theme-color" content="#f75815" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
     <link rel="icon" type="image/jpeg"
         href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
 
-    <link rel="apple-touch-icon"
-        href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+    <link rel="apple-touch-icon" href="/icon-192.png" />
 
     <link rel="shortcut icon"
         href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
@@ -82,6 +90,7 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
 
     @routes
     @viteReactRefresh
