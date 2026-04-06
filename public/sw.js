@@ -1,7 +1,5 @@
-const CACHE_NAME = 'dilo-v1';
-const STATIC_ASSETS = [
-    '/offline',
-];
+const CACHE_NAME = 'dilo-v2';
+const STATIC_ASSETS = ['/offline'];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -27,7 +25,7 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(event.request.url);
 
-    // Ignorar completamente — rutas de Laravel, API, Inertia, Vite HMR
+    // Ignorar rutas dinámicas de Laravel/Inertia
     const ignorar = [
         '/api/',
         '/devocionales',
@@ -68,7 +66,7 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// Push — sin cambios
+// Push
 self.addEventListener('push', (event) => {
     const data = event.data?.json() ?? {};
 
@@ -83,7 +81,7 @@ self.addEventListener('push', (event) => {
     );
 });
 
-// Click en notificación — sin cambios
+// Click en notificación
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     const url = event.notification.data?.url ?? '/';
