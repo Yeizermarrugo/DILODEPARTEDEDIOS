@@ -5,15 +5,17 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import PrivacyBanner from './components/PrivacyBanner';
-import { initializeTheme } from './hooks/use-appearance';
 import PushSubscribeButton from './components/PushSubscribeButton';
+import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 // Registrar SW en background — sin pedir permiso todavía
 window.addEventListener('load', () => {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js');
+        setTimeout(() => {
+            navigator.serviceWorker.register('/sw.js').catch(() => { });
+        }, 1000); // espera 1s después de que la app cargue
     }
 });
 
@@ -28,7 +30,7 @@ createInertiaApp({
             <>
                 <App {...props} />
                 <PrivacyBanner />
-                <PushSubscribeButton/>
+                <PushSubscribeButton />
             </>
         );
     },
