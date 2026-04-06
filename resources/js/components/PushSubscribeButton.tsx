@@ -36,8 +36,6 @@ export default function PushSubscribeButton() {
             return;
         }
 
-        navigator.serviceWorker.register('/sw.js');
-
         // Si el navegador ya bloqueó permanentemente
         if (Notification.permission === 'denied') {
             setEstado('denied');
