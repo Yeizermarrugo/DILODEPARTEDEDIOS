@@ -9,7 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('devocional:notificar-diario')
-    // ->dailyAt('20:03')
-    ->everyMinute()    
+    ->dailyAt('06:00')
     ->timezone('America/Bogota')
     ->withoutOverlapping();
