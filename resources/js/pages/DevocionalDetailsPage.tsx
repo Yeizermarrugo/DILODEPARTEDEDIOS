@@ -126,6 +126,40 @@ const DevocionalDetailsPage = (props: Props) => {
         );
     }
 
+    // Agrega esta función dentro de DevocionalDetailsPage
+
+    const handleShare = async () => {
+        const titulo = getH1Text(devocional.contenido);
+        const url = window.location.href;
+        const path = window.location.pathname;
+
+        const tipo = path.startsWith('/estudio-biblico')
+            ? '📚 Te comparto este estudio bíblico'
+            : path.startsWith('/series') || path.startsWith('/ensenanzas')
+                ? '🎓 Te comparto esta enseñanza'
+                : '📖 Te comparto este devocional';
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: titulo || 'Dilo de parte de Dios',
+                    text: tipo,
+                    url: url,
+                });
+            } catch (err) {
+                // Usuario canceló
+            }
+        } else {
+            await navigator.clipboard.writeText(url);
+            alert('¡Enlace copiado!');
+        }
+    };
+
+    // Detecta si está en móvil (no desktop)
+    const isMobile = () => {
+        return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    };
+
     return (
         <div className="devocional">
             <button type="button" onClick={handleBack} className="back-floating-button">
@@ -164,6 +198,27 @@ const DevocionalDetailsPage = (props: Props) => {
                         marginTop: '8px',
                         color: '#888',
                     }}>
+                        {isMobile() && (
+                            <button
+                                onClick={handleShare}
+                                title="Compartir"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '4px 6px',
+                                    borderRadius: '20px',
+                                    color: '#888',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 500,
+                                }}
+                            >
+                                <i className="bi bi-share" style={{ fontSize: '18px' }} />
+                            </button>
+                        )}
                         <i className="bi bi-eye" style={{ fontSize: '20px' }} />
                         <span>{devocional.views_count ?? 0}</span>
                         <LikeButton type={likeType} id={devocional.id} variant="default" />
