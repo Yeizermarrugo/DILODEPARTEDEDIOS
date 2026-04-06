@@ -233,10 +233,5 @@ Route::get('/gracias', function () {
     return inertia('ThanksPage');
 })->name('payment.thanks');
 
-
-Route::get('/offline', function () {
-    return Inertia::render('Offline');
-});
-
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
