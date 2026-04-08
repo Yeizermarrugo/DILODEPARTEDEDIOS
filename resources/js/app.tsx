@@ -11,15 +11,6 @@ import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-// Registrar SW en background — sin pedir permiso todavía
-window.addEventListener('load', () => {
-    if ('serviceWorker' in navigator) {
-        setTimeout(() => {
-            navigator.serviceWorker.register('/sw.js').catch(() => { });
-        }, 1000); // espera 1s después de que la app cargue
-    }
-});
-
 const STORAGE_KEY = 'welcome_modal_ts';
 const TTL_MS = 12 * 60 * 60 * 1000;
 
