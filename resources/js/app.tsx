@@ -13,17 +13,31 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const STORAGE_KEY = 'welcome_modal_ts';
 const TTL_MS = 12 * 60 * 60 * 1000;
 
+function safeLocalStorage(action: 'get' | 'set' | 'remove', key: string, value?: string): string | null {
+    try {
+        if (action === 'get') return localStorage.getItem(key);
+        if (action === 'set' && value !== undefined) localStorage.setItem(key, value);
+        if (action === 'remove') localStorage.removeItem(key);
+    } catch {
+        // Safari bloqueó localStorage — ignorar silenciosamente
+    }
+    return null;
+}
+
 function WelcomeModal() {
     const [open, setOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const now = Date.now();
+        try {
+            const stored = safeLocalStorage('get', STORAGE_KEY);
+            const now = Date.now();
+            if (stored && now - parseInt(stored, 10) < TTL_MS) return;
+            safeLocalStorage('remove', STORAGE_KEY);
+        } catch {
+            // continuar y mostrar el modal
+        }
 
-        if (stored && now - parseInt(stored, 10) < TTL_MS) return;
-
-        localStorage.removeItem(STORAGE_KEY);
         setOpen(true);
 
         const mq = window.matchMedia('(max-width: 768px)');
@@ -33,14 +47,16 @@ function WelcomeModal() {
         return () => mq.removeEventListener('change', handler);
     }, []);
 
+    const handleClose = () => {
+        safeLocalStorage('set', STORAGE_KEY, Date.now().toString());
+        setOpen(false);
+    };
+
     if (!open) return null;
 
     return (
         <div
-            onClick={() => {
-                localStorage.setItem(STORAGE_KEY, Date.now().toString());
-                setOpen(false);
-            }}
+            onClick={handleClose}
             style={{
                 position: 'fixed', inset: 0,
                 background: 'rgba(0,0,0,0.7)',
@@ -58,10 +74,7 @@ function WelcomeModal() {
                 }}
             >
                 <button
-                    onClick={() => {
-                        localStorage.setItem(STORAGE_KEY, Date.now().toString());
-                        setOpen(false);
-                    }}
+                    onClick={handleClose}
                     style={{
                         position: 'absolute', top: 0,
                         right: isMobile ? 30 : 65,
