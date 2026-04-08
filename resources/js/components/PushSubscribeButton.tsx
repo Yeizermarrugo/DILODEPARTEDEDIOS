@@ -39,14 +39,18 @@ export default function PushSubscribeButton() {
             return;
         }
 
-        // Timeout de seguridad — si el SW no responde, ocultar el botón
         const timeout = setTimeout(() => {
             setEstado('unsupported');
-        }, 3000);
+        }, 8000);
 
-        navigator.serviceWorker.ready.then(reg => {
-            clearTimeout(timeout);
-            reg.pushManager.getSubscription().then(sub => {
+        // Registrar el SW aquí también para asegurar que esté listo
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => navigator.serviceWorker.ready)
+            .then(reg => {
+                clearTimeout(timeout);
+                return reg.pushManager.getSubscription();
+            })
+            .then(sub => {
                 if (sub) {
                     setEstado('subscribed');
                     return;
@@ -56,11 +60,11 @@ export default function PushSubscribeButton() {
                 } else {
                     setEstado('unsupported');
                 }
+            })
+            .catch(() => {
+                clearTimeout(timeout);
+                setEstado('unsupported');
             });
-        }).catch(() => {
-            clearTimeout(timeout);
-            setEstado('unsupported');
-        });
 
         return () => clearTimeout(timeout);
     }, []);
