@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react';
+import { router } from '@inertiajs/react';
 import '../../css/cardNew.css';
 import LikeButton from './LikeButton';
 
@@ -52,8 +52,16 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
         return `${cleanHex}${alpha}`;
     };
 
+    const handleCardClick = () => {
+        if (onClick) {
+            onClick();
+        } else {
+            router.visit(href);
+        }
+    };
+
     return (
-        <div className="card-wrapper-link" onClick={onClick} style={{ cursor: 'pointer' }}>
+        <div className="card-wrapper-link" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
             <div className="example-2 card-custom">
                 <div
                     className="wrapper"
@@ -114,14 +122,6 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                         <div className="content">
                             <span className="author">{autor}</span>
                             <h1 className="title"><span>{titulo}</span></h1>
-                            <a
-                                className="button-read"
-                                href={href}
-                                style={{ textDecoration: 'none', color: 'white' }}
-                                onClick={(e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
-                            >
-                                Leer
-                            </a>
                         </div>
                     </div>
 

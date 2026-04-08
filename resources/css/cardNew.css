@@ -86,11 +86,11 @@
 }
 
 /* EFECTO HOVER: Mostramos el título completo */
-.card-custom .wrapper:hover .title {
-    /* Permitimos que la caja crezca para mostrar todo el texto */
+/* Permitimos que la caja crezca para mostrar todo el texto */
+/* .card-custom .wrapper:hover .title {
     height: auto; 
     min-height: 34px;
-}
+} */
 
 .card-custom .wrapper:hover .title span {
     /* Quitamos el límite de líneas y los puntos suspensivos (...) */
@@ -104,28 +104,25 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    /* Aumentamos un poco el área negra en hover para títulos largos */
     background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 80%, transparent 100%);
-    transform: translateY(40px); 
-    transition: transform 0.3s ease-in-out;
     color: white;
-    /* Asegura que el contenido extra no se corte si el título es muy largo */
     max-height: 100%;
+    /* sin transform, sin transition */
 }
-.card-custom .wrapper:hover .data {
+
+/* .card-custom .wrapper:hover .data {
     transform: translateY(0);
-}
+} */
 
 .card-custom .content {
     padding: 10px;
     padding-right: 45px;
     position: relative;
-    /* Forzamos una altura mínima para que todas las cajas midan lo mismo */
-    min-height: 100px; 
+    min-height: unset; 
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    margin-bottom: 15px;
+    margin-bottom: 0px;
 }
 
 .card-custom .author {
