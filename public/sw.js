@@ -1,10 +1,5 @@
 const CACHE_NAME = 'dilo-v4';
 const STATIC_ASSETS = [
-    '/',
-    '/devocionales',
-    '/series',
-    '/estudios',
-    '/offline',
     '/icon-192.png',
     '/icon-512.png',
     '/manifest.json',
