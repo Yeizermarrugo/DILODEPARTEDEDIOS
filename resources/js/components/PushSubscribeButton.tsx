@@ -29,35 +29,40 @@ export default function PushSubscribeButton() {
     >('waiting'); // 'waiting' = aún evaluando
 
     useEffect(() => {
-        console.log('Push support:', 'serviceWorker' in navigator, 'PushManager' in window);
-        console.log('Notification permission:', Notification.permission);
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             setEstado('unsupported');
             return;
         }
 
-        // Si el navegador ya bloqueó permanentemente
         if (Notification.permission === 'denied') {
             setEstado('denied');
             return;
         }
 
-        // Si ya está suscrito
+        // Timeout de seguridad — si el SW no responde, ocultar el botón
+        const timeout = setTimeout(() => {
+            setEstado('unsupported');
+        }, 3000);
+
         navigator.serviceWorker.ready.then(reg => {
+            clearTimeout(timeout);
             reg.pushManager.getSubscription().then(sub => {
                 if (sub) {
                     setEstado('subscribed');
                     return;
                 }
-
-                // Verificar si debe preguntar ahora
                 if (shouldAskAgain()) {
-                    setEstado('idle'); // muestra el botón
+                    setEstado('idle');
                 } else {
-                    setEstado('unsupported'); // ocultar hasta que pasen los 3 días
+                    setEstado('unsupported');
                 }
             });
+        }).catch(() => {
+            clearTimeout(timeout);
+            setEstado('unsupported');
         });
+
+        return () => clearTimeout(timeout);
     }, []);
 
     const suscribirse = async () => {
