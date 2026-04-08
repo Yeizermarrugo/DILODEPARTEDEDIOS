@@ -1,91 +1,117 @@
-const CACHE_NAME = 'dilo-v1';
+const CACHE_NAME = 'dilo-v4';
 const STATIC_ASSETS = [
+    '/',
+    '/devocionales',
+    '/series',
+    '/estudios',
     '/offline',
+    '/icon-192.png',
+    '/icon-512.png',
+    '/manifest.json',
 ];
 
+// ── Install ──────────────────────────────────────────────
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+        caches.open(CACHE_NAME)
+            .then((cache) => cache.addAll(STATIC_ASSETS))
+            .then(() => self.skipWaiting())
     );
-    self.skipWaiting();
 });
 
+// ── Activate ─────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) =>
-            Promise.all(
-                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        caches.keys()
+            .then((keys) =>
+                Promise.all(
+                    keys
+                        .filter((key) => key !== CACHE_NAME)
+                        .map((key) => caches.delete(key))
+                )
             )
-        )
+            .then(() => self.clients.claim())
     );
-    self.clients.claim();
 });
 
-// Solo cachea assets estáticos, ignora rutas de Laravel e Inertia
+// ── Fetch ─────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
 
     const url = new URL(event.request.url);
 
-    // Ignorar completamente — rutas de Laravel, API, Inertia, Vite HMR
-    const ignorar = [
-        '/api/',
-        '/devocionales',
-        '/series',
-        '/estudios',
-        '/devocional/',
-        '/estudio-biblico/',
-        '/push/',
-        '/sanctum/',
-        '/__vite',
-        '/hot',
-    ];
+    // Ignorar — HMR, websockets, API interna
+    if (
+        url.pathname.startsWith('/__vite') ||
+        url.pathname.startsWith('/hot') ||
+        url.pathname.startsWith('/api/push') ||
+        url.pathname.startsWith('/sanctum') ||
+        url.protocol === 'chrome-extension:'
+    ) return;
 
-    if (ignorar.some((path) => url.pathname.startsWith(path))) return;
-
-    // Solo cachea archivos estáticos reales
+    // Assets estáticos — cache first
     const esAsset =
         url.pathname.startsWith('/build/') ||
         url.pathname.startsWith('/assets/') ||
         url.pathname.match(/\.(png|jpg|jpeg|svg|ico|webp|woff|woff2|ttf|css|js)$/);
 
-    if (!esAsset) return;
+    if (esAsset) {
+        event.respondWith(
+            caches.match(event.request).then((cached) => {
+                if (cached) return cached;
 
-    event.respondWith(
-        caches.match(event.request).then((cached) => {
-            if (cached) return cached;
+                return fetch(event.request).then((response) => {
+                    if (!response || response.status !== 200) return response;
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                    return response;
+                });
+            })
+        );
+        return;
+    }
 
-            return fetch(event.request).then((response) => {
-                const clone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-                return response;
-            });
-        }).catch(() => {
-            if (event.request.destination === 'document') {
-                return caches.match('/offline');
-            }
-        })
-    );
+    // Páginas HTML — network first, fallback a cache, fallback a /offline
+    if (event.request.destination === 'document' || event.request.headers.get('accept')?.includes('text/html')) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    if (!response || response.status !== 200) return response;
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                    return response;
+                })
+                .catch(() =>
+                    caches.match(event.request)
+                        .then((cached) => cached || caches.match('/offline'))
+                )
+        );
+        return;
+    }
 });
 
-// Push — sin cambios
+// ── Push ──────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
-    const data = event.data?.json() ?? {};
+    if (!event.data) return;
+
+    const data = event.data.json();
 
     event.waitUntil(
         self.registration.showNotification(data.title ?? 'Nueva publicación', {
-            body:    data.body ?? '',
-            icon:    data.icon ?? '/assets/img/logo.png',
+            body:    data.body  ?? '',
+            icon:    data.icon  ?? '/icon-192.png',
             badge:   '/icon-192.png',
-            data:    data.data ?? {},
+            data:    data.data  ?? {},
             actions: [{ action: 'open', title: 'Ver ahora' }],
+            vibrate: [200, 100, 200],
         })
     );
 });
 
-// Click en notificación — sin cambios
+// ── Notification click ────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
+
     const url = event.notification.data?.url ?? '/';
 
     event.waitUntil(
@@ -96,7 +122,7 @@ self.addEventListener('notificationclick', (event) => {
                         return client.focus();
                     }
                 }
-                if (clients.openWindow) return clients.openWindow(url);
+                return clients.openWindow(url);
             })
     );
 });
