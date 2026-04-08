@@ -2,34 +2,39 @@ import { useEffect, useState } from 'react';
 
 const DENIED_KEY = 'push_denied_at';
 const DAYS_RETRY = 3;
+const SW_TIMEOUT_MS = 8000;
+
+type Estado = 'waiting' | 'idle' | 'subscribed' | 'loading' | 'unsupported' | 'denied';
 
 function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawData = window.atob(base64);
     const buffer = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; i++) {
-        buffer[i] = rawData.charCodeAt(i);
-    }
+    for (let i = 0; i < rawData.length; i++) buffer[i] = rawData.charCodeAt(i);
     return buffer.buffer;
 }
 
 function shouldAskAgain(): boolean {
     const deniedAt = localStorage.getItem(DENIED_KEY);
-    if (!deniedAt) return true; // nunca ha rechazado → preguntar
+    if (!deniedAt) return true;
+    const daysPassed = (Date.now() - parseInt(deniedAt, 10)) / 86_400_000;
+    return daysPassed >= DAYS_RETRY;
+}
 
-    const diff = Date.now() - parseInt(deniedAt);
-    const daysPassed = diff / (1000 * 60 * 60 * 24);
-    return daysPassed >= DAYS_RETRY; // han pasado 3+ días → preguntar de nuevo
+function isPushSupported(): boolean {
+    return (
+        'serviceWorker' in navigator &&
+        'PushManager' in window &&
+        'Notification' in window
+    );
 }
 
 export default function PushSubscribeButton() {
-    const [estado, setEstado] = useState<
-        'idle' | 'subscribed' | 'denied' | 'loading' | 'unsupported' | 'waiting'
-    >('waiting'); // 'waiting' = aún evaluando
+    const [estado, setEstado] = useState<Estado>('waiting');
 
     useEffect(() => {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        if (!isPushSupported()) {
             setEstado('unsupported');
             return;
         }
@@ -39,23 +44,17 @@ export default function PushSubscribeButton() {
             return;
         }
 
-        const timeout = setTimeout(() => {
-            setEstado('unsupported');
-        }, 8000);
+        const timeout = setTimeout(() => setEstado('unsupported'), SW_TIMEOUT_MS);
 
-        // Registrar el SW aquí también para asegurar que esté listo
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker
+            .register('/sw.js', { scope: '/' })
             .then(() => navigator.serviceWorker.ready)
-            .then(reg => {
+            .then((reg) => reg.pushManager.getSubscription())
+            .then((sub) => {
                 clearTimeout(timeout);
-                return reg.pushManager.getSubscription();
-            })
-            .then(sub => {
                 if (sub) {
                     setEstado('subscribed');
-                    return;
-                }
-                if (shouldAskAgain()) {
+                } else if (shouldAskAgain()) {
                     setEstado('idle');
                 } else {
                     setEstado('unsupported');
@@ -72,25 +71,22 @@ export default function PushSubscribeButton() {
     const suscribirse = async () => {
         setEstado('loading');
         try {
-            const reg = await navigator.serviceWorker.ready;
-
             const permission = await Notification.requestPermission();
 
             if (permission !== 'granted') {
-                // Guardar cuándo rechazó
                 localStorage.setItem(DENIED_KEY, String(Date.now()));
-                setEstado('unsupported'); // ocultar el botón
+                setEstado('unsupported');
                 return;
             }
 
-            // Limpiar el registro de rechazo si ahora aceptó
             localStorage.removeItem(DENIED_KEY);
 
-            const { publicKey } = await fetch('/api/push/vapid-key').then(r => r.json());
+            const reg = await navigator.serviceWorker.ready;
+            const { publicKey } = await fetch('/api/push/vapid-key').then((r) => r.json());
 
             const sub = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(publicKey)
+                applicationServerKey: urlBase64ToUint8Array(publicKey),
             });
 
             const json = sub.toJSON();
@@ -101,13 +97,13 @@ export default function PushSubscribeButton() {
                     endpoint: json.endpoint,
                     publicKey: json.keys?.p256dh,
                     authToken: json.keys?.auth,
-                    contentEncoding: 'aesgcm'
-                })
+                    contentEncoding: 'aesgcm',
+                }),
             });
 
             setEstado('subscribed');
         } catch (err) {
-            console.error('Push error:', err);
+            console.error('[Push] Error al suscribirse:', err);
             setEstado('idle');
         }
     };
@@ -116,81 +112,65 @@ export default function PushSubscribeButton() {
         try {
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.getSubscription();
+
             if (sub) {
                 await fetch('/api/push/unsubscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ endpoint: sub.endpoint })
+                    body: JSON.stringify({ endpoint: sub.endpoint }),
                 });
                 await sub.unsubscribe();
             }
+
             setEstado('idle');
         } catch (err) {
-            console.error('Unsubscribe error:', err);
+            console.error('[Push] Error al desuscribirse:', err);
         }
     };
 
     if (estado === 'unsupported' || estado === 'waiting' || estado === 'denied') return null;
 
-    // Reemplaza el return del botón con esto:
+    const isSubscribed = estado === 'subscribed';
+    const isLoading = estado === 'loading';
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                bottom: '80px',
-                right: '20px',
-                zIndex: 99,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                gap: '8px',
-            }}
-        >
-            {/* Burbuja de texto — solo cuando está en idle */}
+        <div style={{
+            position: 'fixed', bottom: 80, right: 20,
+            zIndex: 99, display: 'flex',
+            flexDirection: 'column', alignItems: 'flex-end', gap: 8,
+        }}>
             {estado === 'idle' && (
                 <div style={{
                     background: '#fff',
                     border: '1px solid #eee',
-                    borderRadius: '12px',
+                    borderRadius: 12,
                     padding: '8px 12px',
-                    fontSize: '13px',
-                    color: '#444',
+                    fontSize: 13, color: '#444',
                     boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
-                    maxWidth: '200px',
-                    textAlign: 'center',
-                    lineHeight: 1.4,
+                    maxWidth: 200, textAlign: 'center', lineHeight: 1.4,
                 }}>
                     🙏 Activa las notificaciones para recibir nuevos devocionales
                 </div>
             )}
 
-            {/* Botón flotante */}
             <button
-                onClick={estado === 'subscribed' ? desuscribirse : suscribirse}
-                disabled={estado === 'loading'}
-                title={estado === 'subscribed' ? 'Desactivar notificaciones' : 'Recibir notificaciones'}
+                onClick={isSubscribed ? desuscribirse : suscribirse}
+                disabled={isLoading}
+                title={isSubscribed ? 'Desactivar notificaciones' : 'Recibir notificaciones'}
                 style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '50%',
-                    border: 'none',
-                    background: estado === 'subscribed'
-                        ? '#e0e0e0'
-                        : 'var(--accent-color)',
-                    color: estado === 'subscribed' ? '#555' : '#fff',
-                    fontSize: '24px',
-                    cursor: estado === 'loading' ? 'not-allowed' : 'pointer',
+                    width: 56, height: 56,
+                    borderRadius: '50%', border: 'none',
+                    background: isSubscribed ? '#e0e0e0' : 'var(--accent-color)',
+                    color: isSubscribed ? '#555' : '#fff',
+                    fontSize: 24, cursor: isLoading ? 'not-allowed' : 'pointer',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.20)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'all 0.2s ease',
-                    opacity: estado === 'loading' ? 0.7 : 1,
+                    opacity: isLoading ? 0.7 : 1,
                 }}
             >
-                {estado === 'loading' && '⏳'}
-                {estado === 'subscribed' && '🔕'}
+                {isLoading && '⏳'}
+                {isSubscribed && '🔕'}
                 {estado === 'idle' && '🔔'}
             </button>
         </div>
