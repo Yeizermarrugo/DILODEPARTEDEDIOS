@@ -6,7 +6,7 @@ import CoverflowCarousel from './CoverflowCarousel';
 interface Devocional {
     contenido: string;
     imagen: string;
-    id?: number;
+    id?: string;
     created_at?: string;
     categoria?: string;
 }
