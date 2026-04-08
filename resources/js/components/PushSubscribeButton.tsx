@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 const DENIED_KEY = 'push_denied_at';
 const DAYS_RETRY = 3;
-const SW_TIMEOUT_MS = 8000;
+const SW_TIMEOUT_MS = 30000;
 
 type Estado = 'waiting' | 'idle' | 'subscribed' | 'loading' | 'unsupported' | 'denied';
 
@@ -16,12 +16,15 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
 }
 
 function shouldAskAgain(): boolean {
-    const deniedAt = localStorage.getItem(DENIED_KEY);
-    if (!deniedAt) return true;
-    const daysPassed = (Date.now() - parseInt(deniedAt, 10)) / 86_400_000;
-    return daysPassed >= DAYS_RETRY;
+    try {
+        const deniedAt = localStorage.getItem(DENIED_KEY);
+        if (!deniedAt) return true;
+        const daysPassed = (Date.now() - parseInt(deniedAt, 10)) / 86_400_000;
+        return daysPassed >= DAYS_RETRY;
+    } catch {
+        return true; // Safari bloqueó localStorage — mostrar el botón igual
+    }
 }
-
 function isPushSupported(): boolean {
     return (
         'serviceWorker' in navigator &&
