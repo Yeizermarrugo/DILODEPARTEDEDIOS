@@ -40,6 +40,10 @@ body {
     overflow: visible;
 }
 
+.devocional h3{
+    color: black;
+}
+
 .header-modal {
     width: 100%;
     min-height: 220px;
