@@ -4,7 +4,7 @@ import '../../css/main.css';
 
 const teamMembers = [
     {
-        img: 'assets/img/person/Yeizer.png',
+        img: 'assets/img/person/Yeizer.jpg',
         name: 'Yeizer Marrugo',
         role: 'Cofundador & Director de Tecnología (CTO)',
         desc: 'Discípulo de Cristo, Ingeniero de sistemas y desarrollador de software, es el encargado de diseñar y programar nuestra página web y brindarnos todos las herramientas y recursos digitales necesarios para cumplir con nuestra asignación de expandir el reino de Dios aquí en la tierra; es también deportista profesional, padre, creador de contenido y cofundador de la escuela de formación y capacitación bíblica Dilo de parte de Dios.',
@@ -15,8 +15,8 @@ const teamMembers = [
     {
         img: 'assets/img/person/Diana.png',
         name: 'Diana López',
-        role: 'Cofundadora & Escritora',
-        desc: 'Discípulo de Cristo, administradora de empresas, escritora y maestra de vocación, madre, creadora de contenido y cofundadora de la escuela de formación y capacitación bíblica Dilo de parte de Dios. Dios le entregó la visión de esta escuela y del ministerio en el año 2022, y desde entonces ha estado trabajando incansablemente para equipar al pueblo de Dios con recursos que les ayuden a comprender y vivir las Escrituras.',
+        role: 'CEO & Escritora',
+        desc: 'Discípulo de Cristo, administradora de empresas, escritora y maestra de vocación, madre, creadora de contenido y CEO de la escuela de formación y capacitación bíblica Dilo de parte de Dios. Dios le entregó la visión de esta escuela y del ministerio en el año 2022, y desde entonces ha estado trabajando incansablemente para equipar al pueblo de Dios con recursos que les ayuden a comprender y vivir las Escrituras.',
         insta: 'https://www.instagram.com/diosconnosotrosyd19',
         face: 'https://www.facebook.com/Dlopez0712',
         yout: 'https://www.youtube.com/@diosconnosotrosyd'
@@ -55,7 +55,7 @@ const About = () => {
                                 <h2 className="about-title">Misión</h2>
                                 <p className="about-description">
                                     <strong>Capacitar al pueblo de Dios para vivir con excelencia</strong> según los principios bíblicos, desarrollando su potencial espiritual y personal.
-                                    Nuestro enfoque es claro: ayudar a las personas a <strong>comprender las palabras del que murió en la cruz</strong>, para que vivan la voluntad de Dios y se conviertan en instrumentos en Sus planes para otros.
+                                    Nuestro enfoque es claro: ayudar a las personas a <strong>comprender las palabras del que murió en la cruz</strong>, para que vivan la voluntad de Dios y se conviertan en instrumentos en sus planes para otros.
                                 </p>
                             </div>
                             <div className="vision col-lg-6">
