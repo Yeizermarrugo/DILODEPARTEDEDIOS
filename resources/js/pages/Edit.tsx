@@ -1,6 +1,9 @@
 import DevocionalCard from '@/components/DevocionalCard';
 import { router, useForm, usePage } from '@inertiajs/react';
+import React from 'react';
 import '../../css/main.css';
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
 
 interface Devocional {
     id: string;
@@ -34,12 +37,43 @@ interface PageProps {
     [key: string]: unknown;
 }
 
+// ─── Componente Principal ─────────────────────────────────────────────────────
+
 export default function Edit() {
     const { devocionales, estudios, ocultos, categorias, filters } = usePage<PageProps>().props;
 
     const form = useForm({
         search: filters.search ?? '',
     });
+
+    // ─── Helper: Decodificar HTML seguro para SSR ───
+    const decodeHtmlEntities = (str: string): string => {
+        if (!str) return '';
+        // Si estamos en el servidor (SSR), usamos reemplazos básicos
+        if (typeof document === 'undefined') {
+            return str
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
+        }
+        // Si estamos en el navegador, usamos el DOM
+        const txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+    };
+
+    const obtenerPrimerEtiqueta = (html: string) => {
+        if (!html) return '';
+        const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
+        if (match) {
+            const innerText = match[2].replace(/<[^>]+>/g, '');
+            return innerText;
+        }
+        return '';
+    };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,21 +84,16 @@ export default function Edit() {
         );
     };
 
+    const todasLasCategorias = categorias
+        .map((cat) => cat.categoria.trim().toLowerCase())
+        .sort();
 
-
-    interface PaginationProps {
-        paginator: DevocionalesPagination;
-        paramName: 'devocionales_page' | 'estudios_page' | 'ocultos_page';
-    }
-
-    const Pagination = ({ paginator, paramName }: PaginationProps) => {
-        const goToPage = (paramName: 'devocionales_page' | 'estudios_page' | 'ocultos_page', page: number) => {
+    // ─── Componente de Paginación Interno ───
+    const Pagination = ({ paginator, paramName }: { paginator: DevocionalesPagination; paramName: string }) => {
+        const goToPage = (pName: string, page: number) => {
             router.get(
                 '/devocionales-edit',
-                {
-                    search: form.data.search,
-                    [paramName]: page,
-                },
+                { search: form.data.search, [pName]: page },
                 { preserveState: true, preserveScroll: true },
             );
         };
@@ -76,17 +105,17 @@ export default function Edit() {
                 <button
                     disabled={paginator.current_page === 1}
                     onClick={() => goToPage(paramName, paginator.current_page - 1)}
-                    className="rounded border px-2 py-1 disabled:opacity-50"
+                    className="rounded border px-2 py-1 disabled:opacity-50 text-black bg-white"
                 >
                     Anterior
                 </button>
-                <span>
+                <span className="text-black">
                     Página {paginator.current_page} de {paginator.last_page}
                 </span>
                 <button
                     disabled={paginator.current_page === paginator.last_page}
                     onClick={() => goToPage(paramName, paginator.current_page + 1)}
-                    className="rounded border px-2 py-1 disabled:opacity-50"
+                    className="rounded border px-2 py-1 disabled:opacity-50 text-black bg-white"
                 >
                     Siguiente
                 </button>
@@ -94,28 +123,19 @@ export default function Edit() {
         );
     };
 
-
-    const decodeHtmlEntities = (str: string): string => {
-        const txt = document.createElement('textarea');
-        txt.innerHTML = str;
-        return txt.value;
+    // Helper para procesar la lista antes de pasarla a la Card
+    const procesarDevocionales = (lista: Devocional[]) => {
+        return lista.map((d) => ({
+            ...d,
+            titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(d.contenido)),
+            contenido: d.contenido,
+            autor: d.autor || '',
+        }));
     };
-
-    const obtenerPrimerEtiqueta = (html: string) => {
-        const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
-        if (match) {
-            const innerText = match[2].replace(/<[^>]+>/g, '');
-            return innerText;
-        }
-        return '';
-    };
-
-    const todasLasCategorias = categorias
-        .map((cat) => cat.categoria.trim().toLowerCase())
-        .sort();
 
     return (
         <div className="blog-details-page" style={{ padding: '20px' }}>
+            {/* Botón Volver */}
             <button
                 type="button"
                 onClick={() => router.visit(route('dashboard'))}
@@ -124,6 +144,7 @@ export default function Edit() {
                 <i className="bi bi-arrow-left" />
                 Atrás
             </button>
+
             {/* Buscador */}
             <form onSubmit={handleSearchSubmit} className="mb-4 flex gap-2">
                 <input
@@ -131,72 +152,37 @@ export default function Edit() {
                     value={form.data.search}
                     onChange={(e) => form.setData('search', e.target.value)}
                     placeholder="Buscar devocional por contenido..."
-                    className="flex-1 rounded border px-2 py-1 text-sm"
+                    className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-blue-500 outline-none"
                 />
                 <button
                     type="submit"
-                    className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                    className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors"
                 >
                     Buscar
                 </button>
             </form>
 
-            {/* Ocultos */}
-            {ocultos.data.length > 0 && <h2
-                className="mb-2 text-lg font-semibold"
-                style={{ color: 'black', padding: '50px 0 20px', textAlign: 'center' }}
-            >
-                Ocultos
-            </h2>}
-            <DevocionalCard
-                devocionales={ocultos.data.map((d) => ({
-                    ...d,
-                    titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(d.contenido)),
-                    contenido: d.contenido,
-                    autor: d.autor || '',
-                }))}
-                todasLasCategorias={todasLasCategorias}
-                buildHref={(dev) => `/devocionales-editar/${dev.id}`}
-            />
-            <Pagination paginator={ocultos} paramName="ocultos_page" />
-
-            {/* Devocionales */}
-            <h2
-                className="mb-2 text-lg font-semibold"
-                style={{ color: 'black', padding: '50px 0 20px', textAlign: 'center' }}
-            >
-                Devocionales
-            </h2>
-            <DevocionalCard
-                devocionales={devocionales.data.map((d) => ({
-                    ...d,
-                    titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(d.contenido)),
-                    contenido: d.contenido,
-                    autor: d.autor || '',
-                }))}
-                todasLasCategorias={todasLasCategorias}
-                buildHref={(dev) => `/devocionales-editar/${dev.id}`}
-            />
-            <Pagination paginator={devocionales} paramName="devocionales_page" />
-
-            {/* Estudios */}
-            <h2
-                className="mt-6 mb-2 text-lg font-semibold"
-                style={{ color: 'black', padding: '50px 0 20px', textAlign: 'center' }}
-            >
-                Estudios bíblicos
-            </h2>
-            <DevocionalCard
-                devocionales={estudios.data.map((d) => ({
-                    ...d,
-                    titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(d.contenido)),
-                    contenido: d.contenido,
-                    autor: d.autor || '',
-                }))}
-                todasLasCategorias={todasLasCategorias}
-                buildHref={(dev) => `/devocionales-editar/${dev.id}`}
-            />
-            <Pagination paginator={estudios} paramName="estudios_page" />
+            {/* Renderizado de Secciones */}
+            {[
+                { title: 'Ocultos', data: ocultos, param: 'ocultos_page', show: ocultos.data.length > 0 },
+                { title: 'Devocionales', data: devocionales, param: 'devocionales_page', show: true },
+                { title: 'Estudios bíblicos', data: estudios, param: 'estudios_page', show: true }
+            ].map((section) => section.show && (
+                <React.Fragment key={section.title}>
+                    <h2
+                        className="text-lg font-semibold text-black text-center"
+                        style={{ padding: '50px 0 20px' }}
+                    >
+                        {section.title}
+                    </h2>
+                    <DevocionalCard
+                        devocionales={procesarDevocionales(section.data.data)}
+                        todasLasCategorias={todasLasCategorias}
+                        buildHref={(dev) => `/devocionales-editar/${dev.id}`}
+                    />
+                    <Pagination paginator={section.data} paramName={section.param} />
+                </React.Fragment>
+            ))}
         </div>
     );
 }
