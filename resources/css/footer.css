@@ -1,0 +1,325 @@
+/* ─── Footer — Azul marino profundo ─────────────────────────────────────────── */
+/*    Paleta alineada con about.css y header.css                                  */
+
+.site-footer {
+    background: #2d465e;
+    font-family: 'Instrument Sans', sans-serif;
+    padding: 56px 40px 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Patrón de fondo sutil (igual que tc__pattern del about) */
+.site-footer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* ─── Top ────────────────────────────────────────────────────────────────────── */
+.site-footer__top {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1.8fr 1fr 1.2fr;
+    gap: 48px;
+    padding-bottom: 40px;
+}
+
+/* ─── Brand ──────────────────────────────────────────────────────────────────── */
+.site-footer__sitename {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.9rem;
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    margin-bottom: 6px;
+}
+
+.site-footer__sitename em {
+    color: #f75815;
+    font-style: italic;
+}
+
+.site-footer__tagline {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.35);
+    margin-bottom: 16px;
+}
+
+.site-footer__desc {
+    font-size: 13px;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 24px;
+    max-width: 320px;
+}
+
+/* Redes sociales */
+.site-footer__socials {
+    display: flex;
+    gap: 10px;
+}
+
+.site-footer__soc {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.45);
+    text-decoration: none;
+    transition: border-color 0.25s, color 0.25s, background 0.25s;
+}
+
+.site-footer__soc:hover {
+    border-color: #f75815;
+    color: #f75815;
+    background: rgba(247, 88, 21, 0.08);
+}
+
+/* ─── Nav col ────────────────────────────────────────────────────────────────── */
+.site-footer__col-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: rgba(247, 88, 21, 0.8);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.site-footer__col-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(247, 88, 21, 0.2);
+}
+
+.site-footer__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.site-footer__links a {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.25s, gap 0.25s;
+}
+
+.site-footer__links a::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(247, 88, 21, 0.4);
+    flex-shrink: 0;
+    transition: background 0.25s;
+}
+
+.site-footer__links a:hover {
+    color: #fff;
+    gap: 12px;
+}
+
+.site-footer__links a:hover::before {
+    background: #f75815;
+}
+
+/* ─── Versículo ──────────────────────────────────────────────────────────────── */
+.site-footer__verse-block {
+    position: relative;
+}
+
+.site-footer__verse-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    line-height: 0.7;
+    color: rgba(247, 88, 21, 0.12);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.site-footer__verse-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.65;
+    margin-bottom: 10px;
+}
+
+.site-footer__verse-ref {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(247, 88, 21, 0.7);
+    font-weight: 600;
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────────── */
+.site-footer__divider {
+    position: relative;
+    z-index: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    margin-bottom: 28px;
+}
+
+/* ─── Bottom ─────────────────────────────────────────────────────────────────── */
+.site-footer__bottom {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.site-footer__bottom-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.site-footer__copy {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+    margin: 0;
+}
+
+.site-footer__copy strong {
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
+}
+
+.site-footer__legal-text {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.2);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.site-footer__legal-link {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+
+.site-footer__legal-link:hover {
+    color: #f75815;
+}
+
+/* Cruz decorativa + credits */
+.site-footer__bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.site-footer__cross {
+    width: 22px;
+    height: 22px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.site-footer__cross-v {
+    position: absolute;
+    width: 2px;
+    height: 22px;
+    background: rgba(247, 88, 21, 0.35);
+    border-radius: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.site-footer__cross-h {
+    position: absolute;
+    width: 22px;
+    height: 2px;
+    background: rgba(247, 88, 21, 0.35);
+    border-radius: 1px;
+    top: 32%;
+}
+
+.site-footer__credits {
+    font-size: 11px;
+    color: rgba(247, 88, 21, 0.45);
+}
+
+.site-footer__credits a {
+    color: rgba(247, 88, 21, 0.65);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.site-footer__credits a:hover {
+    color: #f75815;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .site-footer {
+        padding: 48px 28px 28px;
+    }
+
+    .site-footer__top {
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+    }
+
+    .site-footer__brand {
+        grid-column: 1 / -1;
+    }
+
+    .site-footer__desc {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .site-footer {
+        padding: 40px 20px 24px;
+    }
+
+    .site-footer__top {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .site-footer__brand {
+        grid-column: 1;
+    }
+
+    .site-footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .site-footer__sitename {
+        font-size: 1.6rem;
+    }
+}
