@@ -211,9 +211,6 @@
     /* Scrollbar invisible */
     scrollbar-width: none;
     /* Patrón de fondo sutil */
-    background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 39px, rgba(255, 255, 255, 0.02) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 39px, rgba(255, 255, 255, 0.02) 40px);
 }
 
 .mob-drawer--open {
