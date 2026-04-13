@@ -1,57 +1,488 @@
-.navmenu li {
+/* ─── Header + Mobile Menu — Sacred Pulse ───────────────────────────────────
+   Paleta alineada con main-home.css / footer.css / devocionals.css           */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --hdr-orange: #f75815;
+    --hdr-blue: #2d465e;
+    --hdr-cream: #faf8f4;
+    --hdr-warm: #f5f0e8;
+    --hdr-border: #e8e2d8;
+    --hdr-muted: #8a7f72;
+    --hdr-text: #1c1917;
+    --hdr-serif: 'Cormorant Garamond', serif;
+    --hdr-sans: 'Instrument Sans', sans-serif;
+}
+
+/* ── Header base (heredado del tema, no tocar mucho) ── */
+.header {
+    background: var(--hdr-cream);
+    border-bottom: 1px solid var(--hdr-border);
+    font-family: var(--hdr-sans);
+}
+
+.header .top-row {
+    padding: 14px 0 10px;
+}
+
+.header .sitename {
+    font-family: var(--hdr-serif) !important;
+    font-size: 1.25rem !important;
+    font-weight: 400;
+    color: var(--hdr-blue);
+    letter-spacing: 0.02em;
     margin: 0;
 }
 
-.navmenu a {
-    color: #333;
+.header .sitename em,
+.header .logo span {
+    color: var(--hdr-orange);
+    font-style: italic;
+}
+
+.header .logo {
     text-decoration: none;
-    font-size: 1.2rem;
-    padding: 0.5rem 1rem;
+}
+
+/* Redes sociales desktop */
+.header .social-links a {
+    color: var(--hdr-blue);
+    padding: 0 8px;
+    font-size: 17px;
+    transition: color 0.25s;
+    display: inline-block;
+}
+
+.header .social-links a:hover {
+    color: var(--hdr-orange);
+}
+
+/* Nav desktop */
+.nav-wrap {
+    background: rgba(45, 70, 94, 0.06);
+    border-top: 1px solid var(--hdr-border);
+}
+
+.navmenu ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2px;
+}
+
+.navmenu a {
     display: block;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    color: var(--hdr-text);
+    text-decoration: none;
+    font-family: var(--hdr-sans);
+    position: relative;
+    transition: color 0.2s;
 }
 
+.navmenu a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: var(--hdr-orange);
+    transition: width 0.25s;
+    border-radius: 1px;
+}
+
+.navmenu a:hover,
 .navmenu a.active {
-    font-weight: bold;
+    color: var(--hdr-orange);
 }
 
-@media (max-width: 1200px) {
-    .navmenu {
-        position: fixed;
-        top: 0;
-        left: -100vw;
-        width: 70vw;
-        height: 100vh;
-        background: #fff;
-        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-        transition: left 0.3s;
-        flex-direction: column;
-        align-items: flex-start;
-        padding-top: 4rem;
-        z-index: 999;
+.navmenu a.active::after,
+.navmenu a:hover::after {
+    width: 60%;
+}
+
+/* ── Botón hamburguesa ─────────────────────────────────────────────────────── */
+.hdr-burger {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 1.5px solid var(--hdr-border);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: border-color 0.25s, background 0.25s;
+    flex-shrink: 0;
+}
+
+.hdr-burger:hover {
+    border-color: var(--hdr-orange);
+    background: rgba(247, 88, 21, 0.06);
+}
+
+/* Icono de 3 barras → X animado */
+.hdr-burger__bar {
+    position: relative;
+    width: 18px;
+    height: 2px;
+    background: var(--hdr-blue);
+    border-radius: 2px;
+    transition: background 0.25s;
+}
+
+.hdr-burger__bar::before,
+.hdr-burger__bar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background: var(--hdr-blue);
+    border-radius: 2px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, top 0.3s;
+}
+
+.hdr-burger__bar::before {
+    top: -5px;
+}
+
+.hdr-burger__bar::after {
+    top: 5px;
+}
+
+/* Estado abierto → X */
+.hdr-burger__bar--open {
+    background: transparent;
+}
+
+.hdr-burger__bar--open::before {
+    top: 0;
+    transform: rotate(45deg);
+    background: var(--hdr-orange);
+}
+
+.hdr-burger__bar--open::after {
+    top: 0;
+    transform: rotate(-45deg);
+    background: var(--hdr-orange);
+}
+
+/* ── Overlay ───────────────────────────────────────────────────────────────── */
+.mob-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    background: rgba(15, 28, 40, 0);
+    pointer-events: none;
+    backdrop-filter: blur(0px);
+    transition: background 0.35s ease, backdrop-filter 0.35s ease;
+}
+
+.mob-overlay--visible {
+    background: rgba(15, 28, 40, 0.6);
+    pointer-events: auto;
+    backdrop-filter: blur(3px);
+}
+
+/* ── Drawer lateral ────────────────────────────────────────────────────────── */
+.mob-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1050;
+    width: min(320px, 85vw);
+    background: var(--hdr-blue);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Scrollbar invisible */
+    scrollbar-width: none;
+    /* Patrón de fondo sutil */
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 39px, rgba(255, 255, 255, 0.02) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 39px, rgba(255, 255, 255, 0.02) 40px);
+}
+
+.mob-drawer--open {
+    transform: translateX(0);
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.35);
+}
+
+/* Drawer header */
+.mob-drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.mob-drawer__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mob-drawer__brand-line {
+    width: 3px;
+    height: 24px;
+    background: var(--hdr-orange);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.mob-drawer__brand-name {
+    font-family: var(--hdr-serif);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.mob-drawer__brand-name em {
+    color: var(--hdr-orange);
+    font-style: italic;
+}
+
+.mob-drawer__close {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    flex-shrink: 0;
+}
+
+.mob-drawer__close:hover {
+    border-color: var(--hdr-orange);
+    color: var(--hdr-orange);
+    background: rgba(247, 88, 21, 0.08);
+}
+
+/* Nav links */
+.mob-drawer__nav {
+    flex: 1;
+    padding: 12px 0;
+}
+
+.mob-drawer__nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Animación stagger de entrada */
+.mob-drawer__item {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.mob-drawer__item--in {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.mob-drawer__link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 22px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: var(--hdr-sans);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    position: relative;
+    transition: color 0.2s, background 0.2s, padding-left 0.2s;
+    border-left: 2px solid transparent;
+}
+
+.mob-drawer__link:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+    padding-left: 26px;
+}
+
+.mob-drawer__link--active {
+    color: rgba(247, 88, 21, 0.95) !important;
+    background: rgba(247, 88, 21, 0.12) !important;
+    border-left-color: var(--hdr-orange) !important;
+    padding-left: 26px !important;
+    font-weight: 600;
+}
+
+.mob-drawer__link-icon {
+    font-size: 15px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    opacity: 0.65;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ícono activo — más visible */
+.mob-drawer__link--active .mob-drawer__link-icon {
+    opacity: 1;
+    color: var(--hdr-orange);
+}
+
+.mob-drawer__link-label {
+    flex: 1;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+}
+
+.mob-drawer__link--active .mob-drawer__link-label {
+    letter-spacing: 1.8px;
+}
+
+/* Dot activo */
+.mob-drawer__link-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--hdr-orange);
+    flex-shrink: 0;
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
     }
-    .navmenu.open {
-        left: 0;
+
+    50% {
+        opacity: 0.6;
+        transform: scale(0.8);
     }
-    .navmenu ul {
-        display: block;
-        flex-direction: column;
-        gap: 1rem;
+}
+
+/* Divider */
+.mob-drawer__divider {
+    height: 1px;
+    margin: 4px 20px 16px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    flex-shrink: 0;
+}
+
+/* Redes sociales */
+.mob-drawer__socials {
+    padding: 0 22px 16px;
+    flex-shrink: 0;
+}
+
+.mob-drawer__socials-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(247, 88, 21, 0.6);
+    font-family: var(--hdr-sans);
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mob-drawer__socials-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(247, 88, 21, 0.15);
+}
+
+.mob-drawer__socials-row {
+    display: flex;
+    gap: 10px;
+}
+
+.mob-drawer__soc {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 16px;
+    transition: border-color 0.25s, color 0.25s, background 0.25s, transform 0.25s;
+}
+
+.mob-drawer__soc:hover {
+    border-color: var(--hdr-orange);
+    color: var(--hdr-orange);
+    background: rgba(247, 88, 21, 0.08);
+    transform: translateY(-2px);
+}
+
+/* Versículo */
+.mob-drawer__verse {
+    padding: 16px 22px 24px;
+    font-family: var(--hdr-serif);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.2);
+    line-height: 1.6;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.mob-drawer__verse span {
+    display: block;
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: rgba(247, 88, 21, 0.4);
+    margin-top: 6px;
+    text-transform: uppercase;
+    font-family: var(--hdr-sans);
+}
+
+/* ── Responsive desktop: ocultar drawer ─────────────────────────────────── */
+@media (min-width: 1200px) {
+
+    .mob-drawer,
+    .mob-overlay,
+    .hdr-burger {
+        display: none !important;
     }
-    .navmenu li {
-        width: 100%;
-    }
-    .navmenu a {
-        width: 100%;
-        padding: 1rem 2rem;
-        font-size: 1.5rem;
-    }
-    .navmenu a:hover {
-        background: rgba(0, 0, 0, 0.1);
-    }
-    .mobile-nav-toggle {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
+}
+
+/* ── Mobile: ocultar nav desktop ────────────────────────────────────────── */
+@media (max-width: 1199px) {
+    .nav-wrap {
+        display: none !important;
     }
 }
