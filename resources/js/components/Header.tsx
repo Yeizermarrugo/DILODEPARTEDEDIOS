@@ -8,7 +8,7 @@ const navLinks = [
     { href: '/devocionales', label: 'Devocionales', icon: 'bi-journal-bookmark' },
     { href: '/series', label: 'Series', icon: 'bi-collection-play' },
     { href: '/estudios', label: 'Estudios bíblicos', icon: 'bi-book' },
-    { href: '/libreria', label: 'Librería', icon: 'bi-archive' },
+    { href: '/recursos', label: 'Recursos', icon: 'bi-archive' },
     { href: '/podcast', label: 'Podcast y más', icon: 'bi-mic' },
     { href: '/obras', label: 'Obras', icon: 'bi-heart' },
 ];

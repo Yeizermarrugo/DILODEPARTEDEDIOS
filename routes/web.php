@@ -121,7 +121,7 @@ Route::get('/api/tts', [TTSController::class, 'voiceRss']);
 Route::get('/api/tts/voices', [TTSController::class, 'voices']);
 
 
-Route::get('/libreria', function () {
+Route::get('/recursos', function () {
     return Inertia::render('Libreria');
 });
 
