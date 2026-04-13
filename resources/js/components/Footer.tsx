@@ -4,7 +4,7 @@ const navLinks = [
     { href: '/devocionales', label: 'Devocionales' },
     { href: '/series', label: 'Series' },
     { href: '/estudios', label: 'Estudios bíblicos' },
-    { href: '/libreria', label: 'Librería' },
+    { href: '/recursos', label: 'Recursos' },
     { href: '/podcast', label: 'Podcast y más' },
     { href: '/obras', label: 'Obras' },
 ];
