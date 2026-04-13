@@ -1,16 +1,31 @@
 import { usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../../css/header.css';
 
 const navLinks = [
-    { href: '/', label: 'Inicio' },
-    { href: '/about', label: 'Quiénes somos' },
-    { href: '/devocionales', label: 'Devocionales' },
-    { href: '/series', label: 'Series' },
-    { href: '/estudios', label: 'Estudios bíblicos' },
-    { href: '/libreria', label: 'Librería' },
-    { href: '/podcast', label: 'Podcast y mas' },
-    { href: '/obras', label: 'Obras' },
+    { href: '/', label: 'Inicio', icon: 'bi-house' },
+    { href: '/about', label: '¿Quiénes somos?', icon: 'bi-people' },
+    { href: '/devocionales', label: 'Devocionales', icon: 'bi-journal-bookmark' },
+    { href: '/series', label: 'Series', icon: 'bi-collection-play' },
+    { href: '/estudios', label: 'Estudios bíblicos', icon: 'bi-book' },
+    { href: '/libreria', label: 'Librería', icon: 'bi-archive' },
+    { href: '/podcast', label: 'Podcast y más', icon: 'bi-mic' },
+    { href: '/obras', label: 'Obras', icon: 'bi-heart' },
+];
+
+const socialLinks = [
+    {
+        href: 'https://www.facebook.com/share/1MD6hDKdce/?mibextid=wwXIfr',
+        icon: 'bi-facebook', label: 'Facebook',
+    },
+    {
+        href: 'https://www.youtube.com/@casadevalientes7',
+        icon: 'bi-youtube', label: 'YouTube',
+    },
+    {
+        href: 'https://www.instagram.com/dilodepartededios?igsh=ODU0dHc1bnVhNGd2',
+        icon: 'bi-instagram', label: 'Instagram',
+    },
 ];
 
 const Header = () => {
@@ -22,77 +37,153 @@ const Header = () => {
         return url.startsWith(href.replace('.html', ''));
     };
 
+    // Bloquear scroll del body cuando el menú está abierto
+    useEffect(() => {
+        document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+    }, [mobileMenuOpen]);
+
+    const close = () => setMobileMenuOpen(false);
+
     return (
-        <header id="header" className="header position-relative">
-            <div className="container-fluid container-xl position-relative">
-                <div className="top-row d-flex align-items-center justify-content-between">
-                    <a href="/" className="logo d-flex align-items-end">
-                        <h1 className="sitename" style={{ fontFamily: 'serif', fontSize: '20px' }}>
-                            Dilo de parte de Dios
-                        </h1>
-                        <span></span>
-                    </a>
-                    <div className="d-flex align-items-center">
-                        <div className="social-links">
-                            <a
-                                href="https://www.facebook.com/share/1MD6hDKdce/?mibextid=wwXIfr"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="facebook"
+        <>
+            <header id="header" className="header position-relative">
+                <div className="container-fluid container-xl position-relative">
+                    <div className="top-row d-flex align-items-center justify-content-between">
+                        <a href="/" className="logo d-flex align-items-end">
+                            <h1 className="sitename" style={{ fontFamily: 'serif', fontSize: '20px' }}>
+                                Dilo de parte de Dios
+                            </h1>
+                            <span></span>
+                        </a>
+                        <div className="d-flex align-items-center gap-3">
+                            {/* Redes sociales — solo desktop */}
+                            <div className="social-links d-none d-xl-flex">
+                                {socialLinks.map(s => (
+                                    <a key={s.href} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
+                                        <i className={`bi ${s.icon}`}></i>
+                                    </a>
+                                ))}
+                            </div>
+                            {/* Botón hamburguesa — solo mobile */}
+                            <button
+                                className="hdr-burger d-xl-none"
+                                onClick={() => setMobileMenuOpen(o => !o)}
+                                aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                                aria-expanded={mobileMenuOpen}
                             >
-                                <i className="bi bi-facebook"></i>
-                            </a>
-                            <a href="https://www.youtube.com/@casadevalientes7" className="twitter" target="_blank">
-                                <i className="bi bi-youtube"></i>
-                            </a>
-                            <a
-                                href="https://www.instagram.com/dilodepartededios?igsh=ODU0dHc1bnVhNGd2"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="instagram"
-                            >
-                                <i className="bi bi-instagram"></i>
-                            </a>
-                        </div>
-                        <form className="search-form ms-4">
-                            <input type="text" placeholder="Search..." className="form-control" />
-                            <button type="submit" className="btn">
-                                <i className="bi bi-search"></i>
+                                <span className={`hdr-burger__bar ${mobileMenuOpen ? 'hdr-burger__bar--open' : ''}`} />
                             </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className="nav-wrap">
-                <div className="d-flex justify-content-center position-relative container">
-                    <nav id="navmenu" className={`navmenu ${mobileMenuOpen ? 'open' : ''}`}>
-                        <ul style={{ display: mobileMenuOpen ? 'block' : '' }}>
-                            {navLinks.map((link) => (
-                                <li key={link.href}>
-                                    <a href={link.href} className={isActive(link.href) ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>
-                                        {link.label}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                        <button
-                            className="mobile-nav-toggle d-xl-none"
-                            onClick={() => setMobileMenuOpen((open) => !open)}
-                            aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                fontSize: '2rem',
-                                color: '#333',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            <i className={`bi ${mobileMenuOpen ? 'bi-x' : 'bi-list'}`}></i>
-                        </button>
-                    </nav>
+
+                {/* Nav desktop */}
+                <div className="nav-wrap d-none d-xl-flex">
+                    <div className="d-flex justify-content-center position-relative container">
+                        <nav id="navmenu" className="navmenu">
+                            <ul>
+                                {navLinks.map(link => (
+                                    <li key={link.href}>
+                                        <a
+                                            href={link.href}
+                                            className={isActive(link.href) ? 'active' : ''}
+                                        >
+                                            {link.label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </header>
+
+            {/* ── MOBILE MENU ── */}
+            {/* Overlay */}
+            <div
+                className={`mob-overlay ${mobileMenuOpen ? 'mob-overlay--visible' : ''}`}
+                onClick={close}
+                aria-hidden="true"
+            />
+
+            {/* Drawer */}
+            <div
+                className={`mob-drawer ${mobileMenuOpen ? 'mob-drawer--open' : ''}`}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menú de navegación"
+            >
+                {/* Drawer header */}
+                <div className="mob-drawer__head">
+                    <div className="mob-drawer__brand">
+                        <span className="mob-drawer__brand-line" />
+                        <span className="mob-drawer__brand-name">
+                            Dilo de <em>Parte</em> de Dios
+                        </span>
+                    </div>
+                    <button className="mob-drawer__close" onClick={close} aria-label="Cerrar menú">
+                        <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Links */}
+                <nav className="mob-drawer__nav">
+                    <ul>
+                        {navLinks.map((link, i) => (
+                            <li
+                                key={link.href}
+                                style={{ transitionDelay: mobileMenuOpen ? `${i * 45}ms` : '0ms' }}
+                                className={`mob-drawer__item ${mobileMenuOpen ? 'mob-drawer__item--in' : ''}`}
+                            >
+                                <a
+                                    href={link.href}
+                                    className={`mob-drawer__link ${isActive(link.href) ? 'mob-drawer__link--active' : ''}`}
+                                    onClick={close}
+                                >
+                                    <i className={`bi ${link.icon} mob-drawer__link-icon`} />
+                                    <span className="mob-drawer__link-label">{link.label}</span>
+                                    {isActive(link.href) && (
+                                        <span className="mob-drawer__link-dot" />
+                                    )}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+
+                {/* Divider */}
+                <div className="mob-drawer__divider" />
+
+                {/* Redes sociales */}
+                <div className="mob-drawer__socials">
+                    <p className="mob-drawer__socials-label">Síguenos</p>
+                    <div className="mob-drawer__socials-row">
+                        {socialLinks.map(s => (
+                            <a
+                                key={s.href}
+                                href={s.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mob-drawer__soc"
+                                aria-label={s.label}
+                                onClick={close}
+                            >
+                                <i className={`bi ${s.icon}`} />
+                            </a>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Versículo */}
+                <div className="mob-drawer__verse">
+                    "Lámpara es a mis pies tu palabra"
+                    <span>Sal 119:105</span>
                 </div>
             </div>
-        </header>
+        </>
     );
 };
 
