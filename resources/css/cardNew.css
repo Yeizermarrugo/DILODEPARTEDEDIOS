@@ -1,20 +1,24 @@
 .cards-container {
     display: flex;
-    flex-wrap: wrap;       /* Permite que las cards bajen a la siguiente línea */
-    justify-content: center; /* Centra las tarjetas si sobra espacio */
-    gap: 20px;            /* Espacio entre tarjetas */
+    flex-wrap: wrap;
+    /* Permite que las cards bajen a la siguiente línea */
+    justify-content: center;
+    /* Centra las tarjetas si sobra espacio */
+    gap: 20px;
+    /* Espacio entre tarjetas */
     width: 100%;
     margin: 0 auto;
 }
 
-.cards-container a{
-    text-decoration: none; /* Elimina el subrayado de los enlaces */
+.cards-container a {
+    text-decoration: none;
+    /* Elimina el subrayado de los enlaces */
     justify-content: flex-start !important;
 }
 
 /* Contenedor que imita a tus links de MUI */
 .card-wrapper-link {
-    width: 270px; 
+    width: 270px;
     height: 230px;
     display: flex;
     perspective: 1000px;
@@ -34,16 +38,18 @@
     height: 100%;
     position: relative;
     overflow: hidden;
-    border-radius: 8px; /* Para que combine con MUI */
+    border-radius: 8px;
+    /* Para que combine con MUI */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.575);
     background-size: cover;
     background-position: center;
 }
+
 .card-custom .title {
     margin: 0;
     padding: 0;
     /* Altura fija inicial para mantener la alineación */
-    height: 34px; 
+    height: 34px;
     overflow: hidden;
     line-height: 1.2;
     /* Suavizamos la expansión del título */
@@ -66,23 +72,23 @@
     font-size: 14px;
     font-weight: 700;
     color: #fff;
-    
+
     /* 1. Forzar renderizado limpio (Esto suele arreglar la Ñ) */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
 
     /* 2. Dar espacio a los acentos/tildes */
-    line-height: 1.4; 
+    line-height: 1.4;
 
     /* 3. El motor de recorte */
     display: -webkit-box;
-    -webkit-line-clamp: 2; 
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    
+
     /* 4. Evitar que el navegador invente la negrita si no existe */
-    font-synthesis: none; 
+    font-synthesis: none;
 }
 
 /* EFECTO HOVER: Mostramos el título completo */
@@ -94,9 +100,9 @@
 
 .card-custom .wrapper:hover .title span {
     /* Quitamos el límite de líneas y los puntos suspensivos (...) */
-    display: block; 
+    display: block;
     overflow: visible;
-    -webkit-line-clamp: initial; 
+    -webkit-line-clamp: initial;
 }
 
 /* Ajuste en el degradado para que al crecer el texto no se pierda la lectura */
@@ -104,7 +110,7 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 80%, transparent 100%);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 80%, transparent 100%);
     color: white;
     max-height: 100%;
     /* sin transform, sin transition */
@@ -118,7 +124,7 @@
     padding: 10px;
     padding-right: 45px;
     position: relative;
-    min-height: unset; 
+    min-height: unset;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -149,11 +155,12 @@
     color: white;
 }
 
-.card-custom .header {
+.card-custom .card-header-row {
     padding: 10px;
     display: flex;
     justify-content: space-between;
 }
+
 .card-custom .menu-content {
     float: right;
     list-style: none;
@@ -169,28 +176,33 @@
 
 .card-custom .menu-content i {
     color: white;
-    font-size: 16px; /* Ajustado para el tamaño de 170px */
+    font-size: 16px;
+    /* Ajustado para el tamaño de 170px */
 }
 
 /* Estilo para los números (contadores) */
 .card-custom .menu-content span {
     position: absolute;
     left: 50%;
-    top: -12px; /* Posicionado justo encima del icono */
+    top: -12px;
+    /* Posicionado justo encima del icono */
     font-size: 10px;
     font-weight: 700;
     font-family: 'Open Sans';
-    transform: translate(-50%, 0); /* Posición inicial sobre el icono */
+    transform: translate(-50%, 0);
+    /* Posición inicial sobre el icono */
     color: white;
-    opacity: 1; /* Oculto por defecto */
-    transition: all 0.3s ease; /* Suaviza la aparición */
+    opacity: 1;
+    /* Oculto por defecto */
+    transition: all 0.3s ease;
+    /* Suaviza la aparición */
 }
 
 /* EFECTO HOVER: Los números suben y aparecen */
 /* .card-custom .wrapper:hover .menu-content span {
     transform: translate(-50%, -12px); /* Sube 12px sobre el icono */
-    /* opacity: 1;  */
-    /* Se hace visible */
+/* opacity: 1;  */
+/* Se hace visible */
 /* }  */
 
 /* Asegúrate de que los iconos no se muevan, solo los números */
@@ -217,7 +229,8 @@
     position: absolute;
     bottom: 10px;
     right: 6px;
-    z-index: 10;          /* por encima del .data que se desliza */
+    z-index: 10;
+    /* por encima del .data que se desliza */
 }
 
 /* --- TABLETS Y PANTALLAS MEDIANAS (700px a 992px) --- */
@@ -236,6 +249,7 @@
         width: 150px;
         height: 250px;
     }
+
     .card-custom .title {
         font-size: 13px;
     }
@@ -243,10 +257,11 @@
 
 @media (max-width: 800px) {
     .cards-container {
-        gap: 12px; /* Reducimos el espacio entre ellas para ganar aire */
+        gap: 12px;
+        /* Reducimos el espacio entre ellas para ganar aire */
         padding: 0 10px;
     }
-    
+
     /* .card-wrapper-link {
         width: 145px; 
         height: 240px;
@@ -259,13 +274,13 @@
 
 /* --- MÓVILES (Menos de 500px) --- */
 @media (max-width: 500px) {
-    .card-wrapper-link { 
+    .card-wrapper-link {
         /* En móviles pequeños, ajustamos a un tamaño que permita 2 por fila */
-        width: calc(50% - 15px); 
+        width: calc(50% - 15px);
         min-width: 125px;
-        height: 220px; 
+        height: 220px;
     }
-    
+
     .card-custom .menu-content i {
         font-size: 13px;
     }
@@ -277,12 +292,15 @@
    ============================================================ */
 
 @media (min-width: 576px) and (max-width: 768px) {
+
     /* 1. Limpiamos el contenedor del template antiguo */
     .cards-container {
         display: flex !important;
         flex-wrap: wrap !important;
-        justify-content: center !important; /* Centra el grupo */
-        gap: 12px !important;    /* Espacio entre cards */
+        justify-content: center !important;
+        /* Centra el grupo */
+        gap: 12px !important;
+        /* Espacio entre cards */
         width: 100% !important;
         max-width: 100% !important;
         padding: 0 10px !important;
@@ -291,15 +309,17 @@
 
     /* 2. Forzamos a que las etiquetas <a> no ocupen ancho fijo de 160px */
     .cards-container a {
-        width: calc(33.33% - 12px) !important; /* Forzar 3 columnas reales */
+        width: calc(33.33% - 12px) !important;
+        /* Forzar 3 columnas reales */
         min-width: 140px !important;
         height: auto !important;
-        display: block !important; /* Evita comportamientos flex extraños del template */
+        display: block !important;
+        /* Evita comportamientos flex extraños del template */
     }
 
     /* 3. Ajustamos el wrapper interno para que use el 100% del <a> */
     .card-wrapper-link {
-        width: 100% !important; 
+        width: 100% !important;
         height: 270px !important;
     }
 
@@ -336,9 +356,10 @@
 /* --- MÓVILES PEQUEÑOS (Menos de 400px) --- */
 /* Aquí caben 2 tarjetas cómodamente */
 @media (max-width: 400px) {
-    .card-wrapper-link { 
-        width: 140px; /* Un poquito más grandes para que se lean bien */
-        height: 240px; 
+    .card-wrapper-link {
+        width: 140px;
+        /* Un poquito más grandes para que se lean bien */
+        height: 240px;
     }
 }
 
