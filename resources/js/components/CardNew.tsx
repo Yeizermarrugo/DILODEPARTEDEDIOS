@@ -71,7 +71,7 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                     }}
                 >
                     {/* ── HEADER: categoría + vistas ── */}
-                    <div className="header">
+                    <div className="card-header-row">
                         <div className="date">
                             <span
                                 className="category-badge"
