@@ -753,8 +753,8 @@
 /* Elimina el contenido actual de .about-tc__avatar y pon esto: */
 
 .about-tc__avatar {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     flex-shrink: 0;
     border: 3px solid rgba(247, 88, 21, 0.5);
@@ -791,7 +791,7 @@
 }
 
 .about-tc__top--diana .about-tc__avatar-img {
-    object-position: center 20%;
+    object-position: center 30%;
 }
 
 .about-tc__avatar-initials {
