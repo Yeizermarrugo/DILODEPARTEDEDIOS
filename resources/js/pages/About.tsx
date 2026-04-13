@@ -367,7 +367,7 @@ const teamMembers: TeamMember[] = [
     {
         id: 'yeizer',
         initials: 'YM',
-        imagen: 'assets/img/person/Yeizer.png',
+        imagen: 'assets/img/person/Yeizer2.png',
         name: 'Yeizer Marrugo',
         roleTag: 'Cofundador · CTO',
         roleFull: 'Director de Tecnología (CTO) & Cofundador',
