@@ -13,7 +13,6 @@ const PaginaLegal = () => {
 
                 {/* ── Hero ── */}
                 <section className="legal-hero">
-                    <div className="legal-hero__num" aria-hidden>§</div>
                     <div className="legal-hero__pill">
                         <span className="legal-hero__pill-dot" />
                         Aviso legal
