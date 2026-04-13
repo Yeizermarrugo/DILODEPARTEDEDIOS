@@ -1,90 +1,532 @@
-/* Contenedor tipo documento */
-.legal-container {
-    background: #ffffff;
-    padding: 50px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Variables (reutiliza las mismas de about.css) ── */
+:root {
+    --legal-orange: #f75815;
+    --legal-blue: #2d465e;
+    --legal-cream: #faf8f4;
+    --legal-warm: #f5f0e8;
+    --legal-border: #e8e2d8;
+    --legal-muted: #8a7f72;
+    --legal-text: #1c1917;
+    --legal-serif: 'Cormorant Garamond', serif;
+    --legal-sans: 'Instrument Sans', sans-serif;
+}
+
+/* ── Root ── */
+.legal-root {
+    background: var(--legal-cream);
+}
+
+/* ════════════════════════════
+   HERO
+════════════════════════════ */
+.legal-hero {
+    background: var(--legal-blue);
+    padding: 88px 24px 72px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.legal-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-size: 48px 48px;
+}
+
+.legal-hero__num {
+    position: absolute;
+    bottom: -24px;
+    right: 24px;
+    font-family: var(--legal-serif);
+    font-size: 14rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, .025);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+}
+
+.legal-hero__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(247, 88, 21, .12);
+    border: 1px solid rgba(247, 88, 21, .25);
+    border-radius: 100px;
+    padding: 6px 18px;
+    margin-bottom: 32px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(247, 88, 21, .9);
+    font-family: var(--legal-sans);
+    position: relative;
+    z-index: 1;
+}
+
+.legal-hero__pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--legal-orange);
+    display: inline-block;
+    animation: legalBreathe 2.2s ease-in-out infinite;
+}
+
+@keyframes legalBreathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.6);
+        opacity: .4;
+    }
+}
+
+.legal-hero__title {
+    font-family: var(--legal-serif);
+    font-size: clamp(3rem, 9vw, 7rem);
+    line-height: .92;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0;
+}
+
+.legal-hero__t1 {
+    display: block;
+    color: rgba(255, 255, 255, .88);
+    font-weight: 300;
+}
+
+.legal-hero__t2 {
+    display: block;
+    color: var(--legal-orange);
+    font-style: italic;
+    font-weight: 600;
+}
+
+.legal-hero__sub {
+    margin: 24px auto 0;
+    max-width: 480px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, .38);
+    line-height: 1.7;
+    font-family: var(--legal-sans);
+    position: relative;
+    z-index: 1;
+}
+
+.legal-hero__sub strong {
+    color: rgba(255, 255, 255, .6);
+    font-weight: 500;
+}
+
+.legal-hero__nav {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 32px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+}
+
+.legal-hero__navbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--legal-sans);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .05);
+    color: rgba(255, 255, 255, .65);
+    transition: background .2s, border-color .2s, color .2s;
+}
+
+.legal-hero__navbtn:hover {
+    background: rgba(247, 88, 21, .15);
+    border-color: rgba(247, 88, 21, .45);
+    color: #fff;
+}
+
+/* ════════════════════════════
+   MAIN CONTENT
+════════════════════════════ */
+.legal-main {
     max-width: 900px;
     margin: 0 auto;
-    border: 1px solid #eaeaea;
+    padding: 80px 24px 88px;
 }
 
-/* Títulos */
-.legal-container h2 {
-    color: #2c3e50;
-    font-weight: 700;
-    font-size: 1.8rem;
-}
-
-.legal-container h4 {
-    font-size: 1.1rem;
+/* Eyebrow */
+.legal-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     font-weight: 600;
-    margin-bottom: 15px;
+    color: var(--legal-orange);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--legal-sans);
 }
 
-/* Listas */
-.legal-container ul {
-    list-style: none;
-    padding-left: 0;
+.legal-eyebrow__line {
+    display: inline-block;
+    width: 22px;
+    height: 1px;
+    background: var(--legal-orange);
+    opacity: .35;
 }
 
-.legal-container ul li {
-    margin-bottom: 10px;
-    padding-left: 20px;
+/* Sección */
+.legal-section {
+    margin-bottom: 0;
+}
+
+.legal-section__head {
+    margin-bottom: 36px;
+}
+
+.legal-section__title {
+    font-family: var(--legal-serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--legal-text);
+    line-height: 1.1;
+    margin-bottom: 14px;
+}
+
+.legal-section__lead {
+    font-size: 15px;
+    color: var(--legal-muted);
+    line-height: 1.8;
+    font-family: var(--legal-sans);
+    max-width: 640px;
+}
+
+.legal-section__lead strong {
+    color: var(--legal-blue);
+    font-weight: 600;
+}
+
+/* Divider */
+.legal-divider {
+    border: none;
+    border-top: 1px solid var(--legal-border);
+    margin: 72px 0;
+}
+
+/* ════════════════════════════
+   TARJETAS PERMISO
+════════════════════════════ */
+.legal-perm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.legal-perm-card {
+    border-radius: 18px;
+    padding: 28px 24px;
+    border: 1px solid var(--legal-border);
+    background: #fff;
     position: relative;
-    color: #444;
+    overflow: hidden;
+    transition:
+        border-color .3s,
+        transform .35s cubic-bezier(.34, 1.56, .64, 1),
+        box-shadow .3s;
 }
 
-.legal-container ul li::before {
-    content: "•";
+.legal-perm-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, .07);
+}
+
+.legal-perm-card--allow:hover {
+    border-color: rgba(99, 153, 34, .35);
+}
+
+.legal-perm-card--deny:hover {
+    border-color: rgba(226, 75, 74, .3);
+}
+
+.legal-perm-card__accent {
     position: absolute;
+    top: 0;
     left: 0;
-    color: #77d7b9; /* El color de tu marca */
-    font-weight: bold;
+    right: 0;
+    height: 3px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .5s .1s;
 }
 
-/* Caja de Privacidad */
-.privacy-box {
-    background-color: #fcfcfc;
-    border-left: 4px solid #77d7b9;
-    padding: 25px;
-    border-radius: 0 8px 8px 0;
+.legal-perm-card:hover .legal-perm-card__accent {
+    transform: scaleX(1);
 }
 
-.privacy-box h5 {
-    color: #333;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-top: 15px;
+.legal-perm-card--allow .legal-perm-card__accent {
+    background: linear-gradient(90deg, #639922, transparent);
 }
 
-.privacy-box p {
-    font-size: 0.95rem;
-    color: #666;
+.legal-perm-card--deny .legal-perm-card__accent {
+    background: linear-gradient(90deg, #A32D2D, transparent);
 }
 
-/* Forzamos que el área principal sea clara */
-.centered-main {
-    background-color: #f4f7f6 !important; /* Un gris/celeste muy suave */
+.legal-perm-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.legal-perm-card--allow .legal-perm-card__icon {
+    background: rgba(99, 153, 34, .09);
+    border: 1px solid rgba(99, 153, 34, .2);
+}
+
+.legal-perm-card--deny .legal-perm-card__icon {
+    background: rgba(226, 75, 74, .07);
+    border: 1px solid rgba(226, 75, 74, .18);
+}
+
+.legal-perm-card__label {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: var(--legal-sans);
+    margin-bottom: 14px;
+}
+
+.legal-perm-card--allow .legal-perm-card__label {
+    color: #3B6D11;
+}
+
+.legal-perm-card--deny .legal-perm-card__label {
+    color: #A32D2D;
+}
+
+.legal-perm-card__list {
+    list-style: none;
     display: flex;
     flex-direction: column;
-    min-height: 80vh; /* Asegura que cubra la pantalla */
+    gap: 10px;
 }
 
-
-/* Si el body tiene fondo negro por defecto en tu proyecto */
-.index-page {
-    background-color: #f4f7f6;
+.legal-perm-card__list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--legal-muted);
+    line-height: 1.6;
+    font-family: var(--legal-sans);
 }
 
-/* Responsividad */
-@media (max-width: 768px) {
-    .legal-container {
-        padding: 25px;
-        margin: 10px;
+.legal-perm-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+
+.legal-perm-card--allow .legal-perm-dot {
+    background: #639922;
+}
+
+.legal-perm-card--deny .legal-perm-dot {
+    background: #E24B4A;
+}
+
+/* ════════════════════════════
+   ÍTEMS PRIVACIDAD
+════════════════════════════ */
+.legal-priv-items {
+    display: flex;
+    flex-direction: column;
+}
+
+.legal-priv-item {
+    display: flex;
+    gap: 20px;
+    padding: 30px 0;
+    border-bottom: 1px solid var(--legal-border);
+    transition: background .2s;
+}
+
+.legal-priv-item:last-child {
+    border-bottom: none;
+}
+
+.legal-priv-item__num-wrap {
+    flex-shrink: 0;
+    width: 52px;
+    padding-top: 2px;
+}
+
+.legal-priv-item__num {
+    font-family: var(--legal-serif);
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(247, 88, 21, .1);
+    transition: color .4s;
+}
+
+.legal-priv-item:hover .legal-priv-item__num {
+    color: var(--legal-orange);
+}
+
+.legal-priv-item__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(247, 88, 21, .07);
+    border: 1px solid rgba(247, 88, 21, .14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3px;
+    transition: background .3s, border-color .3s;
+}
+
+.legal-priv-item:hover .legal-priv-item__icon {
+    background: rgba(247, 88, 21, .13);
+    border-color: rgba(247, 88, 21, .3);
+}
+
+.legal-priv-item__title {
+    font-family: var(--legal-serif);
+    font-size: 1.4rem;
+    color: var(--legal-text);
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.legal-priv-item__text {
+    font-size: 14px;
+    color: var(--legal-muted);
+    line-height: 1.8;
+    font-family: var(--legal-sans);
+}
+
+/* ════════════════════════════
+   FOOTER LEGAL
+════════════════════════════ */
+.legal-footer {
+    background: var(--legal-blue);
+    padding: 56px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, .05);
+}
+
+.legal-footer__inner {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.legal-footer__cross {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    margin: 0 auto 24px;
+}
+
+.legal-footer__cross-v {
+    position: absolute;
+    width: 2px;
+    height: 40px;
+    background: var(--legal-orange);
+    border-radius: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.legal-footer__cross-h {
+    position: absolute;
+    width: 40px;
+    height: 2px;
+    background: var(--legal-orange);
+    border-radius: 2px;
+    top: 32%;
+}
+
+.legal-footer__name {
+    font-family: var(--legal-serif);
+    font-size: 1.7rem;
+    color: rgba(255, 255, 255, .75);
+    font-weight: 300;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.legal-footer__name em {
+    color: var(--legal-orange);
+    font-style: italic;
+    font-weight: 600;
+}
+
+.legal-footer__copy {
+    font-size: 13px;
+    color: rgba(255, 255, 255, .28);
+    font-family: var(--legal-sans);
+    line-height: 1.6;
+}
+
+.legal-footer__date {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(247, 88, 21, .5);
+    font-family: var(--legal-sans);
+}
+
+/* ════════════════════════════
+   RESPONSIVE
+════════════════════════════ */
+@media (max-width: 600px) {
+    .legal-perm-grid {
+        grid-template-columns: 1fr;
     }
-    
-    .legal-container h2 {
-        font-size: 1.5rem;
+
+    .legal-priv-item {
+        gap: 14px;
+    }
+
+    .legal-priv-item__num-wrap {
+        display: none;
+    }
+
+    .legal-hero__num {
+        font-size: 7rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .legal-main {
+        padding: 56px 16px 64px;
     }
 }
