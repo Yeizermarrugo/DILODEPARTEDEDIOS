@@ -1,6 +1,8 @@
 import EnsenanzaCard from '@/components/EnsenanzaCard';
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
+import Paginator from '@/components/Paginator';
+import PageHero from '@/components/PageHero';
+import PageLayout from '@/components/PageLayout';
+import Spinner from '@/components/Spinner';
 import { useEffect, useState } from 'react';
 import '../../css/main.css';
 
@@ -75,61 +77,6 @@ function Enseñanzas() {
         return (pagination.total ?? 0) > PAGE_LIMIT;
     };
 
-    const renderPaginator = () => {
-        if (!pagination.last_page || pagination.last_page <= 1) return null;
-
-        const pages = [];
-        const maxPagesToShow = 5;
-        let start = Math.max(1, (pagination.current_page || 1) - 2);
-        const end = Math.min(pagination.last_page, start + maxPagesToShow - 1);
-
-        if (end - start < maxPagesToShow - 1) {
-            start = Math.max(1, end - maxPagesToShow + 1);
-        }
-
-        for (let i = start; i <= end; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    className={`paginator-btn ${pagination.current_page === i ? 'active' : ''}`}
-                    onClick={() => setPage(i)}
-                    disabled={pagination.current_page === i}
-                    style={{
-                        margin: '0 3px',
-                        padding: '5px 10px',
-                        background: pagination.current_page === i ? '#007bff' : '#f0f0f0',
-                        color: pagination.current_page === i ? '#fff' : '#333',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: pagination.current_page === i ? 'default' : 'pointer',
-                    }}
-                >
-                    {i}
-                </button>,
-            );
-        }
-
-        return (
-            <div style={{ textAlign: 'center', margin: '20px 0' }}>
-                <button
-                    onClick={() => setPage((pagination.current_page || 2) - 1)}
-                    disabled={pagination.current_page === 1}
-                    style={{ marginRight: '5px' }}
-                >
-                    « Anterior
-                </button>
-                {pages}
-                <button
-                    onClick={() => setPage((pagination.current_page || 0) + 1)}
-                    disabled={pagination.current_page === pagination.last_page}
-                    style={{ marginLeft: '5px' }}
-                >
-                    Siguiente »
-                </button>
-            </div>
-        );
-    };
-
     const onSubmitSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setPage(1);
@@ -143,29 +90,25 @@ function Enseñanzas() {
     };
 
     return (
-        <div className="blog-details-page">
-            <Header />
+        <PageLayout className="blog-details-page">
+            <PageHero showBreadcrumbs>
+                <h1 style={{ textAlign: 'center' }}>Series Temáticas</h1>
+                <br />
+                <p>
+                    En esta sección encontrarás enseñanzas basadas en la Palabra de Dios, organizadas en series,
+                    donde se desarrollan temas y principios bíblicos para comprender mejor la fe y vivir conforme a la verdad.
+                </p>
+                <br />
+                <p>
+                    Nuestro propósito es guiar a los creyentes a profundizar en el conocimiento de la Palabra y crecer en discernimiento espiritual.
+                </p>
+                <br />
+                <p style={{ fontStyle: 'italic' }}>
+                    “La exposición de tus palabras alumbra; hace entender a los simples.”{' '}
+                    <span style={{ fontWeight: 'bold' }}>Salmos 119:130 RVR1960</span>
+                </p>
+            </PageHero>
             <main className="main">
-                <div className="page-title">
-                    <div className="breadcrumbs" />
-                    <div className="title-wrapper">
-                        <h1 style={{ textAlign: 'center' }}>Series Temáticas</h1>
-                        <br />
-                        <p>
-                            En esta sección encontrarás enseñanzas basadas en la Palabra de Dios, organizadas en series,
-                            donde se desarrollan temas y principios bíblicos para comprender mejor la fe y vivir conforme a la verdad.
-                        </p>
-                        <br />
-                        <p>
-                            Nuestro propósito es guiar a los creyentes a profundizar en el conocimiento de la Palabra y crecer en discernimiento espiritual.
-                        </p>
-                        <br />
-                        <p style={{ fontStyle: 'italic' }}>
-                            “La exposición de tus palabras alumbra; hace entender a los simples.”{' '}
-                            <span style={{ fontWeight: 'bold' }}>Salmos 119:130 RVR1960</span>
-                        </p>
-                    </div>
-                </div>
 
                 <div className="container">
                     <div className="row">
@@ -174,11 +117,7 @@ function Enseñanzas() {
                                 <div className="container" data-aos="fade-up">
                                     {loading ? (
                                         <div style={{ textAlign: 'center', padding: '40px' }}>
-                                            <div id="preloader" className="d-flex align-items-center justify-content-center">
-                                                <div className="spinner-border" role="status">
-                                                    <span className="visually-hidden">Loading...</span>
-                                                </div>
-                                            </div>
+                                            <Spinner />
                                         </div>
                                     ) : ensenanzas.length === 0 ? (
                                         <p>No hay enseñanzas para esta búsqueda.</p>
@@ -240,7 +179,7 @@ function Enseñanzas() {
                                                 })}
                                             </div>
 
-                                            {showPaginator() && renderPaginator()}
+                                            {showPaginator() && <Paginator pagination={pagination} onPageChange={setPage} />}
                                         </>
                                     )}
                                 </div>
@@ -249,8 +188,7 @@ function Enseñanzas() {
                     </div>
                 </div>
             </main>
-            <Footer />
-        </div>
+        </PageLayout>
     );
 }
 

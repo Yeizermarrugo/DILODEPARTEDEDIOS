@@ -1,6 +1,9 @@
 import CardNew from '@/components/CardNew';
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
+import FilterBar, { SortId } from '@/components/FilterBar';
+import PageHero from '@/components/PageHero';
+import PageLayout from '@/components/PageLayout';
+import Paginator from '@/components/Paginator';
+import Spinner from '@/components/Spinner';
 import FilterSheet from '@/components/ui/FilterSheet';
 import { useEffect, useState } from 'react';
 import '../../css/main.css';
@@ -57,10 +60,10 @@ function Devocionals() {
     const [total, setTotal] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
     const [query, setQuery] = useState(searchTerm);
-    const [sort, setSort] = useState<'latest' | 'likes' | 'views'>('latest');
+    const [sort, setSort] = useState<SortId>('latest');
     const [sheetOpen, setSheetOpen] = useState(false);
     const [pendingCategory, setPendingCategory] = useState<string | null>(null);
-    const [pendingSort, setPendingSort] = useState<'latest' | 'likes' | 'views'>('latest');
+    const [pendingSort, setPendingSort] = useState<SortId>('latest');
 
     // Fetch devocionales (paginación y search siempre backend)
     useEffect(() => {
@@ -163,57 +166,6 @@ function Devocionals() {
         return <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }} dangerouslySetInnerHTML={{ __html: titulo }} />;
     };
 
-    // Paginador (backend)
-    const renderPaginator = () => {
-        if (!pagination.last_page || pagination.last_page <= 1) return null;
-        const pages = [];
-        const maxPagesToShow = 5;
-        let start = Math.max(1, (pagination.current_page || 1) - 2);
-        const end = Math.min(pagination.last_page, start + maxPagesToShow - 1);
-        if (end - start < maxPagesToShow - 1) {
-            start = Math.max(1, end - maxPagesToShow + 1);
-        }
-        for (let i = start; i <= end; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    className={`paginator-btn ${pagination.current_page === i ? 'active' : ''}`}
-                    onClick={() => setPage(i)}
-                    disabled={pagination.current_page === i}
-                    style={{
-                        margin: '0 3px',
-                        padding: '5px 10px',
-                        background: pagination.current_page === i ? '#007bff' : '#f0f0f0',
-                        color: pagination.current_page === i ? '#fff' : '#333',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: pagination.current_page === i ? 'default' : 'pointer',
-                    }}
-                >
-                    {i}
-                </button>,
-            );
-        }
-        return (
-            <div style={{ textAlign: 'center', margin: '20px 0' }}>
-                <button
-                    onClick={() => setPage((pagination.current_page || 2) - 1)}
-                    disabled={pagination.current_page === 1}
-                    style={{ marginRight: '5px' }}
-                >
-                    &laquo; Anterior
-                </button>
-                {pages}
-                <button
-                    onClick={() => setPage((pagination.current_page || 0) + 1)}
-                    disabled={pagination.current_page === pagination.last_page}
-                    style={{ marginLeft: '5px' }}
-                >
-                    Siguiente &raquo;
-                </button>
-            </div>
-        );
-    };
 
     const PAGE_LIMIT = 16; // Cambia este valor si tu backend usa otro límite
 
@@ -259,176 +211,6 @@ function Devocionals() {
         setPage(1);
     };
 
-    // Sticky bar — va donde estaba top-categories-sticky-wrapper
-    const FilterBar = () => {
-        const catLabel = selectedCategory
-            ? categories.find(c => c.categoria === selectedCategory)?.categoria ?? 'Todas'
-            : 'Todas';
-        const sortLabel = sort === 'likes' ? 'Likes' : sort === 'views' ? 'Vistas' : 'Recientes';
-        const hasFilter = selectedCategory !== null || sort !== 'latest';
-
-        return (
-            <>
-                {/* ── DESKTOP: filtro original con pills ── */}
-                <div className="filter-desktop">
-                    {/* Fila 1: Categorías */}
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: 80, whiteSpace: 'nowrap' }}>
-                            Categorías
-                        </span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                            <button
-                                onClick={() => handleSelectCategory(null)}
-                                style={{
-                                    padding: '5px 13px', borderRadius: 999,
-                                    border: selectedCategory === null ? 'none' : '0.5px solid #dee2e6',
-                                    background: selectedCategory === null ? '#f75815' : '#fff',
-                                    color: selectedCategory === null ? '#fff' : '#6c757d',
-                                    cursor: 'pointer', fontSize: 13,
-                                    fontWeight: selectedCategory === null ? 500 : 400,
-                                    transition: 'all 0.15s ease',
-                                }}
-                            >
-                                Todas <span style={{ opacity: 0.75, fontSize: 11 }}>{total}</span>
-                            </button>
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat.categoria}
-                                    onClick={() => handleSelectCategory(cat.categoria)}
-                                    style={{
-                                        padding: '5px 13px', borderRadius: 999,
-                                        border: selectedCategory === cat.categoria ? 'none' : '0.5px solid #dee2e6',
-                                        background: selectedCategory === cat.categoria ? '#f75815' : '#fff',
-                                        color: selectedCategory === cat.categoria ? '#fff' : '#6c757d',
-                                        cursor: 'pointer', fontSize: 13,
-                                        fontWeight: selectedCategory === cat.categoria ? 500 : 400,
-                                        transition: 'all 0.15s ease',
-                                    }}
-                                >
-                                    {cat.categoria} <span style={{ opacity: 0.75, fontSize: 11 }}>{cat.count}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Fila 2: Ordenar por */}
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: 80, whiteSpace: 'nowrap' }}>
-                            Ordenar por
-                        </span>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{
-                                padding: '5px 12px', borderRadius: 999, fontSize: 13,
-                                background: sort === 'latest' ? '#f5f5f5' : 'transparent',
-                                color: sort === 'latest' ? '#212529' : '#6c757d',
-                                fontWeight: sort === 'latest' ? 500 : 400,
-                            }}>
-                                🕐 Más recientes
-                            </span>
-                            <div style={{ width: 1, height: 18, background: '#dee2e6' }} />
-                            <button
-                                onClick={() => handleSortChange('likes')}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 5,
-                                    padding: '5px 13px', borderRadius: 999,
-                                    border: sort === 'likes' ? '1.5px solid #e63946' : '0.5px solid #dee2e6',
-                                    background: sort === 'likes' ? '#fff0f0' : '#fff',
-                                    color: sort === 'likes' ? '#c0182a' : '#6c757d',
-                                    cursor: 'pointer', fontSize: 13,
-                                    fontWeight: sort === 'likes' ? 500 : 400,
-                                    transition: 'all 0.15s ease',
-                                }}
-                            >
-                                <span style={{ fontSize: 14 }}>{sort === 'likes' ? '♥' : '♡'}</span>
-                                Más likes
-                                {sort === 'likes' && (
-                                    <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#e63946', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
-                                )}
-                            </button>
-                            <button
-                                onClick={() => handleSortChange('views')}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 5,
-                                    padding: '5px 13px', borderRadius: 999,
-                                    border: sort === 'views' ? '1.5px solid #2563eb' : '0.5px solid #dee2e6',
-                                    background: sort === 'views' ? '#ebf3ff' : '#fff',
-                                    color: sort === 'views' ? '#1a4db5' : '#6c757d',
-                                    cursor: 'pointer', fontSize: 13,
-                                    fontWeight: sort === 'views' ? 500 : 400,
-                                    transition: 'all 0.15s ease',
-                                }}
-                            >
-                                <i className="bi bi-eye" style={{ fontSize: 14 }} />
-                                Más vistas
-                                {sort === 'views' && (
-                                    <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#2563eb', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── MÓVIL: sticky bar compacta ── */}
-                <div className="filter-mobile">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                        <span style={{ fontSize: 13, color: '#999' }}>
-                            {total} devocionales
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div style={{
-                                display: 'flex', alignItems: 'center', gap: 5,
-                                padding: '5px 12px', borderRadius: 999,
-                                background: hasFilter ? '#f75815' : '#f1f1f1',
-                                color: hasFilter ? '#fff' : '#555',
-                                fontSize: 12, fontWeight: 500,
-                                maxWidth: 150, overflow: 'hidden', whiteSpace: 'nowrap',
-                            }}>
-                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {catLabel} · {sortLabel}
-                                </span>
-                                {hasFilter && (
-                                    <span
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedCategory(null);
-                                            setSort('latest');
-                                            setPendingCategory(null);
-                                            setPendingSort('latest');
-                                            setPage(1);
-                                        }}
-                                        style={{ cursor: 'pointer', opacity: 0.8, fontSize: 13, marginLeft: 2 }}
-                                    >
-                                        ✕
-                                    </span>
-                                )}
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setPendingCategory(selectedCategory);
-                                    setPendingSort(sort);
-                                    setSheetOpen(true);
-                                }}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 6,
-                                    padding: '7px 14px', borderRadius: 8,
-                                    border: '1px solid #e0e0e0', background: '#fff',
-                                    fontSize: 13, color: '#333', cursor: 'pointer',
-                                }}
-                            >
-                                <span style={{
-                                    width: 7, height: 7, borderRadius: '50%',
-                                    background: hasFilter ? '#f75815' : '#ccc',
-                                    display: 'inline-block', flexShrink: 0,
-                                }} />
-                                Filtrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </>
-        );
-    };
-
 
     // const RecentPostsWidget = () => (
     //     <div className="recent-posts-widget widget-item">
@@ -464,28 +246,42 @@ function Devocionals() {
     ).sort();
 
     return (
-        <div className="blog-details-page">
-            <Header />
+        <PageLayout className="blog-details-page">
+            <PageHero showBreadcrumbs>
+                <h1>Encuentra la respuesta que Dios envía hoy a tu vida</h1>
+                <p style={{ fontStyle: 'italic' }}>
+                    “Tal vez no nos damos cuenta, pero Dios no deja de hablarnos” <span style={{ fontWeight: 'bold' }}>Job 33:14 TLA</span>
+                </p>
+            </PageHero>
             <main className="main">
-                <div className="page-title">
-                    <div className="breadcrumbs"></div>
-                    <div className="title-wrapper">
-                        <h1>Encuentra la respuesta que Dios envía hoy a tu vida</h1>
-                        <p style={{ fontStyle: 'italic' }}>
-                            “Tal vez no nos damos cuenta, pero Dios no deja de hablarnos" <span style={{ fontWeight: 'bold' }}>Job 33:14 TLA</span>
-                        </p>
-                    </div>
-                </div>
 
                 <div className="container">
                     <div className="row">
                         {/* Columna de ancho completo */}
                         <div className="col-12">
 
-                            {/* 1. Widget de Categorías ubicado arriba */}
                             <div className="top-categories-sticky-wrapper">
                                 <div className="container">
-                                    <FilterBar />
+                                    <FilterBar
+                                        categories={categories}
+                                        total={total}
+                                        selectedCategory={selectedCategory}
+                                        sort={sort}
+                                        onCategoryChange={(cat) => { handleSelectCategory(cat); }}
+                                        onSortToggle={handleSortChange}
+                                        onOpenSheet={() => {
+                                            setPendingCategory(selectedCategory);
+                                            setPendingSort(sort);
+                                            setSheetOpen(true);
+                                        }}
+                                        onClearAll={() => {
+                                            setSelectedCategory(null);
+                                            setSort('latest');
+                                            setPendingCategory(null);
+                                            setPendingSort('latest');
+                                            setPage(1);
+                                        }}
+                                    />
                                 </div>
                             </div>
 
@@ -493,11 +289,7 @@ function Devocionals() {
                                 <div className="container p-0">
                                     {loading ? (
                                         <div style={{ textAlign: 'center', padding: '40px' }}>
-                                            <div id="preloader" className="d-flex align-items-center justify-content-center">
-                                                <div className="spinner-border" role="status">
-                                                    <span className="visually-hidden">Loading...</span>
-                                                </div>
-                                            </div>
+                                            <Spinner />
                                         </div>
                                     ) : devocionales.length === 0 ? (
                                         <p>No hay devocionales para esta búsqueda.</p>
@@ -530,7 +322,7 @@ function Devocionals() {
                                                 ))}
                                             </div>
 
-                                            {showPaginator() && renderPaginator()}
+                                            {showPaginator() && <Paginator pagination={pagination} onPageChange={setPage} />}
                                         </>
                                     )}
                                 </div>
@@ -540,7 +332,6 @@ function Devocionals() {
                     </div>
                 </div>
             </main>
-            <Footer />
             <FilterSheet
                 isOpen={sheetOpen}
                 onClose={() => setSheetOpen(false)}
@@ -561,7 +352,7 @@ function Devocionals() {
                     setPendingSort('latest');
                 }}
             />
-        </div>
+        </PageLayout >
     );
 }
 
