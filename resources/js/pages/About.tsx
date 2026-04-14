@@ -1,16 +1,11 @@
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
 import {
     IconArrow,
     IconBook,
     IconBookOpen,
-    IconBroadcast,
     IconCheck,
     IconCheckCircle,
     IconChevronDown,
     IconChevronUp,
-    IconCompass,
-    IconDiamond,
     IconEyeLight,
     IconFacebook,
     IconFlame,
@@ -19,12 +14,12 @@ import {
     IconInstagram,
     IconMic,
     IconPeople,
-    IconReach,
     IconSend,
     IconShield,
     IconStar,
-    IconYouTube,
+    IconYouTube
 } from '@/components/icons/AboutIcons';
+import PageLayout from '@/components/PageLayout';
 import { useEffect, useRef, useState } from 'react';
 import '../../css/about.css';
 
@@ -642,7 +637,7 @@ const faqItems = [
     {
         icon: <IconPeople />,
         q: '¿A quién impactamos?',
-        a: 'A toda persona que desee aprender y vivir la Palabra de Dios. Llegamos a todo el mundo de habla hispana, rompiendo barreras geográficas para formar discípulos.',
+        a: 'A toda persona que desea aprender y vivir la Palabra de Dios. Llevamos el mensaje sin límites ni fronteras, alcanzando vidas en todo lugar, con el propósito de formar discípulos hasta los confines de la tierra.',
         aside: null,
     },
     {
@@ -866,19 +861,19 @@ function CoberturaSection() {
 export default function About() {
     return (
         <div className="about-root">
-            <Header />
-            <main>
-                <Hero />
-                <FaqSection />
-                <MisionVisionSection />
-                <PilaresSection />
-                <JourneyIntro />
-                <TimelineSection />
-                <CoberturaSection />
-                <TeamSection />
-                <FinalCta />
-            </main>
-            <Footer />
+            <PageLayout>
+                <main>
+                    <Hero />
+                    <FaqSection />
+                    <MisionVisionSection />
+                    <PilaresSection />
+                    <JourneyIntro />
+                    <TimelineSection />
+                    <CoberturaSection />
+                    <TeamSection />
+                    <FinalCta />
+                </main>
+            </PageLayout>
         </div>
     );
 }

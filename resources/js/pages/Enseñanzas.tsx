@@ -1,10 +1,12 @@
 import EnsenanzaCard from '@/components/EnsenanzaCard';
-import Paginator from '@/components/Paginator';
-import PageHero from '@/components/PageHero';
-import PageLayout from '@/components/PageLayout';
 import Spinner from '@/components/Spinner';
-import { useEffect, useState } from 'react';
+import { JSX, useEffect, useMemo, useRef, useState } from 'react';
+
+import PageLayout from '@/components/PageLayout';
+import '../../css/enseñanzas.css';
 import '../../css/main.css';
+
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 type EnsenanzaItem = {
     id: string;
@@ -22,9 +24,34 @@ type EnsenanzasResponse = {
     last_page: number;
     total: number;
     per_page: number;
-    next_page_url: string | null;
-    prev_page_url: string | null;
 };
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+const ChevLeft = () => (
+    <svg viewBox="0 0 24 24" width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+        <path d="M15 18l-6-6 6-6" />
+    </svg>
+);
+
+const ChevRight = () => (
+    <svg viewBox="0 0 24 24" width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+        <path d="M9 18l6-6-6-6" />
+    </svg>
+);
+
+// ─── Hook: debounce ───────────────────────────────────────────────────────────
+
+function useDebounce<T>(value: T, delay: number): T {
+    const [debounced, setDebounced] = useState<T>(value);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebounced(value), delay);
+        return () => clearTimeout(timer);
+    }, [value, delay]);
+    return debounced;
+}
+
+// ─── Componente Principal ─────────────────────────────────────────────────────
 
 function Enseñanzas() {
     const [ensenanzas, setEnsenanzas] = useState<EnsenanzaItem[]>([]);
@@ -32,162 +59,202 @@ function Enseñanzas() {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [query, setQuery] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
 
+    const debouncedSearch = useDebounce(searchTerm, 350);
+
+    // Resetear página cuando cambia la búsqueda
+    useEffect(() => { setPage(1); }, [debouncedSearch]);
+
+    // ── Fetch Data ────────────────────────────────────────────────────────────
     useEffect(() => {
-        setLoading(true);
         const controller = new AbortController();
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const params = new URLSearchParams({
+                    page: String(page),
+                    ...(debouncedSearch.trim() && { search: debouncedSearch.trim() })
+                });
 
-        let url = '';
-        if (query.trim() !== '') {
-            url = `/series-search?search=${encodeURIComponent(query)}&page=${page}`;
-        } else {
-            url = `/series-search?page=${page}`;
+                const url = `/series-search?${params.toString()}`;
+                const response = await fetch(url, { signal: controller.signal });
+                const data = await response.json();
+
+                // Manejo flexible de la respuesta del backend
+                const items = data.data || data.devocionales;
+                setEnsenanzas(Array.isArray(items) ? items : []);
+                setPagination(data);
+            } catch (err: any) {
+                if (err.name !== 'AbortError') console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+        return () => controller.abort();
+    }, [page, debouncedSearch]);
+
+    // ── Valores Derivados ─────────────────────────────────────────────────────
+
+    const totalSeries = pagination.total ?? ensenanzas.length;
+
+    const stats = useMemo(() => {
+        const totalEns = ensenanzas.reduce((s, e) => s + (e.ensenanzas_count ?? 0), 0);
+        const totalAutores = new Set(ensenanzas.flatMap((e) => e.autores)).size;
+        return { totalEns, totalAutores };
+    }, [ensenanzas]);
+
+    // ── Render Helpers ───────────────────────────────────────────────────────
+
+    const renderPaginator = () => {
+        if (!pagination.last_page || pagination.last_page <= 1) return null;
+        const last = pagination.last_page;
+        const cur = pagination.current_page ?? 1;
+
+        const pages: JSX.Element[] = [];
+        const maxShow = 5;
+        let start = Math.max(1, cur - 2);
+        const end = Math.min(last, start + maxShow - 1);
+        if (end - start < maxShow - 1) start = Math.max(1, end - maxShow + 1);
+
+        for (let i = start; i <= end; i++) {
+            pages.push(
+                <button
+                    key={i}
+                    className={`ens-page-btn ${cur === i ? 'ens-page-btn--active' : ''}`}
+                    onClick={() => setPage(i)}
+                    disabled={cur === i}
+                >{i}</button>
+            );
         }
 
-        fetch(url, { signal: controller.signal })
-            .then((r) => r.json())
-            .then((data: EnsenanzasResponse | any) => {
-                if (Array.isArray(data.data)) {
-                    setEnsenanzas(data.data);
-                    setPagination(data);
-                } else if (Array.isArray(data.devocionales)) {
-                    setEnsenanzas(data.devocionales);
-                    setPagination(data);
-                } else {
-                    setEnsenanzas([]);
-                    setPagination({});
-                }
-            })
-            .catch((err) => {
-                if (err.name !== 'AbortError') {
-                    console.error('Error en fetch:', err);
-                }
-            })
-            .finally(() => setLoading(false));
-
-        return () => controller.abort();
-    }, [page, query]);
-
-    const PAGE_LIMIT = 12;
-
-    const showPaginator = () => {
-        if (!pagination.last_page || pagination.last_page <= 1) return false;
-        if (!searchTerm.trim()) return true;
-        return (pagination.total ?? 0) > PAGE_LIMIT;
-    };
-
-    const onSubmitSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        setPage(1);
-        setQuery(searchTerm.trim());
-    };
-
-    const limpiarBusqueda = () => {
-        setSearchTerm('');
-        setQuery('');
-        setPage(1);
+        return (
+            <div className="ens-paginator">
+                <button className="ens-page-btn" onClick={() => setPage(cur - 1)} disabled={cur === 1}>
+                    <ChevLeft />
+                </button>
+                {start > 1 && (
+                    <>
+                        <button className="ens-page-btn" onClick={() => setPage(1)}>1</button>
+                        <span className="ens-paginator-dots">···</span>
+                    </>
+                )}
+                {pages}
+                {end < last && (
+                    <>
+                        <span className="ens-paginator-dots">···</span>
+                        <button className="ens-page-btn" onClick={() => setPage(last)}>{last}</button>
+                    </>
+                )}
+                <button className="ens-page-btn" onClick={() => setPage(cur + 1)} disabled={cur === last}>
+                    <ChevRight />
+                </button>
+            </div>
+        );
     };
 
     return (
-        <PageLayout className="blog-details-page">
-            <PageHero showBreadcrumbs>
-                <h1 style={{ textAlign: 'center' }}>Series Temáticas</h1>
-                <br />
-                <p>
-                    En esta sección encontrarás enseñanzas basadas en la Palabra de Dios, organizadas en series,
-                    donde se desarrollan temas y principios bíblicos para comprender mejor la fe y vivir conforme a la verdad.
-                </p>
-                <br />
-                <p>
-                    Nuestro propósito es guiar a los creyentes a profundizar en el conocimiento de la Palabra y crecer en discernimiento espiritual.
-                </p>
-                <br />
-                <p style={{ fontStyle: 'italic' }}>
-                    “La exposición de tus palabras alumbra; hace entender a los simples.”{' '}
-                    <span style={{ fontWeight: 'bold' }}>Salmos 119:130 RVR1960</span>
-                </p>
-            </PageHero>
-            <main className="main">
+        <PageLayout>
+            <div className="ens-page">
+                <main>
+                    {/* ── HERO ── */}
+                    <section className="ens-hero">
+                        <div className="ens-hero__inner">
+                            <div className="ens-hero__content">
+                                <div className="ens-hero__eyebrow">Recursos Teológicos</div>
+                                <h1 className="ens-hero__title">Series Temáticas</h1>
 
-                <div className="container">
-                    <div className="row">
-                        <div className="col-sm-12">
-                            <section id="ensenanzas-list" className="blog-grid section">
-                                <div className="container" data-aos="fade-up">
-                                    {loading ? (
-                                        <div style={{ textAlign: 'center', padding: '40px' }}>
-                                            <Spinner />
+                                <div className="ens-hero__description-box">
+                                    <p className="ens-hero__text">
+                                        En esta sección encontrarás enseñanzas basadas en la Palabra de Dios, organizadas en series,
+                                        donde se desarrollan temas y principios bíblicos para comprender mejor la fe y vivir conforme a la verdad.
+                                    </p>
+                                    <div className="ens-hero__verse-v2">
+                                        <p>“La exposición de tus palabras alumbra; hace entender a los simples.”</p>
+                                        <strong>Salmos 119:130 RVR1960</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {!loading && ensenanzas.length > 0 && (
+                                <div className="ens-hero__stats">
+                                    <div className="ens-hero__stat">
+                                        <div className="ens-hero__stat-num">{totalSeries}</div>
+                                        <div className="ens-hero__stat-lbl">Series</div>
+                                    </div>
+                                    <div className="ens-hero__stat">
+                                        <div className="ens-hero__stat-num">{stats.totalEns}</div>
+                                        <div className="ens-hero__stat-lbl">Enseñanzas</div>
+                                    </div>
+                                    {stats.totalAutores > 0 && (
+                                        <div className="ens-hero__stat">
+                                            <div className="ens-hero__stat-num">{stats.totalAutores}</div>
+                                            <div className="ens-hero__stat-lbl">Autores</div>
                                         </div>
-                                    ) : ensenanzas.length === 0 ? (
-                                        <p>No hay enseñanzas para esta búsqueda.</p>
-                                    ) : (
-                                        <>
-                                            {/* Título + buscador encima de las cards */}
-                                            <div
-                                                style={{
-                                                    paddingBottom: '20px',
-                                                    marginBottom: '20px',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    gap: 12,
-                                                }}
-                                            >
-                                                {/* <h2 style={{ color: '#212529', margin: 0 }}>
-                                                    {searchTerm
-                                                        ? `Resultados de búsqueda "${searchTerm}"`
-                                                        : 'Series de enseñanzas'}
-                                                </h2> */}
-
-                                                {/* <form
-                                                    onSubmit={onSubmitSearch}
-                                                    style={{
-                                                        display: 'flex',
-                                                        flexWrap: 'wrap',
-                                                        gap: 8,
-                                                        alignItems: 'center',
-                                                    }}
-                                                > */}
-                                                {/* <input
-                                                        type="text"
-                                                        value={searchTerm}
-                                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                                        placeholder="Buscar enseñanza..."
-                                                        style={{
-                                                            flex: '1 1 220px',
-                                                            minWidth: 0,
-                                                            padding: '6px 10px',
-                                                        }}
-                                                    /> */}
-                                                {/* <button type="submit">Buscar</button>
-                                                    {searchTerm && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={limpiarBusqueda}
-                                                            title="Limpiar búsqueda"
-                                                        >
-                                                            Limpiar
-                                                        </button>
-                                                    )} */}
-                                                {/* </form> */}
-                                            </div>
-
-                                            {/* Cards */}
-                                            <div className="ensenanzas-cards">
-                                                {ensenanzas.map((ens) => {
-                                                    return <EnsenanzaCard key={ens.id} ensenanza={ens} />;
-                                                })}
-                                            </div>
-
-                                            {showPaginator() && <Paginator pagination={pagination} onPageChange={setPage} />}
-                                        </>
                                     )}
                                 </div>
-                            </section>
+                            )}
                         </div>
-                    </div>
-                </div>
-            </main>
+                    </section>
+
+                    {/* ── SECCIÓN DE CONTENIDO ── */}
+                    <section className="ens-section">
+                        <div className="ens-section__topbar">
+                            <div className="ens-section__heading">
+                                <div className="ens-section__accent" />
+                                <h2 className="ens-section__title">
+                                    {debouncedSearch.trim() ? `Resultados de "${debouncedSearch.trim()}"` : 'Todas las series'}
+                                </h2>
+                            </div>
+
+                            <div className="ens-section__actions">
+                                <div className="dv-search">
+                                    <svg className="dv-search__icon" viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                                    </svg>
+                                    <input
+                                        ref={inputRef}
+                                        type="text"
+                                        className="dv-search__input"
+                                        placeholder="Buscar serie..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        autoComplete="off"
+                                    />
+                                    {loading && searchTerm && <div className="dv-search__spinner" />}
+                                    {!loading && searchTerm && (
+                                        <button className="dv-search__clear" onClick={() => { setSearchTerm(''); inputRef.current?.focus(); }}>✕</button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {loading && ensenanzas.length === 0 ? (
+                            <div className="ens-loading">
+                                <Spinner />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="ens-grid">
+                                    {ensenanzas.length > 0 ? (
+                                        ensenanzas.map((ens) => (
+                                            <EnsenanzaCard key={ens.id} ensenanza={ens} />
+                                        ))
+                                    ) : (
+                                        <div className="ens-empty">
+                                            <p>No se encontraron series para esta búsqueda.</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {renderPaginator()}
+                            </>
+                        )}
+                    </section>
+                </main>
+            </div>
+
         </PageLayout>
     );
 }
