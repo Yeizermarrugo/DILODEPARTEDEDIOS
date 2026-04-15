@@ -333,7 +333,7 @@ function CarouselSection() {
 //                 Si no tienes poster aún, déjalo en '' y se mostrará
 //                 el fondo oscuro con el botón play.
 
-const VIDEO_SRC = '/assets/video/video-especial.mp4';   // ← tu archivo
+const VIDEO_SRC = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/videos/ZXF3DNFj6ois2QlJp9LD2IzpmNgiayARHoWby1n0.mp4';   // ← tu archivo
 const VIDEO_POSTER = '/assets/video/nosotros.png'; // ← portada (opcional)
 
 function VideoSoonSection() {
@@ -606,7 +606,7 @@ function PodCAFSection() {
                         <div className="sp-pod__video-glow" />
                         <video
                             ref={videoRef}
-                            src="/assets/video/podcaf-promo.mp4"
+                            src="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/videos/yPBmEoLO74GkpHETiZ4RVGVe0b8HvLMtbhX2hnkp.mp4"
                             className="sp-pod__video"
                             muted
                             loop
