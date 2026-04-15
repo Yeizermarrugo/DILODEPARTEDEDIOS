@@ -15,15 +15,29 @@ class DevocionalController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * Soporta: ?sort=latest|likes|views  ?search=texto  ?per_page=16
      */
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 16);
-        $sort = $request->input('sort', 'latest');
+        $sort    = $request->input('sort', 'latest');
+        $search  = $request->input('search');           // ← NUEVO
 
+        // ── Base query con filtro de búsqueda ──────────────────────────────
+        $base = Devocional::where('is_devocional', 1)
+            ->where('ensenanza_id', null);
+
+        if ($search) {
+            $base->where(function ($q) use ($search) {
+                $q->where('contenido', 'like', "%{$search}%")
+                    ->orWhere('categoria', 'like', "%{$search}%")
+                    ->orWhere('autor', 'like', "%{$search}%");
+            });
+        }
+
+        // ── Ordenar ────────────────────────────────────────────────────────
         if ($sort === 'likes') {
-            $devocionales = Devocional::where('is_devocional', 1)
-                ->where('ensenanza_id', null)
+            $devocionales = (clone $base)
                 ->leftJoin('content_likes', function ($join) {
                     $join->on('content_likes.content_id', '=', 'devocionals.id')
                         ->where('content_likes.content_type', '=', \App\Models\ContentLike::TYPE_DEVOCIONAL);
@@ -33,17 +47,16 @@ class DevocionalController extends Controller
                 ->orderBy('likes_count', 'desc')
                 ->paginate($perPage);
         } elseif ($sort === 'views') {
-            $devocionales = Devocional::where('is_devocional', 1)
-                ->where('ensenanza_id', null)
+            $devocionales = (clone $base)
                 ->orderBy('views_count', 'desc')
                 ->paginate($perPage);
         } else {
-            $devocionales = Devocional::where('is_devocional', 1)
-                ->where('ensenanza_id', null)
+            $devocionales = (clone $base)
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         }
 
+        // ── Categorías (solo cuando no hay búsqueda activa) ───────────────
         $categoriasRaw = Devocional::whereNotNull('categoria')
             ->where('categoria', '!=', '')
             ->where('is_devocional', 1)
@@ -52,16 +65,13 @@ class DevocionalController extends Controller
             ->groupBy('categoria', 'serie')
             ->get();
 
-        $series = [];
+        $series             = [];
         $categoriasSinSerie = [];
 
         foreach ($categoriasRaw as $row) {
             if ($row->serie) {
                 if (!isset($series[$row->serie])) {
-                    $series[$row->serie] = [
-                        'nombre'     => $row->serie,
-                        'categorias' => [],
-                    ];
+                    $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
                 }
                 $series[$row->serie]['categorias'][] = [
                     'categoria' => $row->categoria,
@@ -89,7 +99,6 @@ class DevocionalController extends Controller
             'autores'      => $autores,
         ]);
     }
-
     public function searchCategories(Request $request)
     {
         $perPage = $request->input('per_page', 16);

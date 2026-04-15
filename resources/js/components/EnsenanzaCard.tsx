@@ -1,6 +1,7 @@
 import LikeButton from '@/components/LikeButton';
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { useEffect, useRef, useState } from 'react';
+
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 type DevocionalEnsenanza = {
     id: string;
@@ -25,188 +26,190 @@ type EnsenanzaItem = {
     devocionales?: DevocionalEnsenanza[];
 };
 
-type Props = {
-    ensenanza: EnsenanzaItem;
+type Props = { ensenanza: EnsenanzaItem };
+
+type DevRowProps = {
+    dev: DevocionalEnsenanza;
+    idx: number;
+    isEven: boolean;
 };
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function initials(name: string): string {
+    return name
+        .split(' ')
+        .slice(0, 2)
+        .map((w) => w[0]?.toUpperCase() ?? '')
+        .join('');
+}
+
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function EnsenanzaCard({ ensenanza }: Props) {
     const devocionales = ensenanza.devocionales ?? [];
+    const published = devocionales.filter((d) => String(d.is_devocional) === '1');
+    const isComingSoon = published.length === 0;
+    const sinImagen = !ensenanza.imagen;
+    const sinDesc = !ensenanza.descripcion?.trim();
 
-    const publishedDevotionals = devocionales.filter(
-        (item) => String(item.is_devocional) === '1',
-    );
-
-    const isComingSoon = publishedDevotionals.length === 0;
-    const isDropdownDisabled = publishedDevotionals.length === 0;
+    // Lógica para mostrar el diseño de Próximamente espectacular
+    const esPróximamente = sinImagen && sinDesc;
 
     const [isOpen, setIsOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [showBtn, setShowBtn] = useState(false);
-    const textRef = useRef<HTMLParagraphElement>(null);
+    const [showMoreBtn, setShowMoreBtn] = useState(false);
+    const descRef = useRef<HTMLParagraphElement>(null);
 
     useEffect(() => {
         const check = () => {
-            if (textRef.current) setShowBtn(textRef.current.scrollHeight > textRef.current.clientHeight);
+            if (descRef.current) {
+                setShowMoreBtn(descRef.current.scrollHeight > descRef.current.clientHeight + 2);
+            }
         };
         check();
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
     }, [ensenanza.descripcion]);
 
-    const autoresLabel = ensenanza.autores.join(', ') || 'Autor desconocido';
-    const sinImagen = !ensenanza.imagen;
-    const sinDescripcion = !ensenanza.descripcion?.trim();
-    const esPróximamente = sinImagen && sinDescripcion;
+    const totalViews = published.reduce((s, d) => s + (d.views_count ?? 0), 0);
+    const authorFirst = ensenanza.autores[0] ?? 'Autor desconocido';
 
     return (
-        <div
-            className="ensenanza-card"
-            style={{
-                borderRadius: 10,
-                overflow: 'hidden',
-                border: '1px solid #e0e0e0',
-                backgroundColor: '#fff',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                width: '100%',
-                // ── posición relativa para que la franja se ancle aquí ──
-                position: 'relative',
-            }}
-        >
-            {/* ══ FRANJA "PRÓXIMAMENTE" — solo aparece si no tiene imagen ni descripción ══ */}
-            {esPróximamente && (
-                <div style={{
-                    position: 'absolute',
-                    inset: 0,                          // cubre toda la card
-                    zIndex: 10,
-                    pointerEvents: 'none',             // no bloquea clicks del resto
-                    overflow: 'hidden',
-                    borderRadius: 10,
-                }}>
-                    {/* Overlay opaco sobre la card */}
-                    <div style={{
-                        position: 'absolute',
-                        inset: 0,
-                        backgroundColor: 'rgba(255, 255, 255, 0.73)',
-                    }} />
+        <div className={`ens-card ${esPróximamente ? 'ens-card--coming' : ''}`}>
 
-                    {/* Franja diagonal */}
-                    <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%) rotate(-8deg)',
-                        width: '130%',
-                        padding: '12px 0',
-                        background: 'linear-gradient(90deg, #e8c840 0%, #f5d84a 50%, #e8c840 100%)',
-                        textAlign: 'center',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-                    }}>
-                        <div>
-                            <span style={{
-                                color: '#1a1a2e',
-                                fontSize: 15,
-                                fontWeight: 900,
-                                letterSpacing: '6px',
-                                textTransform: 'uppercase',
-                                fontFamily: 'serif',
-                            }}>
-                                {ensenanza.titulo}
-                            </span>
-                        </div>
-                        <span style={{
-                            color: '#1a1a2e',
-                            fontSize: 20,
-                            fontWeight: 900,
-                            letterSpacing: '6px',
-                            textTransform: 'uppercase',
-                            fontFamily: 'serif',
-                        }}>
-                            PRÓXIMAMENTE
-                        </span>
+            {/* ── DISEÑO PRÓXIMAMENTE ESPECTACULAR ── */}
+            {esPróximamente && (
+                <div className="ens-card--coming-container">
+                    <div className="ens-card--coming-overlay" />
+                    <div className="ens-card--coming-strip">
+                        <span className="ens-card--coming-title">{ensenanza.titulo}</span>
+                        <span className="ens-card--coming-text">PRÓXIMAMENTE</span>
                     </div>
                 </div>
             )}
 
-            {/* ── Cabecera: imagen + info ── */}
-            <div className="ensenanza-card-top" style={{ display: 'flex', flexDirection: 'row', gap: 10, padding: 10 }}>
+            {/* ── COVER ── */}
+            <div className="ens-cover">
+                {ensenanza.imagen ? (
+                    <img
+                        src={ensenanza.imagen}
+                        alt={ensenanza.titulo}
+                        className="ens-cover__img"
+                    />
+                ) : (
+                    <div className="ens-cover__placeholder">
+                        <span className="ens-cover__placeholder-letter">
+                            {ensenanza.titulo[0]?.toUpperCase() ?? 'S'}
+                        </span>
+                    </div>
+                )}
 
-                {/* Imagen */}
-                <div style={{ flex: '0 0 150px', maxWidth: 150, height: 120, borderRadius: 8, overflow: 'hidden', backgroundColor: '#f5f5f5', position: 'relative' }}>
-                    {ensenanza.imagen && (
-                        <img
-                            src={ensenanza.imagen}
-                            alt={ensenanza.titulo}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                        />
-                    )}
+                <div className="ens-cover__overlay" />
+
+                {/* Badge visible siempre (incluso en próximamente) */}
+                <div className="ens-cover__badge" style={{ zIndex: 30 }}>
+                    {ensenanza.ensenanzas_count} ens.
                 </div>
 
-                {/* Info derecha */}
-                <div className="ensenanza-card-info-right">
-                    <div className="ensenanza-card-text-block">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#212529', textTransform: 'uppercase' }}>
-                                Serie: {ensenanza.titulo}
-                            </h3>
-                            <div style={{ minWidth: 52, textAlign: 'center', padding: '2px 8px', borderRadius: 16, backgroundColor: '#f1f3f5', fontSize: 11, fontWeight: 500, color: '#495057' }}>
-                                {ensenanza.ensenanzas_count}
-                            </div>
+                <div className="ens-cover__info">
+                    {ensenanza.autores.length > 0 && (
+                        <div className="ens-cover__author">
+                            <span className="ens-cover__avatar">
+                                {initials(authorFirst)}
+                            </span>
+                            <span className="ens-cover__author-name">{authorFirst}</span>
                         </div>
-
-                        <div style={{ position: 'relative' }}>
-                            {ensenanza.descripcion?.trim() ? (
-                                <>
-                                    <p
-                                        ref={textRef}
-                                        className={`descripcion-texto ${isExpanded ? 'expandida' : 'colapsada'}`}
-                                        style={{ margin: '8px 0 0 0', fontSize: 12, color: '#495057', lineHeight: '1.4', textAlign: 'justify' }}
-                                    >
-                                        {ensenanza.descripcion}
-                                    </p>
-                                    {(showBtn || isExpanded) && (
-                                        <span
-                                            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-                                            style={{ fontSize: 12, color: '#007bff', cursor: 'pointer', fontWeight: 'bold', display: 'block', marginTop: '2px' }}
-                                        >
-                                            {isExpanded ? '...ver menos' : '...ver más'}
-                                        </span>
-                                    )}
-                                </>
-                            ) : null}
-                        </div>
-                    </div>
-
-                    <div className="ensenanza-card-author">
-                        <strong>Autor(es):</strong> {autoresLabel}
-                    </div>
+                    )}
+                    <h3 className="ens-cover__title">{ensenanza.titulo}</h3>
                 </div>
             </div>
 
-            {/* ── Dropdown ── */}
-            <div className="ensenanza-card-dropdown" style={{ borderTop: '1px solid #e9ecef' }}>
-                {isComingSoon ? (
-                    <div style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f8f9fa', color: '#adb5bd', textAlign: 'center', fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase', cursor: 'not-allowed' }}>
-                        Próximamente
+            {/* ── CUERPO ── */}
+            <div className="ens-body">
+                {!sinDesc ? (
+                    <div className="ens-desc-wrap">
+                        <p
+                            ref={descRef}
+                            className={`ens-desc ${isExpanded ? 'ens-desc--expanded' : ''}`}
+                        >
+                            {ensenanza.descripcion}
+                        </p>
+                        {(showMoreBtn || isExpanded) && (
+                            <button
+                                className="ens-desc__toggle"
+                                onClick={() => setIsExpanded((v) => !v)}
+                            >
+                                {isExpanded ? 'ver menos' : 'ver más'}
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    /* Espacio reservado para que la card de próximamente mida lo mismo */
+                    <div className="ens-body__placeholder" style={{ flex: 1, minHeight: '60px' }} />
+                )}
+
+                {/* Stats visibles siempre (incluso en próximamente) */}
+                <div className="ens-stats">
+                    <div className="ens-stats__item">
+                        <i className="bi bi-play-circle" style={{ fontSize: 13 }} />
+                        <span>{ensenanza.ensenanzas_count} enseñanzas</span>
+                    </div>
+                    {/* Solo mostrar vistas si NO es próximamente (ya que serían 0) */}
+                    {!esPróximamente && (
+                        <>
+                            <div className="ens-stats__dot" />
+                            <div className="ens-stats__item">
+                                <i className="bi bi-eye" style={{ fontSize: 13 }} />
+                                <span>{totalViews} vistas</span>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {/* ── FOOTER / DROPDOWN ── */}
+            <div className="ens-footer-container">
+                {esPróximamente ? (
+                    <div className="ens-footer ens-footer--disabled">
+                        <span>Próximamente disponible</span>
+                    </div>
+                ) : isComingSoon ? (
+                    <div className="ens-footer ens-footer--disabled">
+                        <span>Sin enseñanzas publicadas aún</span>
                     </div>
                 ) : (
                     <>
                         <button
-                            disabled={isDropdownDisabled}
-                            onClick={() => setIsOpen(!isOpen)}
-                            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', border: 'none', background: '#fff', cursor: isDropdownDisabled ? 'default' : 'pointer' }}
+                            className={`ens-trigger ${isOpen ? 'ens-trigger--open' : ''}`}
+                            onClick={() => setIsOpen((v) => !v)}
+                            aria-expanded={isOpen}
                         >
-                            <span style={{ color: isDropdownDisabled ? '#adb5bd' : 'inherit' }}>
-                                <strong>Enseñanzas</strong>
+                            <span className="ens-trigger__label">
+                                <span className="ens-trigger__dot" />
+                                {isOpen ? 'Cerrar enseñanzas' : 'Ver enseñanzas'}
                             </span>
-                            {!isDropdownDisabled && (
-                                <KeyboardArrowDown style={{ transition: 'transform 0.2s ease', transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)', color: '#666' }} />
-                            )}
+                            <span className="ens-trigger__chevron">
+                                <svg
+                                    width="12" height="12" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor"
+                                    strokeWidth="2.5" strokeLinecap="round"
+                                    style={{ transition: 'transform .25s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                                >
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </span>
                         </button>
 
-                        {isOpen && !isDropdownDisabled && (
-                            <div className="ensenanza-card-devocionales-list">
-                                {publishedDevotionals.map((dev) => (
-                                    <DevocionalRow key={dev.id} devocional={dev} ensenanzaId={ensenanza.id} />
+                        {isOpen && (
+                            <div className="ens-panel">
+                                {published.map((dev, idx) => (
+                                    <DevRow
+                                        key={dev.id}
+                                        dev={dev}
+                                        idx={idx + 1}
+                                        isEven={idx % 2 === 1}
+                                    />
                                 ))}
                             </div>
                         )}
@@ -217,56 +220,55 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
     );
 }
 
-// ─── DevocionalRow ────────────────────────────────────────────────────────────
-type DevRowProps = {
-    ensenanzaId: string;
-    devocional: DevocionalEnsenanza;
-};
-
-function DevocionalRow({ devocional }: DevRowProps) {
+function DevRow({ dev, idx, isEven }: DevRowProps) {
     const [open, setOpen] = useState(false);
 
     return (
-        <div style={{ borderTop: '1px solid #e9ecef' }}>
+        <div className={`dev-row ${isEven ? 'dev-row--even' : ''}`}>
             <button
-                onClick={() => setOpen((o) => !o)}
-                style={{ width: '100%', padding: '10px 16px', border: 'none', background: '#f8f9fa', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
+                className={`dev-row__head ${open ? 'dev-row__head--open' : ''}`}
+                onClick={() => setOpen((v) => !v)}
             >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', gap: 2, flex: 1 }}>
-                    <span style={{ fontSize: 14, fontWeight: 500, color: '#212529' }}>
-                        <strong>{devocional.titulo}</strong>
+                <span className="dev-row__num">{String(idx).padStart(2, '0')}</span>
+                <span className="dev-row__title">{dev.titulo}</span>
+
+                <div className="dev-row__meta">
+                    <span className="dev-row__stat">
+                        <i className="bi bi-eye" style={{ fontSize: 11 }} />
+                        {dev.views_count ?? 0}
                     </span>
+                    <span className="dev-row__like" onClick={(e) => e.stopPropagation()}>
+                        <LikeButton type="ensenanza" id={dev.id} variant="default" />
+                    </span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                        style={{ transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'rotate(0)', flexShrink: 0 }}>
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
                 </div>
-
-                <i className="bi bi-eye" />
-                <span>{devocional.views_count ?? 0}</span>
-                <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', marginRight: 4 }}>
-                    <LikeButton type="ensenanza" id={devocional.id} variant="default" />
-                </div>
-
-                <KeyboardArrowDown
-                    style={{ fontSize: 20, transition: 'transform 0.2s ease', transform: open ? 'rotate(-180deg)' : 'rotate(0deg)', color: '#868e96', flexShrink: 0 }}
-                />
             </button>
 
             {open && (
-                <div style={{ borderTop: '1px solid #e9ecef', display: 'grid' }}>
-                    {devocional.id && <ActionRow label="Leer" href={`/series/${devocional.id}`} />}
-                    {devocional.pdf && <ActionRow label="Descargar PDF" href={devocional.pdf} target="_blank" />}
-                    {devocional.instagram && <ActionRow label="Formato reducido" href={devocional.instagram} target="_blank" />}
-                    {devocional.tiktok && <ActionRow label="Formato reels" href={devocional.tiktok} target="_blank" />}
+                <div className="dev-row__actions">
+                    <a href={`/series/${dev.id}`} className="dev-action dev-action--primary">
+                        <i className="bi bi-book-open" style={{ fontSize: 12 }} /> Leer
+                    </a>
+                    {dev.pdf && (
+                        <a href={dev.pdf} target="_blank" rel="noopener noreferrer" className="dev-action dev-action--pdf">
+                            <i className="bi bi-file-earmark-pdf" style={{ fontSize: 12 }} /> PDF
+                        </a>
+                    )}
+                    {dev.instagram && (
+                        <a href={dev.instagram} target="_blank" rel="noopener noreferrer" className="dev-action dev-action--reducido">
+                            <i className="bi bi-card-text" style={{ fontSize: 12 }} /> Reducido
+                        </a>
+                    )}
+                    {dev.tiktok && (
+                        <a href={dev.tiktok} target="_blank" rel="noopener noreferrer" className="dev-action dev-action--reel">
+                            <i className="bi bi-camera-video" style={{ fontSize: 12 }} /> Reels
+                        </a>
+                    )}
                 </div>
             )}
         </div>
-    );
-}
-
-function ActionRow({ label, href, target }: { label: string; href: string; target?: string }) {
-    return (
-        <a href={href} style={{ textDecoration: 'none', color: 'inherit' }} target={target}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', fontSize: 13, borderRight: '1px solid #e9ecef', borderBottom: '1px solid #e9ecef', cursor: 'pointer', backgroundColor: '#fff' }}>
-                <span>{label}</span>
-            </div>
-        </a>
     );
 }

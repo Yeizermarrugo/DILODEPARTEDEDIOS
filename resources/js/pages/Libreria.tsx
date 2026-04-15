@@ -1,14 +1,10 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
+import PageLayout from "@/components/PageLayout";
 import '../../css/main.css';
 import '../../css/podcast.css';
 
 const Libreria = () => {
     return (
-        <div className="index-page">
-            {/* Header */}
-            <Header />
-
+        <PageLayout>
             {/* Page Title */}
             <div className="page-title">
                 <div className="title-wrapper">
@@ -24,7 +20,6 @@ const Libreria = () => {
                     </p>
                     <br />
                     <p style={{ fontStyle: 'italic' }}>
-
                         “Más bien, busquen todo lo que sea bueno y que ayude a su espíritu, así como los niños recién nacidos buscan ansiosos la leche de su madre. Si lo hacen así, serán mejores cristianos y Dios los salvará,”{' '}
                         <span style={{ fontWeight: 'bold' }}>1 Pedro 2:2 TLA</span>
                     </p>
@@ -35,15 +30,7 @@ const Libreria = () => {
             <main className="centered-main">
                 <img src="/assets/img/Estamos%20trabajando.png" alt="Estamos trabajando" className="trabajando" />
             </main>
-
-            {/* Footer */}
-            <Footer />
-
-            {/* Scroll Top Button */}
-            {/* <a href="#" id="scroll-top" className="scroll-top d-flex align-items-center justify-content-center">
-                <i className="bi bi-arrow-up-short"></i>
-            </a> */}
-        </div>
+        </PageLayout>
     );
 }
 
