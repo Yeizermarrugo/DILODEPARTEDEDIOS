@@ -1,14 +1,17 @@
 import CardNew from '@/components/CardNew';
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
+import Spinner from '@/components/Spinner';
 import FilterSheet from '@/components/ui/FilterSheet';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import '../../css/devocionals.css';
 import '../../css/main.css';
 
-type Category = {
-    categoria: string;
-    count: number;
-};
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+
+type SortId = 'latest' | 'likes' | 'views';
+
+type Category = { categoria: string; count: number };
 
 type Devocional = {
     id: string;
@@ -17,7 +20,8 @@ type Devocional = {
     categoria: string;
     created_at?: string;
     views_count?: number;
-    [key: string]: string | number | undefined;
+    autor?: string;
+    [key: string]: any;
 };
 
 type DevocionalesResponse = {
@@ -25,527 +29,295 @@ type DevocionalesResponse = {
     current_page: number;
     last_page: number;
     total: number;
-    per_page: number;
-    next_page_url: string | null;
-    prev_page_url: string | null;
+    categorias?: Category[];
 };
 
-type Serie = {
-    nombre: string;
-    categorias: { categoria: string; count: number }[];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const obtenerPrimerEtiqueta = (html: string): string => {
+    const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
+    return match ? match[2].replace(/<[^>]+>/g, '') : '';
 };
 
-const categoryColorMap: Record<string, string> = {
-    'general': '#77d7b9',
-    'biblia': '#ff6b6b',
-    'oracion': '#4ecdc4',
-    'fe': '#ffe66d',
-    'reflexion': '#95e1d3',
+const decodeHtmlEntities = (str: string): string => {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    return txt.value;
 };
+
+function useDebounce<T>(value: T, delay: number): T {
+    const [debounced, setDebounced] = useState<T>(value);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebounced(value), delay);
+        return () => clearTimeout(timer);
+    }, [value, delay]);
+    return debounced;
+}
+
+// ─── Componente Principal ─────────────────────────────────────────────────────
 
 function Devocionals() {
+    // Estados de Datos
     const [categories, setCategories] = useState<Category[]>([]);
-    const [series, setSeries] = useState<Serie[]>([]);
     const [devocionales, setDevocionales] = useState<Devocional[]>([]);
-    const [latestDevocionales, setLatestDevocionales] = useState<Devocional[]>([]);
     const [pagination, setPagination] = useState<Partial<DevocionalesResponse>>({});
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [devocionalSeleccionado, setDevocionalSeleccionado] = useState<Devocional | null>(null);
+
+    // Estados de Filtros y UI
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [query, setQuery] = useState(searchTerm);
-    const [sort, setSort] = useState<'latest' | 'likes' | 'views'>('latest');
+    const [sort, setSort] = useState<SortId>('latest');
+
+    // Estados de Modal/Sheet
     const [sheetOpen, setSheetOpen] = useState(false);
     const [pendingCategory, setPendingCategory] = useState<string | null>(null);
-    const [pendingSort, setPendingSort] = useState<'latest' | 'likes' | 'views'>('latest');
+    const [pendingSort, setPendingSort] = useState<SortId>('latest');
 
-    // Fetch devocionales (paginación y search siempre backend)
+    const inputRef = useRef<HTMLInputElement>(null);
+    const debouncedSearch = useDebounce(searchTerm, 350);
+
+    // Resetear página al buscar o filtrar
+    useEffect(() => { setPage(1); }, [debouncedSearch, selectedCategory, sort]);
+
+    // ── Fetch Data ────────────────────────────────────────────────────────────
     useEffect(() => {
-        setLoading(true);
-
-        // Cancelar peticiones anteriores si cambia algo rápido
         const controller = new AbortController();
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                let url = '';
+                const params = new URLSearchParams({
+                    page: String(page),
+                    sort: sort
+                });
 
-        let url = '';
-        if (query.trim() !== '') {
-            // Si tu backend usa ?query= en lugar de ?search= cámbialo aquí:
-            url = `/devocionales-search?search=${encodeURIComponent(query)}&page=${page}&sort=${sort}`;
-        } else if (selectedCategory) {
-            url = `/devocionales/categoria/${encodeURIComponent(selectedCategory)}?page=${page}&sort=${sort}`;
-        } else {
-            url = `/devocionales-search?page=${page}&sort=${sort}`;
-        }
-
-        fetch(url, { signal: controller.signal })
-            .then((r) => r.json())
-            .then((data) => {
-                if (!selectedCategory && query.trim() === '') {
-                    setCategories(data.categorias || []);
-                    // setSeries(data.series || []);
-                    setTotal(data.devocionales?.total || 0);
+                if (debouncedSearch.trim()) {
+                    params.append('search', debouncedSearch.trim());
+                    url = `/devocionales-search?${params.toString()}`;
+                } else if (selectedCategory) {
+                    url = `/devocionales/categoria/${encodeURIComponent(selectedCategory)}?${params.toString()}`;
+                } else {
+                    url = `/devocionales-search?${params.toString()}`;
                 }
 
+                const response = await fetch(url, { signal: controller.signal });
+                const data = await response.json();
+
+                if (data.categorias) setCategories(data.categorias);
+
+                // Normalización de respuesta del backend
                 if (data.devocionales) {
                     setDevocionales(data.devocionales.data || []);
                     setPagination(data.devocionales);
                 } else if (data.data) {
-                    setDevocionales(data.data || []);
+                    setDevocionales(data.data);
                     setPagination(data);
                 }
-            })
-            .catch((err) => {
-                if (err.name !== 'AbortError') {
-                    console.error('Error en fetch:', err);
-                }
-            })
-            .finally(() => setLoading(false));
+            } catch (err: any) {
+                if (err.name !== 'AbortError') console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        fetchData();
         return () => controller.abort();
-    }, [selectedCategory, page, query, sort]); // <- SIN searchTerm
+    }, [selectedCategory, page, debouncedSearch, sort]);
 
-    // Fetch latest posts (no depende del search)
-    useEffect(() => {
-        fetch('devocionals-latest')
-            .then((response) => response.json())
-            .then((data) => {
-                setLatestDevocionales(data);
-            })
-            .catch((error) => {
-                console.error('Error fetching latest devocionales:', error);
-            });
-    }, []);
+    // ── Handlers ─────────────────────────────────────────────────────────────
 
-    const handleSelectCategory = (cat: string | null) => {
-        setSelectedCategory(cat);
-        setPage(1);
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        if (e.target.value && selectedCategory) setSelectedCategory(null);
+    };
+
+    const handleClearSearch = () => {
         setSearchTerm('');
-        setQuery(''); // <- reset del query para listar por categoría
+        inputRef.current?.focus();
     };
 
-    // const limpiarBusqueda = () => {
-    //     setSearchTerm('');
-    //     setQuery(''); // <- limpia el término que dispara el fetch
-    //     setPage(1);
-    // };
+    // ── Valores Derivados ─────────────────────────────────────────────────────
 
-    const abrirModal = (devocional: Devocional) => {
-        setDevocionalSeleccionado(devocional);
-        setModalOpen(true);
-        window.history.pushState({}, '', `?devocional=${devocional.id}`);
-    };
+    const totalResults = pagination.total || 0;
+    const hasFilter = selectedCategory !== null || sort !== 'latest';
+    const gridHeading = debouncedSearch.trim()
+        ? `Resultados de "${debouncedSearch.trim()}"`
+        : selectedCategory ?? 'Todos los Devocionales';
 
-    const cerrarModal = () => {
-        setModalOpen(false);
-        setDevocionalSeleccionado(null);
-        window.history.pushState({}, '', window.location.pathname);
-    };
+    const sortOptions: { key: SortId; icon: string; label: string }[] = [
+        { key: 'latest', icon: '🕐', label: 'Más recientes' },
+        { key: 'likes', icon: '♥', label: 'Más likes' },
+        { key: 'views', icon: '👁', label: 'Más vistas' },
+    ];
 
-    const decodeHtmlEntities = (str: string): string => {
-        const txt = document.createElement('textarea');
-        txt.innerHTML = str;
-        return txt.value;
-    };
+    const todasLasCategorias = useMemo(() =>
+        categories.map(c => c.categoria.trim().toLowerCase()).sort()
+        , [categories]);
 
-    const obtenerPrimerEtiqueta = (html: string) => {
-        const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
-        if (match) {
-            const innerText = match[2].replace(/<[^>]+>/g, '');
-            return innerText;
-        }
-        return '';
-    };
+    // ── Render Helpers ───────────────────────────────────────────────────────
 
-    const TituloDevocional = ({ contenido }: { contenido: string }) => {
-        const titulo = obtenerPrimerEtiqueta(contenido);
-        return <div style={{ justifyContent: 'start', display: 'flex', paddingTop: '20px' }} dangerouslySetInnerHTML={{ __html: titulo }} />;
-    };
-
-    // Paginador (backend)
     const renderPaginator = () => {
         if (!pagination.last_page || pagination.last_page <= 1) return null;
-        const pages = [];
-        const maxPagesToShow = 5;
-        let start = Math.max(1, (pagination.current_page || 1) - 2);
-        const end = Math.min(pagination.last_page, start + maxPagesToShow - 1);
-        if (end - start < maxPagesToShow - 1) {
-            start = Math.max(1, end - maxPagesToShow + 1);
-        }
-        for (let i = start; i <= end; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    className={`paginator-btn ${pagination.current_page === i ? 'active' : ''}`}
-                    onClick={() => setPage(i)}
-                    disabled={pagination.current_page === i}
-                    style={{
-                        margin: '0 3px',
-                        padding: '5px 10px',
-                        background: pagination.current_page === i ? '#007bff' : '#f0f0f0',
-                        color: pagination.current_page === i ? '#fff' : '#333',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: pagination.current_page === i ? 'default' : 'pointer',
-                    }}
-                >
-                    {i}
-                </button>,
-            );
-        }
+        const cur = pagination.current_page || 1;
+        const last = pagination.last_page;
+
         return (
-            <div style={{ textAlign: 'center', margin: '20px 0' }}>
-                <button
-                    onClick={() => setPage((pagination.current_page || 2) - 1)}
-                    disabled={pagination.current_page === 1}
-                    style={{ marginRight: '5px' }}
-                >
-                    &laquo; Anterior
-                </button>
-                {pages}
-                <button
-                    onClick={() => setPage((pagination.current_page || 0) + 1)}
-                    disabled={pagination.current_page === pagination.last_page}
-                    style={{ marginLeft: '5px' }}
-                >
-                    Siguiente &raquo;
-                </button>
+            <div className="dv-pager">
+                <span className="dv-pager__info">
+                    {totalResults} publicaciones · pág. {cur} de {last}
+                </span>
+                <div className="dv-pager__btns">
+                    <button className="dv-pager__btn" onClick={() => setPage(cur - 1)} disabled={cur === 1}>‹</button>
+                    {Array.from({ length: last }, (_, i) => i + 1)
+                        .filter(p => p === 1 || p === last || Math.abs(p - cur) <= 1)
+                        .map((p, i, arr) => (
+                            <React.Fragment key={p}>
+                                {i > 0 && arr[i - 1] !== p - 1 && <span className="dv-pager__dots">...</span>}
+                                <button
+                                    className={`dv-pager__btn ${cur === p ? 'dv-pager__btn--active' : ''}`}
+                                    onClick={() => setPage(p)}
+                                >{p}</button>
+                            </React.Fragment>
+                        ))}
+                    <button className="dv-pager__btn" onClick={() => setPage(cur + 1)} disabled={cur === last}>›</button>
+                </div>
             </div>
         );
     };
 
-    const PAGE_LIMIT = 16; // Cambia este valor si tu backend usa otro límite
-
-    const showPaginator = () => {
-        if (!searchTerm.trim()) {
-            // No hay búsqueda, muestra paginador si hay más de una página
-            return pagination.last_page && pagination.last_page > 1;
-        }
-        // Hay búsqueda, solo muestra paginador si el total de resultados es más que el límite por página
-        return devocionales.length > PAGE_LIMIT && (pagination.last_page ?? 0) > 1;
-    };
-    // const SearchWidget = () => (
-    //     <div className="search-widget widget-item">
-    //         <h3 className="widget-title">Search</h3>
-
-    //         <form
-    //             onSubmit={(e) => {
-    //                 e.preventDefault(); // <- evita recargar la página
-    //                 setPage(1);
-    //                 setQuery(searchTerm.trim()); // <- dispara el fetch
-    //             }}
-    //             style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-    //         >
-    //             <input
-    //                 type="text"
-    //                 value={searchTerm}
-    //                 onChange={(e) => setSearchTerm(e.target.value)} // <- NO dispara fetch
-    //                 placeholder="Buscar devocional..."
-    //             />
-    //             <button type="submit">Buscar</button>
-
-    //             {searchTerm && (
-    //                 <button type="button" onClick={limpiarBusqueda} title="Limpiar búsqueda">
-    //                     Limpiar
-    //                 </button>
-    //             )}
-    //         </form>
-    //     </div>
-    // );
-
-    const handleSortChange = (newSort: 'likes' | 'views') => {
-        setSort(prev => prev === newSort ? 'latest' : newSort);
-        setPage(1);
-    };
-
-    // Sticky bar — va donde estaba top-categories-sticky-wrapper
-    const FilterBar = () => {
-        const catLabel = selectedCategory
-            ? categories.find(c => c.categoria === selectedCategory)?.categoria ?? 'Todas'
-            : 'Todas';
-        const sortLabel = sort === 'likes' ? 'Likes' : sort === 'views' ? 'Vistas' : 'Recientes';
-        const hasFilter = selectedCategory !== null || sort !== 'latest';
-
-        return (
-            <>
-                {/* ── DESKTOP: filtro original con pills ── */}
-                <div className="filter-desktop">
-                    {/* Fila 1: Categorías */}
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: 80, whiteSpace: 'nowrap' }}>
-                            Categorías
-                        </span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                            <button
-                                onClick={() => handleSelectCategory(null)}
-                                style={{
-                                    padding: '5px 13px', borderRadius: 999,
-                                    border: selectedCategory === null ? 'none' : '0.5px solid #dee2e6',
-                                    background: selectedCategory === null ? '#f75815' : '#fff',
-                                    color: selectedCategory === null ? '#fff' : '#6c757d',
-                                    cursor: 'pointer', fontSize: 13,
-                                    fontWeight: selectedCategory === null ? 500 : 400,
-                                    transition: 'all 0.15s ease',
-                                }}
-                            >
-                                Todas <span style={{ opacity: 0.75, fontSize: 11 }}>{total}</span>
-                            </button>
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat.categoria}
-                                    onClick={() => handleSelectCategory(cat.categoria)}
-                                    style={{
-                                        padding: '5px 13px', borderRadius: 999,
-                                        border: selectedCategory === cat.categoria ? 'none' : '0.5px solid #dee2e6',
-                                        background: selectedCategory === cat.categoria ? '#f75815' : '#fff',
-                                        color: selectedCategory === cat.categoria ? '#fff' : '#6c757d',
-                                        cursor: 'pointer', fontSize: 13,
-                                        fontWeight: selectedCategory === cat.categoria ? 500 : 400,
-                                        transition: 'all 0.15s ease',
-                                    }}
-                                >
-                                    {cat.categoria} <span style={{ opacity: 0.75, fontSize: 11 }}>{cat.count}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Fila 2: Ordenar por */}
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: 80, whiteSpace: 'nowrap' }}>
-                            Ordenar por
-                        </span>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{
-                                padding: '5px 12px', borderRadius: 999, fontSize: 13,
-                                background: sort === 'latest' ? '#f5f5f5' : 'transparent',
-                                color: sort === 'latest' ? '#212529' : '#6c757d',
-                                fontWeight: sort === 'latest' ? 500 : 400,
-                            }}>
-                                🕐 Más recientes
-                            </span>
-                            <div style={{ width: 1, height: 18, background: '#dee2e6' }} />
-                            <button
-                                onClick={() => handleSortChange('likes')}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 5,
-                                    padding: '5px 13px', borderRadius: 999,
-                                    border: sort === 'likes' ? '1.5px solid #e63946' : '0.5px solid #dee2e6',
-                                    background: sort === 'likes' ? '#fff0f0' : '#fff',
-                                    color: sort === 'likes' ? '#c0182a' : '#6c757d',
-                                    cursor: 'pointer', fontSize: 13,
-                                    fontWeight: sort === 'likes' ? 500 : 400,
-                                    transition: 'all 0.15s ease',
-                                }}
-                            >
-                                <span style={{ fontSize: 14 }}>{sort === 'likes' ? '♥' : '♡'}</span>
-                                Más likes
-                                {sort === 'likes' && (
-                                    <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#e63946', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
-                                )}
-                            </button>
-                            <button
-                                onClick={() => handleSortChange('views')}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 5,
-                                    padding: '5px 13px', borderRadius: 999,
-                                    border: sort === 'views' ? '1.5px solid #2563eb' : '0.5px solid #dee2e6',
-                                    background: sort === 'views' ? '#ebf3ff' : '#fff',
-                                    color: sort === 'views' ? '#1a4db5' : '#6c757d',
-                                    cursor: 'pointer', fontSize: 13,
-                                    fontWeight: sort === 'views' ? 500 : 400,
-                                    transition: 'all 0.15s ease',
-                                }}
-                            >
-                                <i className="bi bi-eye" style={{ fontSize: 14 }} />
-                                Más vistas
-                                {sort === 'views' && (
-                                    <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#2563eb', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── MÓVIL: sticky bar compacta ── */}
-                <div className="filter-mobile">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                        <span style={{ fontSize: 13, color: '#999' }}>
-                            {total} devocionales
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div style={{
-                                display: 'flex', alignItems: 'center', gap: 5,
-                                padding: '5px 12px', borderRadius: 999,
-                                background: hasFilter ? '#f75815' : '#f1f1f1',
-                                color: hasFilter ? '#fff' : '#555',
-                                fontSize: 12, fontWeight: 500,
-                                maxWidth: 150, overflow: 'hidden', whiteSpace: 'nowrap',
-                            }}>
-                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {catLabel} · {sortLabel}
-                                </span>
-                                {hasFilter && (
-                                    <span
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedCategory(null);
-                                            setSort('latest');
-                                            setPendingCategory(null);
-                                            setPendingSort('latest');
-                                            setPage(1);
-                                        }}
-                                        style={{ cursor: 'pointer', opacity: 0.8, fontSize: 13, marginLeft: 2 }}
-                                    >
-                                        ✕
-                                    </span>
-                                )}
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setPendingCategory(selectedCategory);
-                                    setPendingSort(sort);
-                                    setSheetOpen(true);
-                                }}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 6,
-                                    padding: '7px 14px', borderRadius: 8,
-                                    border: '1px solid #e0e0e0', background: '#fff',
-                                    fontSize: 13, color: '#333', cursor: 'pointer',
-                                }}
-                            >
-                                <span style={{
-                                    width: 7, height: 7, borderRadius: '50%',
-                                    background: hasFilter ? '#f75815' : '#ccc',
-                                    display: 'inline-block', flexShrink: 0,
-                                }} />
-                                Filtrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </>
-        );
-    };
-
-
-    // const RecentPostsWidget = () => (
-    //     <div className="recent-posts-widget widget-item">
-    //         <h3 className="widget-title">Recent Posts</h3>
-    //         {latestDevocionales.map((post, idx) => (
-    //             <div className="post-item" key={idx}>
-    //                 <img src={post.imagen} alt="" className="flex-shrink-0" />
-    //                 <div>
-    //                     <h4 style={{ color: '#212529' }} className="recent-post-title">
-    //                         <button onClick={() => abrirModal(post)}>
-    //                             <TituloDevocional contenido={post.contenido} />
-    //                             <time dateTime="2020-01-01">
-    //                                 {post.created_at
-    //                                     ? new Date(post.created_at).toLocaleDateString('es-ES', {
-    //                                         weekday: 'long',
-    //                                         year: 'numeric',
-    //                                         month: 'long',
-    //                                         day: 'numeric',
-    //                                     })
-    //                                     : ''}
-    //                             </time>
-    //                         </button>
-    //                     </h4>
-    //                     <time dateTime="2020-01-01">{post.date}</time>
-    //                 </div>
-    //             </div>
-    //         ))}
-    //     </div>
-    // );
-
-    const todasLasCategorias = categories.map(cat =>
-        cat.categoria.trim().toLowerCase()
-    ).sort();
-
     return (
-        <div className="blog-details-page">
-            <Header />
-            <main className="main">
-                <div className="page-title">
-                    <div className="breadcrumbs"></div>
-                    <div className="title-wrapper">
-                        <h1>Encuentra la respuesta que Dios envía hoy a tu vida</h1>
-                        <p style={{ fontStyle: 'italic' }}>
-                            “Tal vez no nos damos cuenta, pero Dios no deja de hablarnos" <span style={{ fontWeight: 'bold' }}>Job 33:14 TLA</span>
+        <PageLayout className="dv-page">
+            <main>
+                <div className="dv-page-hero">
+                    <div className="dv-page-hero__inner">
+                        <div className="dv-page-hero__eyebrow">Devocionales</div>
+                        <h1 className="dv-page-hero__title">
+                            Encuentra la <em>palabra</em> que<br />Dios tiene para ti
+                        </h1>
+                        <p className="dv-page-hero__verse">
+                            "Tal vez no nos damos cuenta, pero Dios no deja de hablarnos" — Job 33:14 TLA
                         </p>
                     </div>
                 </div>
 
-                <div className="container">
-                    <div className="row">
-                        {/* Columna de ancho completo */}
-                        <div className="col-12">
+                <div className="dv-layout">
+                    {/* Sidebar Desktop */}
+                    <aside className="dv-sidebar">
+                        <div className="dv-sidebar__section">
+                            <div className="dv-sidebar__section-label">Categorías</div>
+                            <div className="dv-sidebar__cats">
+                                <button
+                                    className={`dv-sidebar__cat ${!selectedCategory && !debouncedSearch ? 'dv-sidebar__cat--active' : ''}`}
+                                    onClick={() => setSelectedCategory(null)}
+                                >
+                                    <span>Todas</span>
+                                    <span className="dv-sidebar__cat-count">{totalResults}</span>
+                                </button>
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat.categoria}
+                                        className={`dv-sidebar__cat ${selectedCategory === cat.categoria ? 'dv-sidebar__cat--active' : ''}`}
+                                        onClick={() => setSelectedCategory(cat.categoria)}
+                                    >
+                                        <span>{cat.categoria}</span>
+                                        <span className="dv-sidebar__cat-count">{cat.count}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                            {/* 1. Widget de Categorías ubicado arriba */}
-                            <div className="top-categories-sticky-wrapper">
-                                <div className="container">
-                                    <FilterBar />
-                                </div>
+                        <div className="dv-sidebar__section">
+                            <div className="dv-sidebar__section-label">Ordenar por</div>
+                            <div className="dv-sidebar__sort">
+                                {sortOptions.map(opt => (
+                                    <button
+                                        key={opt.key}
+                                        className={`dv-sidebar__sort-btn ${sort === opt.key ? 'dv-sidebar__sort-btn--active' : ''}`}
+                                        onClick={() => setSort(opt.key)}
+                                    >
+                                        <span className="dv-sidebar__sort-icon">{opt.icon}</span>
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div className="dv-content">
+                        {/* Topbar: Buscador y Filtros Mobile */}
+                        <div className="dv-topbar">
+                            <div className="dv-topbar__left">
+                                <div className="dv-topbar__heading">{gridHeading}</div>
+                                <div className="dv-topbar__count">{totalResults} publicaciones</div>
                             </div>
 
-                            <section id="blog-details" className="blog-grid section pt-0">
-                                <div className="container p-0">
-                                    {loading ? (
-                                        <div style={{ textAlign: 'center', padding: '40px' }}>
-                                            <div id="preloader" className="d-flex align-items-center justify-content-center">
-                                                <div className="spinner-border" role="status">
-                                                    <span className="visually-hidden">Loading...</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : devocionales.length === 0 ? (
-                                        <p>No hay devocionales para esta búsqueda.</p>
-                                    ) : (
-                                        <>
-                                            <div style={{ paddingBottom: '20px', marginBottom: '20px' }}>
-                                                <h2 style={{ color: '#212529', fontSize: '1.5rem', borderLeft: '4px solid var(--accent-color)', paddingLeft: '15px' }}>
-                                                    {searchTerm
-                                                        ? `Resultados de búsqueda "${searchTerm}"`
-                                                        : selectedCategory
-                                                            ? `Categoría - ${selectedCategory}`
-                                                            : 'Todos los Devocionales'}
-                                                </h2>
-                                            </div>
-
-                                            <div className="cards-container">
-                                                {devocionales.map((devocional, idx) => (
-                                                    <CardNew
-                                                        key={devocional.id || idx}
-                                                        dev={{
-                                                            id: devocional.id,
-                                                            imagen: devocional.imagen,
-                                                            titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(devocional.contenido)),
-                                                            autor: String(devocional.autor ?? ''),
-                                                            categoria: devocional.categoria,
-                                                            views_count: devocional.views_count || 0,
-                                                        }}
-                                                        todasLasCategorias={todasLasCategorias}
-                                                    />
-                                                ))}
-                                            </div>
-
-                                            {showPaginator() && renderPaginator()}
-                                        </>
+                            <div className="dv-topbar__right">
+                                <div className="dv-search">
+                                    <input
+                                        ref={inputRef}
+                                        type="text"
+                                        className="dv-search__input"
+                                        placeholder="Buscar..."
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                    />
+                                    {loading ? <Spinner /> : searchTerm && (
+                                        <button className="dv-search__clear" onClick={handleClearSearch}>✕</button>
                                     )}
                                 </div>
-                            </section>
+
+                                <button
+                                    className="dv-mobile-filter-btn"
+                                    onClick={() => {
+                                        setPendingCategory(selectedCategory);
+                                        setPendingSort(sort);
+                                        setSheetOpen(true);
+                                    }}
+                                >
+                                    {hasFilter && <span className="dv-mobile-filter-btn__dot--active" />}
+                                    Filtrar
+                                </button>
+                            </div>
                         </div>
-                        {/* Nota: Se eliminó el sidebar lateral col-lg-4 para dar espacio completo */}
+
+                        {/* Grid de Contenido */}
+                        <div className="dv-grid-wrapper">
+                            {loading && devocionales.length === 0 ? (
+                                <div className="dv-loading"><Spinner /></div>
+                            ) : devocionales.length === 0 ? (
+                                <div className="dv-empty">
+                                    <div className="dv-empty__icon">📖</div>
+                                    <p>No se encontraron devocionales.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="cards-container">
+                                        {devocionales.map((dev) => (
+                                            <CardNew
+                                                key={dev.id}
+                                                dev={{
+                                                    ...dev,
+                                                    titulo: obtenerPrimerEtiqueta(decodeHtmlEntities(dev.contenido)),
+                                                    autor: dev.autor || 'Redacción',
+                                                }}
+                                                todasLasCategorias={todasLasCategorias}
+                                            />
+                                        ))}
+                                    </div>
+                                    {renderPaginator()}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>
-            <Footer />
+
             <FilterSheet
                 isOpen={sheetOpen}
                 onClose={() => setSheetOpen(false)}
                 categories={categories}
-                total={total}
+                total={totalResults}
                 pendingCategory={pendingCategory}
                 pendingSort={pendingSort}
                 onCategoryChange={setPendingCategory}
@@ -553,7 +325,6 @@ function Devocionals() {
                 onApply={() => {
                     setSelectedCategory(pendingCategory);
                     setSort(pendingSort);
-                    setPage(1);
                     setSheetOpen(false);
                 }}
                 onClear={() => {
@@ -561,7 +332,7 @@ function Devocionals() {
                     setPendingSort('latest');
                 }}
             />
-        </div>
+        </PageLayout>
     );
 }
 

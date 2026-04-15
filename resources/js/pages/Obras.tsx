@@ -1,6 +1,6 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 import ObrasList from "@/components/ObrasList";
+import PageHero from "@/components/PageHero";
+import PageLayout from "@/components/PageLayout";
 import { useEffect, useState } from "react";
 import '../../css/main.css';
 import '../../css/podcast.css';
@@ -67,32 +67,28 @@ const Obras = () => {
     }, []);
 
     return (
-        <div className="index-page">
-            <Header />
+        <PageLayout>
+            <PageHero>
+                <h1 style={{ textAlign: 'center' }}>Llamados a servir con amor</h1>
+                <br /><br />
+                <p>En esta sección compartimos las obras y acciones sociales que realizamos como ministerio...</p>
+                <br />
+                <p style={{ fontWeight: 'bold' }}>Tu apoyo nos ayuda a seguir sirviendo y alcanzando más vidas</p>
+                <br />
+                <p style={{ fontStyle: 'italic' }}>”Hijitos, nuestro amor no debe ser solo de palabras...” <b>1 Juan 3:18 PDT</b></p>
+                <br />
 
-            <div className="page-title">
-                <div className="title-wrapper">
-                    <h1 style={{ textAlign: 'center' }}>Llamados a servir con amor</h1>
-                    <br /><br />
-                    <p>En esta sección compartimos las obras y acciones sociales que realizamos como ministerio...</p>
-                    <br />
-                    <p style={{ fontWeight: 'bold' }}>Tu apoyo nos ayuda a seguir sirviendo y alcanzando más vidas</p>
-                    <br />
-                    <p style={{ fontStyle: 'italic' }}>“Hijitos, nuestro amor no debe ser solo de palabras...” <b>1 Juan 3:18 PDT</b></p>
-                    <br />
-
-                    {/* Botón Principal que abre TU modal */}
-                    {/* <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <button
-                            onClick={() => setShowSelectionModal(true)}
-                            className="obras-header__cta"
-                            style={{ cursor: 'pointer', border: 'none' }}
-                        >
-                            Apoyar esta obra
-                        </button>
-                    </div> */}
+                {/* Botón Principal que abre TU modal */}
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <button
+                        onClick={() => setShowSelectionModal(true)}
+                        className="obras-header__cta"
+                        style={{ cursor: 'pointer', border: 'none' }}
+                    >
+                        Apoyar esta obra
+                    </button>
                 </div>
-            </div>
+            </PageHero>
 
             {/* MODAL DE SELECCIÓN DE MONTO (Se muestra si showSelectionModal es true) */}
             {showSelectionModal && (
@@ -199,9 +195,7 @@ const Obras = () => {
             <main className="centered-main">
                 <ObrasList />
             </main>
-
-            <Footer />
-        </div>
+        </PageLayout>
     );
 }
 
