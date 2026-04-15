@@ -198,6 +198,7 @@
     transition: color 0.2s;
 }
 
+
 .sp-dev__featured-title:hover {
     color: rgba(255, 255, 255, 0.85);
 }
@@ -277,6 +278,10 @@
     cursor: pointer;
     text-align: left;
     flex: 1;
+}
+
+.sp-dev__mini-title h1 {
+    font-size: 0.88rem;
 }
 
 .sp-dev__mini-date {
@@ -1105,6 +1110,7 @@
 
 /* ── 768px — tablet portrait ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
+
     .sp-dev,
     .sp-yt,
     .sp-pod,
@@ -1146,6 +1152,7 @@
 
 /* ── 640px — mobile grande ────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+
     .sp-dev,
     .sp-yt,
     .sp-pod,
@@ -1208,12 +1215,14 @@
     }
 
     .sp-pod__video-glow {
-        display: none; /* evita desbordamiento en móvil pequeño */
+        display: none;
+        /* evita desbordamiento en móvil pequeño */
     }
 }
 
 /* ── 448px — mobile pequeño ───────────────────────────────────────────────── */
 @media (max-width: 448px) {
+
     .sp-dev,
     .sp-yt,
     .sp-pod,
