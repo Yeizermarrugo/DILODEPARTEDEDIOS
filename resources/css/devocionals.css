@@ -75,12 +75,31 @@
     font-style: italic;
 }
 
-.dv-page-hero__verse {
+/* .dv-page-hero__verse {
     font-family: var(--dv-serif);
     font-size: 0.95rem;
     font-style: italic;
-    color: rgba(255, 255, 255, 0.603);
     line-height: 1.5;
+} */
+
+.dv-page-hero__verse {
+    font-family: var(--dv-serif);
+    font-size: 1.2rem;
+    color: #fff;
+    font-style: italic;
+    margin-top: 25px;
+    border-left: 2px solid var(--dv-orange);
+    padding-left: 20px;
+}
+
+.dv-page-hero__verse strong {
+    display: block;
+    font-size: 0.85rem;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 8px;
+    color: var(--dv-orange);
 }
 
 /* Layout — sin max-width para que el sidebar llegue al borde izquierdo */
