@@ -113,12 +113,31 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 </div>
 
                 <div className="ens-cover__info">
-                    {ensenanza.autores.length > 0 && (
+                    {ensenanza.autores.length === 1 && (
                         <div className="ens-cover__author">
                             <span className="ens-cover__avatar">
                                 {initials(authorFirst)}
                             </span>
                             <span className="ens-cover__author-name">{authorFirst}</span>
+                        </div>
+                    )}
+                    {ensenanza.autores.length > 1 && (
+                        <div className="ens-cover__author ens-cover__author--multi">
+                            <div className="ens-cover__facepile">
+                                {ensenanza.autores.slice(0, 4).map((a, i) => (
+                                    <span
+                                        key={i}
+                                        className="ens-cover__avatar ens-cover__avatar--pile"
+                                        style={{ zIndex: ensenanza.autores.length - i }}
+                                        title={a}
+                                    >
+                                        {initials(a)}
+                                    </span>
+                                ))}
+                            </div>
+                            <span className="ens-cover__author-name">
+                                {ensenanza.autores.join(' · ')}
+                            </span>
                         </div>
                     )}
                     <h3 className="ens-cover__title">{ensenanza.titulo}</h3>

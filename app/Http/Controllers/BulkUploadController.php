@@ -2,22 +2,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 
 class BulkUploadController extends Controller
 {
-      public function index()
+    public function index()
     {
-        // Lista recursiva de todos los archivos dentro de "imagenes"
-        $paths = Storage::disk('s3')->allFiles('imagenes');
+        /** @var FilesystemAdapter $disk */
+        $disk  = Storage::disk('s3');
+        $paths = $disk->allFiles('imagenes');
 
-        // Mapear a URLs públicas
-        $files = array_map(function ($path) {
-            return [
-                'path' => $path,
-                'url'  => Storage::disk('s3')->url($path),
-            ];
-        }, $paths);
+        $files = array_map(fn($path) => [
+            'path' => $path,
+            'url'  => $disk->url($path),
+        ], $paths);
 
         return response()->json([
             'count' => count($files),
@@ -31,11 +30,13 @@ class BulkUploadController extends Controller
             'files.*' => 'required|image|max:5120',
         ]);
 
+        /** @var FilesystemAdapter $disk */
+        $disk  = Storage::disk('s3');
         $paths = [];
 
         foreach ($request->file('files') as $file) {
-            $path = $file->store('imagenes', 's3');
-            $url  = Storage::disk('s3')->url($path);
+            $path    = $file->store('imagenes', 's3');
+            $url     = $disk->url($path);
             $paths[] = compact('path', 'url');
         }
 
@@ -43,5 +44,21 @@ class BulkUploadController extends Controller
             'count' => count($paths),
             'files' => $paths,
         ]);
+    }
+
+    public function storeVideo(Request $request)
+    {
+        $request->validate([
+            'file'  => 'required|file|mimetypes:video/mp4,video/webm,video/quicktime|max:204800',
+            'folder' => 'sometimes|string|max:100',
+        ]);
+
+        /** @var FilesystemAdapter $disk */
+        $disk   = Storage::disk('s3');
+        $folder = $request->input('folder', 'videos');
+        $path   = $request->file('file')->store($folder, 's3');
+        $url    = $disk->url($path);
+
+        return response()->json(compact('path', 'url'));
     }
 }

@@ -38,9 +38,6 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 255, 255, .02) 39px, rgba(255, 255, 255, .02) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255, 255, 255, .02) 39px, rgba(255, 255, 255, .02) 40px);
     pointer-events: none;
 }
 
@@ -373,6 +370,33 @@
     color: rgba(255, 255, 255, .5);
 }
 
+.ens-cover__author--multi {
+    align-items: center;
+    gap: 8px;
+}
+
+.ens-cover__author--multi .ens-cover__author-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+
+.ens-cover__facepile {
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.ens-cover__avatar--pile {
+    margin-left: -6px;
+    border: 1.5px solid rgba(0, 0, 0, 0.35);
+}
+
+.ens-cover__avatar--pile:first-child {
+    margin-left: 0;
+}
+
 .ens-cover__title {
     font-family: var(--ens-serif);
     font-size: 1rem;
@@ -644,7 +668,8 @@
 /* --- Pantallas Medianas (Tablets) --- */
 @media (max-width: 1100px) {
     .ens-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+        grid-template-columns: repeat(2, 1fr);
+        /* 2 columnas */
         gap: 16px;
     }
 }
@@ -672,7 +697,8 @@
     }
 
     .ens-hero__stats {
-        display: none; /* Ocultar stats en móvil para limpiar el Hero */
+        display: none;
+        /* Ocultar stats en móvil para limpiar el Hero */
     }
 
     .ens-section {
@@ -695,14 +721,16 @@
     }
 
     .dv-search__input {
-        width: 100% !important; /* El buscador ocupa el ancho disponible */
+        width: 100% !important;
+        /* El buscador ocupa el ancho disponible */
     }
 }
 
 /* --- Móviles Estándar (Menos de 480px) --- */
 @media (max-width: 480px) {
     .ens-grid {
-        grid-template-columns: 1fr; /* Una sola card por fila */
+        grid-template-columns: 1fr;
+        /* Una sola card por fila */
         gap: 20px;
     }
 
@@ -723,7 +751,8 @@
     }
 
     .ens-cover {
-        height: 200px; /* Un poco más de altura para que la imagen luzca en 1 columna */
+        height: 200px;
+        /* Un poco más de altura para que la imagen luzca en 1 columna */
     }
 
     .ens-cover__title {
@@ -745,12 +774,14 @@
     }
 
     .dev-row__actions {
-        padding-left: 14px; /* Menos sangría en móvil para ganar espacio */
+        padding-left: 14px;
+        /* Menos sangría en móvil para ganar espacio */
         gap: 8px;
     }
 
     .dev-action {
-        flex: 1; /* Los botones se estiran para ser más fáciles de tocar */
+        flex: 1;
+        /* Los botones se estiran para ser más fáciles de tocar */
         justify-content: center;
         padding: 8px 10px;
     }

@@ -322,23 +322,134 @@ function CarouselSection() {
     );
 }
 
-// ─── Sección 3: Video próximamente ───────────────────────────────────────────
+// ─── Sección 3: Video local ───────────────────────────────────────────────────
+//
+//  Coloca tu archivo de video en:  /public/assets/video/
+//  y ajusta VIDEO_SRC con el nombre exacto.
+//
+//  VIDEO_SRC  → ruta del video  (mp4 recomendado, h.264)
+//  VIDEO_POSTER → imagen de portada mientras no se reproduce
+//                 (usa una captura del video o una foto tuya)
+//                 Si no tienes poster aún, déjalo en '' y se mostrará
+//                 el fondo oscuro con el botón play.
+
+const VIDEO_SRC = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/videos/ZXF3DNFj6ois2QlJp9LD2IzpmNgiayARHoWby1n0.mp4';   // ← tu archivo
+const VIDEO_POSTER = '/assets/video/nosotros.png'; // ← portada (opcional)
 
 function VideoSoonSection() {
+    const [playing, setPlaying] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const { ref, visible } = useReveal(0.15);
+
+    // Al hacer clic en el thumb: mostrar el <video> y arrancar reproducción
+    const handlePlay = () => {
+        setPlaying(true);
+        // Pequeño timeout para que React renderice el <video> antes de llamar a play()
+        setTimeout(() => {
+            videoRef.current?.play().catch(() => {
+                // Si el navegador bloquea autoplay, el usuario verá los controles
+            });
+        }, 50);
+    };
+
+    // Esc cierra el player y pausa
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && playing) {
+                videoRef.current?.pause();
+                setPlaying(false);
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [playing]);
+
     return (
-        <div className="sp-video-soon">
-            <div className="sp-video-soon__left">
-                <div className="sp-video-soon__play">
-                    <IconPlay />
+        <section className="sp-vsec">
+            <div
+                ref={ref}
+                className={`sp-vsec__inner sp-reveal ${visible ? 'sp-reveal--visible' : ''}`}
+            >
+                {/* ── Encabezado ── */}
+                <div className="sp-vsec__header">
+                    <div>
+                        <div className="sp-eyebrow sp-eyebrow--white" style={{ marginBottom: 10 }}>
+                            <span className="sp-eyebrow__line sp-eyebrow__line--white" />
+                            Video especial
+                        </div>
+                        <h2 className="sp-section-title sp-section-title--white sp-vsec__title">
+                            Un mensaje que <em>transforma</em>
+                        </h2>
+                    </div>
                 </div>
-                <span className="sp-video-soon__text">
-                    <strong>Video especial</strong> · en preparación para ti
-                </span>
+
+                {/* ── Player ── */}
+                <div className="sp-vsec__player">
+
+                    {/* ── Thumbnail + botón play ── visible hasta que el usuario da play */}
+                    <button
+                        className={`sp-vsec__thumb-btn ${playing ? 'sp-vsec__thumb-btn--hidden' : ''}`}
+                        onClick={handlePlay}
+                        aria-label="Reproducir video"
+                        tabIndex={playing ? -1 : 0}
+                    >
+                        {/* Poster / portada */}
+                        {VIDEO_POSTER ? (
+                            <img
+                                src={VIDEO_POSTER}
+                                alt="Portada del video"
+                                className="sp-vsec__thumb-img"
+                                loading="lazy"
+                            />
+                        ) : (
+                            /* Sin poster: fondo oscuro con patrón */
+                            <div className="sp-vsec__thumb-fallback" />
+                        )}
+
+                        <div className="sp-vsec__thumb-overlay" />
+
+                        {/* Botón play naranja con anillo pulsante */}
+                        <div className="sp-vsec__play-btn">
+                            <svg viewBox="0 0 24 24" width={30} height={30} fill="#fff">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                        </div>
+
+                        <span className="sp-vsec__play-label">Reproducir</span>
+                    </button>
+
+                    {/* ── Video HTML5 nativo ── */}
+                    <video
+                        ref={videoRef}
+                        className={`sp-vsec__video ${playing ? 'sp-vsec__video--visible' : ''}`}
+                        src={VIDEO_SRC}
+                        poster={VIDEO_POSTER || undefined}
+                        controls
+                        playsInline
+                        preload="metadata"     // carga solo metadatos hasta que el usuario da play
+                        onEnded={() => setPlaying(false)}
+                    />
+
+                    {/* Botón X para cerrar el player y volver al poster */}
+                    {playing && (
+                        <button
+                            className="sp-vsec__close-btn"
+                            onClick={() => {
+                                videoRef.current?.pause();
+                                setPlaying(false);
+                            }}
+                            aria-label="Cerrar reproductor"
+                        >
+                            <svg viewBox="0 0 24 24" width={14} height={14} fill="none"
+                                stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+
+                </div>
             </div>
-            <span className="sp-video-soon__badge">
-                Próximamente
-            </span>
-        </div>
+        </section>
     );
 }
 
@@ -443,6 +554,28 @@ function YTSection({ videos, error }: YTSectionProps) {
 
 function PodCAFSection() {
     const { ref, visible } = useReveal();
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+        if (visible) {
+            video.play().catch(() => { });
+        } else {
+            video.pause();
+        }
+    }, [visible]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+        const handleVisibility = () => {
+            if (document.hidden) video.pause();
+            else if (visible) video.play().catch(() => { });
+        };
+        document.addEventListener('visibilitychange', handleVisibility);
+        return () => document.removeEventListener('visibilitychange', handleVisibility);
+    }, [visible]);
 
     return (
         <section className="sp-pod">
@@ -469,21 +602,18 @@ function PodCAFSection() {
                     </div>
                 </div>
                 <div className="sp-pod__img-wrap">
-                    <a href="/podcast">
-                        <img
-                            src="/assets/img/misc/podCAFmobile.png"
-                            alt="Podcast PodCAF"
-                            className="sp-pod__img"
-                            loading="lazy"
-                            onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                const placeholder = e.currentTarget.nextElementSibling as HTMLElement | null;
-                                if (placeholder) placeholder.style.display = 'flex';
-                            }}
+                    <a href="/podcast" className="sp-pod__video-link">
+                        <div className="sp-pod__video-glow" />
+                        <video
+                            ref={videoRef}
+                            src="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/videos/yPBmEoLO74GkpHETiZ4RVGVe0b8HvLMtbhX2hnkp.mp4"
+                            className="sp-pod__video"
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                            aria-label="Promo PodCAF"
                         />
-                        <div className="sp-pod__img-placeholder" style={{ display: 'none' }}>
-                            🎙
-                        </div>
                     </a>
                 </div>
             </div>
