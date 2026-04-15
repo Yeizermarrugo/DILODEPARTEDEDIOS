@@ -370,6 +370,33 @@
     color: rgba(255, 255, 255, .5);
 }
 
+.ens-cover__author--multi {
+    align-items: center;
+    gap: 8px;
+}
+
+.ens-cover__author--multi .ens-cover__author-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+
+.ens-cover__facepile {
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.ens-cover__avatar--pile {
+    margin-left: -6px;
+    border: 1.5px solid rgba(0, 0, 0, 0.35);
+}
+
+.ens-cover__avatar--pile:first-child {
+    margin-left: 0;
+}
+
 .ens-cover__title {
     font-family: var(--ens-serif);
     font-size: 1rem;
