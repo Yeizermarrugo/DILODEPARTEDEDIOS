@@ -146,9 +146,9 @@ function Devocionals() {
         : selectedCategory ?? 'Todos los Devocionales';
 
     const sortOptions: { key: SortId; icon: string; label: string }[] = [
-        { key: 'latest', icon: '🕐', label: 'Más recientes' },
-        { key: 'likes', icon: '♥', label: 'Más likes' },
-        { key: 'views', icon: '👁', label: 'Más vistas' },
+        { key: 'latest', icon: 'bi-clock', label: 'Más recientes' },
+        { key: 'likes', icon: pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-heart', label: 'Más likes' },
+        { key: 'views', icon: 'bi-eye', label: 'Más vistas' },
     ];
 
     const todasLasCategorias = useMemo(() =>
@@ -193,7 +193,7 @@ function Devocionals() {
                     <div className="dv-page-hero__inner">
                         <div className="dv-page-hero__eyebrow">Devocionales</div>
                         <h1 className="dv-page-hero__title">
-                            Encuentra la <em>palabra</em> que<br />Dios tiene para ti
+                            Encuentra la <em>palabra</em> que<br />Dios tiene para ti <em>hoy</em>
                         </h1>
                         <p className="dv-page-hero__verse">
                             "Tal vez no nos damos cuenta, pero Dios no deja de hablarnos" — Job 33:14 TLA
@@ -236,7 +236,7 @@ function Devocionals() {
                                         className={`dv-sidebar__sort-btn ${sort === opt.key ? 'dv-sidebar__sort-btn--active' : ''}`}
                                         onClick={() => setSort(opt.key)}
                                     >
-                                        <span className="dv-sidebar__sort-icon">{opt.icon}</span>
+                                        <i className={`bi ${opt.icon} dv-sidebar__sort-icon`} />
                                         {opt.label}
                                     </button>
                                 ))}

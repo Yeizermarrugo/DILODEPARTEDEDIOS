@@ -148,7 +148,7 @@ function DevSection({ devocionales, onOpen }: DevSectionProps) {
                             Devocionales
                         </div>
                         <h2 className="sp-section-title sp-dev__title">
-                            Las últimas <em>palabras</em>
+                            Más <em>recientes</em>
                         </h2>
                     </div>
                     <a href="/devocionales" className="sp-link-more">
