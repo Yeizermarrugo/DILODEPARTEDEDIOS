@@ -112,7 +112,7 @@
     text-transform: uppercase;
     letter-spacing: 1.5px;
     margin-top: 8px;
-    color: var(--ens-muted);
+    color: var(--ens-orange);
 }
 
 .ens-hero__stats {

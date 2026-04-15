@@ -193,11 +193,12 @@ function Devocionals() {
                     <div className="dv-page-hero__inner">
                         <div className="dv-page-hero__eyebrow">Devocionales</div>
                         <h1 className="dv-page-hero__title">
-                            Encuentra la <em>palabra</em> que<br />Dios tiene para ti <em>hoy</em>
+                            Encuentra la <em>palabra</em> que Dios tiene para ti <em>hoy</em>
                         </h1>
-                        <p className="dv-page-hero__verse">
-                            "Tal vez no nos damos cuenta, pero Dios no deja de hablarnos" — Job 33:14 TLA
-                        </p>
+                        <div className="dv-page-hero__verse">
+                            <p>“Tal vez no nos damos cuenta, pero Dios no deja de hablarnos.”</p>
+                            <strong>Job 33:14 TLA</strong>
+                        </div>
                     </div>
                 </div>
 
