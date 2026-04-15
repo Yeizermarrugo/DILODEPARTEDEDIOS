@@ -77,16 +77,16 @@ const Obras = () => {
                 <br />
                 <p style={{ fontStyle: 'italic' }}>”Hijitos, nuestro amor no debe ser solo de palabras...” <b>1 Juan 3:18 PDT</b></p>
                 <br />
-                {/* Botón Principal que abre TU modal */}
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <button
-                        onClick={() => setShowSelectionModal(true)}
-                        className="obras-header__cta"
-                        style={{ cursor: 'pointer', border: 'none' }}
-                    >
-                        Apoyar esta obra
-                    </button>
-                </div>
+                  {/* Botón Principal que abre TU modal */}
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <button
+                            onClick={() => setShowSelectionModal(true)}
+                            className="obras-header__cta"
+                            style={{ cursor: 'pointer', border: 'none' }}
+                        >
+                            Apoyar esta obra
+                        </button>
+                    </div>
             </PageHero>
 
             {/* MODAL DE SELECCIÓN DE MONTO (Se muestra si showSelectionModal es true) */}
