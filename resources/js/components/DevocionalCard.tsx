@@ -104,16 +104,15 @@ export default function DevocionalCard({ devocionales, todasLasCategorias, build
                                 }}
                             />
                             <CardContent sx={{ flex: '1 1 auto', overflow: 'hidden', paddingBottom: 0 }}>
-                                <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div"
-                                    dangerouslySetInnerHTML={{
-                                        __html: dev.titulo.split(' ').slice(0, 7).join(' ').toUpperCase() + (dev.titulo.split(' ').length > 7 ? '...' : '')
-                                    }}>
+                                <Typography sx={{ color: 'rgba(56, 56, 56, 1)', fontSize: '16px' }} gutterBottom variant="h5" component="div">
+                                    {dev.titulo.split(' ').slice(0, 7).join(' ').toUpperCase() + (dev.titulo.split(' ').length > 7 ? '...' : '')}
                                 </Typography>
                                 <Typography
                                     variant="body2"
                                     sx={{ color: 'rgba(119, 119, 119, 0.81)', paddingTop: 1, margin: 0, fontSize: '12px', fontStyle: 'italic' }}
-                                    dangerouslySetInnerHTML={{ __html: dev.autor ? `Autor: ${dev.autor}` : '' }}
-                                />
+                                >
+                                    {dev.autor ? `Autor: ${dev.autor}` : ''}
+                                </Typography>
                             </CardContent>
                         </Card>
                     </a>
