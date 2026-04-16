@@ -10,9 +10,26 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Jenssegers\Agent\Agent;
 use Stevebauman\Location\Facades\Location;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 
 class DevocionalController extends Controller
 {
+    private function purifyHtml(string $html): string
+    {
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('HTML.Allowed', 'h1,h2,h3,h4,h5,h6,p,br,strong,em,u,s,ul,ol,li,blockquote,a[href|target|rel],img[src|alt|width|height],span[style],div[style],table,thead,tbody,tr,th[colspan|rowspan],td[colspan|rowspan],pre,code,hr');
+        $config->set('HTML.AllowedAttributes', 'a.href,a.target,a.rel,img.src,img.alt,img.width,img.height,*.style,*.class');
+        $config->set('CSS.AllowedProperties', 'color,background-color,font-weight,font-style,text-decoration,text-align,font-size,line-height,margin,padding');
+        $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true]);
+        $config->set('Attr.AllowedRel', 'noopener noreferrer nofollow');
+        $config->set('AutoFormat.RemoveEmpty', true);
+        $config->set('Cache.DefinitionImpl', null);
+
+        $purifier = new HTMLPurifier($config);
+        return $purifier->purify($html);
+    }
+
     /**
      * Display a listing of the resource.
      * Soporta: ?sort=latest|likes|views  ?search=texto  ?per_page=16
@@ -272,7 +289,7 @@ class DevocionalController extends Controller
 
         // Creamos el registro usando SOLO los campos que existen en la DB
         $devocional = Devocional::create([
-            'contenido'     => $validated['contenido'],
+            'contenido'     => $this->purifyHtml($validated['contenido']),
             'categoria'     => $validated['categoria'],
             'imagen'        => $validated['imagen'] ?? null,
             'autor'         => $validated['autor'] ?? null,
@@ -390,7 +407,7 @@ class DevocionalController extends Controller
         $createdAt = $request->input('created_at');
 
         $devocional->update([
-            'contenido'     => $request->input('contenido'),
+            'contenido'     => $this->purifyHtml($request->input('contenido')),
             'categoria'     => $request->input('categoria'),
             'imagen'        => $request->input('imagen') ?: $devocional->imagen,
             'autor'         => $request->input('autor'),

@@ -136,7 +136,7 @@ Route::get('/devocionales-edit', [DevocionalController::class, 'adminIndex']);
 
 Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->name('devocionales.showJson');
 
-Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name('devocionales.update');
+Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->middleware(['auth', 'verified'])->name('devocionales.update');
 
 // Trackviews
 Route::post('/devocionales/{id}/view', [DevocionalController::class, 'trackView']);
