@@ -295,7 +295,7 @@ class DevocionalController extends Controller
             'autor'         => $validated['autor'] ?? null,
             'is_devocional' => $validated['is_devocional'],
             'serie'         => $validated['serie'] ?? null,
-            'created_at'    => $validated['created_at'] ?: now(),
+            'created_at'    => ($validated['created_at'] ?? null) ?: now(),
             'pdf'           => $validated['pdf'] ?? null,
             'instagram'     => $validated['instagram'] ?? null,
             'tiktok'        => $validated['tiktok'] ?? null,
