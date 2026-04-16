@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'privacy/accept',
             'recaudo/confirmacion',
         ]);
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'visitor_id']);
 
         $middleware->web(append: [
             HandleAppearance::class,
