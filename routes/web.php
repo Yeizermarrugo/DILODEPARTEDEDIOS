@@ -179,6 +179,24 @@ Route::get('/donacion-by-params', function (Request $request) {
         return response()->json(['error' => 'Sin parámetros'], 400);
     }
 
+    // Campos PII que nunca deben exponerse públicamente
+    $piiFields = [
+        'x_customer_name', 'x_customer_lastname', 'x_customer_email',
+        'x_customer_phone', 'x_customer_document', 'x_customer_ip',
+        'x_customer_movil',
+    ];
+
+    $safeResponse = function ($donacion) use ($piiFields) {
+        $raw = $donacion->raw_response;
+        if (is_string($raw)) {
+            $raw = json_decode($raw, true) ?? [];
+        }
+        foreach ($piiFields as $field) {
+            unset($raw[$field]);
+        }
+        return ['raw_response' => $raw];
+    };
+
     // 1. Buscar en BD local primero
     $donacion = \App\Models\Donation::where('ref_payco', $ref)
         ->orWhere('ref_payco_hash', $ref)
@@ -187,7 +205,7 @@ Route::get('/donacion-by-params', function (Request $request) {
         ->first();
 
     if ($donacion) {
-        return response()->json($donacion);
+        return response()->json($safeResponse($donacion));
     }
 
     // 2. Si no está en BD, consultar API de ePayco directamente
@@ -202,7 +220,6 @@ Route::get('/donacion-by-params', function (Request $request) {
             if (isset($body['data']) && $body['success'] === true) {
                 $d = $body['data'];
 
-                // Guardar en BD para futuras consultas
                 $donacion = \App\Models\Donation::updateOrCreate(
                     ['ref_payco' => (string) $d['x_ref_payco']],
                     [
@@ -219,7 +236,7 @@ Route::get('/donacion-by-params', function (Request $request) {
                     ]
                 );
 
-                return response()->json($donacion);
+                return response()->json($safeResponse($donacion));
             }
         }
     } catch (\Exception $e) {
