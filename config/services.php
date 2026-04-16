@@ -41,4 +41,8 @@ return [
         'public_key' => env('EPAYCO_PUBLIC_KEY'),
     ],
 
+    'tinymce' => [
+        'key' => env('TINYMCE_API_KEY'),
+    ],
+
 ];

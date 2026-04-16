@@ -1,9 +1,11 @@
 import ImageUpload from '@/components/ImageUpload';
 import LoaderBook from '@/components/LoaderBook';
 import { Editor } from '@tinymce/tinymce-react';
+import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import type { Editor as TinyMCEEditor } from 'tinymce';
+import type { SharedData } from '@/types';
 import styles from '../../css/categoriaSelect.module.css';
 
 interface DevocionalFormProps {
@@ -12,6 +14,7 @@ interface DevocionalFormProps {
 }
 
 const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
+    const { tinymce_key } = usePage<SharedData>().props;
     const editorRef = useRef<TinyMCEEditor | null>(null);
 
     const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -564,7 +567,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
 
                 {/* Editor */}
                 <Editor
-                    apiKey="pc7pp06765v04kvyv0e65n2ja3v0c3hn5law9o9vpchu0erd"
+                    apiKey={tinymce_key ?? ''}
                     onInit={handleEditorInit}
                     initialValue={initialContent}
                     init={{
