@@ -2,6 +2,7 @@ import LikeButton from '@/components/LikeButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
 import { usePage } from '@inertiajs/react';
+import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
@@ -138,7 +139,7 @@ const DevocionalDetailsPage = (props: Props) => {
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
 
                 <p style={{ padding: '5px', textAlign: 'justify' }}
-                    dangerouslySetInnerHTML={{ __html: devocionalContent }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(devocionalContent) }}
                 />
 
                 <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>

@@ -1,6 +1,7 @@
 import { LikeButton } from '@/components/LikeButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
+import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
@@ -103,7 +104,7 @@ const DevocionalDetails = ({ devocional }: Props) => {
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
 
                 <p style={{ padding: '5px', textAlign: 'justify' }}
-                    dangerouslySetInnerHTML={{ __html: devocionalContent }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(devocionalContent) }}
                 />
 
                 <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
