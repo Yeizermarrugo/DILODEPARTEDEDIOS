@@ -16,19 +16,21 @@ function buildCategoryColorMap(todasLasCategorias: string[]) {
     return map;
 }
 
+interface DevItem {
+    id: string;
+    imagen: string;
+    titulo: string;
+    autor: string;
+    categoria: string;
+    views_count?: number;
+    is_devocional?: number;
+}
+
 interface CardNewProps {
-    dev: {
-        id: string;
-        imagen: string;
-        titulo: string;
-        autor: string;
-        categoria: string;
-        views_count?: number;
-        is_devocional?: number;
-    };
+    dev: DevItem;
     todasLasCategorias: string[];
     onClick?: () => void;
-    buildHref?: (dev: any) => string;
+    buildHref?: (dev: DevItem) => string;
 }
 
 function getContentType(is_devocional?: number): 'devocional' | 'estudio' | 'ensenanza' {

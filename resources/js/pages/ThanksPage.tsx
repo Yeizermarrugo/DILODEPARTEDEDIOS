@@ -14,7 +14,7 @@ import {
     ShieldCheckIcon,
     XCircleIcon
 } from 'lucide-react';
-import { ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import '../../css/main.css';
 import '../../css/podcast.css';
 
@@ -71,8 +71,23 @@ const DEFAULT_STATUS = {
     showDetails: false,
 };
 
+interface PaymentData {
+    ref_epayco: string;
+    ref_comercio: string;
+    cus: string;
+    amount: string;
+    bank: string;
+    status: string;
+    date: string;
+    description: string;
+    method: string;
+    currency: string;
+    error_reason?: string;
+    error_code?: string;
+}
+
 const ThanksPage = () => {
-    const [payment, setPayment] = useState<any>(null);
+    const [payment, setPayment] = useState<PaymentData | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -266,7 +281,14 @@ const ThanksPage = () => {
     );
 };
 
-const DetailRow = ({ icon, label, value, isBold = false }: any) => (
+interface DetailRowProps {
+    icon: ReactNode;
+    label: string;
+    value: string | undefined;
+    isBold?: boolean;
+}
+
+const DetailRow = ({ icon, label, value, isBold = false }: DetailRowProps) => (
     <div className="flex justify-between items-start gap-2 text-xs sm:text-sm">
         <div className="flex items-center gap-1.5 text-gray-400 font-medium italic shrink-0 min-w-[90px] sm:min-w-[120px]">
             <span className="text-gray-400">{icon}</span>

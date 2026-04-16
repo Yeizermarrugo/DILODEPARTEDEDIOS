@@ -85,8 +85,8 @@ function Enseñanzas() {
                 const items = data.data || data.devocionales;
                 setEnsenanzas(Array.isArray(items) ? items : []);
                 setPagination(data);
-            } catch (err: any) {
-                if (err.name !== 'AbortError') console.error(err);
+            } catch (err: unknown) {
+                if ((err as Error).name !== 'AbortError') console.error(err);
             } finally {
                 setLoading(false);
             }

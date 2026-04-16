@@ -29,15 +29,12 @@ function getContentType(is_devocional?: number | string): 'devocional' | 'estudi
 }
 
 const DevocionalDetailsPage = (props: Props) => {
-    const page = usePage().props as any;
-    const devocional = props.devocional ?? page.devocional as Devocional | undefined;
-
-    if (!devocional) return <div>No se encontró el devocional.</div>;
+    const page = usePage().props as Record<string, unknown>;
+    const devocional = props.devocional ?? (page.devocional as Devocional | undefined);
+    const likeType = (props.like_type ?? (page.like_type as string | undefined) ?? getContentType(devocional?.is_devocional)) as 'devocional' | 'estudio' | 'ensenanza';
 
     const [loading, setLoading] = useState(true);
-    const imageLoaded = useImagePreload(devocional.imagen);
-    const likeType = props.like_type ?? page.like_type ?? getContentType(devocional.is_devocional);
-
+    const imageLoaded = useImagePreload(devocional?.imagen ?? '');
 
     useEffect(() => {
         const t = setTimeout(() => setLoading(false), 1000);
@@ -62,6 +59,8 @@ const DevocionalDetailsPage = (props: Props) => {
             body: JSON.stringify({ local_time: local }),
         });
     }, [devocional?.id]);
+
+    if (!devocional) return <div>No se encontró el devocional.</div>;
 
     // ── Helpers ────────────────────────────────────────────────────────────────
     const getH1Text = (html: string) => html.match(/<h1[^>]*>(.*?)<\/h1>/i)?.[1].trim() ?? '';

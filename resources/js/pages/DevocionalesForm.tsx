@@ -45,7 +45,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const [useNuevaEnsenanza, setUseNuevaEnsenanza] = useState(false);
     const [nuevaEnsenanzaTitulo, setNuevaEnsenanzaTitulo] = useState('');
     const [nuevaEnsenanzaDescripcion, setNuevaEnsenanzaDescripcion] = useState('');
-    const [nuevaEnsenanzaImagenFile, setNuevaEnsenanzaImagenFile] = useState<File | null>(null);
+    const [, setNuevaEnsenanzaImagenFile] = useState<File | null>(null);
     const [nuevaEnsenanzaImagenUrl, setNuevaEnsenanzaImagenUrl] = useState('');
 
     const [initialContent, setInitialContent] = useState('<p>This is the initial content of the editor.</p>');
@@ -105,7 +105,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
         setIsLoading(false);
     };
 
-    const handleImageChange = (file: File | null, _dataUrl: string | null) => {
+    const handleImageChange = (file: File | null) => {
         console.log('handleImageChange file', file);
         setSelectedImageFile(file);
         if (file) {
@@ -226,7 +226,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
             alert(mode === 'create' ? '¡Guardado con éxito!' : '¡Actualizado con éxito!');
             window.location.href = mode === 'create' ? '/dashboard' : '/devocionales-edit';
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
                 const data = error.response?.data;

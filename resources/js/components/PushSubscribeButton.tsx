@@ -58,13 +58,13 @@ function loadPos(): Pos {
     try {
         const saved = localStorage.getItem(POS_KEY);
         if (saved) return JSON.parse(saved) as Pos;
-    } catch { }
+    } catch { /* ignorado — devuelve posición por defecto */ }
     // Por defecto: Abajo a la derecha
     return { x: document.documentElement.clientWidth - 100, y: window.innerHeight - 120 };
 }
 
 function savePos(pos: Pos) {
-    try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { }
+    try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { /* ignorado */ }
 }
 
 function snapToEdge(pos: Pos): Pos {
@@ -229,7 +229,7 @@ export default function PushSubscribeButton() {
         posRef.current = next;
     };
 
-    const onPointerUp = (e: React.PointerEvent) => {
+    const onPointerUp = () => {
         if (!isDragging.current) return;
         isDragging.current = false;
         setActiveDrag(false);
@@ -252,9 +252,7 @@ export default function PushSubscribeButton() {
 
     // ── Lógica de posicionamiento del Tooltip ──
     const vw = document.documentElement.clientWidth;
-    const vh = window.innerHeight;
     const isAtRight = pos.x + BTN_SIZE / 2 > vw / 2;
-    const isAtBottom = pos.y + BTN_SIZE / 2 > vh / 2;
 
     const tooltipStyles: React.CSSProperties = {
         position: 'absolute',

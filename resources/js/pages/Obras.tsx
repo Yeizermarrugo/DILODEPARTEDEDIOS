@@ -23,7 +23,7 @@ const Obras = () => {
         if (!isValidAmount) return; // Doble validación de seguridad
 
         const publicKey = import.meta.env.VITE_EPAYCO_PUBLIC_KEY;
-        const epayco = (window as any).ePayco;
+        const epayco = (window as Window & { ePayco?: { checkout: { configure: (c: Record<string, unknown>) => { open: (d: Record<string, unknown>) => void } } } }).ePayco;
 
         if (epayco && publicKey) {
             const handler = epayco.checkout.configure({
