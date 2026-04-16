@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Visitor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class PushSubscriptionController extends Controller
 {
@@ -18,21 +17,14 @@ class PushSubscriptionController extends Controller
             'authToken' => 'nullable|string',
         ]);
 
-        // 1. Desencriptar la cookie
-        $rawCookie = $request->cookie('visitor_id');
+        $visitorId = $request->cookie('visitor_id');
 
-        try {
-            $decrypted = decrypt($rawCookie);
-        } catch (\Exception $e) {
-            $decrypted = $rawCookie; // ya viene plana
-        }
-
-        if (!$decrypted) {
+        if (!$visitorId) {
             return response()->json(['error' => 'Visitor no identificado'], 400);
         }
 
-        // 2. Hash SHA-256 — siempre 64 chars, nunca expone el UUID real
-        $visitorHash = hash('sha256', $decrypted);
+        // Hash SHA-256 — nunca expone el UUID real en la BD
+        $visitorHash = hash('sha256', $visitorId);
 
         // 3. Guardar
         $visitor = Visitor::firstOrCreate([
@@ -51,15 +43,8 @@ class PushSubscriptionController extends Controller
 
     public function unsubscribe(Request $request)
     {
-        $rawCookie = $request->cookie('visitor_id');
-
-        try {
-            $decrypted = decrypt($rawCookie);
-        } catch (\Exception $e) {
-            $decrypted = $rawCookie;
-        }
-
-        $visitorHash = hash('sha256', $decrypted);
+        $visitorId = $request->cookie('visitor_id');
+        $visitorHash = hash('sha256', (string) $visitorId);
 
         $visitor = Visitor::where('visitor_id', $visitorHash)->first();
         $visitor?->deletePushSubscription($request->endpoint);
