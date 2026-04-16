@@ -32,6 +32,7 @@ type DevRowProps = {
     dev: DevocionalEnsenanza;
     idx: number;
     isEven: boolean;
+    disabled?: boolean;
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -108,9 +109,9 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 <div className="ens-cover__overlay" />
 
                 {/* Badge visible siempre (incluso en próximamente) */}
-                <div className="ens-cover__badge" style={{ zIndex: 30 }}>
+                {/* <div className="ens-cover__badge" style={{ zIndex: 30 }}>
                     {ensenanza.ensenanzas_count} ens.
-                </div>
+                </div> */}
 
                 <div className="ens-cover__info">
                     {ensenanza.autores.length === 1 && (
@@ -222,12 +223,13 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
 
                         {isOpen && (
                             <div className="ens-panel">
-                                {published.map((dev, idx) => (
+                                {devocionales.map((dev, idx) => (
                                     <DevRow
                                         key={dev.id}
                                         dev={dev}
                                         idx={idx + 1}
                                         isEven={idx % 2 === 1}
+                                        disabled={String(dev.is_devocional) !== '1'}
                                     />
                                 ))}
                             </div>
@@ -239,8 +241,22 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
     );
 }
 
-function DevRow({ dev, idx, isEven }: DevRowProps) {
+function DevRow({ dev, idx, isEven, disabled = false }: DevRowProps) {
     const [open, setOpen] = useState(false);
+
+    if (disabled) {
+        return (
+            <div className={`dev-row dev-row--disabled ${isEven ? 'dev-row--even' : ''}`}>
+                <div className="dev-row__head">
+                    <span className="dev-row__num">{String(idx).padStart(2, '0')}</span>
+                    <span className="dev-row__title">{dev.titulo}</span>
+                    <div className="dev-row__meta">
+                        <span className="dev-row__badge-soon">Próximamente</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`dev-row ${isEven ? 'dev-row--even' : ''}`}>
