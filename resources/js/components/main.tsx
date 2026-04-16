@@ -96,12 +96,6 @@ const IconChevronRight = () => (
     </svg>
 );
 
-const IconPlay = () => (
-    <svg viewBox="0 0 24 24" width={14} height={14} fill="rgba(247,88,21,0.4)">
-        <path d="M5 3l14 9-14 9V3z" />
-    </svg>
-);
-
 const IconPlaylist = () => (
     <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="rgba(247,88,21,0.8)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 6h16M4 10h16M4 14h10M4 18h10M18 14v8M15 17l3-3 3 3" />
@@ -186,7 +180,7 @@ function DevSection({ devocionales, onOpen }: DevSectionProps) {
                             </div>
                             <button
                                 className="sp-dev__featured-title"
-                                onClick={(e) => { e.stopPropagation(); featured && onOpen(featured); }}
+                                onClick={(e) => { e.stopPropagation(); if (featured) onOpen(featured); }}
                             >
                                 <TituloDevocional contenido={featured?.contenido ?? ''} />
                             </button>

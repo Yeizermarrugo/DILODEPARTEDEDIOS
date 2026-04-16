@@ -57,7 +57,7 @@ export function useLike(type: ContentType, id: string): UseLikeReturn {
         })();
 
         return () => { mounted.current = false; };
-    }, [type, id]);
+    }, [type, id, key, keyT]);
 
     // ── Toggle ────────────────────────────────────────────────────────────────
     const toggle = useCallback(() => {
@@ -105,7 +105,7 @@ export function useLike(type: ContentType, id: string): UseLikeReturn {
                 });
             }
         }, 300);
-    }, [type, id]);
+    }, [type, id, key, keyT]);
 
     return { ...state, toggle };
 }

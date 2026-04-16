@@ -21,7 +21,7 @@ type Devocional = {
     created_at?: string;
     views_count?: number;
     autor?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 };
 
 type DevocionalesResponse = {
@@ -114,8 +114,8 @@ function Devocionals() {
                     setDevocionales(data.data);
                     setPagination(data);
                 }
-            } catch (err: any) {
-                if (err.name !== 'AbortError') console.error(err);
+            } catch (err: unknown) {
+                if ((err as Error).name !== 'AbortError') console.error(err);
             } finally {
                 setLoading(false);
             }
