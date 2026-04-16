@@ -5,9 +5,11 @@ use App\Http\Controllers\BulkUploadController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PushSubscriptionController;
 
-Route::post('/bulk-upload', [BulkUploadController::class, 'store']);
-Route::post('/bulk-upload/video', [BulkUploadController::class, 'storeVideo']);
-Route::get('/bucket/images', [BulkUploadController::class, 'index']);
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/bulk-upload', [BulkUploadController::class, 'store']);
+    Route::post('/bulk-upload/video', [BulkUploadController::class, 'storeVideo']);
+    Route::get('/bucket/images', [BulkUploadController::class, 'index']);
+});
 
 //-------- Likes API ---------
 Route::get('/likes/{type}/{id}',  [LikeController::class, 'show']);
