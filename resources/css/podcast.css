@@ -1,27 +1,971 @@
-html,
-body,
-#app {
-    height: 100%;
-    margin: 0;
-    padding: 0;
+/* ─── PodCAF — Página Podcast · Sacred Pulse ────────────────────────────────
+   Paleta: naranja #f75815 · azul marino #2d465e · crema #faf8f4
+   Fuentes: Cormorant Garamond (serif) + Instrument Sans (sans)
+   ────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --pod-orange: #f75815;
+    --pod-blue: #2d465e;
+    --pod-cream: #faf8f4;
+    --pod-warm: #f5f0e8;
+    --pod-border: #e8e2d8;
+    --pod-muted: #8a7f72;
+    --pod-text: #1c1917;
+    --pod-dark: #0d1e2c;
+    --pod-serif: 'Cormorant Garamond', serif;
+    --pod-sans: 'Instrument Sans', sans-serif;
 }
 
-.index-page {
+/* ── Animaciones globales ── */
+@keyframes pod-breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.6);
+        opacity: .4;
+    }
+}
+
+@keyframes pod-ring {
+    0% {
+        transform: scale(1);
+        opacity: .6;
+    }
+
+    70% {
+        transform: scale(1.35);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1.35);
+        opacity: 0;
+    }
+}
+
+@keyframes pod-float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pod-drip {
+    0% {
+        top: -100%;
+    }
+
+    100% {
+        top: 200%;
+    }
+}
+
+/* ── Reveal util ── */
+.pod-reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity .9s cubic-bezier(.16, 1, .3, 1), transform .9s cubic-bezier(.16, 1, .3, 1);
+}
+
+.pod-reveal--visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* ── Root ── */
+.pod-page {
+    background: var(--pod-cream);
+    font-family: var(--pod-sans);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SHARED
+══════════════════════════════════════════════════════════════ */
+
+.pod-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: rgba(247, 88, 21, .75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: var(--pod-sans);
+    margin-bottom: 20px;
+}
+
+.pod-eyebrow--dark {
+    color: var(--pod-orange);
+}
+
+.pod-eyebrow--orange {
+    color: var(--pod-orange);
+}
+
+.pod-eyebrow__line {
+    display: inline-block;
+    width: 28px;
+    height: 1px;
+    background: var(--pod-orange);
+    opacity: .35;
+}
+
+.pod-eyebrow__line--dark {
+    opacity: .5;
+}
+
+.pod-section-title {
+    font-family: var(--pod-serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--pod-text);
+    line-height: 1.1;
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.pod-section-title em {
+    color: var(--pod-orange);
+    font-style: italic;
+}
+
+/* ── Botones ── */
+.pod-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 28px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--pod-sans);
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .3s, box-shadow .3s, background .3s, border-color .3s;
+    border: none;
+}
+
+.pod-btn--primary {
+    background: var(--pod-orange);
+    color: #fff;
+    border: 1.5px solid var(--pod-orange);
+}
+
+.pod-btn--primary:hover {
+    background: #e0500e;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(247, 88, 21, .28);
+    color: #fff;
+}
+
+.pod-btn--ghost {
+    background: transparent;
+    color: rgba(255, 255, 255, .7);
+    border: 1.5px solid rgba(255, 255, 255, .2);
+    font-size: 12px;
+}
+
+.pod-btn--ghost:hover {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .45);
+    color: #fff;
+}
+
+.pod-btn--ghost-dark {
+    background: transparent;
+    color: var(--pod-blue);
+    border: 1.5px solid var(--pod-border);
+    font-size: 13px;
+}
+
+.pod-btn--ghost-dark:hover {
+    background: rgba(45, 70, 94, .07);
+    border-color: var(--pod-blue);
+    color: var(--pod-blue);
+}
+
+/* ── Tags ── */
+.pod-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--pod-sans);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+.pod-tag--orange {
+    background: rgba(247, 88, 21, .12);
+    color: var(--pod-orange);
+    border: 1px solid rgba(247, 88, 21, .2);
+}
+
+.pod-tag--blue {
+    background: rgba(45, 70, 94, .1);
+    color: var(--pod-blue);
+    border: 1px solid rgba(45, 70, 94, .15);
+}
+
+.pod-tag--muted {
+    background: rgba(138, 127, 114, .1);
+    color: var(--pod-muted);
+    border: 1px solid rgba(138, 127, 114, .18);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECCIÓN 1 — HERO
+══════════════════════════════════════════════════════════════ */
+
+.pod-hero {
+    background: var(--pod-dark);
     min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 48px;
+    padding: 100px 80px 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Cuadrícula sutil de fondo */
+.pod-hero__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Círculos decorativos */
+.pod-hero__circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.pod-hero__circle--1 {
+    width: 500px;
+    height: 500px;
+    top: -200px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(247, 88, 21, .06) 0%, transparent 70%);
+}
+
+.pod-hero__circle--2 {
+    width: 300px;
+    height: 300px;
+    bottom: -100px;
+    left: 200px;
+    background: radial-gradient(circle, rgba(45, 70, 94, .15) 0%, transparent 70%);
+}
+
+.pod-hero__inner {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+}
+
+/* Logotipo tipográfico */
+.pod-hero__logo {
+    font-family: var(--pod-serif);
+    font-size: clamp(4rem, 8vw, 7rem);
+    line-height: .9;
+    margin-bottom: 16px;
+    font-weight: 700;
+}
+
+.pod-hero__logo-pod {
+    color: #fff;
+    font-weight: 300;
+}
+
+.pod-hero__logo-caf {
+    color: var(--pod-orange);
+    font-style: italic;
+}
+
+/* Tagline */
+.pod-hero__tagline {
+    font-size: 11px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .25);
+    font-family: var(--pod-sans);
+    margin-bottom: 28px;
+}
+
+/* Descripción */
+.pod-hero__desc {
+    font-size: 15px;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, .5);
+    font-family: var(--pod-sans);
+    margin-bottom: 28px;
+    max-width: 520px;
+}
+
+.pod-hero__desc em {
+    color: rgba(247, 88, 21, .8);
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* Versículo */
+.pod-hero__verse {
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-left: 3px solid var(--pod-orange);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+}
+
+.pod-hero__verse-text {
+    font-family: var(--pod-serif);
+    font-style: italic;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, .45);
+    line-height: 1.55;
+}
+
+.pod-hero__verse-ref {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(247, 88, 21, .6);
+    font-family: var(--pod-sans);
+    margin-top: 7px;
+    font-weight: 600;
+}
+
+/* CTA */
+.pod-hero__cta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+/* Tags */
+.pod-hero__tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Video del hero ── */
+.pod-hero__img-wrap {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    margin: 0;
-    padding: 0;
-    background: #fff;
+    align-items: center;
 }
 
-/* Centra el contenido principal y permite que el footer quede abajo */
-.centered-main {
-    flex: 1;
+.pod-hero__video-link {
+    position: relative;
+    display: block;
+    animation: pod-float 4s ease-in-out infinite;
+}
+
+.pod-hero__video-glow {
+    position: absolute;
+    inset: -10px;
+    border-radius: 28px;
+    pointer-events: none;
+    z-index: 0;
+    animation: pod-glow-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes pod-glow-pulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 2px rgba(247, 88, 21, .35),
+            0 0 50px 10px rgba(247, 88, 21, .18),
+            0 30px 70px rgba(0, 0, 0, .35);
+    }
+
+    50% {
+        box-shadow:
+            0 0 0 2px rgba(247, 88, 21, .6),
+            0 0 80px 22px rgba(247, 88, 21, .3),
+            0 30px 70px rgba(0, 0, 0, .35);
+    }
+}
+
+.pod-hero__video {
+    width: 300px;
+    height: auto;
+    border-radius: 24px;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.pod-hero__video-badge {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    background: rgba(247, 88, 21, 0.92);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    font-family: var(--pod-sans);
+    padding: 4px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECCIÓN 2 — EPISODIOS PRÓXIMOS
+══════════════════════════════════════════════════════════════ */
+
+.pod-episodes {
+    background: #fff;
+    padding: 90px 24px;
+    border-top: 1px solid var(--pod-border);
+}
+
+.pod-episodes__inner {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.pod-section-header {
+    text-align: center;
+    margin-bottom: 0;
+}
+
+.pod-episodes__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+/* Episode card */
+.pod-ep-card {
+    background: var(--pod-cream);
+    border: 1px solid var(--pod-border);
+    border-radius: 18px;
+    padding: 28px 24px 22px;
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .4s cubic-bezier(.34, 1.56, .64, 1), box-shadow .4s, border-color .4s;
+}
+
+.pod-ep-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .07);
+}
+
+.pod-ep-card--orange:hover {
+    border-color: rgba(247, 88, 21, .35);
+}
+
+.pod-ep-card--blue:hover {
+    border-color: rgba(45, 70, 94, .35);
+}
+
+/* Línea de acento superior */
+.pod-ep-card__accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .5s .1s;
+}
+
+.pod-ep-card--orange .pod-ep-card__accent {
+    background: linear-gradient(90deg, var(--pod-orange), transparent);
+}
+
+.pod-ep-card--blue .pod-ep-card__accent {
+    background: linear-gradient(90deg, var(--pod-blue), transparent);
+}
+
+.pod-ep-card:hover .pod-ep-card__accent {
+    transform: scaleX(1);
+}
+
+/* Número decorativo */
+.pod-ep-card__num {
+    font-family: var(--pod-serif);
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(247, 88, 21, .09);
+    transition: color .4s;
+    margin-bottom: 4px;
+}
+
+.pod-ep-card--blue .pod-ep-card__num {
+    color: rgba(45, 70, 94, .08);
+}
+
+.pod-ep-card:hover .pod-ep-card__num {
+    color: rgba(247, 88, 21, .16);
+}
+
+.pod-ep-card--blue:hover .pod-ep-card__num {
+    color: rgba(45, 70, 94, .15);
+}
+
+/* Tag */
+.pod-ep-card__tag {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: var(--pod-sans);
+    margin-bottom: 4px;
+    opacity: 0;
+    transition: opacity .3s .15s;
+}
+
+.pod-ep-card--orange .pod-ep-card__tag {
+    color: var(--pod-orange);
+}
+
+.pod-ep-card--blue .pod-ep-card__tag {
+    color: var(--pod-blue);
+}
+
+.pod-ep-card:hover .pod-ep-card__tag {
+    opacity: 1;
+}
+
+/* Título */
+.pod-ep-card__title {
+    font-family: var(--pod-serif);
+    font-size: 1.2rem;
+    color: var(--pod-text);
+    line-height: 1.25;
+    font-weight: 600;
+    flex: 1;
+}
+
+/* Descripción */
+.pod-ep-card__desc {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--pod-muted);
+    font-family: var(--pod-sans);
+}
+
+/* Meta */
+.pod-ep-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--pod-border);
+    margin-top: auto;
+}
+
+.pod-ep-card__duration {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--pod-muted);
+    font-family: var(--pod-sans);
+}
+
+.pod-ep-card__soon {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: rgba(247, 88, 21, .07);
+    color: var(--pod-orange);
+    border-radius: 100px;
+    padding: 3px 10px;
+    font-family: var(--pod-sans);
+    font-weight: 600;
+}
+
+.pod-ep-card--blue .pod-ep-card__soon {
+    background: rgba(45, 70, 94, .07);
+    color: var(--pod-blue);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECCIÓN 3 — MISIÓN / PARA QUIÉN
+══════════════════════════════════════════════════════════════ */
+
+.pod-about {
+    background: var(--pod-cream);
+    padding: 0 24px 90px;
+}
+
+.pod-about__inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.pod-about__card {
+    padding: 56px 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--pod-border);
+}
+
+.pod-about__card--dark {
+    background: var(--pod-blue);
+    border-color: transparent;
+    border-radius: 20px 0 0 20px;
+}
+
+.pod-about__card--light {
+    background: var(--pod-warm);
+    border-radius: 0 20px 20px 0;
+}
+
+/* Patrón cuadrícula en dark */
+.pod-about__card--dark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Número decorativo */
+.pod-about__card--dark::after {
+    content: '01';
+    position: absolute;
+    bottom: -20px;
+    right: 20px;
+    font-family: var(--pod-serif);
+    font-size: 9rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, .03);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.pod-about__card--light::after {
+    content: '02';
+    position: absolute;
+    bottom: -20px;
+    right: 20px;
+    font-family: var(--pod-serif);
+    font-size: 9rem;
+    font-weight: 700;
+    color: rgba(45, 70, 94, .04);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.pod-about__card-accent {
+    width: 32px;
+    height: 3px;
+    background: var(--pod-orange);
+    border-radius: 2px;
+}
+
+.pod-about__card-num {
+    font-size: 9px;
+    display: none;
+    /* usa el pseudo-element */
+}
+
+.pod-about__card-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: var(--pod-sans);
+}
+
+.pod-about__card--dark .pod-about__card-label {
+    color: rgba(247, 88, 21, .7);
+}
+
+.pod-about__card--light .pod-about__card-label {
+    color: var(--pod-orange);
+}
+
+.pod-about__card-title {
+    font-family: var(--pod-serif);
+    font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+    line-height: 1.15;
+    position: relative;
+    z-index: 1;
+}
+
+.pod-about__card--dark .pod-about__card-title {
+    color: #fff;
+}
+
+.pod-about__card--light .pod-about__card-title {
+    color: var(--pod-text);
+}
+
+.pod-about__card-body {
+    font-size: 13px;
+    line-height: 1.8;
+    font-family: var(--pod-sans);
+    position: relative;
+    z-index: 1;
+}
+
+.pod-about__card--dark .pod-about__card-body {
+    color: rgba(255, 255, 255, .45);
+}
+
+.pod-about__card--light .pod-about__card-body {
+    color: var(--pod-muted);
+}
+
+.pod-about__card-verse {
+    margin-top: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-family: var(--pod-serif);
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+    border-left: 3px solid var(--pod-orange);
+}
+
+.pod-about__card--dark .pod-about__card-verse {
+    background: rgba(255, 255, 255, .05);
+    color: rgba(255, 255, 255, .55);
+}
+
+.pod-about__card--light .pod-about__card-verse {
+    background: rgba(247, 88, 21, .06);
+    color: var(--pod-blue);
+}
+
+.pod-about__card-verse span {
+    display: block;
+    font-style: normal;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: var(--pod-sans);
+    margin-top: 6px;
+    opacity: .5;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECCIÓN 4 — CTA FINAL
+══════════════════════════════════════════════════════════════ */
+
+.pod-cta {
+    background: var(--pod-warm);
+    border-top: 1px solid var(--pod-border);
+    padding: 90px 24px;
+    text-align: center;
+}
+
+.pod-cta__inner {
+    max-width: 580px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Cruz decorativa */
+.pod-cta__cross {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    margin: 0 auto 28px;
+}
+
+.pod-cta__cross-v {
+    position: absolute;
+    width: 2px;
+    height: 48px;
+    background: var(--pod-orange);
+    border-radius: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.pod-cta__cross-h {
+    position: absolute;
+    width: 48px;
+    height: 2px;
+    background: var(--pod-orange);
+    border-radius: 2px;
+    top: 32%;
+}
+
+.pod-cta__title {
+    font-family: var(--pod-serif);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--pod-text);
+    line-height: 1.1;
+    margin-bottom: 16px;
+}
+
+.pod-cta__title em {
+    color: var(--pod-orange);
+    font-style: italic;
+}
+
+.pod-cta__sub {
+    font-size: 14px;
+    color: var(--pod-muted);
+    line-height: 1.75;
+    margin-bottom: 32px;
+    font-family: var(--pod-sans);
+}
+
+.pod-cta__actions {
+    display: flex;
+    align-items: center;
     justify-content: center;
-    align-items: flex-start;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.pod-cta__note {
+    font-size: 11px;
+    color: var(--pod-muted);
+    font-family: var(--pod-sans);
+    border-top: 1px solid var(--pod-border);
+    padding-top: 24px;
+    margin-top: 8px;
+}
+
+.pod-cta__note strong {
+    color: var(--pod-orange);
+    font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1000px) {
+    .pod-hero {
+        grid-template-columns: 1fr;
+        padding: 100px 32px 60px;
+        text-align: center;
+    }
+
+    .pod-hero__inner {
+        max-width: 100%;
+    }
+
+    .pod-hero__desc {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .pod-hero__cta {
+        justify-content: center;
+    }
+
+    .pod-hero__tags {
+        justify-content: center;
+    }
+
+    .pod-hero__verse {
+        text-align: left;
+    }
+
+    .pod-hero__img-wrap {
+        margin: 0 auto;
+    }
+
+    .pod-eyebrow {
+        justify-content: center;
+    }
+
+    .pod-episodes__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pod-about__inner {
+        grid-template-columns: 1fr;
+    }
+
+    .pod-about__card--dark {
+        border-radius: 20px 20px 0 0;
+    }
+
+    .pod-about__card--light {
+        border-radius: 0 0 20px 20px;
+    }
+
+    .pod-about__card {
+        padding: 40px 28px;
+    }
+}
+
+@media (max-width: 640px) {
+    .pod-hero {
+        padding: 88px 20px 52px;
+    }
+
+    .pod-hero__logo {
+        font-size: clamp(3rem, 12vw, 5rem);
+    }
+
+    .pod-hero__video {
+        width: min(260px, 85vw);
+    }
+
+    .pod-episodes__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pod-episodes {
+        padding: 60px 16px;
+    }
+
+    .pod-about {
+        padding: 0 16px 60px;
+    }
+
+    .pod-cta {
+        padding: 60px 16px;
+    }
+
+    .pod-about__card {
+        padding: 32px 20px;
+    }
 }
