@@ -58,7 +58,7 @@ Route::get('/devocionales', function () {
 });
 Route::get('/devocionals-latest', [DevocionalController::class, 'latest']);
 Route::post('/devocionalesadd', [DevocionalController::class, 'store'])->middleware(['auth', 'verified']);
-Route::post('/upload-image', [ImageUploadController::class, 'store']);
+Route::post('/upload-image', [ImageUploadController::class, 'store'])->middleware(['auth', 'verified']);
 Route::get('/devocionales-search', [DevocionalController::class, 'index']);
 Route::get('/devocionales-searchCategories', [DevocionalController::class, 'searchCategories']);
 Route::get('/devocionales/categoria/{categoria}', [DevocionalController::class, 'porCategoria']);
@@ -104,7 +104,7 @@ Route::post('/api/series', [EnsenanzaController::class, 'store']);
 Route::put('/api/series/{id}', [EnsenanzaController::class, 'update']);
 
 
-Route::post('/upload-pdf', [PdfUploadController::class, 'store'])->name('upload.pdf');
+Route::post('/upload-pdf', [PdfUploadController::class, 'store'])->middleware(['auth', 'verified'])->name('upload.pdf');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
