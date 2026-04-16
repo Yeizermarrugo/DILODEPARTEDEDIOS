@@ -1,5 +1,6 @@
 import DevocionalDetails from '@/pages/DevocionalDetails';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/main-home.css';
 import CoverflowCarousel from './CoverflowCarousel';
@@ -35,7 +36,7 @@ function TituloDevocional({ contenido }: { contenido: string }) {
     const titulo = obtenerPrimerEtiqueta(contenido);
     return (
         <span
-            dangerouslySetInnerHTML={{ __html: titulo }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(titulo) }}
             style={{ textTransform: 'uppercase' }}
         />
     );
