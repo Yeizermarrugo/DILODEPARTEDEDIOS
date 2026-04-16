@@ -132,11 +132,11 @@ Route::get('/obras', function () {
 
 //Editar o eliminar devocionales
 
-Route::get('/devocionales-edit', [DevocionalController::class, 'adminIndex']);
-
-Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->name('devocionales.showJson');
-
-Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->middleware(['auth', 'verified'])->name('devocionales.update');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/devocionales-edit', [DevocionalController::class, 'adminIndex']);
+    Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->name('devocionales.showJson');
+    Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name('devocionales.update');
+});
 
 // Trackviews
 Route::post('/devocionales/{id}/view', [DevocionalController::class, 'trackView']);
