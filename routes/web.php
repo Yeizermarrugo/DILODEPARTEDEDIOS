@@ -99,9 +99,11 @@ Route::get('/podcast', function () {
     return Inertia::render('Podcast');
 });
 
-Route::get('/api/series', [EnsenanzaController::class, 'listSimple']);
-Route::post('/api/series', [EnsenanzaController::class, 'store']);
-Route::put('/api/series/{id}', [EnsenanzaController::class, 'update']);
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/api/series', [EnsenanzaController::class, 'listSimple']);
+    Route::post('/api/series', [EnsenanzaController::class, 'store']);
+    Route::put('/api/series/{id}', [EnsenanzaController::class, 'update']);
+});
 
 
 Route::post('/upload-pdf', [PdfUploadController::class, 'store'])->middleware(['auth', 'verified'])->name('upload.pdf');
