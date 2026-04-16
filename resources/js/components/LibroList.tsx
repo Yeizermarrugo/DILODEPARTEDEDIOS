@@ -86,23 +86,16 @@ export default function LibroList() {
 
     const TituloEstudioBiblico = ({ contenido }: { contenido: string }) => {
         const titulo = obtenerPrimerEtiqueta(contenido);
-        return (
-            <div dangerouslySetInnerHTML={{ __html: titulo }} />
-        );
+        return <div>{titulo}</div>;
     };
 
     const Heading2EstudioBiblico = ({ contenido }: { contenido: string }) => {
         const h2 = obtenerSegundaEtiqueta(contenido);
         if (!h2) return null;
         return (
-            <div
-                style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    minWidth: 0,
-                }}
-                dangerouslySetInnerHTML={{ __html: h2 }}
-            />
+            <div style={{ display: 'flex', flexWrap: 'wrap', minWidth: 0 }}>
+                {h2}
+            </div>
         );
     };
 
