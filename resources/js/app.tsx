@@ -88,6 +88,7 @@ function WelcomeModal() {
                 <img
                     src="/assets/img/Estudio Bíblico - 1.png"
                     alt="Bienvenido"
+                    loading="lazy"
                     style={{
                         width: '90%', height: 'auto',
                         margin: '0 auto 50px auto',
@@ -103,7 +104,7 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => resolvePageComponent(
         `./pages/${name}.tsx`,
-        import.meta.glob('./pages/**/*.tsx')
+        import.meta.glob('./pages/**/*.tsx', { eager: false })
     ),
     setup({ el, App, props }) {
         createRoot(el).render(

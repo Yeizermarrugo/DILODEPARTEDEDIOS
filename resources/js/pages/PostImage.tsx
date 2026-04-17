@@ -106,7 +106,7 @@ const PostImage = () => {
             <div className="post-image-gallery-grid">
                 {postImages.map((img) => (
                     <div className="post-image-card" key={img.id}>
-                        <img src={img.url} alt={`Imagen ${img.id}`} className="post-image-card-img" />
+                        <img src={img.url} alt={`Imagen ${img.id}`} className="post-image-card-img" loading="lazy" />
                         <button
                             className="post-image-card-delete"
                             onClick={() => handleEliminar(img.id)}

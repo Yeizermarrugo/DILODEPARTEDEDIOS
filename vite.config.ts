@@ -25,4 +25,26 @@ export default defineConfig({
     define: {
         'process.env': {},
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-react':   ['react', 'react-dom', '@inertiajs/react'],
+                    'vendor-mui':     ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+                    'vendor-tinymce': ['@tinymce/tinymce-react'],
+                },
+            },
+        },
+    },
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        cors: true, // ESTE ES EL SALVAVIDAS
+        origin: process.env.VITE_APP_URL || 'http://localhost:8000',
+        hmr: {
+            host: (process.env.VITE_APP_URL || 'http://localhost:8000').replace('https://', ''),
+            protocol: 'wss',
+        },
+    },
 });

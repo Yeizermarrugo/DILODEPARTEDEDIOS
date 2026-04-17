@@ -97,6 +97,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         src={ensenanza.imagen}
                         alt={ensenanza.titulo}
                         className="ens-cover__img"
+                        loading="lazy"
                     />
                 ) : (
                     <div className="ens-cover__placeholder">
