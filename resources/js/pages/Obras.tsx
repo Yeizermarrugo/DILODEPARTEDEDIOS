@@ -3,7 +3,6 @@ import PageHero from "@/components/PageHero";
 import PageLayout from "@/components/PageLayout";
 import { useEffect, useState } from "react";
 import '../../css/main.css';
-import '../../css/podcast.css';
 
 const Obras = () => {
     const [showSelectionModal, setShowSelectionModal] = useState(false);

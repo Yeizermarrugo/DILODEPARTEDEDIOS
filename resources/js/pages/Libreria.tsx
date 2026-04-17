@@ -1,6 +1,5 @@
 import PageLayout from "@/components/PageLayout";
 import '../../css/main.css';
-import '../../css/podcast.css';
 
 const Libreria = () => {
     return (

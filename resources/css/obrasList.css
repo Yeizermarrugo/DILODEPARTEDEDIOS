@@ -52,9 +52,9 @@
 }
 
 .obra-card__embed {
-  background: #000;
+  background: transparent;
   max-height: 450px;
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .obra-card__body {
