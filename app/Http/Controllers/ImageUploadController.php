@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PostImage;
+use App\Rules\ValidImageContent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,7 +12,7 @@ class ImageUploadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+            'file' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120', new ValidImageContent()],
         ]);
 
         $path = $request->file('file')->store('imagenes', 's3', 'public');
@@ -24,7 +25,7 @@ class ImageUploadController extends Controller
     {
         // Validar que viene el archivo
         $request->validate([
-            'file' => 'required|image|max:5120', // 5MB máximo
+            'file' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120', new ValidImageContent()],
         ]);
 
         if ($request->hasFile('file')) {

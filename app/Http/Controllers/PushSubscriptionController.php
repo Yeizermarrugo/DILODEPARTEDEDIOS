@@ -4,18 +4,35 @@ namespace App\Http\Controllers;
 
 use App\Models\Visitor;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class PushSubscriptionController extends Controller
 {
-    // app/Http/Controllers/PushSubscriptionController.php
+    // Dominios legítimos de servicios de push por navegador:
+    // Firefox: updates.push.services.mozilla.com
+    // Chrome/Edge/Opera: fcm.googleapis.com, fcm.endpoints.googleapis.com
+    // Safari: web.push.apple.com
+    private const ALLOWED_PUSH_HOSTS = [
+        'updates.push.services.mozilla.com',
+        'fcm.googleapis.com',
+        'fcm.endpoints.googleapis.com',
+        'web.push.apple.com',
+    ];
 
     public function subscribe(Request $request)
     {
         $request->validate([
-            'endpoint'  => 'required|url',
-            'publicKey' => 'nullable|string',
-            'authToken' => 'nullable|string',
+            'endpoint'  => 'required|url|max:500',
+            'publicKey' => 'nullable|string|max:200',
+            'authToken' => 'nullable|string|max:100',
         ]);
+
+        $host = parse_url($request->endpoint, PHP_URL_HOST);
+        if (!in_array($host, self::ALLOWED_PUSH_HOSTS, true)) {
+            throw ValidationException::withMessages([
+                'endpoint' => 'El endpoint no pertenece a un servicio de push reconocido.',
+            ]);
+        }
 
         $visitorId = $request->cookie('visitor_id');
 
