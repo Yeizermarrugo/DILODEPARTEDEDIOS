@@ -2,7 +2,6 @@ import LibroList from '@/components/LibroList';
 import PageHero from '@/components/PageHero';
 import PageLayout from '@/components/PageLayout';
 import '../../css/main.css';
-import '../../css/podcast.css';
 
 export default function Estudios() {
     return (

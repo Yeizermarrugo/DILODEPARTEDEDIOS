@@ -786,6 +786,7 @@ h6 {
 # Global Page Titles & Breadcrumbs
 --------------------------------------------------------------*/
 .page-title {
+    background-color: #ffffff;
     text-align: center;
     padding: 20px 0;
 }
@@ -4211,4 +4212,13 @@ section,
     .filter-mobile {
         display: none;
     }
+}
+
+.centered-main {
+    background-color: #ffffff;
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
 }
