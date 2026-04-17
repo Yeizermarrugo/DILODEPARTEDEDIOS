@@ -249,9 +249,6 @@
 .pod-hero__bg {
     position: absolute;
     inset: 0;
-    background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 255, 255, .02) 39px, rgba(255, 255, 255, .02) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255, 255, 255, .02) 39px, rgba(255, 255, 255, .02) 40px);
     pointer-events: none;
 }
 
@@ -665,9 +662,6 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 255, 255, .025) 39px, rgba(255, 255, 255, .025) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255, 255, 255, .025) 39px, rgba(255, 255, 255, .025) 40px);
     pointer-events: none;
 }
 
