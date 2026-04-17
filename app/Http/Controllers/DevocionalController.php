@@ -282,7 +282,7 @@ class DevocionalController extends Controller
             'pdf'           => 'nullable|string|max:255',
             'instagram'     => 'nullable|string|max:255',
             'tiktok'        => 'nullable|string|max:255',
-            'ensenanza_id'  => 'nullable|string',
+            'ensenanza_id'  => 'nullable|uuid|exists:ensenanzas,id',
         ]);
 
         // Creamos el registro usando SOLO los campos que existen en la DB
@@ -403,7 +403,7 @@ class DevocionalController extends Controller
             'pdf'           => 'nullable|string|max:255',
             'instagram'     => 'nullable|string|max:255',
             'tiktok'        => 'nullable|string|max:255',
-            'ensenanza_id'  => 'nullable|string',
+            'ensenanza_id'  => 'nullable|uuid|exists:ensenanzas,id',
         ]);
 
         $createdAt = $request->input('created_at');

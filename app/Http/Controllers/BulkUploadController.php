@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Rules\ValidImageContent;
 use Illuminate\Http\Request;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
@@ -27,7 +28,7 @@ class BulkUploadController extends Controller
     {
         $request->validate([
             'files'   => 'required|array',
-            'files.*' => 'required|image|max:5120',
+            'files.*' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120', new ValidImageContent()],
         ]);
 
         /** @var FilesystemAdapter $disk */

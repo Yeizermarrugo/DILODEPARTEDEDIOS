@@ -31,14 +31,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Agregar
     Route::get('devocionalesAgregar', function () {
-        return Inertia::render('DevocionalesForm', ['mode' => 'create']);
+        return Inertia::render('DevocionalesForm', [
+            'mode'        => 'create',
+            'tinymce_key' => config('services.tinymce.key'),
+        ]);
     })->name('devocionales.create');
 
     // Editar
     Route::get('/devocionales-editar/{id}', function (string $id) {
         return Inertia::render('DevocionalesForm', [
-            'mode' => 'edit',
-            'id'   => $id,
+            'mode'        => 'edit',
+            'id'          => $id,
+            'tinymce_key' => config('services.tinymce.key'),
         ]);
     })->name('devocionales.editPage');
 });
@@ -142,7 +146,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Trackviews
-Route::post('/devocionales/{id}/view', [DevocionalController::class, 'trackView']);
+Route::post('/devocionales/{id}/view', [DevocionalController::class, 'trackView'])
+    ->middleware('throttle:20,1');
 Route::post('/privacy/accept', [DevocionalController::class, 'acceptPrivacy']);
 
 Route::get('/reparar-ciudades', function () {
