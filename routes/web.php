@@ -23,22 +23,25 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        $stats = [
-            'devocionales'   => \App\Models\Devocional::where('is_devocional', 1)->whereNull('ensenanza_id')->count(),
-            'estudios'       => \App\Models\Devocional::where('is_devocional', 0)->count(),
-            'series'         => \App\Models\Ensenanza::count(),
-            'episodios'      => \App\Models\Devocional::whereNotNull('ensenanza_id')->count(),
-            'total_vistas'   => \App\Models\DevocionalView::count(),
-            'total_likes'    => \App\Models\ContentLike::count(),
-            'suscriptores'   => \App\Models\Visitor::has('pushSubscriptions')->count(),
-            'este_mes'       => \App\Models\Devocional::where('is_devocional', 1)
-                                    ->whereNull('ensenanza_id')
-                                    ->whereMonth('created_at', now()->month)
-                                    ->whereYear('created_at', now()->year)
-                                    ->count(),
-        ];
+        $stats = Cache::remember('dashboard.stats', 300, function () {
+            return [
+                'devocionales'   => \App\Models\Devocional::where('is_devocional', 1)->whereNull('ensenanza_id')->count(),
+                'estudios'       => \App\Models\Devocional::where('is_devocional', 0)->count(),
+                'series'         => \App\Models\Ensenanza::count(),
+                'episodios'      => \App\Models\Devocional::whereNotNull('ensenanza_id')->count(),
+                'total_vistas'   => \App\Models\DevocionalView::count(),
+                'total_likes'    => \App\Models\ContentLike::count(),
+                'suscriptores'   => \App\Models\Visitor::has('pushSubscriptions')->count(),
+                'este_mes'       => \App\Models\Devocional::where('is_devocional', 1)
+                                        ->whereNull('ensenanza_id')
+                                        ->whereMonth('created_at', now()->month)
+                                        ->whereYear('created_at', now()->year)
+                                        ->count(),
+            ];
+        });
 
-        $recientes = \App\Models\Devocional::whereIn('is_devocional', [0, 1])
+        $recientes = Cache::remember('dashboard.recientes', 120, function () {
+            return \App\Models\Devocional::whereIn('is_devocional', [0, 1])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get(['id', 'contenido', 'categoria', 'is_devocional', 'created_at', 'views_count', 'ensenanza_id'])
@@ -60,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     'created_at' => $d->created_at,
                 ];
             });
+        });
 
         return Inertia::render('dashboard', compact('stats', 'recientes'));
     })->name('dashboard');
