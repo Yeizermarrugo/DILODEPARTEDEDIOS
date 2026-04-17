@@ -80,7 +80,7 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
+    --background: #faf8f4;
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -105,14 +105,14 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+    --sidebar: oklch(0.305 0.054 236);
+    --sidebar-foreground: oklch(0.975 0.006 95);
+    --sidebar-primary: oklch(0.655 0.198 38);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(1 0 0 / 0.10);
+    --sidebar-accent-foreground: oklch(0.975 0.006 95);
+    --sidebar-border: oklch(1 0 0 / 0.10);
+    --sidebar-ring: oklch(1 0 0 / 0.20);
 }
 
 .dark {
@@ -156,6 +156,38 @@ body,
     height: 100%;
     margin: 0;
     padding: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* Sidebar navy — forzar colores sobre componentes shadcn */
+[data-slot="sidebar"] {
+    background-color: #2d465e;
+    color: #faf8f4;
+}
+
+[data-slot="sidebar"] [data-sidebar="group-label"] {
+    color: rgba(250, 248, 244, 0.45);
+}
+
+[data-slot="sidebar"] [data-sidebar="menu-button"] {
+    color: #faf8f4;
+}
+
+[data-slot="sidebar"] [data-sidebar="menu-button"]:hover {
+    background-color: rgba(255,255,255,0.10);
+    color: #faf8f4;
+}
+
+[data-slot="sidebar"] [data-sidebar="menu-button"][data-active="true"] {
+    background-color: rgba(247, 88, 21, 0.20);
+    color: #f75815;
 }
 
 .file {
