@@ -72,15 +72,21 @@ export default function LibroList() {
         return acc;
     }, []).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
 
+    const decodeHtmlEntities = (str: string): string => {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+    };
+
     const obtenerPrimerEtiqueta = (html: string) => {
         const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
-        if (match) return match[2].replace(/<[^>]+>/g, '');
+        if (match) return decodeHtmlEntities(match[2].replace(/<[^>]+>/g, ''));
         return '';
     };
 
     const obtenerSegundaEtiqueta = (html: string) => {
         const match = html.match(/<h2[^>]*>(.*?)<\/h2>/i);
-        if (match) return match[1].replace(/<[^>]+>/g, '');
+        if (match) return decodeHtmlEntities(match[1].replace(/<[^>]+>/g, ''));
         return '';
     };
 

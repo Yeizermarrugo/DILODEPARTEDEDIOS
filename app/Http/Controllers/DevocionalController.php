@@ -214,7 +214,6 @@ class DevocionalController extends Controller
     {
         $devocionales = Devocional::where('is_devocional', 0)
             ->orderBy('categoria', 'asc')
-            ->orderBy('contenido', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
         return response()->json($devocionales);
@@ -545,51 +544,20 @@ class DevocionalController extends Controller
             ->exists();
 
         if (!$recentAnalytic) {
-            $loc = Location::get($rawIp);
-
-            // Guardado Manual para forzar timestamps del dispositivo
-            $view = new DevocionalView();
-            $view->timestamps = false;
-            $view->devocional_id = $id;
-            $view->ip_address = $ipToSave;
-            $view->country = $loc ? $loc->countryName : 'Desconocido';
-            $view->city = $loc ? $loc->cityName : 'Desconocida';
-            $view->browser = $agent->browser() . ' ' . $agent->version($agent->browser());
-            $view->platform = $agent->platform();
-            $view->accepted_terms = true;
-            $view->created_at = $localTime;
-            $view->updated_at = $localTime;
-            $view->save();
-
-            // 5. LÓGICA DE INCREMENTO DE VIEWS_COUNT
-            $shouldIncrement = false;
-
-            if ($isWorkIp) {
-                // Si es tu IP y pasó el check del punto 3, es su primera vez
-                $shouldIncrement = true;
-            } else {
-                // Para cualquier otra persona (incluyendo invitados en tu WiFi no registrados)
-                $dayCheck = DevocionalView::where('devocional_id', $id)
-                    ->where('ip_address', $ipToSave)
-                    ->where('created_at', '>', Carbon::parse($localTime)->subDay())
-                    ->count();
-
-                if ($dayCheck === 1) {
-                    $shouldIncrement = true;
-                }
-            }
-
-            if ($shouldIncrement) {
-                $devocional = Devocional::find($id);
-                if ($devocional) {
-                    $devocional->increment('views_count');
-                }
-            }
+            \App\Jobs\TrackDevocionalView::dispatch(
+                $id,
+                $ipToSave,
+                $rawIp,
+                $agent->browser() . ' ' . $agent->version($agent->browser()),
+                $agent->platform(),
+                $localTime,
+                $isWorkIp,
+            )->afterResponse();
 
             return response()->json([
-                'status' => 'recorded',
+                'status'     => 'recorded',
                 'is_work_log' => $isWorkIp,
-                'ip_stored' => $ipToSave
+                'ip_stored'  => $ipToSave,
             ]);
         }
 
