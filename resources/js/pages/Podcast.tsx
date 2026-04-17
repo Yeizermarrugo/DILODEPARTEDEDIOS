@@ -142,8 +142,7 @@ function PodHero() {
 
                 {/* Descripción */}
                 <p className="pod-hero__desc">
-                    Una serie única que une la <em>fe en Cristo</em>, el <em>amor propio</em> y el
-                    cuidado de tu cuerpo — templo del Espíritu Santo. Pronto exploraremos juntos cómo
+                    Una serie que integra la <em>fe en Cristo</em>, el <em>amor de Dios</em> y el <em>cuidado del cuerpo como templo del Espíritu Santo</em>; guiándote a una transformación integral mediante una relación genuina con Dios. Pronto exploraremos juntos cómo
                     la relación con Dios puede transformar cada área de tu vida.
                 </p>
 
@@ -199,7 +198,6 @@ function PodHero() {
                         preload="metadata"
                         aria-label="Promo PodCAF"
                     />
-                    <div className="pod-hero__video-badge">PRÓXIMAMENTE</div>
                 </div>
             </div>
         </section>
@@ -337,7 +335,7 @@ function FinalCta() {
                 </h2>
 
                 <p className="pod-cta__sub">
-                    Explora nuestros devocionales, estudios bíblicos y series de enseñanza.
+                    Explora nuestros devocionales, estudios bíblicos y series temáticas.
                     La plataforma está activa y lista para transformar tu vida hoy.
                 </p>
 
