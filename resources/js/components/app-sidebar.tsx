@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Edit3, GraduationCap, Image, LayoutGrid, PlusCircle } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -13,25 +13,40 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+    {
+        title: 'Nuevo Devocional',
+        href: '/devocionalesAgregar',
+        icon: PlusCircle,
+    },
+    {
+        title: 'Editar Contenido',
+        href: '/devocionales-edit',
+        icon: Edit3,
+    },
+    {
+        title: 'Imágenes de Post',
+        href: '/postImage',
+        icon: Image,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        title: 'Devocionales',
+        href: '/devocionales',
+        icon: BookOpen,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
+        title: 'Estudios Bíblicos',
+        href: '/estudios',
         icon: BookOpen,
     },
 ];
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar collapsible="icon" variant="inset" style={{ backgroundColor: '#2d465e', textDecoration: 'none' }}>
+            <SidebarHeader style={{ backgroundColor: '#2d465e', textDecoration: 'none' }}>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
@@ -43,11 +58,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent style={{ backgroundColor: '#2d465e', textDecoration: 'none' }}>
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 
-            <SidebarFooter>
+            <SidebarFooter style={{ backgroundColor: '#2d465e', textDecoration: 'none' }}>
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
