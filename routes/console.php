@@ -8,7 +8,9 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Corre cada minuto entre 6:00 y 6:10 — el primer minuto disponible notifica,
+// los siguientes salen inmediatamente porque notificado_at ya está seteado.
 Schedule::command('devocional:notificar-diario')
-    ->dailyAt('09:40')
+    ->cron('0-10 6 * * *')
     ->timezone('America/Bogota')
     ->withoutOverlapping();
