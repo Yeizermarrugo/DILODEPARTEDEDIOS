@@ -193,7 +193,7 @@ function Devocionals() {
                     <div className="dv-page-hero__inner">
                         <div className="dv-page-hero__eyebrow">Devocionales</div>
                         <h1 className="dv-page-hero__title">
-                            Encuentra la <em>palabra</em> que Dios tiene para ti <em>hoy</em>
+                            Encuentra <em>la palabra</em> que Dios tiene para ti <em>hoy</em>
                         </h1>
                         <div className="dv-page-hero__verse">
                             <p>“Tal vez no nos damos cuenta, pero Dios no deja de hablarnos.”</p>

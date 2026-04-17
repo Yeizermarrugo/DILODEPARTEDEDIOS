@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use App\Models\DevocionalView;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -17,16 +18,18 @@ class DevocionalController extends Controller
 {
     private function purifyHtml(string $html): string
     {
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('HTML.Allowed', 'h1,h2,h3,h4,h5,h6,p,br,strong,em,u,s,ul,ol,li,blockquote,a[href|target|rel],img[src|alt|width|height],span[style],div[style],table,thead,tbody,tr,th[colspan|rowspan],td[colspan|rowspan],pre,code,hr');
-        $config->set('HTML.AllowedAttributes', 'a.href,a.target,a.rel,img.src,img.alt,img.width,img.height,*.style,*.class');
-        $config->set('CSS.AllowedProperties', 'color,background-color,font-weight,font-style,text-decoration,text-align,font-size,line-height,margin,padding');
-        $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true]);
-        $config->set('Attr.AllowedRel', 'noopener noreferrer nofollow');
-        $config->set('AutoFormat.RemoveEmpty', true);
-        $config->set('Cache.DefinitionImpl', null);
-
-        $purifier = new HTMLPurifier($config);
+        static $purifier = null;
+        if ($purifier === null) {
+            $config = HTMLPurifier_Config::createDefault();
+            $config->set('HTML.Allowed', 'h1,h2,h3,h4,h5,h6,p,br,strong,em,u,s,ul,ol,li,blockquote,a[href|target|rel],img[src|alt|width|height],span[style],div[style],table,thead,tbody,tr,th[colspan|rowspan],td[colspan|rowspan],pre,code,hr');
+            $config->set('HTML.AllowedAttributes', 'a.href,a.target,a.rel,img.src,img.alt,img.width,img.height,*.style,*.class');
+            $config->set('CSS.AllowedProperties', 'color,background-color,font-weight,font-style,text-decoration,text-align,font-size,line-height,margin,padding');
+            $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true]);
+            $config->set('Attr.AllowedRel', 'noopener noreferrer nofollow');
+            $config->set('AutoFormat.RemoveEmpty', true);
+            $config->set('Cache.DefinitionImpl', null);
+            $purifier = new HTMLPurifier($config);
+        }
         return $purifier->purify($html);
     }
 
@@ -73,95 +76,90 @@ class DevocionalController extends Controller
                 ->paginate($perPage);
         }
 
-        // ── Categorías (solo cuando no hay búsqueda activa) ───────────────
-        $categoriasRaw = Devocional::whereNotNull('categoria')
-            ->where('categoria', '!=', '')
-            ->where('is_devocional', 1)
-            ->where('ensenanza_id', '=', null)
-            ->selectRaw('categoria, serie, COUNT(*) as count')
-            ->groupBy('categoria', 'serie')
-            ->get();
+        // ── Categorías y autores (cacheados 1 hora) ───────────────────────
+        [$categoriasSinSerie, $series] = Cache::remember('devocional-categorias', 3600, function () {
+            $categoriasRaw = Devocional::whereNotNull('categoria')
+                ->where('categoria', '!=', '')
+                ->where('is_devocional', 1)
+                ->where('ensenanza_id', '=', null)
+                ->selectRaw('categoria, serie, COUNT(*) as count')
+                ->groupBy('categoria', 'serie')
+                ->get();
 
-        $series             = [];
-        $categoriasSinSerie = [];
-
-        foreach ($categoriasRaw as $row) {
-            if ($row->serie) {
-                if (!isset($series[$row->serie])) {
-                    $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
+            $series             = [];
+            $categoriasSinSerie = [];
+            foreach ($categoriasRaw as $row) {
+                if ($row->serie) {
+                    if (!isset($series[$row->serie])) {
+                        $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
+                    }
+                    $series[$row->serie]['categorias'][] = ['categoria' => $row->categoria, 'count' => $row->count];
+                } else {
+                    $categoriasSinSerie[] = ['categoria' => $row->categoria, 'count' => $row->count];
                 }
-                $series[$row->serie]['categorias'][] = [
-                    'categoria' => $row->categoria,
-                    'count'     => $row->count,
-                ];
-            } else {
-                $categoriasSinSerie[] = [
-                    'categoria' => $row->categoria,
-                    'count'     => $row->count,
-                ];
             }
-        }
+            return [$categoriasSinSerie, array_values($series)];
+        });
 
-        $autores = Devocional::whereNotNull('autor')
-            ->where('autor', '!=', '')
-            ->where('is_devocional', 1)
-            ->groupBy('autor')
-            ->selectRaw('autor, COUNT(*) as count')
-            ->get();
+        $autores = Cache::remember('devocional-autores', 3600, fn () =>
+            Devocional::whereNotNull('autor')
+                ->where('autor', '!=', '')
+                ->where('is_devocional', 1)
+                ->groupBy('autor')
+                ->selectRaw('autor, COUNT(*) as count')
+                ->get()
+        );
 
         return response()->json([
             'devocionales' => $devocionales,
             'categorias'   => $categoriasSinSerie,
-            'series'       => array_values($series),
+            'series'       => $series,
             'autores'      => $autores,
         ]);
     }
     public function searchCategories(Request $request)
     {
         $perPage = $request->input('per_page', 16);
-        // Nota: Agregué el paginate() que faltaba en tu segundo bloque de código
         $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
 
-        // 1. LISTA REAL DE TODAS LAS CATEGORÍAS (Sin importar la serie)
-        $todasLasCategorias = Devocional::whereNotNull('categoria')
-            ->where('categoria', '!=', '')
-            ->selectRaw('categoria, COUNT(*) as count')
-            ->groupBy('categoria')
-            ->get();
+        [$todasLasCategorias, $series] = Cache::remember('search-categorias-series', 3600, function () {
+            $todasLasCategorias = Devocional::whereNotNull('categoria')
+                ->where('categoria', '!=', '')
+                ->selectRaw('categoria, COUNT(*) as count')
+                ->groupBy('categoria')
+                ->get();
 
-        // 2. ESTRUCTURA DE SERIES (Para navegación jerárquica)
-        $categoriasRaw = Devocional::whereNotNull('categoria')
-            ->where('categoria', '!=', '')
-            ->selectRaw('categoria, serie, COUNT(*) as count')
-            ->groupBy('categoria', 'serie')
-            ->get();
+            $categoriasRaw = Devocional::whereNotNull('categoria')
+                ->where('categoria', '!=', '')
+                ->selectRaw('categoria, serie, COUNT(*) as count')
+                ->groupBy('categoria', 'serie')
+                ->get();
 
-        $series = [];
-        foreach ($categoriasRaw as $row) {
-            if ($row->serie) {
-                if (!isset($series[$row->serie])) {
-                    $series[$row->serie] = [
-                        'nombre'     => $row->serie,
-                        'categorias' => [],
-                    ];
+            $series = [];
+            foreach ($categoriasRaw as $row) {
+                if ($row->serie) {
+                    if (!isset($series[$row->serie])) {
+                        $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
+                    }
+                    $series[$row->serie]['categorias'][] = ['categoria' => $row->categoria, 'count' => $row->count];
                 }
-                $series[$row->serie]['categorias'][] = [
-                    'categoria' => $row->categoria,
-                    'count'     => $row->count,
-                ];
             }
-        }
 
-        $autores = Devocional::whereNotNull('autor')
-            ->where('autor', '!=', '')
-            ->groupBy('autor')
-            ->selectRaw('autor, COUNT(*) as count')
-            ->get();
+            return [$todasLasCategorias, array_values($series)];
+        });
+
+        $autores = Cache::remember('devocional-autores', 3600, fn () =>
+            Devocional::whereNotNull('autor')
+                ->where('autor', '!=', '')
+                ->groupBy('autor')
+                ->selectRaw('autor, COUNT(*) as count')
+                ->get()
+        );
 
         return response()->json([
             'devocionales' => $devocionales,
-            'categorias'   => $todasLasCategorias, // <--- AQUÍ ESTARÁN TODAS
-            'series'       => array_values($series),
+            'categorias'   => $todasLasCategorias,
+            'series'       => $series,
             'autores'      => $autores,
         ]);
     }
@@ -302,6 +300,10 @@ class DevocionalController extends Controller
             'ensenanza_id'  => $validated['ensenanza_id'] ?? null,
         ]);
 
+        Cache::forget('devocional-categorias');
+        Cache::forget('devocional-autores');
+        Cache::forget('search-categorias-series');
+
         return response()->json([
             'message' => '¡Guardado con éxito!',
             'devocional' => $devocional
@@ -421,6 +423,10 @@ class DevocionalController extends Controller
             'tiktok'        => $request->input('tiktok'),
             'ensenanza_id'  => $request->input('ensenanza_id'),
         ]);
+
+        Cache::forget('devocional-categorias');
+        Cache::forget('devocional-autores');
+        Cache::forget('search-categorias-series');
 
         return response()->json([
             'message'    => 'Devocional actualizado correctamente',

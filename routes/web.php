@@ -11,6 +11,7 @@ use App\Http\Controllers\YouTubeController;
 use App\Models\DevocionalView;
 use App\Models\Donation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -199,53 +200,64 @@ Route::get('/donacion-by-params', function (Request $request) {
         return ['raw_response' => $raw];
     };
 
-    // 1. Buscar en BD local primero
-    $donacion = \App\Models\Donation::where('ref_payco', $ref)
-        ->orWhere('ref_payco_hash', $ref)
-        ->orWhere('transaction_id', $ref)
-        ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(raw_response, '$.x_ref_payco')) = ?", [$ref])
-        ->first();
+    $cacheKey = "donation-ref-{$ref}";
 
-    if ($donacion) {
-        return response()->json($safeResponse($donacion));
-    }
+    $result = Cache::remember($cacheKey, 300, function () use ($ref, $safeResponse) {
+        // 1. Buscar en BD local primero
+        $donacion = \App\Models\Donation::where('ref_payco', $ref)
+            ->orWhere('ref_payco_hash', $ref)
+            ->orWhere('transaction_id', $ref)
+            ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(raw_response, '$.x_ref_payco')) = ?", [$ref])
+            ->first();
 
-    // 2. Si no está en BD, consultar API de ePayco directamente
-    try {
-        $apiResponse = \Illuminate\Support\Facades\Http::get(
-            "https://secure.epayco.co/validation/v1/reference/{$ref}"
-        );
-
-        if ($apiResponse->successful()) {
-            $body = $apiResponse->json();
-
-            if (isset($body['data']) && $body['success'] === true) {
-                $d = $body['data'];
-
-                $donacion = \App\Models\Donation::updateOrCreate(
-                    ['ref_payco' => (string) $d['x_ref_payco']],
-                    [
-                        'ref_payco_hash' => $ref,
-                        'transaction_id' => (string) $d['x_transaction_id'],
-                        'amount'         => $d['x_amount'],
-                        'currency'       => $d['x_currency_code'],
-                        'status'         => $d['x_transaction_state'],
-                        'description'    => $d['x_description'],
-                        'bank_name'      => $d['x_bank_name'],
-                        'customer_name'  => trim(($d['x_customer_name'] ?? '') . ' ' . ($d['x_customer_lastname'] ?? '')),
-                        'customer_email' => $d['x_customer_email'] ?? null,
-                        'raw_response'   => $d,
-                    ]
-                );
-
-                return response()->json($safeResponse($donacion));
-            }
+        if ($donacion) {
+            return ['status' => 'found', 'data' => $safeResponse($donacion)];
         }
-    } catch (\Exception $e) {
-        Log::error("Error consultando ePayco API", ['error' => $e->getMessage(), 'ref' => $ref]);
+
+        // 2. Si no está en BD, consultar API de ePayco directamente
+        try {
+            $apiResponse = \Illuminate\Support\Facades\Http::get(
+                "https://secure.epayco.co/validation/v1/reference/{$ref}"
+            );
+
+            if ($apiResponse->successful()) {
+                $body = $apiResponse->json();
+
+                if (isset($body['data']) && $body['success'] === true) {
+                    $d = $body['data'];
+
+                    $donacion = \App\Models\Donation::updateOrCreate(
+                        ['ref_payco' => (string) $d['x_ref_payco']],
+                        [
+                            'ref_payco_hash' => $ref,
+                            'transaction_id' => (string) $d['x_transaction_id'],
+                            'amount'         => $d['x_amount'],
+                            'currency'       => $d['x_currency_code'],
+                            'status'         => $d['x_transaction_state'],
+                            'description'    => $d['x_description'],
+                            'bank_name'      => $d['x_bank_name'],
+                            'customer_name'  => trim(($d['x_customer_name'] ?? '') . ' ' . ($d['x_customer_lastname'] ?? '')),
+                            'customer_email' => $d['x_customer_email'] ?? null,
+                            'raw_response'   => $d,
+                        ]
+                    );
+
+                    return ['status' => 'found', 'data' => $safeResponse($donacion)];
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Error consultando ePayco API", ['error' => $e->getMessage(), 'ref' => $ref]);
+        }
+
+        return ['status' => 'not_found'];
+    });
+
+    if ($result['status'] === 'not_found') {
+        Cache::forget($cacheKey); // no cachear 404s
+        return response()->json(['error' => 'No encontrado'], 404);
     }
 
-    return response()->json(['error' => 'No encontrado'], 404);
+    return response()->json($result['data']);
 });
 
 Route::get('/gracias', function () {

@@ -502,6 +502,7 @@ function TeamCard({ member }: { member: TeamMember }) {
                         src={member.imagen}
                         alt={member.name}
                         className="about-tc__avatar-img"
+                        loading="lazy"
                         onError={(e) => {
                             e.currentTarget.style.display = 'none';
                             e.currentTarget.nextElementSibling?.removeAttribute('style');

@@ -28,7 +28,7 @@ const Libreria = () => {
 
             {/* Main Content */}
             <main className="centered-main">
-                <img src="/assets/img/Estamos%20trabajando.png" alt="Estamos trabajando" className="trabajando" />
+                <img src="/assets/img/Estamos%20trabajando.png" alt="Estamos trabajando" className="trabajando" loading="lazy" />
             </main>
         </PageLayout>
     );

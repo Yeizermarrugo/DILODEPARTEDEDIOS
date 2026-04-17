@@ -16,11 +16,11 @@
 /* ─── Animaciones ────────────────────────────────────────────────────────────── */
 @keyframes drip {
     0% {
-        top: -100%;
+        transform: translateY(-100%);
     }
 
     100% {
-        top: 200%;
+        transform: translateY(200%);
     }
 }
 
@@ -228,10 +228,11 @@
 
 .about-hero__scroll-fill {
     position: absolute;
-    top: -100%;
+    top: 0;
     width: 100%;
     height: 50%;
     background: var(--about-orange);
+    will-change: transform;
     animation: drip 2s ease-in-out infinite;
 }
 
