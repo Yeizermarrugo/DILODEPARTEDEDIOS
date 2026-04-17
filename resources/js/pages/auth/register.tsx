@@ -31,7 +31,7 @@ export default function Register() {
         });
     };
 
-    const inputClass = (hasError: boolean) =>
+    const inputClass = (_hasError: boolean) =>
         'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all duration-200 placeholder:text-[#8a7f72]';
 
     const inputStyle = (hasError: boolean) => ({
