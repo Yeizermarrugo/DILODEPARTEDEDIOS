@@ -1,4 +1,4 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Eye, EyeOff, LoaderCircle, UserPlus } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
@@ -31,7 +31,7 @@ export default function Register() {
         });
     };
 
-    const inputClass = (_hasError: boolean) =>
+    const inputClass = () =>
         'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all duration-200 placeholder:text-[#8a7f72]';
 
     const inputStyle = (hasError: boolean) => ({
