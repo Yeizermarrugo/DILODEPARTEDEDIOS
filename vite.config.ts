@@ -4,7 +4,7 @@ import laravel from 'laravel-vite-plugin';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx', 'resources/css/devocionalDetails.css'],
@@ -28,7 +28,7 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                manualChunks: {
+                manualChunks: isSsrBuild ? undefined : {
                     'vendor-react':   ['react', 'react-dom', '@inertiajs/react'],
                     'vendor-mui':     ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
                     'vendor-tinymce': ['@tinymce/tinymce-react'],
@@ -47,4 +47,4 @@ export default defineConfig({
             protocol: 'wss',
         },
     },
-});
+}));
