@@ -1,4 +1,5 @@
 import LikeButton from '@/components/LikeButton';
+import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
 import { usePage } from '@inertiajs/react';
@@ -153,12 +154,13 @@ const DevocionalDetailsPage = (props: Props) => {
                         : ''}
                 </div>
 
-                {/* ── Like al pie de la página ── */}
+                {/* ── Vistas + Compartir + Like al pie de la página ── */}
                 {devocional.id && (
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'flex-end',
+                        gap: '8px',
                         padding: '12px 20px 4px 0',
                         borderTop: '1px solid #f0f0f0',
                         marginTop: '8px',
@@ -166,6 +168,7 @@ const DevocionalDetailsPage = (props: Props) => {
                     }}>
                         <i className="bi bi-eye" style={{ fontSize: '20px' }} />
                         <span>{devocional.views_count ?? 0}</span>
+                        <ShareButton type={likeType} id={devocional.id} variant="default" />
                         <LikeButton type={likeType} id={devocional.id} variant="default" />
                     </div>
                 )}

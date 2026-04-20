@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DevocionalController;
+use App\Http\Controllers\ShortUrlController;
 use App\Http\Controllers\EnsenanzaController;
 use App\Http\Controllers\PdfUploadController;
 use App\Http\Controllers\ImageUploadController;
@@ -310,6 +311,11 @@ Route::get('/donacion-by-params', function (Request $request) {
 Route::get('/gracias', function () {
     return inertia('ThanksPage');
 })->name('payment.thanks');
+
+// Short URL redirect — debe ir al final para no interceptar rutas reales
+Route::get('/{code}', [ShortUrlController::class, 'redirect'])
+    ->where('code', '[A-Za-z0-9]{8}')
+    ->name('short-url.redirect');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

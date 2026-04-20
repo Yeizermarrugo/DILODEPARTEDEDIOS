@@ -25,6 +25,7 @@ class Devocional extends Model
         'instagram',
         'tiktok',
         'notificado_at',
+        'short_code',
     ];
 
     // PK UUID string
