@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use App\Models\Ensenanza;
 use App\Services\ShortCodeService;
-use Illuminate\Http\Request;
 
 class ShortUrlController extends Controller
 {
@@ -32,7 +31,7 @@ class ShortUrlController extends Controller
         abort(404);
     }
 
-    public function getOrCreate(Request $request, string $type, string $id)
+    public function getOrCreate(string $type, string $id)
     {
         $service = new ShortCodeService();
 
@@ -50,5 +49,16 @@ class ShortUrlController extends Controller
         return response()->json([
             'short_url' => url('/' . $record->short_code),
         ]);
+    }
+
+    public function trackShare(string $type, string $id)
+    {
+        if ($type === 'ensenanza') {
+            Ensenanza::where('id', $id)->increment('shares_count');
+        } else {
+            Devocional::where('id', $id)->increment('shares_count');
+        }
+
+        return response()->json(['ok' => true]);
     }
 }

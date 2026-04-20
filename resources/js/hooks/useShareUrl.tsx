@@ -2,7 +2,10 @@ import { useRef, useState } from 'react';
 
 export type ShareContentType = 'devocional' | 'estudio' | 'ensenanza';
 
-export function useShareUrl(type: ShareContentType, id: string) {
+const csrfToken = () =>
+    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+
+export function useShareUrl(type: ShareContentType, id: string, initialSharesCount = 0) {
     const [shortUrl, setShortUrl] = useState<string | null>(() => {
         try {
             return localStorage.getItem(`short_url_${type}_${id}`);
@@ -12,7 +15,19 @@ export function useShareUrl(type: ShareContentType, id: string) {
     });
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [sharesCount, setSharesCount] = useState(initialSharesCount);
     const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const recordShare = () => {
+        fetch(`/api/share/${type}/${id}`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken() },
+        }).then(() => {
+            setSharesCount((c) => c + 1);
+        }).catch(() => {
+            // fallo silencioso — el conteo en DB puede diferir por un share, no crítico
+        });
+    };
 
     const share = async () => {
         let url = shortUrl;
@@ -43,24 +58,28 @@ export function useShareUrl(type: ShareContentType, id: string) {
                     title: 'Dilo De Parte De Dios',
                     text: 'Te comparto esto de Dilo De Parte De Dios',
                 });
+                recordShare();
                 return;
             } catch (err) {
-                // AbortError = el usuario canceló — caemos al clipboard silenciosamente
+                // AbortError = el usuario canceló — no contamos
                 if (err instanceof Error && err.name !== 'AbortError') {
                     console.error('Error al compartir:', err);
                 }
+                return;
             }
         }
 
+        // Fallback: copiar al portapapeles
         try {
             await navigator.clipboard.writeText(url);
+            recordShare();
             if (copiedTimer.current) clearTimeout(copiedTimer.current);
             setCopied(true);
             copiedTimer.current = setTimeout(() => setCopied(false), 2500);
         } catch {
-            // Si clipboard también falla, no hacemos nada
+            // Si clipboard falla, no hacemos nada
         }
     };
 
-    return { loading, copied, share };
+    return { loading, copied, sharesCount, share };
 }

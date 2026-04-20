@@ -9,7 +9,7 @@ import '../../css/main.css';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-type SortId = 'latest' | 'likes' | 'views';
+type SortId = 'latest' | 'likes' | 'views' | 'shares';
 
 type Category = { categoria: string; count: number };
 
@@ -149,6 +149,7 @@ function Devocionals() {
         { key: 'latest', icon: 'bi-clock', label: 'Más recientes' },
         { key: 'likes', icon: pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-heart', label: 'Más likes' },
         { key: 'views', icon: 'bi-eye', label: 'Más vistas' },
+        { key: 'shares', icon: 'bi-share', label: 'Más compartidos' },
     ];
 
     const todasLasCategorias = useMemo(() =>

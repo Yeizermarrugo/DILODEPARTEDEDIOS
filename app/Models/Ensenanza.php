@@ -18,6 +18,7 @@ class Ensenanza extends Model
         'descripcion',
         'imagen',
         'short_code',
+        'shares_count',
     ];
 
     // PK UUID string

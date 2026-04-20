@@ -70,6 +70,10 @@ class DevocionalController extends Controller
             $devocionales = (clone $base)
                 ->orderBy('views_count', 'desc')
                 ->paginate($perPage);
+        } elseif ($sort === 'shares') {
+            $devocionales = (clone $base)
+                ->orderBy('shares_count', 'desc')
+                ->paginate($perPage);
         } else {
             $devocionales = (clone $base)
                 ->orderBy('created_at', 'desc')
@@ -187,6 +191,12 @@ class DevocionalController extends Controller
                 ->where('is_devocional', 1)
                 ->where('ensenanza_id', null)
                 ->orderBy('views_count', 'desc')
+                ->paginate($perPage);
+        } elseif ($sort === 'shares') {
+            $devocionales = Devocional::where('categoria', $categoria)
+                ->where('is_devocional', 1)
+                ->where('ensenanza_id', null)
+                ->orderBy('shares_count', 'desc')
                 ->paginate($perPage);
         } else {
             $devocionales = Devocional::where('categoria', $categoria)

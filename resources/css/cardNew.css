@@ -169,7 +169,7 @@
 }
 
 .card-custom .menu-content li {
-    margin: 0 5px;
+    margin: 0;
     position: relative;
     display: inline-block;
 }

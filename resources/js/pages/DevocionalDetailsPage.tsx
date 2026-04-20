@@ -15,6 +15,7 @@ type Devocional = {
     autor?: string;
     is_devocional?: number; // 0=estudio | 1=devocional | 2=ensenanza
     views_count?: number;
+    shares_count?: number;
 };
 
 type Props = {
@@ -168,7 +169,7 @@ const DevocionalDetailsPage = (props: Props) => {
                     }}>
                         <i className="bi bi-eye" style={{ fontSize: '20px' }} />
                         <span>{devocional.views_count ?? 0}</span>
-                        <ShareButton type={likeType} id={devocional.id} variant="default" />
+                        <ShareButton type={likeType} id={devocional.id} sharesCount={devocional.shares_count ?? 0} variant="default" />
                         <LikeButton type={likeType} id={devocional.id} variant="default" />
                     </div>
                 )}
