@@ -14,13 +14,13 @@ class AddSecurityHeaders
 
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://cdn.tiny.cloud",
+            "script-src 'self' 'unsafe-inline' https://cdn.tiny.cloud https://www.instagram.com",
             "style-src 'self' 'unsafe-inline' https://fonts.bunny.net https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tiny.cloud",
             "font-src 'self' https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
             "img-src 'self' data: blob: https:",
             "media-src 'self' https:",
-            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-            "connect-src 'self' https://cdn.tiny.cloud https://sp.tinymce.com",
+            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com",
+            "connect-src 'self' https://cdn.tiny.cloud https://sp.tinymce.com https://www.instagram.com",
             "worker-src 'self' blob:",
         ]);
 
