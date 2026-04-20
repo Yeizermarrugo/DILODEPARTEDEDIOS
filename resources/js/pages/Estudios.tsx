@@ -52,7 +52,7 @@ export default function Estudios() {
                         </h1>
 
                         <p className="est-hero__desc">
-                            A través de estudios <em>libro por libro y capítulo por capítulo</em>,
+                            A través de estudios libro por libro y capítulo por capítulo,
                             acompañamos tu crecimiento espiritual con enseñanza fiel de la Palabra de Dios.
                         </p>
 
