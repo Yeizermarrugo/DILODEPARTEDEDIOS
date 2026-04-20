@@ -1,0 +1,677 @@
+/* ─── Estudios Bíblicos — Sacred Pulse ──────────────────────────────────────
+   Paleta: naranja #f75815 · azul marino #2d465e · crema #faf8f4
+   Fuentes: Cormorant Garamond (serif) + Instrument Sans (sans)
+   ────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --est-orange: #f75815;
+    --est-blue: #2d465e;
+    --est-cream: #faf8f4;
+    --est-warm: #f5f0e8;
+    --est-border: #e8e2d8;
+    --est-muted: #8a7f72;
+    --est-text: #1c1917;
+    --est-dark: #0d1e2c;
+    --est-serif: 'Cormorant Garamond', serif;
+    --est-sans: 'Instrument Sans', sans-serif;
+}
+
+/* ── Animaciones ── */
+@keyframes est-breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.6);
+        opacity: .4;
+    }
+}
+
+@keyframes est-item-in {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes est-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Reveal util ── */
+.est-reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity .85s cubic-bezier(.16, 1, .3, 1), transform .85s cubic-bezier(.16, 1, .3, 1);
+}
+
+.est-reveal--visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* ── Root ── */
+.est-page {
+    background: var(--est-cream);
+    font-family: var(--est-sans);
+    min-height: 100vh;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HERO — fondo azul marino, mismo sistema que Devocionales
+══════════════════════════════════════════════════════════════ */
+
+.est-hero {
+    background: var(--est-blue);
+    padding: 44px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.est-hero__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.est-hero__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 28px 36px;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 28px;
+}
+
+.est-hero__eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: rgba(247, 88, 21, .75);
+    font-family: var(--est-sans);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.est-hero__eyebrow-line {
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: rgba(247, 88, 21, .35);
+}
+
+.est-hero__title {
+    font-family: var(--est-serif);
+    font-size: clamp(1.7rem, 3.5vw, 2.8rem);
+    color: #fff;
+    line-height: 1.1;
+    font-weight: 400;
+    margin-bottom: 14px;
+}
+
+.est-hero__title em {
+    color: var(--est-orange);
+    font-style: italic;
+}
+
+.est-hero__desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, .45);
+    font-family: var(--est-sans);
+    margin-bottom: 18px;
+    max-width: 540px;
+}
+
+.est-hero__desc em {
+    color: var(--est-orange);
+    font-style: italic;
+}
+
+.est-hero__verse {
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-left: 3px solid var(--est-orange);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    max-width: 520px;
+}
+
+.est-hero__verse-text {
+    font-family: var(--est-serif);
+    font-style: italic;
+    font-size: .95rem;
+    color: rgba(255, 255, 255, .4);
+    line-height: 1.55;
+}
+
+.est-hero__verse-ref {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(247, 88, 21, .6);
+    font-family: var(--est-sans);
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+/* Stats */
+.est-hero__stats {
+    display: flex;
+    gap: 1px;
+    align-self: flex-end;
+    flex-shrink: 0;
+}
+
+.est-hero__stat {
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-bottom: none;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 72px;
+}
+
+.est-hero__stat-num {
+    font-family: var(--est-serif);
+    font-size: 1.9rem;
+    color: var(--est-orange);
+    line-height: 1;
+}
+
+.est-hero__stat-lbl {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .2);
+    margin-top: 2px;
+    font-family: var(--est-sans);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECCIÓN PRINCIPAL
+══════════════════════════════════════════════════════════════ */
+
+.est-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+}
+
+/* Topbar */
+.est-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.est-topbar__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.est-topbar__accent {
+    width: 3px;
+    height: 22px;
+    background: var(--est-orange);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.est-topbar__title {
+    font-family: var(--est-serif);
+    font-size: 1.2rem;
+    color: var(--est-text);
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.est-topbar__count {
+    font-size: 11px;
+    color: var(--est-muted);
+    font-family: var(--est-sans);
+    margin-top: 2px;
+}
+
+/* Buscador — mismo sistema que Devocionales */
+.est-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--est-border);
+    border-radius: 100px;
+    padding: 0 12px;
+    height: 36px;
+    gap: 6px;
+    transition: border-color .2s, box-shadow .2s;
+    min-width: 200px;
+}
+
+.est-search:focus-within {
+    border-color: var(--est-orange);
+    box-shadow: 0 0 0 3px rgba(247, 88, 21, .08);
+}
+
+.est-search__icon {
+    color: var(--est-muted);
+    flex-shrink: 0;
+}
+
+.est-search__input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 12px;
+    font-family: var(--est-sans);
+    color: var(--est-text);
+    flex: 1;
+    min-width: 0;
+}
+
+.est-search__input::placeholder {
+    color: var(--est-muted);
+}
+
+.est-search__clear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--est-muted);
+    font-size: 11px;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color .2s;
+}
+
+.est-search__clear:hover {
+    color: var(--est-orange);
+}
+
+/* ── Estados: cargando y vacío ── */
+.est-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+}
+
+.est-empty {
+    padding: 80px 24px;
+    text-align: center;
+}
+
+.est-empty__icon {
+    font-size: 2.5rem;
+    opacity: .25;
+    margin-bottom: 14px;
+}
+
+.est-empty__text {
+    font-family: var(--est-serif);
+    font-size: 1.2rem;
+    color: var(--est-muted);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ACORDEÓN — Libros de la Biblia
+══════════════════════════════════════════════════════════════ */
+
+.est-acordeon {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ── Libro (categoría) ── */
+.est-book {
+    background: #fff;
+    border: 1px solid var(--est-border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition:
+        border-color .3s,
+        box-shadow .3s;
+}
+
+.est-book--open {
+    border-color: rgba(247, 88, 21, .25);
+    box-shadow: 0 6px 24px rgba(45, 70, 94, .07);
+}
+
+/* Cabecera del libro */
+.est-book__head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background .2s;
+}
+
+.est-book--open .est-book__head {
+    background: var(--est-blue);
+}
+
+.est-book__head:hover:not(.est-book--open .est-book__head) {
+    background: var(--est-warm);
+}
+
+/* Número decorativo */
+.est-book__num {
+    font-family: var(--est-serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(247, 88, 21, .18);
+    line-height: 1;
+    min-width: 32px;
+    flex-shrink: 0;
+    transition: color .3s;
+}
+
+.est-book--open .est-book__num {
+    color: rgba(247, 88, 21, .4);
+}
+
+/* Nombre del libro */
+.est-book__name {
+    flex: 1;
+    font-family: var(--est-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--est-text);
+    line-height: 1.2;
+    transition: color .2s;
+    text-align: left;
+}
+
+.est-book--open .est-book__name {
+    color: #fff;
+}
+
+/* Badge con cantidad */
+.est-book__count {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    font-family: var(--est-sans);
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: rgba(247, 88, 21, .08);
+    color: var(--est-orange);
+    border: 1px solid rgba(247, 88, 21, .15);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background .3s, border-color .3s, color .3s;
+}
+
+.est-book--open .est-book__count {
+    background: rgba(247, 88, 21, .2);
+    border-color: rgba(247, 88, 21, .3);
+    color: rgba(247, 88, 21, .95);
+}
+
+/* Chevron */
+.est-book__chev {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--est-border);
+    color: var(--est-muted);
+    flex-shrink: 0;
+    transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), border-color .2s, color .2s, background .2s;
+}
+
+.est-book__chev--open {
+    transform: rotate(180deg);
+    border-color: rgba(247, 88, 21, .3);
+    color: var(--est-orange);
+    background: rgba(247, 88, 21, .08);
+}
+
+.est-book--open .est-book__chev {
+    border-color: rgba(255, 255, 255, .2);
+    color: rgba(255, 255, 255, .6);
+    background: rgba(255, 255, 255, .08);
+}
+
+/* ── Lista de estudios dentro de un libro ── */
+.est-book__items {
+    border-top: 1px solid var(--est-border);
+    animation: est-panel-in .2s ease;
+}
+
+/* ── Ítem de estudio ── */
+.est-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    text-decoration: none;
+    border-bottom: 1px solid var(--est-border);
+    transition: background .15s, padding-left .2s;
+    animation: est-item-in .25s ease both;
+    position: relative;
+}
+
+.est-item:last-child {
+    border-bottom: none;
+}
+
+.est-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: var(--est-orange);
+    transition: width .2s;
+    border-radius: 0;
+}
+
+.est-item:hover {
+    background: var(--est-cream);
+    padding-left: 22px;
+}
+
+.est-item:hover::before {
+    width: 3px;
+}
+
+/* Número del capítulo */
+.est-item__num {
+    font-family: var(--est-serif);
+    font-size: .85rem;
+    color: rgba(247, 88, 21, .3);
+    min-width: 28px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: color .2s;
+}
+
+.est-item:hover .est-item__num {
+    color: rgba(247, 88, 21, .65);
+}
+
+/* Cuerpo del ítem */
+.est-item__body {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.est-item__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--est-text);
+    font-family: var(--est-sans);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color .2s;
+}
+
+.est-item:hover .est-item__title {
+    color: var(--est-blue);
+}
+
+.est-item__dash {
+    color: var(--est-border);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.est-item__sub {
+    font-size: 12px;
+    color: var(--est-muted);
+    font-family: var(--est-sans);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+}
+
+/* Meta: vistas + likes */
+.est-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    color: var(--est-orange);
+
+}
+
+.est-item__views {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--est-orange);
+    font-family: var(--est-sans);
+}
+
+/* Flecha de navegación */
+.est-item__arrow {
+    color: var(--est-border);
+    flex-shrink: 0;
+    transition: color .2s, transform .2s;
+    display: flex;
+    align-items: center;
+}
+
+.est-item:hover .est-item__arrow {
+    color: var(--est-orange);
+    transform: translateX(3px);
+}
+
+/* Filas alternadas */
+.est-item:nth-child(even) {
+    background: var(--est-cream);
+}
+
+.est-item:nth-child(even):hover {
+    background: #ede7dc;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .est-hero__inner {
+        grid-template-columns: 1fr;
+        padding: 0 20px 28px;
+    }
+
+    .est-hero__stats {
+        display: none;
+    }
+
+    .est-hero {
+        padding-top: 32px;
+    }
+
+    .est-section {
+        padding: 20px 16px 40px;
+    }
+
+    .est-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .est-search {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .est-item__sub {
+        display: none;
+    }
+
+    .est-book__head {
+        padding: 12px 14px;
+    }
+
+    .est-item {
+        padding: 9px 14px;
+    }
+
+    .est-item:hover {
+        padding-left: 17px;
+    }
+}
+
+@media (max-width: 480px) {
+    .est-item__meta .est-item__views {
+        display: none;
+    }
+
+    .est-book__num {
+        display: none;
+    }
+}
