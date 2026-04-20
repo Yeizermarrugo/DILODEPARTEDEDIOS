@@ -1,303 +1,234 @@
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import Paper from '@mui/material/Paper';
-import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LikeButton from './LikeButton';
+import { ShareButton } from './ShareButton';
 
-const FireNav = styled(List)<{ component?: React.ElementType }>({
-    '& .MuiListItemButton-root': {
-        paddingLeft: 24,
-        paddingRight: 24,
-    },
-    '& .MuiListItemIcon-root': {
-        minWidth: 0,
-        marginRight: 16,
-    },
-    '& .MuiSvgIcon-root': {
-        fontSize: 20,
-    },
-});
+function navigate(url: string) {
+    window.location.href = url;
+}
 
 type Categoria = string | { nombre: string };
+
 type Libro = {
     id: string;
     categoria: Categoria | Categoria[];
     contenido: string;
     views_count?: number;
-    is_devocional?: number; // 0=estudio | 1=devocional | 2=ensenanza
+    shares_count?: number;
 };
 
-export default function LibroList() {
-    const [openCategoria, setOpenCategoria] = useState<Record<string, boolean>>({});
-    const [libros, setLibros] = useState<Libro[]>([]);
+interface Props {
+    searchTerm: string;
+    onLoad?: (stats: { total: number; categorias: number }) => void;
+}
 
+function decode(str: string) {
+    const el = document.createElement('textarea');
+    el.innerHTML = str;
+    return el.value;
+}
+
+function getH1(html: string) {
+    const m = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    return m ? decode(m[1].replace(/<[^>]+>/g, '')) : '';
+}
+
+function getH2(html: string) {
+    const m = html.match(/<h2[^>]*>(.*?)<\/h2>/i);
+    return m ? decode(m[1].replace(/<[^>]+>/g, '')) : '';
+}
+
+function parseRef(html: string): { cap: number; ver: number } {
+    const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1].replace(/<[^>]+>/g, '') ?? '';
+    let m = h1.match(/(\d+):(\d+)/);
+    if (m) return { cap: Number(m[1]), ver: Number(m[2]) };
+    m = h1.match(/\b(\d+)\b/);
+    if (m) return { cap: Number(m[1]), ver: 0 };
+    return { cap: 9999, ver: 9999 };
+}
+
+function getCatNombre(c: Categoria) {
+    return typeof c === 'object' ? c.nombre : c;
+}
+
+export default function LibroList({ searchTerm, onLoad }: Props) {
+    const [libros, setLibros] = useState<Libro[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [openCategoria, setOpenCategoria] = useState<Record<string, boolean>>({});
+    const onLoadRef = useRef(onLoad);
+    onLoadRef.current = onLoad;
 
     useEffect(() => {
         fetch('/estudiosbiblicos')
-            .then((response) => response.json())
+            .then(r => r.json())
             .then((data: Libro[]) => {
                 const lista = Array.isArray(data) ? data : [];
-
-                const ordenados = [...lista].sort((a, b) => {
-                    const ra = parseRefFromContenido(a.contenido);
-                    const rb = parseRefFromContenido(b.contenido);
-
-                    if (ra.cap !== rb.cap) return ra.cap - rb.cap;
-                    return ra.ver - rb.ver;
+                const sorted = [...lista].sort((a, b) => {
+                    const ra = parseRef(a.contenido);
+                    const rb = parseRef(b.contenido);
+                    return ra.cap !== rb.cap ? ra.cap - rb.cap : ra.ver - rb.ver;
                 });
+                setLibros(sorted);
+                setLoading(false);
 
-                setLibros(ordenados);
+                const cats = sorted.reduce<Set<string>>((s, l) => {
+                    const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
+                    cs.forEach(c => c && s.add(getCatNombre(c)));
+                    return s;
+                }, new Set());
+                onLoadRef.current?.({ total: sorted.length, categorias: cats.size });
             })
-            .catch((error) => console.error('Error fetching libros:', error));
+            .catch(() => setLoading(false));
     }, []);
 
-    // Obtener todas las categorías en array (deduplicadas por nombre)
-    const todasCategorias = libros
-        .map((libro) =>
-            Array.isArray(libro.categoria)
-                ? libro.categoria
-                : [libro.categoria].filter(Boolean)
-        )
-        .flat();
+    const search = searchTerm.trim().toLowerCase();
 
-    const categoriasUnicas = todasCategorias.reduce<{ nombre: string }[]>((acc, curr) => {
-        if (!curr) return acc;
-        const nombre = typeof curr === 'object' ? curr.nombre : curr;
-        if (!acc.find((item) => item.nombre === nombre)) acc.push({ nombre });
-        return acc;
-    }, []).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+    const filtrados = search
+        ? libros.filter(l =>
+            getH1(l.contenido).toLowerCase().includes(search) ||
+            getH2(l.contenido).toLowerCase().includes(search),
+          )
+        : libros;
 
-    const decodeHtmlEntities = (str: string): string => {
-        const txt = document.createElement('textarea');
-        txt.innerHTML = str;
-        return txt.value;
-    };
+    const categorias = filtrados
+        .reduce<{ nombre: string }[]>((acc, l) => {
+            const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
+            cs.forEach(c => {
+                if (!c) return;
+                const nombre = getCatNombre(c);
+                if (!acc.find(x => x.nombre === nombre)) acc.push({ nombre });
+            });
+            return acc;
+        }, [])
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
 
-    const obtenerPrimerEtiqueta = (html: string) => {
-        const match = html.match(/<([a-zA-Z0-9]+)[^>]*>(.*?)<\/\1>/i);
-        if (match) return decodeHtmlEntities(match[2].replace(/<[^>]+>/g, ''));
-        return '';
-    };
+    useEffect(() => {
+        if (search) {
+            const open: Record<string, boolean> = {};
+            categorias.forEach(c => { open[c.nombre] = true; });
+            setOpenCategoria(open);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search]);
 
-    const obtenerSegundaEtiqueta = (html: string) => {
-        const match = html.match(/<h2[^>]*>(.*?)<\/h2>/i);
-        if (match) return decodeHtmlEntities(match[1].replace(/<[^>]+>/g, ''));
-        return '';
-    };
+    const toggle = (nombre: string) =>
+        setOpenCategoria(prev => ({ ...prev, [nombre]: !prev[nombre] }));
 
-    const TituloEstudioBiblico = ({ contenido }: { contenido: string }) => {
-        const titulo = obtenerPrimerEtiqueta(contenido);
-        return <div>{titulo}</div>;
-    };
-
-    const Heading2EstudioBiblico = ({ contenido }: { contenido: string }) => {
-        const h2 = obtenerSegundaEtiqueta(contenido);
-        if (!h2) return null;
+    if (loading) {
         return (
-            <div style={{ display: 'flex', flexWrap: 'wrap', minWidth: 0 }}>
-                {h2}
+            <div className="est-loading">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
             </div>
         );
-    };
-
-    // 1) Función para extraer capítulo y versículo inicial del contenido
-    const parseRefFromContenido = (html: string): { cap: number; ver: number } => {
-        const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-        const h1Text = h1Match ? h1Match[1].replace(/<[^>]+>/g, '') : '';
-
-        // Primero intenta "2:4"
-        let refMatch = h1Text.match(/(\d+):(\d+)/);
-        if (refMatch) {
-            return { cap: Number(refMatch[1]), ver: Number(refMatch[2]) };
-        }
-
-        // Si no tiene ":", intenta solo "7" (capítulo)
-        refMatch = h1Text.match(/\b(\d+)\b/);
-        if (refMatch) {
-            return { cap: Number(refMatch[1]), ver: 0 }; // versículo 0 ⇒ va antes que 1-?
-        }
-
-        // Sin número, mándalo al final
-        return { cap: 9999, ver: 9999 };
     }
 
-
+    if (filtrados.length === 0) {
+        return (
+            <div className="est-empty">
+                <div className="est-empty__icon">📖</div>
+                <div className="est-empty__text">
+                    No se encontraron estudios para "{searchTerm}"
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <Box sx={{ display: 'flex' }}>
-            <ThemeProvider
-                theme={createTheme({
-                    components: {
-                        MuiListItemButton: {
-                            defaultProps: {
-                                disableTouchRipple: true,
-                            },
-                        },
-                    },
-                    // palette: {
-                    //     mode: 'dark',
-                    //     primary: { main: 'rgb(102, 157, 246)' },
-                    //     background: { paper: 'rgb(5, 30, 52)' },
-                    // },
-                })}
-            >
-                <Paper elevation={0} sx={{ maxWidth: 600, width: '100%', minHeight: 400 }}>
-                    <FireNav component="nav" disablePadding>
-                        <Divider />
-                        <Divider />
-                        <Box>
-                            {categoriasUnicas.map((categoria) => {
-                                const nombre = categoria.nombre;
-                                const isOpen = openCategoria[nombre] ?? false;
+        <div className="est-acordeon">
+            {categorias.map((cat, catIdx) => {
+                const isOpen = openCategoria[cat.nombre] ?? false;
+                const items = filtrados.filter(l => {
+                    const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
+                    return cs.some(c => c && getCatNombre(c) === cat.nombre);
+                });
 
-                                // Filtrar libros por la categoría actual (Libro)
-                                const librosCategoria = libros.filter((libro: Libro) => {
-                                    if (Array.isArray(libro.categoria)) {
-                                        return libro.categoria.some((cat: Categoria) =>
-                                            (typeof cat === 'object' ? cat.nombre : cat) === nombre
-                                        );
-                                    }
-                                    return libro.categoria === nombre;
-                                });
+                return (
+                    <div
+                        key={cat.nombre}
+                        className={`est-book ${isOpen ? 'est-book--open' : ''}`}
+                        style={{ animationDelay: `${catIdx * 40}ms` }}
+                    >
+                        <button
+                            className="est-book__head"
+                            onClick={() => toggle(cat.nombre)}
+                            aria-expanded={isOpen}
+                        >
+                            <span className="est-book__num">
+                                {String(catIdx + 1).padStart(2, '0')}
+                            </span>
+                            <span className="est-book__name">{cat.nombre}</span>
+                            <span className="est-book__count">{items.length} cap.</span>
+                            <span className={`est-book__chev ${isOpen ? 'est-book__chev--open' : ''}`}>
+                                <svg viewBox="0 0 24 24" width={14} height={14}
+                                    fill="none" stroke="currentColor"
+                                    strokeWidth={2.2} strokeLinecap="round">
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </span>
+                        </button>
 
-                                return (
-                                    <Box key={nombre}>
-                                        <ListItemButton
-                                            alignItems="flex-start"
-                                            onClick={() =>
-                                                setOpenCategoria((prev) => ({
-                                                    ...prev,
-                                                    [nombre]: !isOpen,
-                                                }))
-                                            }
-                                            sx={[
-                                                { px: 3, pt: 2.5 },
-                                                isOpen
-                                                    ? { bgcolor: 'rgba(71, 98, 130, 0.2)' }
-                                                    : { bgcolor: null, borderBlockEnd: '1px solid', borderColor: 'divider' },
-                                                isOpen ? { pb: 0 } : { pb: 2.5 },
-                                                {
-                                                    '&:hover, &:focus': {
-                                                        '& svg': { opacity: 1 },
-                                                    },
-                                                },
-                                            ]}
+                        {isOpen && (
+                            <div className="est-book__items">
+                                {items.map((libro, libroIdx) => {
+                                    const titulo = getH1(libro.contenido);
+                                    const subtitulo = getH2(libro.contenido);
+                                    return (
+                                        <div
+                                            key={libro.id}
+                                            className="est-item"
+                                            style={{ animationDelay: `${libroIdx * 25}ms`, cursor: 'pointer' }}
+                                            onClick={() => navigate(`/estudio-biblico/${libro.id}`)}
                                         >
-                                            <ListItemText
-                                                primary={nombre}
-                                                slotProps={{
-                                                    primary: {
-                                                        fontSize: 15,
-                                                        fontWeight: 'medium',
-                                                        lineHeight: '20px',
-                                                        mb: '2px',
-                                                        color: isOpen ? 'text.primary' : 'primary.main',
-                                                    },
-                                                }}
-                                                sx={{ my: 0 }}
-                                            />
-                                            <KeyboardArrowDown
-                                                sx={[
-                                                    { mr: -1, opacity: 0, transition: '0.2s' },
-                                                    isOpen
-                                                        ? { transform: 'rotate(-180deg)' }
-                                                        : { transform: 'rotate(0)' },
-                                                ]}
-                                            />
-                                        </ListItemButton>
-                                        {/* Libros de la categoría expandida */}
-                                        {isOpen &&
-                                            librosCategoria.map((libro) => (
-                                                <ListItemButton
-                                                    key={libro.id}
-                                                    sx={[
-                                                        isOpen ? { bgcolor: 'rgba(71, 98, 130, 0.07)' } : { bgcolor: null },
-                                                        {
-                                                            py: 0.5,
-                                                            minHeight: 36,
-                                                            pl: 5,
-                                                            pr: 2,
-                                                            alignItems: 'center', // ← centrado vertical
-                                                            '&:hover': { backgroundColor: 'rgba(71, 98, 130, 0.19)' },
-                                                            '&:hover, &:focus': { '& svg': { opacity: 1 } },
-                                                        },
-                                                    ]}
+                                            <span className="est-item__num">
+                                                {String(libroIdx + 1).padStart(2, '0')}
+                                            </span>
+
+                                            <span className="est-item__body">
+                                                <span className="est-item__title">{titulo}</span>
+                                                {subtitulo && (
+                                                    <span className="est-item__sub">
+                                                        <span className="est-item__dash">–</span>
+                                                        {subtitulo}
+                                                    </span>
+                                                )}
+                                            </span>
+
+                                            {/* Vistas + Compartir + Like — stopPropagation evita navegar al link */}
+                                            <span className="est-item__meta">
+                                                <span className="est-item__views">
+                                                    <i className="bi bi-eye" style={{ fontSize: 12 }} />
+                                                    {libro.views_count ?? 0}
+                                                </span>
+                                                <span
+                                                    onClick={e => e.stopPropagation()}
+                                                    style={{ display: 'flex', alignItems: 'center', gap: 2 }}
                                                 >
-                                                    {/* Wrapper externo */}
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+                                                    <ShareButton type="estudio" id={libro.id} sharesCount={libro.shares_count ?? 0} variant="compact" />
+                                                    <span style={{ fontSize: 11 }}>{libro.shares_count ?? 0}</span>
+                                                </span>
+                                                <span
+                                                    onClick={e => e.stopPropagation()}
+                                                >
+                                                    <LikeButton type="estudio" id={libro.id} variant="default" />
+                                                </span>
+                                            </span>
 
-                                                        <Box
-                                                            component="a"
-                                                            href={`/estudio-biblico/${libro.id}`}
-                                                            sx={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '4px',
-                                                                minWidth: 0,
-                                                                flex: 1,
-                                                                textDecoration: 'none',
-                                                                overflow: 'hidden',
-                                                            }}
-                                                        >
-                                                            {/* Título — nunca se encoge */}
-                                                            <Box sx={{
-                                                                fontSize: '14px',
-                                                                fontWeight: 500,
-                                                                flexShrink: 0,
-                                                                whiteSpace: 'nowrap',
-                                                            }}>
-                                                                <TituloEstudioBiblico contenido={libro.contenido} />
-                                                            </Box>
-
-                                                            {/* Separador + subtítulo — solo si existe */}
-                                                            {obtenerSegundaEtiqueta(libro.contenido) && (
-                                                                <>
-                                                                    <Box sx={{ color: '#aaa', flexShrink: 0 }}>–</Box>
-                                                                    <Box sx={{
-                                                                        color: '#7a7a7a',
-                                                                        fontSize: '13px',
-                                                                        minWidth: 0,
-                                                                        overflow: 'hidden',
-                                                                        display: 'flex', // ← no flex
-                                                                        flexWrap: 'wrap',
-                                                                        flex: 1,
-                                                                    }}>
-                                                                        <Heading2EstudioBiblico contenido={libro.contenido} />
-                                                                    </Box>
-                                                                </>
-                                                            )}
-                                                        </Box>
-
-                                                        {/* Contadores — siempre a la derecha, nunca se encogen */}
-                                                        <Box sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '6px',
-                                                            flexShrink: 0,
-                                                            color: 'rgba(110,110,110,0.88)',
-                                                            fontSize: '13px',
-                                                        }}>
-                                                            <i className="bi bi-eye" style={{ fontSize: '14px' }} />
-                                                            <span>{libro.views_count ?? 0}</span>
-                                                            <LikeButton type="estudio" id={libro.id} variant="default" />
-                                                        </Box>
-
-                                                    </Box>
-                                                </ListItemButton>
-                                            ))}
-                                    </Box>
-                                );
-                            })}
-                            <Divider />
-                        </Box>
-                    </FireNav>
-                </Paper>
-            </ThemeProvider>
-        </Box >
+                                            <span className="est-item__arrow">
+                                                <svg viewBox="0 0 24 24" width={12} height={12}
+                                                    fill="none" stroke="currentColor"
+                                                    strokeWidth={2} strokeLinecap="round">
+                                                    <path d="M9 18l6-6-6-6" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
     );
 }
