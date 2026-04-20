@@ -142,7 +142,7 @@ function PodHero() {
 
                 {/* Descripción */}
                 <p className="pod-hero__desc">
-                    Una serie que integra la <em>fe en Cristo</em>, el <em>amor de Dios</em> y el cuidado del cuerpo como <em>templo del Espíritu Santo</em>; guiándote a una transformación integral mediante una relación genuina con Dios. Pronto exploraremos juntos cómo
+                    Una serie que integra la fe en Cristo, el amor de Dios y el cuidado del cuerpo como templo del Espíritu Santo; guiándote a una transformación integral mediante una relación genuina con Dios. Pronto exploraremos juntos cómo
                     la relación con Dios puede transformar cada área de tu vida.
                 </p>
 
