@@ -1,4 +1,5 @@
 import { LikeButton } from '@/components/LikeButton';
+import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
 import DOMPurify from 'dompurify';
@@ -119,17 +120,19 @@ const DevocionalDetails = ({ devocional }: Props) => {
                         : ''}
                 </div>
 
-                {/* ── Like al pie del modal — corazón + número ── */}
+                {/* ── Compartir + Like al pie ── */}
                 {devocional.id && (
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'flex-end',
+                        gap: '8px',
                         padding: '10px 20px 4px 0',
                         borderTop: '1px solid #f0f0f0',
                         marginTop: '6px',
                         color: '#888',
                     }}>
+                        <ShareButton type={contentType} id={devocional.id} variant="default" />
                         <LikeButton type={contentType} id={devocional.id} variant="default" />
                     </div>
                 )}
