@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import PrivacyBanner from './components/PrivacyBanner';
+import PullToRefresh from './components/PullToRefresh';
 import PushSubscribeButton from './components/PushSubscribeButton';
 import { initializeTheme } from './hooks/use-appearance';
 
@@ -113,6 +114,7 @@ createInertiaApp({
                 <PrivacyBanner />
                 <PushSubscribeButton />
                 <WelcomeModal />
+                <PullToRefresh />
             </>
         );
     },

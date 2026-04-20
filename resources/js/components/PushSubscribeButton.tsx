@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
+const ADMIN_PATHS = ['/login', '/register', '/dashboard', '/forgot-password', '/reset-password', '/verify-email', '/settings'];
+
+function isAdminPath(path: string) {
+    return ADMIN_PATHS.some(p => path === p || path.startsWith(p + '/'));
+}
+
 const DENIED_KEY = 'push_denied_at';
 const POS_KEY = 'push_btn_pos';
 const DAYS_RETRY = 3;
@@ -80,7 +86,7 @@ function snapToEdge(pos: Pos): Pos {
 
 // ─── Componente Principal ──────────────────────────────────────────────────────
 
-export default function PushSubscribeButton() {
+function PushSubscribeButtonInner() {
     const [estado, setEstado] = useState<Estado>('waiting');
     const [showTooltip, setShowTooltip] = useState(false);
 
@@ -364,4 +370,9 @@ export default function PushSubscribeButton() {
             `}</style>
         </div>
     );
+}
+
+export default function PushSubscribeButton() {
+    if (isAdminPath(window.location.pathname)) return null;
+    return <PushSubscribeButtonInner />;
 }
