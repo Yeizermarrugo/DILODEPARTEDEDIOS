@@ -55,15 +55,15 @@ A single table serves three content types, distinguished by `is_devocional`:
 |-------|------|-----|
 | `1` | Devocional (daily devotional) | `/devocionales` |
 | `0` | Estudio Bíblico (Bible study) | `/estudios` |
-| `2` | Hidden / draft | — |
+| `2` | Episodio de serie (Enseñanza) | `/series/{id}` |
 
 **Series (Enseñanzas):** separate `ensenanzas` table with UUID PKs. Individual episodes are `Devocional` rows with `ensenanza_id` set and `serie = 'Series'`.
 
 ### Key models
 | Model | Table | Notes |
 |-------|-------|-------|
-| `Devocional` | `devocionals` | UUID PK; belongs to `Ensenanza` |
-| `Ensenanza` | `ensenanzas` | UUID PK; has many `Devocional` (episodes) |
+| `Devocional` | `devocionals` | UUID PK; belongs to `Ensenanza`; has `views_count`, `shares_count`, `short_code` |
+| `Ensenanza` | `ensenanzas` | UUID PK; has many `Devocional` (episodes); has `short_code` |
 | `DevocionalView` | `devocional_views` | Analytics: IP, country, city, browser, platform, timezone |
 | `ContentLike` | `content_likes` | Likes for any content type (devocional/estudio/ensenanza) |
 | `Donation` | `donations` | ePayco payment records with audit fields |
@@ -98,6 +98,7 @@ A single table serves three content types, distinguished by `is_devocional`:
 | `/post-images` | — | Post image management (auth required) |
 | `/reparar-ciudades` | — | One-off utility: backfill city data in DevocionalView |
 | `/content-usage` | — | Legal/content usage page |
+| `/{code}` | `ShortUrlController@redirect` | Short URL redirect (8 chars alfanuméricos); registrada **al final** de web.php para no interceptar rutas reales como `/register` |
 
 Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 
@@ -105,6 +106,8 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | Endpoint | Purpose |
 |---------|---------|
 | `GET/POST /api/likes/{type}/{id}` | Get or toggle like; `type` = devocional / estudio / ensenanza |
+| `GET /api/short-url/{type}/{id}` | Get or generate short URL for content (lazy: creates `short_code` on first call) |
+| `POST /api/share/{type}/{id}` | Increment `shares_count` (called only on confirmed share/clipboard copy) |
 | `POST /api/push/subscribe` | Register device for web push |
 | `POST /api/push/unsubscribe` | Unregister device |
 | `GET /api/push/vapid-key` | Get VAPID public key |
@@ -127,6 +130,7 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | `PaymentController` | ePayco webhook: validate signatures, store `Donation` records |
 | `TTSController` | Proxy VoiceRSS API; cache MP3s on S3 |
 | `LikeController` | `show()` like counts; `toggle()` like/unlike |
+| `ShortUrlController` | `redirect()` short URL → 302; `getOrCreate()` genera/devuelve short code; `trackShare()` incrementa `shares_count` |
 | `ImageUploadController` | Upload devotional + post images to S3 |
 | `PdfUploadController` | Upload PDFs to S3 (10 MB max) |
 | `BulkUploadController` | Bulk S3 image/video uploads; list bucket contents |
@@ -141,8 +145,9 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | Page | Route | Notes |
 |------|-------|-------|
 | `welcome.tsx` | `/` | Hero, featured content |
-| `Devocionals.tsx` | `/devocionales` | Filters, search, sort (latest/likes/views) |
-| `DevocionalDetails.tsx` | `/devocional/{id}` | Detail view, TTS, likes |
+| `Devocionals.tsx` | `/devocionales` | Filters, search, sort (latest/likes/views/shares) |
+| `DevocionalDetailsPage.tsx` | `/devocional/{id}`, `/estudio-biblico/{id}`, `/series/{id}` | Inertia page for all content types; includes TTS, likes, share, view tracking |
+| `DevocionalDetails.tsx` | — | Componente embebido (no es página Inertia directa) |
 | `DevocionalesForm.tsx` | create/edit | Auth required; `mode` prop toggles create vs edit |
 | `Estudios.tsx` | `/estudios` | Bible studies listing |
 | `Enseñanzas.tsx` | `/series` | Teaching series listing |
@@ -164,6 +169,8 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | `FilterBar.tsx` | Filter/search bar |
 | `TextToSpeechButton.tsx` / `TextToSpeechAudioPlayer.tsx` | TTS trigger + player |
 | `LikeButton.tsx` | Like/dislike with animation |
+| `ShareButton.tsx` | Compartir vía Web Share API (sheet nativo) o clipboard; muestra "¡Copiado!" y conteo en variant `default`; sin conteo en `compact` (usado en cards) |
+| `CardNew.tsx` | Card principal de contenido; incluye LikeButton + ShareButton (compact) |
 | `PushSubscribeButton.tsx` | Web push opt-in (mounted globally in `app.tsx`) |
 | `ImageUpload.tsx` | Upload with preview |
 | `Paginator.tsx` | Pagination controls |
@@ -176,6 +183,7 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | Hook | Purpose |
 |------|---------|
 | `useLike.tsx` | Optimistic like toggle; debounced POST; LocalStorage for instant render |
+| `useShareUrl.tsx` | Obtiene/genera short URL lazy (cachea en localStorage); llama Web Share API con texto dinámico según tipo; fallback clipboard; registra share en API solo en share confirmado |
 | `use-appearance.tsx` | Dark/light/system theme management |
 | `use-mobile.tsx` | Mobile viewport detection |
 | `use-mobile-navigation.ts` | Mobile nav open/close state |
