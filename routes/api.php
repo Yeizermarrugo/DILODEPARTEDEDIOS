@@ -19,6 +19,8 @@ Route::post('/likes/{type}/{id}', [LikeController::class, 'toggle']);
 
 Route::get('/short-url/{type}/{id}', [ShortUrlController::class, 'getOrCreate'])
     ->middleware('throttle:30,1');
+Route::post('/share/{type}/{id}', [ShortUrlController::class, 'trackShare'])
+    ->middleware('throttle:20,1');
 
 Route::post('/push/subscribe',   [PushSubscriptionController::class, 'subscribe']);
 Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'unsubscribe']);

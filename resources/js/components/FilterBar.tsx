@@ -1,4 +1,4 @@
-export type SortId = 'latest' | 'likes' | 'views';
+export type SortId = 'latest' | 'likes' | 'views' | 'shares';
 
 type Category = { categoria: string; count: number };
 
@@ -8,7 +8,7 @@ type Props = {
     selectedCategory: string | null;
     sort: SortId;
     onCategoryChange: (cat: string | null) => void;
-    onSortToggle: (sort: 'likes' | 'views') => void;
+    onSortToggle: (sort: 'likes' | 'views' | 'shares') => void;
     onOpenSheet: () => void;
     onClearAll: () => void;
 };
@@ -26,7 +26,7 @@ export default function FilterBar({
     const catLabel = selectedCategory
         ? categories.find(c => c.categoria === selectedCategory)?.categoria ?? 'Todas'
         : 'Todas';
-    const sortLabel = sort === 'likes' ? 'Likes' : sort === 'views' ? 'Vistas' : 'Recientes';
+    const sortLabel = sort === 'likes' ? 'Likes' : sort === 'views' ? 'Vistas' : sort === 'shares' ? 'Compartidos' : 'Recientes';
     const hasFilter = selectedCategory !== null || sort !== 'latest';
 
     return (
@@ -124,6 +124,25 @@ export default function FilterBar({
                             Más vistas
                             {sort === 'views' && (
                                 <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#2563eb', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => onSortToggle('shares')}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 5,
+                                padding: '5px 13px', borderRadius: 999,
+                                border: sort === 'shares' ? '1.5px solid #16a34a' : '0.5px solid #dee2e6',
+                                background: sort === 'shares' ? '#f0fdf4' : '#fff',
+                                color: sort === 'shares' ? '#15803d' : '#6c757d',
+                                cursor: 'pointer', fontSize: 13,
+                                fontWeight: sort === 'shares' ? 500 : 400,
+                                transition: 'all 0.15s ease',
+                            }}
+                        >
+                            <i className="bi bi-share" style={{ fontSize: 14 }} />
+                            Más compartidos
+                            {sort === 'shares' && (
+                                <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#16a34a', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
                             )}
                         </button>
                     </div>

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 
 type Category = { categoria: string; count: number };
-type SortId = 'latest' | 'likes' | 'views';
+type SortId = 'latest' | 'likes' | 'views' | 'shares';
 
 type Props = {
     isOpen: boolean;
@@ -42,6 +42,7 @@ export default function FilterSheet({
         { id: 'latest', icon: 'bi-clock', label: 'Más recientes' },
         { id: 'likes', icon: pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-heart', label: 'Más likes' },
         { id: 'views', icon: 'bi-eye', label: 'Más vistas' },
+        { id: 'shares', icon: 'bi-share', label: 'Más compartidos' },
     ];
 
     const sortPillStyle = (id: SortId): React.CSSProperties => {
@@ -54,6 +55,7 @@ export default function FilterSheet({
         if (id !== pendingSort) return { ...base, border: `1px solid ${BORDER}`, background: '#fff', color: MUTED };
         if (id === 'likes') return { ...base, border: `1.5px solid rgba(247,88,21,0.5)`, background: 'rgba(247,88,21,0.08)', color: ORANGE };
         if (id === 'views') return { ...base, border: `1.5px solid rgba(45,70,94,0.4)`, background: 'rgba(45,70,94,0.07)', color: BLUE };
+        if (id === 'shares') return { ...base, border: `1.5px solid rgba(22,163,74,0.5)`, background: 'rgba(22,163,74,0.08)', color: '#15803d' };
         return { ...base, border: 'none', background: ORANGE, color: '#fff' };
     };
 
@@ -174,8 +176,8 @@ export default function FilterSheet({
                         )}
                         {pendingSort !== 'latest' && (
                             <span style={{ background: ORANGE, color: '#fff', borderRadius: 100, padding: '2px 10px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                <i className={`bi ${pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-eye'}`} style={{ fontSize: 11 }} />
-                                {pendingSort === 'likes' ? 'Más likes' : 'Más vistas'}
+                                <i className={`bi ${pendingSort === 'likes' ? 'bi-heart-fill' : pendingSort === 'shares' ? 'bi-share' : 'bi-eye'}`} style={{ fontSize: 11 }} />
+                                {pendingSort === 'likes' ? 'Más likes' : pendingSort === 'shares' ? 'Más compartidos' : 'Más vistas'}
                             </span>
                         )}
                     </div>

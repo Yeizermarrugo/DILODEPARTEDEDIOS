@@ -4,13 +4,16 @@ import { Check, Share2 } from 'lucide-react';
 interface ShareButtonProps {
     type: ShareContentType;
     id: string;
+    sharesCount?: number;
     variant?: 'default' | 'compact';
     className?: string;
 }
 
-export function ShareButton({ type, id, variant = 'default', className = '' }: ShareButtonProps) {
-    const { loading, copied, share } = useShareUrl(type, id);
+export function ShareButton({ type, id, sharesCount = 0, variant = 'default', className = '' }: ShareButtonProps) {
+    const { loading, copied, sharesCount: count, share } = useShareUrl(type, id, sharesCount);
     const size = variant === 'compact' ? 17 : 21;
+
+    const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 
     return (
         <button
@@ -25,7 +28,7 @@ export function ShareButton({ type, id, variant = 'default', className = '' }: S
                 background: 'none',
                 border: 'none',
                 cursor: loading ? 'wait' : 'pointer',
-                padding: '4px',
+                padding: '4px 2px',
                 color: copied ? '#22c55e' : 'inherit',
                 opacity: loading ? 0.5 : 1,
                 transition: 'color 0.2s',
@@ -41,6 +44,11 @@ export function ShareButton({ type, id, variant = 'default', className = '' }: S
                 ? <Check size={size} color="#22c55e" />
                 : <Share2 size={size} />
             }
+            {variant === 'default' && (
+                <span style={{ fontSize: '0.85rem', color: copied ? '#22c55e' : 'inherit' }}>
+                    {fmt(count)}
+                </span>
+            )}
         </button>
     );
 }

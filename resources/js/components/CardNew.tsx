@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import '../../css/cardNew.css';
+import { ShareButton } from './ShareButton';
 import LikeButton from './LikeButton';
 
 const colorArray = [
@@ -101,12 +102,20 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                         </div>
                     </div>
 
-                    {/* ── LIKE fijo — esquina inferior derecha, FUERA del .data ── */}
+                    {/* ── LIKE + SHARE fijos — esquina inferior derecha ── */}
                     <div
                         className="card-like-fixed"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <ul className="menu-content" style={{ width: 'auto', display: 'flex' }}>
+                        <ul className="menu-content" style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0px' }}>
+                            <li style={{ display: 'flex', alignItems: 'center' }}>
+                                <ShareButton
+                                    type={contentType}
+                                    id={id}
+                                    variant="compact"
+                                    className="text-white"
+                                />
+                            </li>
                             <li style={{ display: 'flex', alignItems: 'center' }}>
                                 <LikeButton
                                     type={contentType}
@@ -115,7 +124,6 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                                     className="text-white"
                                 />
                             </li>
-                            {/* <li><i className="fa fa-comment-o"></i> <span>{comments}</span></li> */}
                         </ul>
                     </div>
 
