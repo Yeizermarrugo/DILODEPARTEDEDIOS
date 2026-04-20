@@ -53,10 +53,16 @@ export function useShareUrl(type: ShareContentType, id: string, initialSharesCou
 
         if (navigator.share) {
             try {
+                const shareText = type === 'estudio'
+                    ? 'Te comparto este Estudio Bíblico de Dilo De Parte De Dios'
+                    : type === 'ensenanza'
+                    ? 'Te comparto esta Enseñanza de Dilo De Parte De Dios'
+                    : 'Te comparto este Devocional de Dilo De Parte De Dios';
+
                 await navigator.share({
                     url,
                     title: 'Dilo De Parte De Dios',
-                    text: 'Te comparto esto de Dilo De Parte De Dios',
+                    text: shareText,
                 });
                 recordShare();
                 return;
