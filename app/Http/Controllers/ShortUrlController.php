@@ -35,11 +35,7 @@ class ShortUrlController extends Controller
     {
         $service = new ShortCodeService();
 
-        if ($type === 'ensenanza') {
-            $record = Ensenanza::findOrFail($id);
-        } else {
-            $record = Devocional::findOrFail($id);
-        }
+        $record = Devocional::findOrFail($id);
 
         if (!$record->short_code) {
             $record->short_code = $service->generate();
