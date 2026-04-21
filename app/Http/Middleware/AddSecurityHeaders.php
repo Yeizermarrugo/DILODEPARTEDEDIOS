@@ -14,7 +14,7 @@ class AddSecurityHeaders
 
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://cdn.tiny.cloud https://www.instagram.com",
+            "script-src 'self' 'unsafe-inline' https://cdn.tiny.cloud https://www.instagram.com https://checkout.epayco.co https://analytics.ahrefs.com",
             "style-src 'self' 'unsafe-inline' https://fonts.bunny.net https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tiny.cloud",
             "font-src 'self' https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
             "img-src 'self' data: blob: https:",
