@@ -19,8 +19,8 @@ class AddSecurityHeaders
             "font-src 'self' https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
             "img-src 'self' data: blob: https:",
             "media-src 'self' https:",
-            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com",
-            "connect-src 'self' https://cdn.tiny.cloud https://sp.tinymce.com https://www.instagram.com",
+            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com https://secure.epayco.co https://*.epayco.co",
+            "connect-src 'self' https://cdn.tiny.cloud https://sp.tinymce.com https://www.instagram.com https://analytics.ahrefs.com https://*.epayco.co webpack:",
             "worker-src 'self' blob:",
         ]);
 
