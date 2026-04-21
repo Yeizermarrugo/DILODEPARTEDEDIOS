@@ -27,7 +27,7 @@ const Obras = () => {
         if (epayco && publicKey) {
             const handler = epayco.checkout.configure({
                 key: publicKey,
-                test: true
+                test: import.meta.env.VITE_EPAYCO_TEST === 'true'
             });
 
             const detectedCountry = (navigator.language.split('-')[1] || 'co').toLowerCase();
