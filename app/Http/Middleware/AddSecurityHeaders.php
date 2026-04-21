@@ -20,7 +20,7 @@ class AddSecurityHeaders
             "img-src 'self' data: blob: https:",
             "media-src 'self' https:",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com",
-            "connect-src 'self' https://cdn.tiny.cloud https://sp.tinymce.com https://www.instagram.com",
+            "connect-src 'self' https://cdn.tiny.cloud https://sp.tinymce.com https://www.instagram.com https://analytics.ahrefs.com https://*.epayco.co",
             "worker-src 'self' blob:",
         ]);
 
