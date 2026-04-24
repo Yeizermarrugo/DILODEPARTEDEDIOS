@@ -24,9 +24,7 @@ export function useShareUrl(type: ShareContentType, id: string, initialSharesCou
             headers: { 'X-CSRF-TOKEN': csrfToken() },
         }).then(() => {
             setSharesCount((c) => c + 1);
-        }).catch(() => {
-            // fallo silencioso — el conteo en DB puede diferir por un share, no crítico
-        });
+        }).catch(() => {});
     };
 
     const share = async () => {
@@ -75,7 +73,7 @@ export function useShareUrl(type: ShareContentType, id: string, initialSharesCou
             }
         }
 
-        // Fallback: copiar al portapapeles
+        // Fallback clipboard: contar al copiar el enlace
         try {
             await navigator.clipboard.writeText(url);
             recordShare();
