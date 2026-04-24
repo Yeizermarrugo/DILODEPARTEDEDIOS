@@ -130,10 +130,10 @@ function PodHero() {
                 </div>
 
                 {/* Logotipo tipográfico */}
-                <div className="pod-hero__logo">
+                <h1 className="pod-hero__logo">
                     <span className="pod-hero__logo-pod">Pod</span>
                     <span className="pod-hero__logo-caf">CAF</span>
-                </div>
+                </h1>
 
                 {/* Tagline */}
                 <p className="pod-hero__tagline">

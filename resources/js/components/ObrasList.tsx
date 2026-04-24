@@ -67,6 +67,11 @@ const ObrasList = () => {
                     </article>
                 ))}
             </div>
+
+            <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                <a href="/devocionales" style={{ marginRight: '1rem' }}>Ver devocionales</a>
+                <a href="/series">Explorar series</a>
+            </div>
         </section>
     );
 };

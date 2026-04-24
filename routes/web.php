@@ -315,6 +315,8 @@ Route::get('/gracias', function () {
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+
 // Short URL redirect — debe ir al final para no interceptar rutas reales
 Route::get('/{code}', [ShortUrlController::class, 'redirect'])
     ->where('code', '[A-Za-z0-9]{8}')
