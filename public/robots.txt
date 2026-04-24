@@ -1,2 +1,25 @@
 User-agent: *
-Disallow:
+
+# Auth
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /confirm-password
+
+# Admin / autenticado
+Disallow: /dashboard
+Disallow: /devocionales-edit
+Disallow: /devocionalesAgregar
+Disallow: /devocionales-editar/
+Disallow: /post-images
+Disallow: /postImage
+Disallow: /settings/
+
+# API y utilidades internas
+Disallow: /api/
+Disallow: /reparar-ciudades
+Disallow: /donacion-by-params
+
+Sitemap: https://dilodepartededios.com/sitemap.xml

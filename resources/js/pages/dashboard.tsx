@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Bell,
     BookOpen,
@@ -70,7 +70,6 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
 
             <div className="flex flex-col gap-6 p-5 md:p-7" style={{ backgroundColor: '#f5f0e8', textDecoration: 'none' }}>
 
