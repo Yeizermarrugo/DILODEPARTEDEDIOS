@@ -49,11 +49,9 @@ class ShortUrlController extends Controller
 
     public function trackShare(string $type, string $id)
     {
-        if ($type === 'ensenanza') {
-            Ensenanza::where('id', $id)->increment('shares_count');
-        } else {
-            Devocional::where('id', $id)->increment('shares_count');
-        }
+        // El type='ensenanza' indica un episodio de serie, pero el registro
+        // vive en devocionals (el ID es un UUID de Devocional).
+        Devocional::where('id', $id)->increment('shares_count');
 
         return response()->json(['ok' => true]);
     }
