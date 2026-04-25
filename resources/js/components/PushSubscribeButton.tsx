@@ -1,6 +1,12 @@
+import { router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
-const ADMIN_PATHS = ['/login', '/register', '/dashboard', '/forgot-password', '/reset-password', '/verify-email', '/settings'];
+const ADMIN_PATHS = [
+    '/login', '/register', '/dashboard',
+    '/forgot-password', '/reset-password', '/verify-email',
+    '/settings', '/devocionales-edit', '/devocionales-editar',
+    '/devocionalesAgregar', '/post-images', '/postImage',
+];
 
 function isAdminPath(path: string) {
     return ADMIN_PATHS.some(p => path === p || path.startsWith(p + '/'));
@@ -373,6 +379,12 @@ function PushSubscribeButtonInner() {
 }
 
 export default function PushSubscribeButton() {
-    if (isAdminPath(window.location.pathname)) return null;
+    const [path, setPath] = useState(window.location.pathname);
+
+    useEffect(() => {
+        return router.on('navigate', (e) => setPath(new URL(e.detail.page.url).pathname));
+    }, []);
+
+    if (isAdminPath(path)) return null;
     return <PushSubscribeButtonInner />;
 }
