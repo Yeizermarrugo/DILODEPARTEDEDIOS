@@ -18,8 +18,8 @@
 
 /* Contenedor que imita a tus links de MUI */
 .card-wrapper-link {
-    width: 270px;
-    height: 230px;
+    width: 300px;
+    height: 250px;
     display: flex;
     perspective: 1000px;
     transition: all 0.3s ease;

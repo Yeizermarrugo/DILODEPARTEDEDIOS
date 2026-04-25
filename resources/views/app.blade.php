@@ -41,9 +41,12 @@
 
     $defaultTitle = "Dilo de parte de Dios " . $sectionName;
 
-    $currentTitle = $meta['title'] ?? $defaultTitle;
-    $currentDesc = $meta['description'] ?? "Plataforma de recursos cristianos para conectar con Dios a través de
-    estudios bíblicos, series temáticas y herramientas de crecimiento espiritual.";
+    $rawTitle = $meta['title'] ?? $defaultTitle;
+    $currentTitle = strlen($rawTitle) < 30 ? $rawTitle . ' | Dilo de parte de Dios' : $rawTitle;
+    $rawDesc = $meta['description'] ?? '';
+    $currentDesc = strlen($rawDesc) >= 70
+        ? $rawDesc
+        : "Plataforma de recursos cristianos para conectar con Dios a través de estudios bíblicos, series temáticas y herramientas de crecimiento espiritual.";
     $currentUrl = $meta['url'] ?? url()->current();
     $currentImage = $meta['image'] ??
     'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg';

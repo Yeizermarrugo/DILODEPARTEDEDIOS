@@ -667,10 +667,6 @@
 }
 
 @media (max-width: 480px) {
-    .est-item__meta .est-item__views {
-        display: none;
-    }
-
     .est-book__num {
         display: none;
     }

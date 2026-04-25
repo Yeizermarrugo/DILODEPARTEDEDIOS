@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Devocional;
-use App\Models\Ensenanza;
 use Illuminate\Support\Facades\Cache;
 
 class SitemapController extends Controller
@@ -22,7 +21,8 @@ class SitemapController extends Controller
                 ->orderByDesc('updated_at')
                 ->get();
 
-            $series = Ensenanza::select('id', 'updated_at')
+            $series = Devocional::whereNotNull('ensenanza_id')
+                ->select('id', 'updated_at')
                 ->orderByDesc('updated_at')
                 ->get();
 
