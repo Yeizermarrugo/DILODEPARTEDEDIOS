@@ -1,5 +1,5 @@
 // Components
-import { Head, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
@@ -27,7 +27,6 @@ export default function ConfirmPassword() {
             title="Confirm your password"
             description="This is a secure area of the application. Please confirm your password before continuing."
         >
-            <Head title="Confirm password" />
 
             <form onSubmit={submit}>
                 <div className="space-y-6">

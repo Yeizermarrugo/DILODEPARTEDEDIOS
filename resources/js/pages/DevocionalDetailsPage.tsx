@@ -76,12 +76,14 @@ const DevocionalDetailsPage = (props: Props) => {
     const removeFirstH1 = (html: string) => html.replace(/<h1[^>]*>.*?<\/h1>/i, '').trim();
 
     const decodeEntities = (str: string) => {
+        if (typeof document === 'undefined') return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ');
         const el = document.createElement('textarea');
         el.innerHTML = str;
         return el.value;
     };
 
     const stripHtml = (html: string) => {
+        if (typeof document === 'undefined') return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         const el = document.createElement('div');
         el.innerHTML = html;
         return el.textContent || el.innerText || '';

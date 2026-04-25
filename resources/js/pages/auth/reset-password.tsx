@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
@@ -37,7 +37,6 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
 
     return (
         <AuthLayout title="Reset password" description="Please enter your new password below">
-            <Head title="Reset password" />
 
             <form onSubmit={submit}>
                 <div className="grid gap-6">

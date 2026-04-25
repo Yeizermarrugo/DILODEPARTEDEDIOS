@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { Eye, EyeOff, LoaderCircle, LogIn } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
@@ -37,7 +37,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     return (
         <AuthLayout title="Bienvenido de nuevo" description="Ingresa tus credenciales para acceder al panel">
-            <Head title="Iniciar sesión" />
 
             {status && (
                 <div

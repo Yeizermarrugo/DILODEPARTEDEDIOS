@@ -244,21 +244,29 @@ class DevocionalController extends Controller
         ]);
     }
 
+    private function extractTitle(string $html): string
+    {
+        $clean = fn(string $s) => html_entity_decode(strip_tags($s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (preg_match('/<h1[^>]*>(.*?)<\/h1>/is', $html, $m)) return $clean($m[1]);
+        if (preg_match('/<h2[^>]*>(.*?)<\/h2>/is', $html, $m)) return $clean($m[1]);
+        return Str::limit($clean($html), 80);
+    }
+
     public function details($id)
     {
         $devocional = Devocional::findOrFail($id);
         $routeName = $devocional->is_devocional === 1 ? 'devocional.details' : 'estudio-biblico.details';
 
-        $url = route($routeName, ['id' => $devocional->id]);
+        $titulo = $this->extractTitle($devocional->contenido);
 
         return Inertia::render('DevocionalDetailsPage', [
             'devocional' => $devocional,
             'is_devocional' => $devocional->is_devocional,
 
             'meta' => [
-                'title' => $devocional->titulo,
+                'title' => $titulo,
                 'description' => Str::limit(strip_tags($devocional->contenido), 150),
-                'image' => $devocional->imagen, // URL pública
+                'image' => $devocional->imagen,
                 'url' => url()->current(),
             ]
         ]);
