@@ -2,10 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import LikeButton from './LikeButton';
 import { ShareButton } from './ShareButton';
 
-function navigate(url: string) {
-    window.location.href = url;
-}
-
 type Categoria = string | { nombre: string };
 
 type Libro = {
@@ -158,7 +154,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                 {String(catIdx + 1).padStart(2, '0')}
                             </span>
                             <span className="est-book__name">{cat.nombre}</span>
-                            <span className="est-book__count">{items.length} cap.</span>
+                            <span className="est-book__count">{items.length} est.</span>
                             <span className={`est-book__chev ${isOpen ? 'est-book__chev--open' : ''}`}>
                                 <svg viewBox="0 0 24 24" width={14} height={14}
                                     fill="none" stroke="currentColor"
@@ -174,11 +170,11 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                     const titulo = getH1(libro.contenido);
                                     const subtitulo = getH2(libro.contenido);
                                     return (
-                                        <div
+                                        <a
                                             key={libro.id}
+                                            href={`/estudio-biblico/${libro.id}`}
                                             className="est-item"
-                                            style={{ animationDelay: `${libroIdx * 25}ms`, cursor: 'pointer' }}
-                                            onClick={() => navigate(`/estudio-biblico/${libro.id}`)}
+                                            style={{ animationDelay: `${libroIdx * 25}ms`, cursor: 'pointer', textDecoration: 'none', display: 'flex', color: 'inherit' }}
                                         >
                                             <span className="est-item__num">
                                                 {String(libroIdx + 1).padStart(2, '0')}
@@ -221,7 +217,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                                     <path d="M9 18l6-6-6-6" />
                                                 </svg>
                                             </span>
-                                        </div>
+                                        </a>
                                     );
                                 })}
                             </div>

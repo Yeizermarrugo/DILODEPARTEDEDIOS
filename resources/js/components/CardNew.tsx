@@ -56,11 +56,7 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
     };
 
     const handleCardClick = () => {
-        if (onClick) {
-            onClick();
-        } else {
-            router.visit(href);
-        }
+        if (onClick) { onClick(); } else { router.visit(href); }
     };
 
     return (
@@ -131,13 +127,13 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                     <div className="data">
                         <div className="content">
                             <span className="author">{autor}</span>
-                            <h1 className="title"><span>{titulo}</span></h1>
+                            <h1 className="title"><a href={href} style={{ color: 'inherit', textDecoration: 'none' }}><span>{titulo}</span></a></h1>
                         </div>
                     </div>
 
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

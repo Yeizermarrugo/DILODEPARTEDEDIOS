@@ -9,6 +9,7 @@ import '../../css/devocionalDetails.css';
 
 type Devocional = {
     id?: string;
+    titulo?: string;
     contenido: string;
     imagen: string;
     created_at?: string;
@@ -73,7 +74,7 @@ const DevocionalDetailsPage = (props: Props) => {
         return [words.slice(0, groupSize).join(' '), words.slice(groupSize, groupSize * 2).join(' ')];
     };
 
-    const removeFirstH1 = (html: string) => html.replace(/<h1[^>]*>.*?<\/h1>/i, '').trim();
+    const removeFirstH1 = (html: string) => html.replace(/<h1[^>]*>.*?<\/h1>/gi, '').trim();
 
     const decodeEntities = (str: string) => {
         if (typeof document === 'undefined') return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ');
@@ -92,7 +93,7 @@ const DevocionalDetailsPage = (props: Props) => {
     const devocionalContent = removeFirstH1(devocional.contenido);
 
     const H1Custom = () => {
-        const h1Text = getH1Text(devocional.contenido);
+        const h1Text = getH1Text(devocional.contenido) || devocional.titulo || '';
         const [p1, p2] = splitH1Parts(decodeEntities(h1Text));
         return (
             <header
@@ -112,13 +113,7 @@ const DevocionalDetailsPage = (props: Props) => {
         );
     };
 
-    const handleBack = () => {
-        const path = window.location.pathname;
-        if (path.startsWith('/estudio-biblico')) { window.location.href = '/estudios'; return; }
-        if (path.startsWith('/devocional')) { window.location.href = '/devocionales'; return; }
-        if (path.startsWith('/series')) { window.location.href = '/series'; return; }
-        window.history.back();
-    };
+    const backHref = likeType === 'estudio' ? '/estudios' : likeType === 'ensenanza' ? '/series' : '/devocionales';
 
     if (loading && !imageLoaded) {
         return (
@@ -132,9 +127,9 @@ const DevocionalDetailsPage = (props: Props) => {
 
     return (
         <div className="devocional">
-            <button type="button" onClick={handleBack} className="back-floating-button">
+            <a href={backHref} className="back-floating-button">
                 <i className="bi bi-arrow-left" /> Atrás
-            </button>
+            </a>
 
             <H1Custom />
 
