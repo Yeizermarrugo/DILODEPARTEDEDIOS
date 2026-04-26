@@ -124,7 +124,10 @@ class DevocionalController extends Controller
     public function searchCategories(Request $request)
     {
         $perPage = $request->input('per_page', 16);
-        $devocionales = Devocional::orderBy('created_at', 'desc')->paginate($perPage);
+        $devocionales = Devocional::where('is_devocional', 1)
+            ->where('ensenanza_id', null)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
 
         [$todasLasCategorias, $series] = Cache::remember('search-categorias-series', 3600, function () {
             $todasLasCategorias = Devocional::whereNotNull('categoria')
@@ -222,10 +225,13 @@ class DevocionalController extends Controller
 
     public function estudios()
     {
-        $devocionales = Devocional::where('is_devocional', 0)
-            ->orderBy('categoria', 'asc')
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $devocionales = Cache::remember('estudios-list', 3600, fn () =>
+            Devocional::where('is_devocional', 0)
+                ->select('id', 'categoria', 'contenido', 'views_count', 'shares_count', 'created_at')
+                ->orderBy('categoria', 'asc')
+                ->orderBy('created_at', 'asc')
+                ->get()
+        );
         return response()->json($devocionales);
     }
 
@@ -309,6 +315,7 @@ class DevocionalController extends Controller
         Cache::forget('devocional-categorias');
         Cache::forget('devocional-autores');
         Cache::forget('search-categorias-series');
+        Cache::forget('estudios-list');
 
         return response()->json([
             'message' => '¡Guardado con éxito!',
@@ -433,6 +440,7 @@ class DevocionalController extends Controller
         Cache::forget('devocional-categorias');
         Cache::forget('devocional-autores');
         Cache::forget('search-categorias-series');
+        Cache::forget('estudios-list');
 
         return response()->json([
             'message'    => 'Devocional actualizado correctamente',
