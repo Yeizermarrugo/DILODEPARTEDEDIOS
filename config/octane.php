@@ -119,6 +119,8 @@ return [
     */
     'garbage' => 50,
 
+    'max_requests' => 500,
+
     'max_execution_time' => 30,
 
 ];

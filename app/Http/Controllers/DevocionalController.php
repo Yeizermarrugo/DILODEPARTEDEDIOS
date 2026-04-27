@@ -6,6 +6,7 @@ use App\Models\Devocional;
 use App\Models\DevocionalView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -55,6 +56,13 @@ class DevocionalController extends Controller
             });
         }
 
+        // Columns needed for list cards — contenido truncated to extract title only
+        $listColumns = [
+            'id', 'imagen', 'categoria', 'autor', 'is_devocional',
+            'serie', 'created_at', 'views_count', 'shares_count', 'ensenanza_id',
+            DB::raw('SUBSTRING(contenido, 1, 800) as contenido'),
+        ];
+
         // ── Ordenar ────────────────────────────────────────────────────────
         if ($sort === 'likes') {
             $devocionales = (clone $base)
@@ -62,20 +70,27 @@ class DevocionalController extends Controller
                     $join->on('content_likes.content_id', '=', 'devocionals.id')
                         ->where('content_likes.content_type', '=', \App\Models\ContentLike::TYPE_DEVOCIONAL);
                 })
-                ->selectRaw('devocionals.*, COUNT(content_likes.id) as likes_count')
+                ->selectRaw('devocionals.id, devocionals.imagen, devocionals.categoria, devocionals.autor,
+                    devocionals.is_devocional, devocionals.serie, devocionals.created_at,
+                    devocionals.views_count, devocionals.shares_count, devocionals.ensenanza_id,
+                    SUBSTRING(devocionals.contenido, 1, 800) as contenido,
+                    COUNT(content_likes.id) as likes_count')
                 ->groupBy('devocionals.id')
                 ->orderBy('likes_count', 'desc')
                 ->paginate($perPage);
         } elseif ($sort === 'views') {
             $devocionales = (clone $base)
+                ->select($listColumns)
                 ->orderBy('views_count', 'desc')
                 ->paginate($perPage);
         } elseif ($sort === 'shares') {
             $devocionales = (clone $base)
+                ->select($listColumns)
                 ->orderBy('shares_count', 'desc')
                 ->paginate($perPage);
         } else {
             $devocionales = (clone $base)
+                ->select($listColumns)
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         }
@@ -126,6 +141,11 @@ class DevocionalController extends Controller
         $perPage = $request->input('per_page', 16);
         $devocionales = Devocional::where('is_devocional', 1)
             ->where('ensenanza_id', null)
+            ->select([
+                'id', 'imagen', 'categoria', 'autor', 'is_devocional',
+                'serie', 'created_at', 'views_count', 'shares_count', 'ensenanza_id',
+                DB::raw('SUBSTRING(contenido, 1, 800) as contenido'),
+            ])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -177,34 +197,43 @@ class DevocionalController extends Controller
         $perPage = $request->input('per_page', 16);
         $sort = $request->input('sort', 'latest');
 
+        $listColumns = [
+            'id', 'imagen', 'categoria', 'autor', 'is_devocional',
+            'serie', 'created_at', 'views_count', 'shares_count', 'ensenanza_id',
+            DB::raw('SUBSTRING(contenido, 1, 800) as contenido'),
+        ];
+
+        $base = Devocional::where('categoria', $categoria)
+            ->where('is_devocional', 1)
+            ->where('ensenanza_id', null);
+
         if ($sort === 'likes') {
-            $devocionales = Devocional::where('categoria', $categoria)
-                ->where('is_devocional', 1)
-                ->where('ensenanza_id', null)
+            $devocionales = (clone $base)
                 ->leftJoin('content_likes', function ($join) {
                     $join->on('content_likes.content_id', '=', 'devocionals.id')
                         ->where('content_likes.content_type', '=', \App\Models\ContentLike::TYPE_DEVOCIONAL);
                 })
-                ->selectRaw('devocionals.*, COUNT(content_likes.id) as likes_count')
+                ->selectRaw('devocionals.id, devocionals.imagen, devocionals.categoria, devocionals.autor,
+                    devocionals.is_devocional, devocionals.serie, devocionals.created_at,
+                    devocionals.views_count, devocionals.shares_count, devocionals.ensenanza_id,
+                    SUBSTRING(devocionals.contenido, 1, 800) as contenido,
+                    COUNT(content_likes.id) as likes_count')
                 ->groupBy('devocionals.id')
                 ->orderBy('likes_count', 'desc')
                 ->paginate($perPage);
         } elseif ($sort === 'views') {
-            $devocionales = Devocional::where('categoria', $categoria)
-                ->where('is_devocional', 1)
-                ->where('ensenanza_id', null)
+            $devocionales = (clone $base)
+                ->select($listColumns)
                 ->orderBy('views_count', 'desc')
                 ->paginate($perPage);
         } elseif ($sort === 'shares') {
-            $devocionales = Devocional::where('categoria', $categoria)
-                ->where('is_devocional', 1)
-                ->where('ensenanza_id', null)
+            $devocionales = (clone $base)
+                ->select($listColumns)
                 ->orderBy('shares_count', 'desc')
                 ->paginate($perPage);
         } else {
-            $devocionales = Devocional::where('categoria', $categoria)
-                ->where('is_devocional', 1)
-                ->where('ensenanza_id', null)
+            $devocionales = (clone $base)
+                ->select($listColumns)
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         }
