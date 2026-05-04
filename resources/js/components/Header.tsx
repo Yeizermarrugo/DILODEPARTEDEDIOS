@@ -119,7 +119,7 @@ const Header = () => {
                     <div className="mob-drawer__brand">
                         <span className="mob-drawer__brand-line" />
                         <span className="mob-drawer__brand-name">
-                            Dilo de <em>Parte</em> de Dios
+                            Dilo <em>de Parte</em> de Dios
                         </span>
                     </div>
                     <button className="mob-drawer__close" onClick={close} aria-label="Cerrar menú">
