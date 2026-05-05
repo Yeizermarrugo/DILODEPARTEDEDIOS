@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use App\Models\Ensenanza;
 use App\Services\ShortCodeService;
+use Illuminate\Support\Facades\Cache;
 
 class ShortUrlController extends Controller
 {
@@ -52,6 +53,10 @@ class ShortUrlController extends Controller
         // El type='ensenanza' indica un episodio de serie, pero el registro
         // vive en devocionals (el ID es un UUID de Devocional).
         Devocional::where('id', $id)->increment('shares_count');
+
+        if ($type === 'estudio') {
+            Cache::forget('estudios-list');
+        }
 
         return response()->json(['ok' => true]);
     }
