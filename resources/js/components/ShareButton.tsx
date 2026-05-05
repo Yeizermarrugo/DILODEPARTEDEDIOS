@@ -6,10 +6,11 @@ interface ShareButtonProps {
     id: string;
     sharesCount?: number;
     variant?: 'default' | 'compact';
+    showCount?: boolean;
     className?: string;
 }
 
-export function ShareButton({ type, id, sharesCount = 0, variant = 'default', className = '' }: ShareButtonProps) {
+export function ShareButton({ type, id, sharesCount = 0, variant = 'default', showCount = false, className = '' }: ShareButtonProps) {
     const { loading, copied, sharesCount: count, share } = useShareUrl(type, id, sharesCount);
     const size = variant === 'compact' ? 17 : 21;
 
@@ -44,7 +45,7 @@ export function ShareButton({ type, id, sharesCount = 0, variant = 'default', cl
                 ? <Check size={size} color="#22c55e" />
                 : <Share2 size={size} />
             }
-            {variant === 'default' && (
+            {(variant === 'default' || showCount) && (
                 <span style={{ fontSize: '0.85rem', color: copied ? '#22c55e' : 'inherit' }}>
                     {fmt(count)}
                 </span>

@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import LikeButton from './LikeButton';
 import { ShareButton } from './ShareButton';
@@ -82,7 +83,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
         ? libros.filter(l =>
             getH1(l.contenido).toLowerCase().includes(search) ||
             getH2(l.contenido).toLowerCase().includes(search),
-          )
+        )
         : libros;
 
     const categorias = filtrados
@@ -103,7 +104,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
             categorias.forEach(c => { open[c.nombre] = true; });
             setOpenCategoria(open);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
     const toggle = (nombre: string) =>
@@ -170,9 +171,12 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                     const titulo = getH1(libro.contenido);
                                     const subtitulo = getH2(libro.contenido);
                                     return (
-                                        <a
+                                        <div
                                             key={libro.id}
-                                            href={`/estudio-biblico/${libro.id}`}
+                                            role="link"
+                                            tabIndex={0}
+                                            onClick={() => router.visit(`/estudio-biblico/${libro.id}`)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.visit(`/estudio-biblico/${libro.id}`); }}
                                             className="est-item"
                                             style={{ animationDelay: `${libroIdx * 25}ms`, cursor: 'pointer', textDecoration: 'none', display: 'flex', color: 'inherit' }}
                                         >
@@ -200,8 +204,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                                     onClick={e => e.stopPropagation()}
                                                     style={{ display: 'flex', alignItems: 'center', gap: 2 }}
                                                 >
-                                                    <ShareButton type="estudio" id={libro.id} sharesCount={libro.shares_count ?? 0} variant="compact" />
-                                                    <span style={{ fontSize: 11 }}>{libro.shares_count ?? 0}</span>
+                                                    <ShareButton type="estudio" id={libro.id} sharesCount={libro.shares_count ?? 0} variant="compact" showCount />
                                                 </span>
                                                 <span
                                                     onClick={e => e.stopPropagation()}
@@ -217,7 +220,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                                     <path d="M9 18l6-6-6-6" />
                                                 </svg>
                                             </span>
-                                        </a>
+                                        </div>
                                     );
                                 })}
                             </div>
