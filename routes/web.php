@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DevocionalController;
 use App\Http\Controllers\ShortUrlController;
 use App\Http\Controllers\EnsenanzaController;
@@ -66,7 +67,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
         });
 
-        return Inertia::render('dashboard', compact('stats', 'recientes'));
+        $contactMessages = \App\Models\ContactMessage::whereNull('archived_at')->latest()->take(50)->get();
+
+        return Inertia::render('dashboard', compact('stats', 'recientes', 'contactMessages'));
     })->name('dashboard');
 });
 
@@ -190,6 +193,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/devocionales-edit', [DevocionalController::class, 'adminIndex']);
     Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->name('devocionales.showJson');
     Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name('devocionales.update');
+    Route::patch('/contact-messages/{id}/read',    [ContactController::class, 'markRead']);
+    Route::patch('/contact-messages/{id}/archive', [ContactController::class, 'archive']);
 });
 
 // Trackviews

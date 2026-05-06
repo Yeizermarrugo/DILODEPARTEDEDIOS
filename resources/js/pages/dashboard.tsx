@@ -14,7 +14,7 @@ import {
     PlusCircle,
     TrendingUp
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
 
@@ -42,6 +42,7 @@ interface Reciente {
 interface DashboardProps {
     stats: Stats;
     recientes: Reciente[];
+    contactMessages: ContactMsg[];
 }
 
 const TIPO_LABEL: Record<string, { label: string; color: string; bg: string }> = {
@@ -58,24 +59,30 @@ interface ContactMsg {
     subject: string;
     body: string;
     read_at: string | null;
+    archived_at: string | null;
     created_at: string;
 }
 
-function MessagesPanel() {
-    const [messages, setMessages] = useState<ContactMsg[]>([]);
-    const [loading, setLoading]   = useState(true);
+const csrfToken = () =>
+    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+
+function MessagesPanel({ initialMessages }: { initialMessages: ContactMsg[] }) {
+    const [messages, setMessages] = useState<ContactMsg[]>(initialMessages);
     const [expanded, setExpanded] = useState<number | null>(null);
 
-    useEffect(() => {
-        axios.get('/api/contact-messages')
-            .then(r => setMessages(r.data.data ?? []))
-            .catch(() => {})
-            .finally(() => setLoading(false));
-    }, []);
-
     const markRead = (id: number) => {
-        axios.patch(`/api/contact-messages/${id}/read`).catch(() => {});
         setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: new Date().toISOString() } : m));
+        axios.patch(`/contact-messages/${id}/read`, {}, { headers: { 'X-CSRF-TOKEN': csrfToken() } }).catch(() => {
+            setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: null } : m));
+        });
+    };
+
+    const archive = (id: number) => {
+        setMessages(prev => prev.filter(m => m.id !== id));
+        if (expanded === id) setExpanded(null);
+        axios.patch(`/contact-messages/${id}/archive`, {}, { headers: { 'X-CSRF-TOKEN': csrfToken() } }).catch(() => {
+            setMessages(initialMessages);
+        });
     };
 
     const toggle = (id: number) => {
@@ -87,8 +94,8 @@ function MessagesPanel() {
     const unread = messages.filter(m => !m.read_at).length;
 
     return (
-        <div className="rounded-2xl p-6" style={{ backgroundColor: '#fff', border: '1px solid #e8e2d8' }}>
-            <div className="flex items-center justify-between mb-5">
+        <div className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: '#fff', border: '1px solid #e8e2d8' }}>
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Inbox size={18} style={{ color: '#2d465e' }} />
                     <span className="font-semibold text-base" style={{ color: '#2d465e' }}>Mensajes de contacto</span>
@@ -100,35 +107,38 @@ function MessagesPanel() {
                 </div>
             </div>
 
-            {loading && (
-                <p className="text-sm text-center py-8" style={{ color: '#9ca3af' }}>Cargando mensajes…</p>
-            )}
-            {!loading && messages.length === 0 && (
+            {messages.length === 0 && (
                 <p className="text-sm text-center py-8" style={{ color: '#9ca3af' }}>No hay mensajes de contacto aún.</p>
             )}
-            {!loading && messages.length > 0 && (
+            {messages.length > 0 && (
                 <ul className="flex flex-col gap-2">
                     {messages.map(msg => (
-                        <li key={msg.id} style={{ borderRadius: 10, border: `1px solid ${msg.read_at ? '#e8e2d8' : '#f75815'}`, overflow: 'hidden' }}>
+                        <li key={msg.id} style={{ borderRadius: 10, border: `1.5px solid ${msg.read_at ? '#e8e2d8' : '#f75815'}`, overflow: 'hidden' }}>
                             <button
                                 onClick={() => toggle(msg.id)}
-                                className="w-full text-left px-4 py-3 flex items-start justify-between gap-3"
-                                style={{ background: msg.read_at ? '#faf8f4' : '#fff5f0', cursor: 'pointer', border: 'none' }}
+                                className="w-full text-left px-4 py-4 flex items-start justify-between gap-3"
+                                style={{ background: msg.read_at ? '#faf8f4' : '#fff8f5', cursor: 'pointer', border: 'none' }}
                             >
-                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        {!msg.read_at && <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#f75815' }} />}
+                                <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        {!msg.read_at && <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#f75815' }} />}
                                         <span className="font-semibold text-sm truncate" style={{ color: '#1f2937' }}>{msg.name}</span>
-                                        <span className="text-xs" style={{ color: '#9ca3af' }}>· {msg.email}</span>
+                                        <span className="hidden sm:inline text-xs truncate" style={{ color: '#9ca3af' }}>· {msg.email}</span>
                                     </div>
-                                    <span className="text-sm truncate" style={{ color: '#6b7280' }}>{msg.subject}</span>
+                                    <span className="text-sm font-medium truncate" style={{ color: '#374151' }}>{msg.subject}</span>
+                                    <span className="text-xs truncate" style={{ color: '#9ca3af' }}>{msg.body.slice(0, 80)}{msg.body.length > 80 ? '…' : ''}</span>
                                 </div>
-                                <span className="text-xs flex-shrink-0 mt-0.5" style={{ color: '#9ca3af' }}>{fmtDate(msg.created_at)}</span>
+                                <span className="text-xs flex-shrink-0 mt-0.5 whitespace-nowrap" style={{ color: '#9ca3af' }}>{fmtDate(msg.created_at)}</span>
                             </button>
                             {expanded === msg.id && (
-                                <div className="px-4 pb-4 pt-1" style={{ background: '#fff' }}>
+                                <div className="px-4 pb-4 pt-2" style={{ background: '#fff' }}>
                                     <p className="text-sm whitespace-pre-wrap mb-3" style={{ color: '#374151', lineHeight: 1.65 }}>{msg.body}</p>
-                                    <div className="flex flex-wrap gap-3">
+                                    {msg.read_at && (
+                                        <p className="text-xs mb-3" style={{ color: '#9ca3af' }}>
+                                            Leído el {fmtDate(msg.read_at)} a las {new Date(msg.read_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    )}
+                                    <div className="flex flex-wrap gap-2">
                                         {msg.whatsapp && (
                                             <a href={`https://wa.me/${msg.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
                                                 className="text-xs font-medium px-3 py-1.5 rounded-lg no-underline"
@@ -139,15 +149,20 @@ function MessagesPanel() {
                                         <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`}
                                             className="text-xs font-medium px-3 py-1.5 rounded-lg no-underline"
                                             style={{ background: '#2d465e', color: '#fff' }}>
-                                            Responder por correo
+                                            Responder
                                         </a>
                                         {!msg.read_at && (
                                             <button onClick={() => markRead(msg.id)}
                                                 className="text-xs font-medium px-3 py-1.5 rounded-lg"
                                                 style={{ background: '#f0f0f0', color: '#6b7280', border: 'none', cursor: 'pointer' }}>
-                                                Marcar como leído
+                                                Marcar leído
                                             </button>
                                         )}
+                                        <button onClick={() => archive(msg.id)}
+                                            className="text-xs font-medium px-3 py-1.5 rounded-lg ml-auto"
+                                            style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', cursor: 'pointer' }}>
+                                            Archivar
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -171,7 +186,7 @@ function fmtDate(iso: string): string {
     });
 }
 
-export default function Dashboard({ stats, recientes }: DashboardProps) {
+export default function Dashboard({ stats, recientes, contactMessages }: DashboardProps) {
     const { auth } = usePage<SharedData>().props;
     const firstName = auth.user?.name?.split(' ')[0] ?? 'Administrador';
     const hour = new Date().getHours();
@@ -183,11 +198,11 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
 
-            <div className="flex flex-col gap-6 p-5 md:p-7" style={{ backgroundColor: '#f5f0e8', textDecoration: 'none' }}>
+            <div className="flex flex-col gap-4 p-3 sm:p-5 md:p-7" style={{ backgroundColor: '#f5f0e8', textDecoration: 'none' }}>
 
                 {/* ── HERO ─────────────────────────────────────────── */}
                 <div
-                    className="relative overflow-hidden rounded-2xl p-7 md:p-9"
+                    className="relative overflow-hidden rounded-2xl p-5 sm:p-7 md:p-9"
                     style={{ backgroundColor: '#2d465e' }}
                 >
                     {/* grid pattern */}
@@ -219,15 +234,15 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
                             </p>
                         </div>
 
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                             <Link href="/devocionalesAgregar"
-                                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
                                 style={{ backgroundColor: '#f75815' }}>
                                 <PlusCircle className="size-4" />
                                 Nuevo contenido
                             </Link>
                             <Link href="/devocionales-edit"
-                                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all hover:opacity-90"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all hover:opacity-90"
                                 style={{ backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' }}>
                                 <Edit3 className="size-4" />
                                 Editar
@@ -257,7 +272,7 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
                 </div>
 
                 {/* ── MÉTRICAS ─────────────────────────────────────── */}
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                     {[
                         { label: 'Total vistas', value: fmt(stats.total_vistas), icon: Eye, color: '#2d465e', bg: '#f0f4f7', sub: 'en todo el contenido' },
                         { label: 'Total likes', value: fmt(stats.total_likes), icon: Heart, color: '#e0375c', bg: '#fdf0f4', sub: 'reacciones acumuladas' },
@@ -294,13 +309,13 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
                                 { label: 'Imágenes de post', href: '/postImage',           icon: Image,      color: '#2a7d4f', bg: '#f0f9f4' },
                             ].map(({ label, href, icon: Icon, color, bg }) => (
                                 <Link key={label} href={href}
-                                    className="group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+                                    className="group flex items-center gap-3 rounded-2xl border px-3 py-3 sm:px-4 sm:py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
                                     style={{ backgroundColor: '#fff', borderColor: '#e8e2d8' }}>
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105"
+                                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105"
                                         style={{ backgroundColor: bg }}>
                                         <Icon className="size-4" style={{ color }} />
                                     </div>
-                                    <p className="text-sm font-semibold" style={{ color: '#1c1917' }}>{label}</p>
+                                    <p className="text-sm font-semibold truncate" style={{ color: '#1c1917' }}>{label}</p>
                                 </Link>
                             ))}
                         </div>
@@ -342,7 +357,7 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
                                             : `/devocional/${item.id}`;
                                         return (
                                             <Link key={item.id} href={href}
-                                                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[#faf8f4]">
+                                                className="group flex items-center gap-3 px-3 py-3 sm:px-5 sm:py-4 transition-colors hover:bg-[#faf8f4]">
                                                 {/* Número */}
                                                 <span className="w-5 shrink-0 text-center text-xs font-medium"
                                                     style={{ color: '#e8e2d8' }}>
@@ -374,7 +389,7 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
                                                 </div>
 
                                                 {/* Meta */}
-                                                <div className="shrink-0 text-right">
+                                                <div className="hidden sm:block shrink-0 text-right">
                                                     <div className="flex items-center gap-1 justify-end"
                                                         style={{ color: '#8a7f72' }}>
                                                         <Eye className="size-3" />
@@ -394,7 +409,7 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
                 </div>
 
                 {/* ── MENSAJES DE CONTACTO ──────────────────────────── */}
-                <MessagesPanel />
+                <MessagesPanel initialMessages={contactMessages} />
 
                 {/* ── VERSÍCULO ─────────────────────────────────────── */}
                 <div

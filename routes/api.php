@@ -29,8 +29,3 @@ Route::get('/push/vapid-key',    [PushSubscriptionController::class, 'vapidKey']
 
 //-------- Contact --------
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/contact-messages',              [ContactController::class, 'index']);
-    Route::patch('/contact-messages/{id}/read',  [ContactController::class, 'markRead']);
-    Route::get('/contact-messages/unread-count', [ContactController::class, 'unreadCount']);
-});
