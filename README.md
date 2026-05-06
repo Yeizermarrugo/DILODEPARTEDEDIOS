@@ -1,77 +1,253 @@
+# Dilo de Parte de Dios
 
-Este proyecto es una aplicación web para mostrar devocionales cristianos en formato blog. Permite visualizar los devocionales más recientes, navegar entre categorías, ver detalles de cada devocional y acceder a contenido destacado, últimas publicaciones y secciones de inspiración.
-
-## Características principales
-
-- **Listado de devocionales**: Muestra los últimos devocionales en un grid visual con imágenes y títulos extraídos dinámicamente.
-- **Detalle de devocional**: Cada devocional tiene una página propia con imagen destacada, contenido enriquecido y fecha de publicación.
-- **Navegación SPA**: La navegación entre devocionales y páginas se realiza de forma rápida usando React y Inertia.js.
-- **Diseño responsivo y moderno**: Utiliza grid CSS y componentes visuales para una experiencia atractiva en desktop y móvil.
-- **Carga dinámica**: Los devocionales se obtienen desde un backend Laravel, con actualización automática de la lista.
-- **Secciones adicionales**: Incluye categorías, posts destacados, últimas publicaciones y llamados a la acción.
-
-## Tecnologías utilizadas
-
-- **Frontend:** React, Inertia.js, Vite, Bootstrap Icons, CSS Grid/Flexbox
-- **Backend:** Laravel
-- **Estilos:** CSS personalizado, fuentes web desde Bunny Fonts
-
-## Estructura básica
-
-- **MainContent.jsx**: Renderiza el grid de devocionales, posts destacados y secciones extra.
-- **DevocionalDetails.jsx**: Muestra el detalle del devocional con manejo de imágenes y contenido HTML.
-- **Rutas Inertia**: Navegación SPA para transiciones rápidas.
-- **Estilos**: Archivos CSS para grid, cards, fuentes y adaptabilidad.
-
-## Instalación y uso
-
-1. Clona el repositorio:
-
-    ```bash
-    git clone https://github.com/tu_usuario/tu_repositorio.git
-    ```
-
-2. Instala dependencias:
-
-    ```bash
-    npm install
-    composer install
-    ```
-
-3. Copia y configura tu archivo `.env` de Laravel.
-
-4. Compila los assets:
-
-    ```bash
-    npm run dev
-    ```
-
-5. Ejecuta el backend Laravel:
-
-    ```bash
-    php artisan serve
-    ```
-
-6. Accede a la app en tu navegador:
-    ```
-    http://localhost:8000
-    ```
-
-## Personalización
-
-- Puedes agregar nuevos devocionales desde el backend y estos aparecerán automáticamente en el frontend.
-- Los estilos y layout pueden ser adaptados en los archivos CSS según tus preferencias.
-- Las imágenes principales de cada devocional se muestran con esquinas redondeadas y adaptadas al grid.
-
-## Contribuciones
-
-¡Las contribuciones son bienvenidas!
-Puedes enviar pull requests para mejorar la funcionalidad, corregir errores o proponer nuevas secciones.
-
-## Licencia
-
-Este proyecto está bajo la licencia MIT.
+Plataforma web para una comunidad cristiana que publica devocionales diarios, estudios bíblicos y series de enseñanza. Permite leer, escuchar (TTS), compartir y reaccionar al contenido, con panel de administración integrado.
 
 ---
 
+## Características
+
+- **Devocionales diarios** — listado con filtros por categoría, búsqueda y orden por fecha, likes, vistas o compartidos
+- **Estudios bíblicos** — sección separada con el mismo modelo de datos
+- **Series de enseñanza (Enseñanzas)** — series con episodios agrupados, portada y descripción
+- **Text-to-Speech** — reproducción de audio del contenido vía Voice RSS (voces en es-MX y es-ES)
+- **Likes anónimos** — sin registro; identificación por cookie + hash SHA256
+- **Compartir con short URL** — genera código corto de 8 caracteres al compartir; registra confirmaciones
+- **Notificaciones push** — opt-in vía Web Push (VAPID); enviadas desde Laravel
+- **Formulario de contacto** — mensajes con lectura/archivo gestionados desde el dashboard
+- **Panel de administración** — estadísticas, publicaciones recientes, gestión de mensajes de contacto
+- **Donaciones** — integración con ePayco (webhook con validación de firma)
+- **Podcast** — sección de contenido de audio
+- **Librería de recursos** — descarga de materiales (PDF y otros)
+- **Short URLs** — redireccionamiento `/{code}` → devocional o serie
+- **Analítica de vistas** — IP anonimizada, país, browser, plataforma, hora local del visitante
+- **SEO** — meta tags dinámicos por contenido en `DevocionalDetailsPage`
+- **Diseño responsivo** — Tailwind CSS v4 + MUI 7, optimizado para móvil y desktop
+
+---
+
+## Stack
+
+| Capa | Tecnología |
+|------|-----------|
+| Backend | Laravel 12, PHP 8.2, Laravel Octane |
+| Frontend | React 19, TypeScript 5.7 |
+| Routing bridge | Inertia.js v2 (SPA sin API REST para navegación) |
+| Build | Vite 6 |
+| Estilos | Tailwind CSS v4, MUI 7, Radix UI |
+| Editor | TinyMCE 6 |
+| Base de datos | MySQL / PostgreSQL |
+| Archivos | AWS S3 |
+| Email | Resend |
+| Push | Web Push + VAPID (`laravel-notification-channels/webpush`) |
+| TTS | Voice RSS API |
+| Pagos | ePayco |
+| Geolocalización | `stevebauman/location` |
+
+---
+
+## Instalación
+
+### Requisitos
+- PHP 8.2+
+- Composer
+- Node.js 20+
+- MySQL o PostgreSQL
+- Cuenta de AWS S3
+
+### Pasos
+
+```bash
+# 1. Clonar
+git clone https://github.com/Yeizermarrugo/DILODEPARTEDEDIOS.git
+cd DILODEPARTEDEDIOS
+
+# 2. Dependencias PHP
+composer install
+
+# 3. Dependencias JS
+npm install
+
+# 4. Variables de entorno
+cp .env.example .env
+php artisan key:generate
+
+# 5. Base de datos
+php artisan migrate
+
+# 6. Servidor de desarrollo (dos terminales)
+php artisan serve        # → http://localhost:8000
+npm run dev              # → http://localhost:5173
+```
+
+---
+
+## Variables de entorno
+
+```env
+APP_NAME="Dilo de Parte de Dios"
+APP_URL=http://localhost:8000
+VITE_APP_URL=http://localhost:5173
+
+# Base de datos
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=dilodepartededios
+DB_USERNAME=root
+DB_PASSWORD=
+
+# Email (Resend)
+RESEND_KEY=
+
+# AWS S3
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+
+# Web Push
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+
+# Text-to-Speech
+VOICE_RSS_API_KEY=
+
+# YouTube
+YOUTUBE_API_KEY=
+YOUTUBE_CHANNEL_ID=
+
+# ePayco (donaciones)
+EPAYCO_CUSTOMER_ID=
+EPAYCO_P_KEY=
+EPAYCO_PUBLIC_KEY=
+
+# TinyMCE (editor de texto enriquecido)
+TINYMCE_API_KEY=
+```
+
+---
+
+## Estructura del proyecto
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── DevocionalController.php    # CRUD devocionales/estudios, analytics
+│   │   ├── EnsenanzaController.php     # CRUD series + episodios
+│   │   ├── ContactController.php       # Formulario de contacto, read/archive
+│   │   ├── LikeController.php          # Likes anónimos (hash)
+│   │   ├── ShortUrlController.php      # Short URLs + share tracking
+│   │   ├── TTSController.php           # Proxy Voice RSS, caché MP3
+│   │   ├── YouTubeController.php       # Feed YouTube (caché 30min)
+│   │   ├── PaymentController.php       # Webhook ePayco
+│   │   ├── PushSubscriptionController.php
+│   │   ├── ImageUploadController.php   # Subida imágenes a S3
+│   │   ├── BulkUploadController.php    # Subida masiva imágenes/videos a S3
+│   │   └── PdfUploadController.php
+│   └── Middleware/
+│       ├── AssignVisitorId.php         # Cookie visitor_id (1 año, HttpOnly)
+│       ├── HandleInertiaRequests.php   # Props globales Inertia
+│       ├── HandleAppearance.php        # Tema dark/light/system
+│       └── AddSecurityHeaders.php      # CSP, X-Frame-Options, etc.
+├── Models/
+│   ├── Devocional.php                  # UUID PK, is_devocional (0/1/2)
+│   ├── Ensenanza.php                   # UUID PK, slug único
+│   ├── DevocionalView.php              # Analytics de vistas
+│   ├── ContentLike.php                 # Likes por visitor_hash
+│   ├── ContactMessage.php              # Mensajes de contacto
+│   ├── Donation.php                    # Registro de donaciones ePayco
+│   ├── Visitor.php                     # Suscriptores push
+│   └── PostImage.php                   # URLs de imágenes de posts
+└── Mail/
+    └── ContactFormMail.php
+
+resources/
+├── js/
+│   ├── pages/                          # Páginas Inertia (React)
+│   ├── components/                     # Componentes reutilizables
+│   │   └── ui/                         # Primitivos shadcn/Radix
+│   └── hooks/                          # useLike, useShareUrl, etc.
+└── css/                                # CSS por página + app.css global
+
+routes/
+├── web.php                             # Rutas web + dashboard
+├── api.php                             # API: likes, push, TTS, short URLs
+├── auth.php                            # Login, registro, reset
+└── settings.php                        # Perfil, contraseña, apariencia
+```
+
+---
+
+## Modelo de contenido
+
+La tabla `devocionals` sirve tres tipos de contenido distinguidos por `is_devocional`:
+
+| Valor | Tipo | URL |
+|-------|------|-----|
+| `0` | Estudio bíblico   | `/estudios`     |
+| `1` | Devocional diario | `/devocionales` |
+| `2` | Series tematicas  | `/series/{id}`  |
+
+Las **series** tienen su propia tabla `ensenanzas` (UUID PK, slug único). Los episodios son filas en `devocionals` con `ensenanza_id` y `serie = 'Series'`.
+
+---
+
+## Privacidad y anonimato
+
+- **Visitor ID:** cookie HttpOnly UUID (1 año). El UUID nunca se almacena en DB — solo su hash SHA256.
+- **Likes:** `visitor_hash = SHA256(uuid|content_id|content_type)` — sin PII en la tabla `content_likes`.
+- **Vistas:** IP anonimizada: último octeto reemplazado por `.0` antes de guardar.
+- **Donaciones:** IP del donante guardada en `donations` solo para auditoría de fraude.
+
+---
+
+## Comandos útiles
+
+```bash
+# Limpiar cachés de Laravel
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+
+# Formatear código PHP
+php artisan pint
+
+# Generar claves VAPID para Web Push
+php artisan webpush:vapid
+
+# Ver rutas registradas
+php artisan route:list
+
+# TypeScript check
+npm run types
+
+# Build de producción
+npm run build
+```
+
+---
+
+## Contribuciones
+
+Pull requests bienvenidos. Para cambios grandes, abre un issue primero para discutir la dirección.
+
+- **Backend:** PHP 8.2, tipos estrictos, sin tests automáticos — verificar visualmente.
+- **Frontend:** TypeScript estricto, sin `any`. Componentes en `resources/js/components/`, páginas en `resources/js/pages/`.
+- **Estilos:** Tailwind v4 + CSS por página en `resources/css/`. Paleta de colores: `#2d465e`, `#f75815`, `#faf8f4`.
+
+---
+
+## Licencia
+
+MIT © 2026 [Yeizer Marrugo](https://github.com/Yeizermarrugo)
+
 **Desarrollado para comunidades cristianas que buscan compartir inspiración y reflexión diaria de forma moderna y accesible.**
+
+---
+
+## Autor
+
+**Yeizer Marrugo**
+- GitHub: [@Yeizermarrugo](https://github.com/Yeizermarrugo)
+- Email: yeizermarrugo@gmail.com
