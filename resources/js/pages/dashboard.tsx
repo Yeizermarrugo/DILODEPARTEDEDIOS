@@ -63,19 +63,26 @@ interface ContactMsg {
     created_at: string;
 }
 
+const csrfToken = () =>
+    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+
 function MessagesPanel({ initialMessages }: { initialMessages: ContactMsg[] }) {
     const [messages, setMessages] = useState<ContactMsg[]>(initialMessages);
     const [expanded, setExpanded] = useState<number | null>(null);
 
     const markRead = (id: number) => {
-        axios.patch(`/api/contact-messages/${id}/read`).catch(() => {});
         setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: new Date().toISOString() } : m));
+        axios.patch(`/contact-messages/${id}/read`, {}, { headers: { 'X-CSRF-TOKEN': csrfToken() } }).catch(() => {
+            setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: null } : m));
+        });
     };
 
     const archive = (id: number) => {
-        axios.patch(`/api/contact-messages/${id}/archive`).catch(() => {});
         setMessages(prev => prev.filter(m => m.id !== id));
         if (expanded === id) setExpanded(null);
+        axios.patch(`/contact-messages/${id}/archive`, {}, { headers: { 'X-CSRF-TOKEN': csrfToken() } }).catch(() => {
+            setMessages(initialMessages);
+        });
     };
 
     const toggle = (id: number) => {

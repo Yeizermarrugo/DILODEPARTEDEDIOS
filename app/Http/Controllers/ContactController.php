@@ -36,7 +36,9 @@ class ContactController extends Controller
     public function markRead(int $id): JsonResponse
     {
         $msg = ContactMessage::findOrFail($id);
-        $msg->update(['read_at' => now()]);
+        if (!$msg->read_at) {
+            $msg->update(['read_at' => now()]);
+        }
         return response()->json(['ok' => true]);
     }
 

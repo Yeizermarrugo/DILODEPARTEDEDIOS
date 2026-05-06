@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ContactMessage extends Model
 {
-    protected $fillable = ['name', 'email', 'whatsapp', 'subject', 'body'];
+    protected $fillable = ['name', 'email', 'whatsapp', 'subject', 'body', 'read_at', 'archived_at'];
 
     protected $casts = ['read_at' => 'datetime', 'archived_at' => 'datetime'];
 
