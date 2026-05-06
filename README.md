@@ -246,8 +246,11 @@ MIT © 2026 [Yeizer Marrugo](https://github.com/Yeizermarrugo)
 
 ---
 
-## Autor
+## Autores
 
 **Yeizer Marrugo**
 - GitHub: [@Yeizermarrugo](https://github.com/Yeizermarrugo)
 - Email: yeizermarrugo@gmail.com
+
+**Diana Lopez**
+- Email: dilodepartededios@gmail.com
