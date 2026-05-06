@@ -40,6 +40,13 @@ class ContactController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    public function archive(int $id): JsonResponse
+    {
+        $msg = ContactMessage::findOrFail($id);
+        $msg->update(['archived_at' => now()]);
+        return response()->json(['ok' => true]);
+    }
+
     public function unreadCount(): JsonResponse
     {
         return response()->json(['count' => ContactMessage::unread()->count()]);

@@ -21,7 +21,7 @@
 <body>
     <div class="card">
         <div class="header">
-            <h1>📬 Nuevo mensaje de contacto</h1>
+            <h1>Nuevo mensaje de contacto</h1>
             <p>Dilo de parte de Dios · dilodepartededios.com</p>
         </div>
         <div class="body">

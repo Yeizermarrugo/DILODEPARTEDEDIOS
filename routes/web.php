@@ -66,7 +66,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
         });
 
-        return Inertia::render('dashboard', compact('stats', 'recientes'));
+        $contactMessages = \App\Models\ContactMessage::whereNull('archived_at')->latest()->take(50)->get();
+
+        return Inertia::render('dashboard', compact('stats', 'recientes', 'contactMessages'));
     })->name('dashboard');
 });
 

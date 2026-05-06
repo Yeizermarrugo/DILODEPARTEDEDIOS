@@ -9,7 +9,7 @@ class ContactMessage extends Model
 {
     protected $fillable = ['name', 'email', 'whatsapp', 'subject', 'body'];
 
-    protected $casts = ['read_at' => 'datetime'];
+    protected $casts = ['read_at' => 'datetime', 'archived_at' => 'datetime'];
 
     public function scopeUnread(Builder $query): Builder
     {
