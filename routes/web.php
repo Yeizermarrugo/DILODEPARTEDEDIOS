@@ -180,6 +180,10 @@ Route::get('/obras', function () {
     return Inertia::render('Obras');
 });
 
+Route::get('/contacto', function () {
+    return Inertia::render('Contacto');
+});
+
 //Editar o eliminar devocionales
 
 Route::middleware(['auth', 'verified'])->group(function () {

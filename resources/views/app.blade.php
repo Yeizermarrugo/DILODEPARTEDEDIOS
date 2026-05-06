@@ -21,6 +21,7 @@
     'recursos' => '| Librería',
     'podcast' => '| Podcast y más',
     'obras' => '| Obras',
+    'contacto' => '| Contacto',
     'login' => '| Iniciar sesión',
     'dashboard' => '| Dashboard',
     'devocionales-edit' => '| Editar devocionales',
