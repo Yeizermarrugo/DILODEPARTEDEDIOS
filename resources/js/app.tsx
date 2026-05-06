@@ -102,7 +102,7 @@ function WelcomeModal() {
 }
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => (title ? `${title}` : appName),
     resolve: (name) => resolvePageComponent(
         `./pages/${name}.tsx`,
         import.meta.glob('./pages/**/*.tsx', { eager: false })
