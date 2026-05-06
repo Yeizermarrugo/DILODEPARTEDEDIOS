@@ -1,0 +1,823 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Variables ─────────────────────────────────────────────────────────────── */
+
+.lib-page {
+    --lib-navy: #2d465e;
+    --lib-navy-dark: #1a2f40;
+    --lib-orange: #f75815;
+    --lib-orange-dark: #d44a10;
+    --lib-cream: #faf8f4;
+    --lib-muted: #6b7280;
+    --lib-text: #1f2937;
+    font-family: 'Instrument Sans', sans-serif;
+    color: var(--lib-text);
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+
+.lib-hero {
+    background-color: var(--lib-navy-dark);
+    background-image:
+        radial-gradient(circle at 15% 85%, rgba(247, 88, 21, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 85% 15%, rgba(58, 96, 128, 0.45) 0%, transparent 50%);
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 7rem 1.5rem 5rem;
+    text-align: center;
+}
+
+.lib-hero__bg-pattern {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.lib-hero__content {
+    max-width: 820px;
+    position: relative;
+    z-index: 1;
+}
+
+.lib-hero__label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--lib-orange);
+    border: 1px solid rgba(247, 88, 21, 0.45);
+    padding: 0.35rem 1.1rem;
+    border-radius: 999px;
+    margin-bottom: 2rem;
+}
+
+.lib-hero__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    color: #fff;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 1.5rem;
+}
+
+.lib-hero__title em {
+    font-style: italic;
+    color: var(--lib-orange);
+}
+
+.lib-hero__subtitle {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 580px;
+    margin: 0 auto 2.75rem;
+    line-height: 1.75;
+    font-weight: 300;
+}
+
+.lib-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--lib-orange);
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 0.9rem 2.1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 6px 28px rgba(247, 88, 21, 0.4);
+}
+
+.lib-hero__cta:hover {
+    background: var(--lib-orange-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(247, 88, 21, 0.5);
+    color: #fff;
+}
+
+.lib-hero__scroll-hint {
+    position: absolute;
+    bottom: 2.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    animation: lib-float 2.5s ease-in-out infinite;
+}
+
+@keyframes lib-float {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(7px);
+    }
+}
+
+/* ── Shared section typography ─────────────────────────────────────────────── */
+
+.lib-section-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--lib-orange);
+    margin-bottom: 0.75rem;
+}
+
+.lib-section-label--navy {
+    color: var(--lib-navy);
+}
+
+.lib-section-label--orange {
+    color: var(--lib-orange);
+}
+
+.lib-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    color: var(--lib-navy);
+    line-height: 1.1;
+    margin: 0 0 1rem;
+    letter-spacing: -0.02em;
+}
+
+.lib-section-subtitle {
+    font-size: 14px;
+    color: var(--lib-muted);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.75;
+}
+
+/* ── Resources ─────────────────────────────────────────────────────────────── */
+
+.lib-resources {
+    padding: 6rem 1.5rem;
+    background: #fff;
+}
+
+.lib-resources__header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.lib-resources__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.75rem;
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────── */
+
+.lib-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(0, 0, 0, 0.04);
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.lib-card:hover {
+    transform: translateY(-7px);
+    box-shadow:
+        0 20px 48px rgba(0, 0, 0, 0.13),
+        0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.lib-card__cover {
+    height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.lib-card__cover--navy {
+    background: linear-gradient(150deg, #1a2f45 0%, #2d465e 55%, #3a6080 100%);
+}
+
+.lib-card__cover--orange {
+    background: linear-gradient(150deg, #7a2c0e 0%, #c44a1a 55%, #f75815 100%);
+}
+
+.lib-card__cover--green {
+    background: linear-gradient(150deg, #1a3a2a 0%, #2d5e45 55%, #3a7858 100%);
+}
+
+.lib-card__cover--purple {
+    background: linear-gradient(150deg, #2d1a45 0%, #4a2d78 55%, #7b52b0 100%);
+}
+
+.lib-card__cover--blue {
+    background: linear-gradient(150deg, #0e3d74 0%, #1867c0 55%, #42a5f5 100%);
+}
+
+
+
+.lib-card__cover-icon {
+    font-size: 3.75rem;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.lib-card:hover .lib-card__cover-icon {
+    transform: scale(1.1);
+}
+
+.lib-card__cover-shine {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.14) 0%, transparent 65%);
+    pointer-events: none;
+}
+
+.lib-card__badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.lib-card__body {
+    padding: 1.5rem 1.5rem 1.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.lib-card__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--lib-navy);
+    line-height: 1.25;
+    margin: 0 0 0.65rem;
+}
+
+.lib-card__author {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--lib-orange);
+    margin-bottom: 0.5rem;
+}
+
+.lib-card__desc {
+    font-size: 13px;
+    color: var(--lib-muted);
+    line-height: 1.7;
+    margin: 0 0 1rem;
+    flex: 1;
+}
+
+.lib-card__meta {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.lib-card__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--lib-orange);
+    text-decoration: none;
+    border: 1.5px solid rgba(247, 88, 21, 0.28);
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    align-self: flex-start;
+}
+
+.lib-card__btn:hover {
+    background: var(--lib-orange);
+    border-color: var(--lib-orange);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* ── Why LearnHub ──────────────────────────────────────────────────────────── */
+
+.lib-why {
+    background: #faf8f4;
+    padding: 6rem 1.5rem;
+}
+
+.lib-why__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.lib-why__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.75rem;
+    margin-top: 3.5rem;
+}
+
+.lib-why__item {
+    background: #fff;
+    border-radius: 18px;
+    padding: 2.25rem 1.75rem;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+    text-align: left;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lib-why__item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.09);
+}
+
+.lib-why__icon-wrap {
+    width: 52px;
+    height: 52px;
+    background: rgba(247, 88, 21, 0.1);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    font-size: 1.5rem;
+    color: var(--lib-orange);
+}
+
+.lib-why__item h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--lib-navy);
+    margin: 0 0 0.6rem;
+}
+
+.lib-why__item p {
+    font-size: 13px;
+    color: var(--lib-muted);
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ── Quote divider ─────────────────────────────────────────────────────────── */
+
+.lib-quote {
+    background: var(--lib-navy);
+    padding: 7rem 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.lib-quote__mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18rem;
+    color: rgba(255, 255, 255, 0.04);
+    line-height: 0.55;
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    font-weight: 700;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.lib-quote__text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 3.5vw, 2.6rem);
+    font-style: italic;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 720px;
+    margin: 0 auto 1.75rem;
+    line-height: 1.45;
+    position: relative;
+    z-index: 1;
+}
+
+.lib-quote__source {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--lib-orange);
+    font-style: normal;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── CTA Banner ────────────────────────────────────────────────────────────── */
+
+.lib-cta {
+    background: var(--lib-cream);
+    padding: 6.5rem 1.5rem;
+    text-align: center;
+}
+
+.lib-cta__inner {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.lib-cta__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    color: var(--lib-orange);
+    margin: 0 0 1rem;
+    line-height: 1.1;
+    font-style: italic;
+}
+
+.lib-cta__subtitle {
+    font-size: 14px;
+    color: var(--lib-navy);
+    margin: 0 0 2.5rem;
+    line-height: 1.75;
+}
+
+.lib-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.lib-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.9rem 1.85rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+.lib-cta__btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.92;
+    text-decoration: none;
+}
+
+.lib-cta__btn--primary {
+    background: var(--lib-orange);
+    color: var(--lib-cream);
+}
+
+.lib-cta__btn--secondary {
+    background: var(--lib-navy);
+    color: var(--lib-cream);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+/* ── Contact Section ───────────────────────────────────────────────────────── */
+
+.lib-contact-section {
+    background: #fff;
+    padding: 6rem 1.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.lib-contact-section__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+/* ── Contact info column ── */
+
+.lib-contact-info__desc {
+    font-size: 14px;
+    color: var(--lib-muted);
+    line-height: 1.75;
+    margin: 0 0 2rem;
+    max-width: 340px;
+}
+
+.lib-contact-info__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.lib-contact-info__link {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    color: var(--lib-text);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.lib-contact-info__link:hover {
+    color: var(--lib-orange);
+    text-decoration: none;
+}
+
+.lib-contact-info__icon-wrap {
+    width: 40px;
+    height: 40px;
+    background: #f4f4f5;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: var(--lib-navy);
+    flex-shrink: 0;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lib-contact-info__link:hover .lib-contact-info__icon-wrap {
+    background: rgba(247, 88, 21, 0.1);
+    color: var(--lib-orange);
+}
+
+/* ── Form ── */
+
+.lib-contact-form-wrap {
+    background: #faf8f4;
+    border-radius: 20px;
+    padding: 2.5rem;
+}
+
+.lib-contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.lib-form-row--2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.lib-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.lib-form-group label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lib-navy);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lib-form-group label span[aria-hidden] {
+    color: var(--lib-orange);
+}
+
+.lib-form-optional {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #9ca3af;
+}
+
+.lib-form-counter {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #9ca3af;
+}
+
+.lib-form-group input,
+.lib-form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'Instrument Sans', sans-serif;
+    color: var(--lib-text);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    resize: vertical;
+}
+
+.lib-form-group input::placeholder,
+.lib-form-group textarea::placeholder {
+    color: #c4c9d4;
+}
+
+.lib-form-group input:focus,
+.lib-form-group textarea:focus {
+    border-color: var(--lib-navy);
+    box-shadow: 0 0 0 3px rgba(45, 70, 94, 0.1);
+}
+
+.lib-form-error {
+    font-size: 13px;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.lib-form-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--lib-orange);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Instrument Sans', sans-serif;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 16px rgba(247, 88, 21, 0.3);
+    align-self: flex-start;
+}
+
+.lib-form-submit:hover:not(:disabled) {
+    background: var(--lib-orange-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(247, 88, 21, 0.4);
+}
+
+.lib-form-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.lib-form-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: lib-spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes lib-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Success state ── */
+
+.lib-contact-success {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.lib-contact-success__icon {
+    font-size: 3.5rem;
+    color: var(--lib-navy);
+    margin-bottom: 1.25rem;
+    line-height: 1;
+}
+
+.lib-contact-success h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--lib-navy);
+    margin: 0 0 0.75rem;
+}
+
+.lib-contact-success p {
+    font-size: 14px;
+    color: var(--lib-muted);
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .lib-hero {
+        min-height: 80vh;
+        padding-top: 5rem;
+        padding-bottom: 4rem;
+    }
+
+    .lib-resources,
+    .lib-why,
+    .lib-cta {
+        padding-top: 4.5rem;
+        padding-bottom: 4.5rem;
+    }
+
+    .lib-quote {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+    }
+
+    .lib-resources__grid,
+    .lib-why__grid {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .lib-cta__actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .lib-cta__btn {
+        width: 100%;
+        justify-content: center;
+        max-width: 320px;
+    }
+
+    .lib-contact-section__inner {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .lib-contact-form-wrap {
+        padding: 1.75rem;
+    }
+
+    .lib-form-row--2 {
+        grid-template-columns: 1fr;
+    }
+
+    .lib-form-submit {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .lib-hero__title {
+        font-size: 2.5rem;
+    }
+
+    .lib-quote__mark {
+        font-size: 10rem;
+    }
+}

@@ -3,6 +3,7 @@
     src: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/sucrose.woff2') format('woff2');
     font-display: swap;
 }
+
 @font-face {
     font-family: 'IM Fell French Canon Pro';
     src: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/im-fell-french-canon-pro.woff2') format('woff2');
@@ -43,9 +44,10 @@ body {
 .devocional h2,
 .devocional-details h2 {
     color: #222;
+    font-weight: bold;
 }
 
-.devocional h3{
+.devocional h3 {
     color: black;
 }
 
@@ -60,7 +62,7 @@ body {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    padding-top: 60%; 
+    padding-top: 60%;
     padding-bottom: 200px;
 }
 
@@ -122,18 +124,18 @@ body {
 .devocional ol,
 .devocional-details ul,
 .devocional-details ol {
-  list-style-position: outside;
-  padding-left: 1.5rem;
+    list-style-position: outside;
+    padding-left: 1.5rem;
 }
 
 .devocional ul,
 .devocional-details ul {
-  list-style-type: disc;
+    list-style-type: disc;
 }
 
 .devocional ol,
 .devocional-details ol {
-  list-style-type: decimal;
+    list-style-type: decimal;
 }
 
 
@@ -146,34 +148,38 @@ body {
 }
 
 .back-floating-button {
-  position: fixed;       /* se fija al viewport, no al scroll */
-  top: 16px;             /* distancia desde arriba */
-  left: 16px;            /* distancia desde la izquierda */
-  z-index: 1000;         /* por encima del contenido */
-  
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+    position: fixed;
+    /* se fija al viewport, no al scroll */
+    top: 16px;
+    /* distancia desde arriba */
+    left: 16px;
+    /* distancia desde la izquierda */
+    z-index: 1000;
+    /* por encima del contenido */
 
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid #6c757d;
-  background-color: #ffffff5e;
-  color: #202427;
-  font-size: 14px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid #6c757d;
+    background-color: #ffffff5e;
+    color: #202427;
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .back-floating-button:hover {
-  background-color: #6c757d;
-  color: #ffffff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+    background-color: #6c757d;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
 .back-floating-button i {
-  font-size: 16px;
+    font-size: 16px;
 }
 
 
@@ -183,9 +189,10 @@ body {
         font-size: 1.8rem;
         max-width: 60%;
         /* margin: 0 0 -1rem 0; */
-        margin-bottom: 0px; 
-        padding-bottom: 200px; 
+        margin-bottom: 0px;
+        padding-bottom: 200px;
     }
+
     .header-modal {
         padding-top: 50%;
         padding-bottom: 70px;
@@ -198,11 +205,13 @@ body {
         font-size: 2.1rem;
         max-width: 80%;
         /* margin: 0 0 -8rem 0; */
-        margin-bottom: 0px; 
-        padding-bottom: 150px; 
+        margin-bottom: 0px;
+        padding-bottom: 150px;
     }
+
     .header-modal {
-        padding-top: 50%; /* Reducimos un poco en tablets */
+        padding-top: 50%;
+        /* Reducimos un poco en tablets */
         padding-bottom: 70px;
     }
 }
@@ -213,23 +222,29 @@ body {
         border-radius: 0;
         box-shadow: none;
     }
+
     .devocional {
         max-width: 100%;
         border-radius: 0;
         box-shadow: none;
     }
+
     .header-modal {
-        padding-top: 30%; /* Reducimos un poco en tablets */
+        padding-top: 30%;
+        /* Reducimos un poco en tablets */
         padding-bottom: 150px;
     }
+
     .header-modal .title {
         font-size: 1.6rem;
         max-width: 80%;
         margin: 0 0 -8rem 0;
     }
+
     .header-modal .title span {
         font-size: 2.1rem;
     }
+
     .devocional-details section {
         padding: 1rem 0.5rem;
     }
@@ -243,46 +258,54 @@ body {
     .devocional-details {
         padding: 0;
     }
+
     .devocional {
         padding: 0;
     }
+
     .header-modal {
         padding-top: 0%;
         padding-bottom: 150px;
     }
+
     .header-modal .title {
         font-size: 1.2rem;
         max-width: 70%;
         margin: 0 0 -9rem 0;
     }
+
     .header-modal .title span {
         font-size: 1.4rem;
     }
+
     .devocional p {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: #222;
-    margin: 0;
-    word-break: break-word;
-}
-.devocional-details p {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: #222;
-    margin: 0;
-    word-break: break-word;
-}
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #222;
+        margin: 0;
+        word-break: break-word;
+    }
+
+    .devocional-details p {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #222;
+        margin: 0;
+        word-break: break-word;
+    }
 }
 
 @media (max-width: 400px) {
     .devocional-details {
         padding: 0;
     }
+
     .devocional {
         padding: 0;
     }
-    .header-modal{
-      padding-top: 0%;
+
+    .header-modal {
+        padding-top: 0%;
     }
 
     .header-modal .title {
@@ -290,19 +313,20 @@ body {
         max-width: 70%;
         margin: 0 0 -10rem 0;
     }
-    .devocional p {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: #222;
-    margin: 0;
-    word-break: break-word;
-}
 
-.devocional-details p {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: #222;
-    margin: 0;
-    word-break: break-word;
-}
+    .devocional p {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #222;
+        margin: 0;
+        word-break: break-word;
+    }
+
+    .devocional-details p {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #222;
+        margin: 0;
+        word-break: break-word;
+    }
 }

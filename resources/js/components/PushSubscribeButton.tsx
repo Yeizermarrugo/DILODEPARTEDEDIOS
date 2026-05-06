@@ -382,7 +382,13 @@ export default function PushSubscribeButton() {
     const [path, setPath] = useState(window.location.pathname);
 
     useEffect(() => {
-        return router.on('navigate', (e) => setPath(new URL(e.detail.page.url).pathname));
+        return router.on('navigate', (e) => {
+            try {
+                setPath(new URL(e.detail.page.url, window.location.origin).pathname);
+            } catch {
+                setPath(window.location.pathname);
+            }
+        });
     }, []);
 
     if (isAdminPath(path)) return null;
