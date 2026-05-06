@@ -16,9 +16,9 @@
     $sections = [
     'about' => '| Quiénes somos',
     'devocionales' => '| Devocionales',
-    'ensenanzas' => '| Series',
+    'series' => '| Series',
     'estudios' => '| Estudios bíblicos',
-    'libreria' => '| Librería',
+    'recursos' => '| Librería',
     'podcast' => '| Podcast y más',
     'obras' => '| Obras',
     'login' => '| Iniciar sesión',
@@ -27,10 +27,14 @@
     'devocionalesAgregar' => '| Agregar devocionales'
     ];
 
-    // Lógica para detectar si es una subpágina de devocional (ej: devocional/id)
+    // Lógica para detectar si es una subpágina (ej: devocional/id, series/id, estudio-biblico/id)
     $sectionName = '';
     if (str_starts_with($currentPath, 'devocional/')) {
     $sectionName = '| Devocional';
+    } elseif (str_starts_with($currentPath, 'series/')) {
+    $sectionName = '| Series';
+    } elseif (str_starts_with($currentPath, 'estudio-biblico/')) {
+    $sectionName = '| Estudios bíblicos';
     } else {
     $sectionName = $sections[$currentPath] ?? '';
     }

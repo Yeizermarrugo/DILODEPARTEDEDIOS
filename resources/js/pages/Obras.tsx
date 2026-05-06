@@ -1,6 +1,7 @@
 import ObrasList from "@/components/ObrasList";
 import PageHero from "@/components/PageHero";
 import PageLayout from "@/components/PageLayout";
+import { Head } from '@inertiajs/react';
 import { useEffect, useState } from "react";
 import '../../css/main.css';
 
@@ -67,6 +68,7 @@ const Obras = () => {
 
     return (
         <PageLayout>
+            <Head title="Dilo de parte de Dios | Obras" />
             <PageHero>
                 <h1 style={{ textAlign: 'center' }}>Llamados a servir con amor</h1>
                 <br /><br />
