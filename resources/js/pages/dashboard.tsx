@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
+import axios from 'axios';
 import {
     Bell,
     BookOpen,
@@ -9,9 +10,11 @@ import {
     GraduationCap,
     Heart,
     Image,
+    Inbox,
     PlusCircle,
     TrendingUp
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
 
@@ -46,6 +49,115 @@ const TIPO_LABEL: Record<string, { label: string; color: string; bg: string }> =
     estudio: { label: 'Estudio', color: '#2a7d4f', bg: '#f0f9f4' },
     episodio: { label: 'Episodio', color: '#6b5b95', bg: '#f5f3fa' },
 };
+
+interface ContactMsg {
+    id: number;
+    name: string;
+    email: string;
+    whatsapp: string | null;
+    subject: string;
+    body: string;
+    read_at: string | null;
+    created_at: string;
+}
+
+function MessagesPanel() {
+    const [messages, setMessages] = useState<ContactMsg[]>([]);
+    const [loading, setLoading]   = useState(true);
+    const [expanded, setExpanded] = useState<number | null>(null);
+
+    useEffect(() => {
+        axios.get('/api/contact-messages')
+            .then(r => setMessages(r.data.data ?? []))
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
+    const markRead = (id: number) => {
+        axios.patch(`/api/contact-messages/${id}/read`).catch(() => {});
+        setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: new Date().toISOString() } : m));
+    };
+
+    const toggle = (id: number) => {
+        setExpanded(prev => prev === id ? null : id);
+        const msg = messages.find(m => m.id === id);
+        if (msg && !msg.read_at) markRead(id);
+    };
+
+    const unread = messages.filter(m => !m.read_at).length;
+
+    return (
+        <div className="rounded-2xl p-6" style={{ backgroundColor: '#fff', border: '1px solid #e8e2d8' }}>
+            <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                    <Inbox size={18} style={{ color: '#2d465e' }} />
+                    <span className="font-semibold text-base" style={{ color: '#2d465e' }}>Mensajes de contacto</span>
+                    {unread > 0 && (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#f75815', color: '#fff' }}>
+                            {unread} nuevo{unread > 1 ? 's' : ''}
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            {loading && (
+                <p className="text-sm text-center py-8" style={{ color: '#9ca3af' }}>Cargando mensajes…</p>
+            )}
+            {!loading && messages.length === 0 && (
+                <p className="text-sm text-center py-8" style={{ color: '#9ca3af' }}>No hay mensajes de contacto aún.</p>
+            )}
+            {!loading && messages.length > 0 && (
+                <ul className="flex flex-col gap-2">
+                    {messages.map(msg => (
+                        <li key={msg.id} style={{ borderRadius: 10, border: `1px solid ${msg.read_at ? '#e8e2d8' : '#f75815'}`, overflow: 'hidden' }}>
+                            <button
+                                onClick={() => toggle(msg.id)}
+                                className="w-full text-left px-4 py-3 flex items-start justify-between gap-3"
+                                style={{ background: msg.read_at ? '#faf8f4' : '#fff5f0', cursor: 'pointer', border: 'none' }}
+                            >
+                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        {!msg.read_at && <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#f75815' }} />}
+                                        <span className="font-semibold text-sm truncate" style={{ color: '#1f2937' }}>{msg.name}</span>
+                                        <span className="text-xs" style={{ color: '#9ca3af' }}>· {msg.email}</span>
+                                    </div>
+                                    <span className="text-sm truncate" style={{ color: '#6b7280' }}>{msg.subject}</span>
+                                </div>
+                                <span className="text-xs flex-shrink-0 mt-0.5" style={{ color: '#9ca3af' }}>{fmtDate(msg.created_at)}</span>
+                            </button>
+                            {expanded === msg.id && (
+                                <div className="px-4 pb-4 pt-1" style={{ background: '#fff' }}>
+                                    <p className="text-sm whitespace-pre-wrap mb-3" style={{ color: '#374151', lineHeight: 1.65 }}>{msg.body}</p>
+                                    <div className="flex flex-wrap gap-3">
+                                        {msg.whatsapp && (
+                                            <a href={`https://wa.me/${msg.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
+                                                className="text-xs font-medium px-3 py-1.5 rounded-lg no-underline"
+                                                style={{ background: '#25d366', color: '#fff' }}>
+                                                WhatsApp
+                                            </a>
+                                        )}
+                                        <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`}
+                                            className="text-xs font-medium px-3 py-1.5 rounded-lg no-underline"
+                                            style={{ background: '#2d465e', color: '#fff' }}>
+                                            Responder por correo
+                                        </a>
+                                        {!msg.read_at && (
+                                            <button onClick={() => markRead(msg.id)}
+                                                className="text-xs font-medium px-3 py-1.5 rounded-lg"
+                                                style={{ background: '#f0f0f0', color: '#6b7280', border: 'none', cursor: 'pointer' }}>
+                                                Marcar como leído
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
 
 function fmt(n: number): string {
     if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
@@ -280,6 +392,9 @@ export default function Dashboard({ stats, recientes }: DashboardProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* ── MENSAJES DE CONTACTO ──────────────────────────── */}
+                <MessagesPanel />
 
                 {/* ── VERSÍCULO ─────────────────────────────────────── */}
                 <div

@@ -66,7 +66,7 @@ export default function Register() {
                         onChange={(e) => setData('name', e.target.value)}
                         disabled={processing}
                         placeholder="Tu nombre"
-                        className={inputClass(!!errors.name)}
+                        className={inputClass()}
                         style={inputStyle(!!errors.name)}
                         onFocus={(e) => onFocus(e, !!errors.name)}
                         onBlur={(e) => onBlur(e, !!errors.name)}
@@ -88,7 +88,7 @@ export default function Register() {
                         onChange={(e) => setData('email', e.target.value)}
                         disabled={processing}
                         placeholder="correo@ejemplo.com"
-                        className={inputClass(!!errors.email)}
+                        className={inputClass()}
                         style={inputStyle(!!errors.email)}
                         onFocus={(e) => onFocus(e, !!errors.email)}
                         onBlur={(e) => onBlur(e, !!errors.email)}
@@ -111,7 +111,7 @@ export default function Register() {
                             onChange={(e) => setData('password', e.target.value)}
                             disabled={processing}
                             placeholder="Mínimo 8 caracteres"
-                            className={`${inputClass(!!errors.password)} pr-11`}
+                            className={`${inputClass()} pr-11`}
                             style={inputStyle(!!errors.password)}
                             onFocus={(e) => onFocus(e, !!errors.password)}
                             onBlur={(e) => onBlur(e, !!errors.password)}
@@ -144,7 +144,7 @@ export default function Register() {
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             disabled={processing}
                             placeholder="Repite tu contraseña"
-                            className={`${inputClass(!!errors.password_confirmation)} pr-11`}
+                            className={`${inputClass()} pr-11`}
                             style={inputStyle(!!errors.password_confirmation)}
                             onFocus={(e) => onFocus(e, !!errors.password_confirmation)}
                             onBlur={(e) => onBlur(e, !!errors.password_confirmation)}

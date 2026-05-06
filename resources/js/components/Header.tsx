@@ -11,6 +11,7 @@ const navLinks = [
     { href: '/recursos', label: 'Recursos', icon: 'bi-archive' },
     { href: '/podcast', label: 'Podcast y más', icon: 'bi-mic' },
     { href: '/obras', label: 'Obras', icon: 'bi-heart' },
+    { href: '/contacto', label: 'Contacto', icon: 'bi-envelope' },
 ];
 
 const socialLinks = [
