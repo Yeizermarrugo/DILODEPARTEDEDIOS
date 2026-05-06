@@ -1,6 +1,7 @@
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import LibroList from '@/components/LibroList';
+import { Head } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 import '../../css/estudios.css';
 import '../../css/main.css';
@@ -30,6 +31,7 @@ export default function Estudios() {
 
     return (
         <div className="est-page">
+            <Head title="Dilo de parte de Dios | Estudios Bíblicos" />
             <Header />
             <main>
 

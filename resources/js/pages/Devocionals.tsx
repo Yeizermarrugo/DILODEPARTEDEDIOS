@@ -2,6 +2,7 @@ import CardNew from '@/components/CardNew';
 import PageLayout from '@/components/PageLayout';
 import Spinner from '@/components/Spinner';
 import FilterSheet from '@/components/ui/FilterSheet';
+import { Head } from '@inertiajs/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import '../../css/devocionals.css';
@@ -189,6 +190,7 @@ function Devocionals() {
 
     return (
         <PageLayout className="dv-page">
+            <Head title="Dilo de parte de Dios | Devocionales" />
             <main>
                 <div className="dv-page-hero">
                     <div className="dv-page-hero__inner">

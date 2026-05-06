@@ -1,9 +1,11 @@
 import PageLayout from "@/components/PageLayout";
+import { Head } from '@inertiajs/react';
 import '../../css/main.css';
 
 const Libreria = () => {
     return (
         <PageLayout>
+            <Head title="Dilo de parte de Dios | Recursos" />
             {/* Page Title */}
             <div className="page-title">
                 <div className="title-wrapper">

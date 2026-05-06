@@ -20,6 +20,7 @@ import {
     IconYouTube
 } from '@/components/icons/AboutIcons';
 import PageLayout from '@/components/PageLayout';
+import { Head } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import '../../css/about.css';
 
@@ -863,6 +864,7 @@ export default function About() {
     return (
         <div className="about-root">
             <PageLayout>
+                <Head title="Dilo de parte de Dios | Quiénes somos" />
                 <main>
                     <Hero />
                     <FaqSection />

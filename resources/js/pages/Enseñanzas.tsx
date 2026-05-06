@@ -1,5 +1,6 @@
 import EnsenanzaCard from '@/components/EnsenanzaCard';
 import Spinner from '@/components/Spinner';
+import { Head } from '@inertiajs/react';
 import { JSX, useEffect, useMemo, useRef, useState } from 'react';
 
 import PageLayout from '@/components/PageLayout';
@@ -157,6 +158,7 @@ function Enseñanzas() {
 
     return (
         <PageLayout>
+            <Head title="Dilo de parte de Dios | Series" />
             <div className="ens-page">
                 <main>
                     {/* ── HERO ── */}

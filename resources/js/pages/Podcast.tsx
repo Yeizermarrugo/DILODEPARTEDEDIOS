@@ -1,5 +1,6 @@
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
+import { Head } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import '../../css/podcast.css';
 
@@ -359,6 +360,7 @@ function FinalCta() {
 export default function Podcast() {
     return (
         <div className="pod-page">
+            <Head title="Dilo de parte de Dios | Podcast y más" />
             <Header />
             <main>
                 <PodHero />
