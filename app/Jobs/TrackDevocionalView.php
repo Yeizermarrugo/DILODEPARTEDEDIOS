@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Stevebauman\Location\Facades\Location;
 
 class TrackDevocionalView implements ShouldQueue
@@ -62,6 +63,7 @@ class TrackDevocionalView implements ShouldQueue
 
         if ($shouldIncrement) {
             Devocional::where('id', $this->devocionalId)->increment('views_count');
+            Cache::forget('estudios-list');
         }
     }
 }

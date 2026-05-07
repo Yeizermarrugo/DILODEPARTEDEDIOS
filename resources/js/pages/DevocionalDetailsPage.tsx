@@ -136,6 +136,7 @@ const DevocionalDetailsPage = (props: Props) => {
     const nav = (props.nav ?? (page.nav as StudyNav | undefined | null)) ?? null;
 
     const [loading, setLoading] = useState(true);
+    const [viewsCount, setViewsCount] = useState(devocional?.views_count ?? 0);
     const imageLoaded = useImagePreload(devocional?.imagen ?? '');
 
     useEffect(() => {
@@ -148,6 +149,8 @@ const DevocionalDetailsPage = (props: Props) => {
         const devId = devocional?.id;
         if (!devId) return;
 
+        setViewsCount(devocional?.views_count ?? 0);
+
         const d = new Date();
         const pad = (n: number) => String(n).padStart(2, '0');
         const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
@@ -159,7 +162,13 @@ const DevocionalDetailsPage = (props: Props) => {
                 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
             },
             body: JSON.stringify({ local_time: local }),
-        });
+        })
+            .then(r => r.json())
+            .then((data: { status: string }) => {
+                if (data.status === 'recorded') {
+                    setViewsCount(c => c + 1);
+                }
+            });
     }, [devocional?.id]);
 
     if (!devocional) return <div>No se encontró el devocional.</div>;
@@ -265,7 +274,7 @@ const DevocionalDetailsPage = (props: Props) => {
                         color: '#888',
                     }}>
                         <i className="bi bi-eye" style={{ fontSize: '20px' }} />
-                        <span>{devocional.views_count ?? 0}</span>
+                        <span>{viewsCount}</span>
                         <ShareButton type={likeType} id={devocional.id} sharesCount={devocional.shares_count ?? 0} variant="default" />
                         <LikeButton type={likeType} id={devocional.id} variant="default" />
                     </div>
