@@ -125,7 +125,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
 export default function Libreria() {
     return (
         <PageLayout>
-            <Head title="Recursos | Dilo de parte de Dios" />
+            <Head title="Dilo de parte de Dios | Recursos" />
             <div className="lib-page">
 
                 {/* ── HERO ── */}
