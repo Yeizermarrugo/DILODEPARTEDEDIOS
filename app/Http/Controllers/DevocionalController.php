@@ -254,13 +254,19 @@ class DevocionalController extends Controller
 
     public function estudios()
     {
-        $devocionales = Cache::remember('estudios-list', 3600, fn () =>
-            Devocional::where('is_devocional', 0)
+        $devocionales = Cache::remember('estudios-list', 3600, function () {
+            $orderMap = array_flip(self::$biblicalOrder);
+            return Devocional::where('is_devocional', 0)
                 ->select('id', 'categoria', 'contenido', 'views_count', 'shares_count', 'created_at')
-                ->orderBy('categoria', 'asc')
-                ->orderBy('created_at', 'asc')
                 ->get()
-        );
+                ->sortBy(function ($e) use ($orderMap) {
+                    $book = strtoupper(trim($e->categoria ?? ''));
+                    $bookPos = $orderMap[$book] ?? 999;
+                    [$cap, $ver] = self::parseChapterVerse($e->contenido ?? '');
+                    return [$bookPos, $cap, $ver];
+                })
+                ->values();
+        });
         return response()->json($devocionales);
     }
 
@@ -279,13 +285,50 @@ class DevocionalController extends Controller
         ]);
     }
 
+    private static function parseChapterVerse(string $contenido): array
+    {
+        if (preg_match('/<h1[^>]*>(.*?)<\/h1>/is', $contenido, $m)) {
+            $h1 = strip_tags($m[1]);
+            if (preg_match('/(\d+):\s*(\d+)/', $h1, $ref)) {
+                return [(int) $ref[1], (int) $ref[2]];
+            }
+            if (preg_match('/\b(\d+)\b/', $h1, $ref)) {
+                return [(int) $ref[1], 0];
+            }
+        }
+        return [9999, 9999];
+    }
+
+    private static array $biblicalOrder = [
+        'GÉNESIS', 'ÉXODO', 'LEVÍTICO', 'NÚMEROS', 'DEUTERONOMIO',
+        'JOSUÉ', 'JUECES', 'RUT', '1 SAMUEL', '2 SAMUEL',
+        '1 REYES', '2 REYES', '1 CRÓNICAS', '2 CRÓNICAS', 'ESDRAS',
+        'NEHEMÍAS', 'ESTER', 'JOB', 'SALMOS', 'PROVERBIOS',
+        'ECLESIASTÉS', 'CANTARES', 'ISAÍAS', 'JEREMÍAS', 'LAMENTACIONES',
+        'EZEQUIEL', 'DANIEL', 'OSEAS', 'JOEL', 'AMÓS', 'ABDÍAS',
+        'JONÁS', 'MIQUEAS', 'NAHÚM', 'HABACUC', 'SOFONÍAS',
+        'HAGEO', 'ZACARÍAS', 'MALAQUÍAS',
+        'MATEO', 'MARCOS', 'LUCAS', 'JUAN', 'HECHOS',
+        'ROMANOS', '1 CORINTIOS', '2 CORINTIOS', 'GÁLATAS', 'EFESIOS',
+        'FILIPENSES', 'COLOSENSES', '1 TESALONICENSES', '2 TESALONICENSES',
+        '1 TIMOTEO', '2 TIMOTEO', 'TITO', 'FILEMÓN', 'HEBREOS',
+        'SANTIAGO', '1 PEDRO', '2 PEDRO', '1 JUAN', '2 JUAN', '3 JUAN',
+        'JUDAS', 'APOCALIPSIS',
+    ];
+
     public function details($id)
     {
         $devocional = Devocional::findOrFail($id);
 
+        $nav = null;
+        if ((int) $devocional->is_devocional === 0) {
+            $nav = $this->computeStudyNav($id, $devocional->categoria);
+        }
+
         return Inertia::render('DevocionalDetailsPage', [
             'devocional' => $devocional,
             'is_devocional' => $devocional->is_devocional,
+            'nav' => $nav,
 
             'meta' => [
                 'title' => $devocional->titulo,
@@ -294,6 +337,73 @@ class DevocionalController extends Controller
                 'url' => url()->current(),
             ]
         ]);
+    }
+
+    private function computeStudyNav(string $id, ?string $currentBook): array
+    {
+        $orderMap = array_flip(self::$biblicalOrder);
+
+        // Only visible estudios (is_devocional=0); sorted by biblical book then chapter:verse
+        $allEstudios = Devocional::where('is_devocional', 0)
+            ->get(['id', 'categoria', 'contenido'])
+            ->sortBy(function ($e) use ($orderMap) {
+                $book = strtoupper(trim($e->categoria ?? ''));
+                $bookPos = $orderMap[$book] ?? 999;
+                [$cap, $ver] = self::parseChapterVerse($e->contenido ?? '');
+                return [$bookPos, $cap, $ver];
+            })
+            ->values();
+
+        // Sorted books in biblical order (preserving insertion order from sorted collection)
+        $sortedBooks = $allEstudios->pluck('categoria')->unique()->values()->toArray();
+
+        // Studies in current book
+        $bookEstudios = $allEstudios->filter(fn ($e) => $e->categoria === $currentBook)->values();
+        $bookIds = $bookEstudios->pluck('id')->toArray();
+        $posInBook = array_search($id, $bookIds);
+        $totalInBook = count($bookIds);
+
+        $isFirstInBook = $posInBook === 0;
+        $isLastInBook = $posInBook === $totalInBook - 1;
+        $currentBookIdx = array_search($currentBook, $sortedBooks);
+
+        // Prev: within book or jump to first of previous book
+        $prevData = null;
+        $prevCrossesBook = false;
+        if (!$isFirstInBook) {
+            $prevData = $bookEstudios[$posInBook - 1];
+        } elseif ($currentBookIdx > 0) {
+            $prevBook = $sortedBooks[$currentBookIdx - 1];
+            $prevData = $allEstudios->first(fn ($e) => $e->categoria === $prevBook);
+            $prevCrossesBook = true;
+        }
+
+        // Next: within book or jump to first of next book
+        $nextData = null;
+        $nextCrossesBook = false;
+        if (!$isLastInBook) {
+            $nextData = $bookEstudios[$posInBook + 1];
+        } elseif ($currentBookIdx !== false && $currentBookIdx < count($sortedBooks) - 1) {
+            $nextBook = $sortedBooks[$currentBookIdx + 1];
+            $nextData = $allEstudios->first(fn ($e) => $e->categoria === $nextBook);
+            $nextCrossesBook = true;
+        }
+
+        return [
+            'prev' => $prevData ? [
+                'id' => $prevData->id,
+                'categoria' => $prevData->categoria,
+                'crosses_book' => $prevCrossesBook,
+            ] : null,
+            'next' => $nextData ? [
+                'id' => $nextData->id,
+                'categoria' => $nextData->categoria,
+                'crosses_book' => $nextCrossesBook,
+            ] : null,
+            'current_book' => $currentBook,
+            'position_in_book' => $posInBook !== false ? $posInBook + 1 : null,
+            'total_in_book' => $totalInBook,
+        ];
     }
 
 

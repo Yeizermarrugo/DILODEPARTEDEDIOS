@@ -295,6 +295,170 @@ body {
     }
 }
 
+/* ── Study navigation ─────────────────────────────────── */
+.study-nav {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e8e8e8;
+}
+
+.study-nav__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.study-nav__book-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #2d465e;
+}
+
+.study-nav__counter {
+    font-size: 0.72rem;
+    color: #aaa;
+    font-variant-numeric: tabular-nums;
+}
+
+.study-nav__progress-bar {
+    height: 3px;
+    background: #f0f0f0;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.study-nav__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2d465e 0%, #f75815 100%);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.study-nav__buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.study-nav__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+    color: #2d465e;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    text-decoration: none;
+    min-height: 64px;
+}
+
+.study-nav__btn--prev {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.study-nav__btn--next {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.study-nav__btn:hover:not(.study-nav__btn--disabled) {
+    border-color: #2d465e;
+    background: #f7fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(45, 70, 94, 0.12);
+    text-decoration: none;
+    color: #2d465e;
+}
+
+.study-nav__btn--disabled {
+    opacity: 0.32;
+    cursor: default;
+    pointer-events: none;
+}
+
+.study-nav__btn--cross-book {
+    border-color: #ffd4bf;
+    background: #fff8f5;
+}
+
+.study-nav__btn--cross-book:hover:not(.study-nav__btn--disabled) {
+    border-color: #f75815;
+    background: #fff0ea;
+    box-shadow: 0 4px 12px rgba(247, 88, 21, 0.12);
+}
+
+.study-nav__icon {
+    flex-shrink: 0;
+    color: currentColor;
+    opacity: 0.7;
+}
+
+.study-nav__label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.study-nav__label small {
+    font-size: 0.65rem;
+    color: #f75815;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1;
+}
+
+.study-nav__label strong {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #2d465e;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.study-nav__label span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #2d465e;
+    line-height: 1;
+}
+
+@media (max-width: 500px) {
+    .study-nav__buttons {
+        gap: 8px;
+    }
+
+    .study-nav__btn {
+        padding: 10px 12px;
+        min-height: 54px;
+        border-radius: 10px;
+        gap: 8px;
+    }
+
+    .study-nav__label strong {
+        font-size: 0.75rem;
+    }
+
+    .study-nav__label span {
+        font-size: 0.78rem;
+    }
+
+    .study-nav__label small {
+        font-size: 0.6rem;
+    }
+}
+
 @media (max-width: 400px) {
     .devocional-details {
         padding: 0;

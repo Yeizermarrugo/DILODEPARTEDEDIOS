@@ -3,6 +3,25 @@ import { useEffect, useRef, useState } from 'react';
 import LikeButton from './LikeButton';
 import { ShareButton } from './ShareButton';
 
+const BIBLICAL_ORDER: string[] = [
+    'GÉNESIS', 'ÉXODO', 'LEVÍTICO', 'NÚMEROS', 'DEUTERONOMIO',
+    'JOSUÉ', 'JUECES', 'RUT', '1 SAMUEL', '2 SAMUEL',
+    '1 REYES', '2 REYES', '1 CRÓNICAS', '2 CRÓNICAS', 'ESDRAS',
+    'NEHEMÍAS', 'ESTER', 'JOB', 'SALMOS', 'PROVERBIOS',
+    'ECLESIASTÉS', 'CANTARES', 'ISAÍAS', 'JEREMÍAS', 'LAMENTACIONES',
+    'EZEQUIEL', 'DANIEL', 'OSEAS', 'JOEL', 'AMÓS', 'ABDÍAS',
+    'JONÁS', 'MIQUEAS', 'NAHÚM', 'HABACUC', 'SOFONÍAS',
+    'HAGEO', 'ZACARÍAS', 'MALAQUÍAS',
+    'MATEO', 'MARCOS', 'LUCAS', 'JUAN', 'HECHOS',
+    'ROMANOS', '1 CORINTIOS', '2 CORINTIOS', 'GÁLATAS', 'EFESIOS',
+    'FILIPENSES', 'COLOSENSES', '1 TESALONICENSES', '2 TESALONICENSES',
+    '1 TIMOTEO', '2 TIMOTEO', 'TITO', 'FILEMÓN', 'HEBREOS',
+    'SANTIAGO', '1 PEDRO', '2 PEDRO', '1 JUAN', '2 JUAN', '3 JUAN',
+    'JUDAS', 'APOCALIPSIS',
+];
+
+const biblicalOrderMap = new Map(BIBLICAL_ORDER.map((b, i) => [b.toUpperCase(), i]));
+
 type Categoria = string | { nombre: string };
 
 type Libro = {
@@ -34,17 +53,18 @@ function getH2(html: string) {
     return m ? decode(m[1].replace(/<[^>]+>/g, '')) : '';
 }
 
+
+function getCatNombre(c: Categoria) {
+    return typeof c === 'object' ? c.nombre : c;
+}
+
 function parseRef(html: string): { cap: number; ver: number } {
     const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1].replace(/<[^>]+>/g, '') ?? '';
-    let m = h1.match(/(\d+):(\d+)/);
+    let m = h1.match(/(\d+):\s*(\d+)/);
     if (m) return { cap: Number(m[1]), ver: Number(m[2]) };
     m = h1.match(/\b(\d+)\b/);
     if (m) return { cap: Number(m[1]), ver: 0 };
     return { cap: 9999, ver: 9999 };
-}
-
-function getCatNombre(c: Categoria) {
-    return typeof c === 'object' ? c.nombre : c;
 }
 
 export default function LibroList({ searchTerm, onLoad }: Props) {
@@ -59,20 +79,15 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
             .then(r => r.json())
             .then((data: Libro[]) => {
                 const lista = Array.isArray(data) ? data : [];
-                const sorted = [...lista].sort((a, b) => {
-                    const ra = parseRef(a.contenido);
-                    const rb = parseRef(b.contenido);
-                    return ra.cap !== rb.cap ? ra.cap - rb.cap : ra.ver - rb.ver;
-                });
-                setLibros(sorted);
+                setLibros(lista);
                 setLoading(false);
 
-                const cats = sorted.reduce<Set<string>>((s, l) => {
+                const cats = lista.reduce<Set<string>>((s, l) => {
                     const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
                     cs.forEach(c => c && s.add(getCatNombre(c)));
                     return s;
                 }, new Set());
-                onLoadRef.current?.({ total: sorted.length, categorias: cats.size });
+                onLoadRef.current?.({ total: lista.length, categorias: cats.size });
             })
             .catch(() => setLoading(false));
     }, []);
@@ -96,7 +111,11 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
             });
             return acc;
         }, [])
-        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+        .sort((a, b) => {
+            const posA = biblicalOrderMap.get(a.nombre.toUpperCase()) ?? 999;
+            const posB = biblicalOrderMap.get(b.nombre.toUpperCase()) ?? 999;
+            return posA !== posB ? posA - posB : a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+        });
 
     useEffect(() => {
         if (search) {
@@ -135,10 +154,16 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
         <div className="est-acordeon">
             {categorias.map((cat, catIdx) => {
                 const isOpen = openCategoria[cat.nombre] ?? false;
-                const items = filtrados.filter(l => {
-                    const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
-                    return cs.some(c => c && getCatNombre(c) === cat.nombre);
-                });
+                const items = filtrados
+                    .filter(l => {
+                        const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
+                        return cs.some(c => c && getCatNombre(c) === cat.nombre);
+                    })
+                    .sort((a, b) => {
+                        const ra = parseRef(a.contenido);
+                        const rb = parseRef(b.contenido);
+                        return ra.cap !== rb.cap ? ra.cap - rb.cap : ra.ver - rb.ver;
+                    });
 
                 return (
                     <div

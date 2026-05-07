@@ -2,8 +2,9 @@ import LikeButton from '@/components/LikeButton';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import DOMPurify from 'dompurify';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
@@ -19,9 +20,24 @@ type Devocional = {
     shares_count?: number;
 };
 
+type NavItem = {
+    id: string;
+    categoria: string;
+    crosses_book: boolean;
+};
+
+type StudyNav = {
+    prev: NavItem | null;
+    next: NavItem | null;
+    current_book: string | null;
+    position_in_book: number | null;
+    total_in_book: number;
+};
+
 type Props = {
     devocional: Devocional;
-    like_type?: 'devocional' | 'estudio' | 'ensenanza'; // ← nuevo prop
+    like_type?: 'devocional' | 'estudio' | 'ensenanza';
+    nav?: StudyNav | null;
 };
 
 function getContentType(is_devocional?: number | string): 'devocional' | 'estudio' | 'ensenanza' {
@@ -31,10 +47,93 @@ function getContentType(is_devocional?: number | string): 'devocional' | 'estudi
     return 'devocional';
 }
 
+const StudyNavigation = ({ nav }: { nav: StudyNav }) => {
+    const progressPct = nav.position_in_book && nav.total_in_book
+        ? Math.round((nav.position_in_book / nav.total_in_book) * 100)
+        : 0;
+
+    return (
+        <div className="study-nav">
+            <div className="study-nav__header">
+                <span className="study-nav__book-name">{nav.current_book}</span>
+                {nav.position_in_book != null && (
+                    <span className="study-nav__counter">
+                        {nav.position_in_book} / {nav.total_in_book}
+                    </span>
+                )}
+            </div>
+
+            <div className="study-nav__progress-bar">
+                <div
+                    className="study-nav__progress-fill"
+                    style={{ width: `${progressPct}%` }}
+                />
+            </div>
+
+            <div className="study-nav__buttons">
+                {nav.prev ? (
+                    <Link
+                        href={`/estudio-biblico/${nav.prev.id}`}
+                        className={`study-nav__btn study-nav__btn--prev${nav.prev.crosses_book ? ' study-nav__btn--cross-book' : ''}`}
+                        title={nav.prev.crosses_book ? `Libro anterior: ${nav.prev.categoria}` : 'Estudio anterior'}
+                    >
+                        <ChevronLeft className="study-nav__icon" size={20} />
+                        <span className="study-nav__label">
+                            {nav.prev.crosses_book ? (
+                                <>
+                                    <small>Libro anterior</small>
+                                    <strong>{nav.prev.categoria}</strong>
+                                </>
+                            ) : (
+                                <span>Anterior</span>
+                            )}
+                        </span>
+                    </Link>
+                ) : (
+                    <div className="study-nav__btn study-nav__btn--prev study-nav__btn--disabled">
+                        <ChevronLeft className="study-nav__icon" size={20} />
+                        <span className="study-nav__label">
+                            <span>Inicio</span>
+                        </span>
+                    </div>
+                )}
+
+                {nav.next ? (
+                    <Link
+                        href={`/estudio-biblico/${nav.next.id}`}
+                        className={`study-nav__btn study-nav__btn--next${nav.next.crosses_book ? ' study-nav__btn--cross-book' : ''}`}
+                        title={nav.next.crosses_book ? `Siguiente libro: ${nav.next.categoria}` : 'Siguiente estudio'}
+                    >
+                        <span className="study-nav__label">
+                            {nav.next.crosses_book ? (
+                                <>
+                                    <small>Siguiente libro</small>
+                                    <strong>{nav.next.categoria}</strong>
+                                </>
+                            ) : (
+                                <span>Siguiente</span>
+                            )}
+                        </span>
+                        <ChevronRight className="study-nav__icon" size={20} />
+                    </Link>
+                ) : (
+                    <div className="study-nav__btn study-nav__btn--next study-nav__btn--disabled">
+                        <span className="study-nav__label">
+                            <span>Fin</span>
+                        </span>
+                        <ChevronRight className="study-nav__icon" size={20} />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const DevocionalDetailsPage = (props: Props) => {
     const page = usePage().props as Record<string, unknown>;
     const devocional = props.devocional ?? (page.devocional as Devocional | undefined);
     const likeType = (props.like_type ?? (page.like_type as string | undefined) ?? getContentType(devocional?.is_devocional)) as 'devocional' | 'estudio' | 'ensenanza';
+    const nav = (props.nav ?? (page.nav as StudyNav | undefined | null)) ?? null;
 
     const [loading, setLoading] = useState(true);
     const imageLoaded = useImagePreload(devocional?.imagen ?? '');
@@ -171,6 +270,8 @@ const DevocionalDetailsPage = (props: Props) => {
                         <LikeButton type={likeType} id={devocional.id} variant="default" />
                     </div>
                 )}
+
+                {nav && likeType === 'estudio' && <StudyNavigation nav={nav} />}
             </section>
         </div>
     );
