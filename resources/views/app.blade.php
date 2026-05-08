@@ -18,7 +18,7 @@
     'devocionales' => '| Devocionales',
     'series' => '| Series',
     'estudios' => '| Estudios bíblicos',
-    'recursos' => '| Librería',
+    'recursos' => '| Recursos',
     'podcast' => '| Podcast y más',
     'obras' => '| Obras',
     'contacto' => '| Contacto',
@@ -48,85 +48,86 @@
 
     $rawTitle = $meta['title'] ?? $defaultTitle;
     $currentTitle = strlen($rawTitle) < 30 ? $rawTitle . ' | Dilo de parte de Dios' : $rawTitle;
-    $rawDesc = $meta['description'] ?? '';
-    $currentDesc = strlen($rawDesc) >= 70
+        $rawDesc=$meta['description'] ?? '' ; $currentDesc=strlen($rawDesc)>= 70
         ? $rawDesc
-        : "Plataforma de recursos cristianos para conectar con Dios a través de estudios bíblicos, series temáticas y herramientas de crecimiento espiritual.";
-    $currentUrl = $meta['url'] ?? url()->current();
-    $currentImage = $meta['image'] ??
-    'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg';
-    @endphp
+        : "Plataforma de recursos cristianos para conectar con Dios a través de estudios bíblicos, series temáticas y
+        herramientas de crecimiento espiritual.";
+        $currentUrl = $meta['url'] ?? url()->current();
+        $currentImage = $meta['image'] ??
+        'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg';
+        @endphp
 
-    <title inertia>{{ $currentTitle }}</title>
-    <meta name="description" content="{{ $currentDesc }}">
-    <link rel="canonical" href="{{ url()->current() }}">
+        <title inertia>{{ $currentTitle }}</title>
+        <meta name="description" content="{{ $currentDesc }}">
+        <link rel="canonical" href="{{ url()->current() }}">
 
-    <meta property="og:type" content="{{ $meta ? 'article' : 'website' }}">
-    <meta property="og:site_name" content="Dilo de parte de Dios">
-    <meta property="og:title" content="{{ $currentTitle }}">
-    <meta property="og:description" content="{{ $currentDesc }}">
-    <meta property="og:url" content="{{ $currentUrl }}">
-    <meta property="og:image" content="{{ $currentImage }}">
-    <meta property="og:image:secure_url" content="{{ $currentImage }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="{{ $currentTitle }}">
+        <meta property="og:type" content="{{ $meta ? 'article' : 'website' }}">
+        <meta property="og:site_name" content="Dilo de parte de Dios">
+        <meta property="og:title" content="{{ $currentTitle }}">
+        <meta property="og:description" content="{{ $currentDesc }}">
+        <meta property="og:url" content="{{ $currentUrl }}">
+        <meta property="og:image" content="{{ $currentImage }}">
+        <meta property="og:image:secure_url" content="{{ $currentImage }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ $currentTitle }}">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $currentTitle }}">
-    <meta name="twitter:description" content="{{ $currentDesc }}">
-    <meta name="twitter:image" content="{{ $currentImage }}">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $currentTitle }}">
+        <meta name="twitter:description" content="{{ $currentDesc }}">
+        <meta name="twitter:image" content="{{ $currentImage }}">
 
-    {{-- Web Push / PWA --}}
-    <link rel="manifest" href="/manifest.json">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Dilo de parte de Dios">
-    <meta name="theme-color" content="#f75815" />
-    <meta name="mobile-web-app-capable" content="yes" />
+        {{-- Web Push / PWA --}}
+        <link rel="manifest" href="/manifest.json">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="Dilo de parte de Dios">
+        <meta name="theme-color" content="#f75815" />
+        <meta name="mobile-web-app-capable" content="yes" />
 
-    <link rel="icon" type="image/jpeg"
-        href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+        <link rel="icon" type="image/jpeg"
+            href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
 
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
 
-    <link rel="shortcut icon"
-        href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+        <link rel="shortcut icon"
+            href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
 
-    @routes
-    @viteReactRefresh
-    @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
-    @inertiaHead
+        @routes
+        @viteReactRefresh
+        @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @inertiaHead
 </head>
 
 <body class="font-sans antialiased">
     <script>
-    (function() {
-        const appearance = '{{ $appearance ?? "system" }}';
-        if (appearance === 'system') {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (prefersDark) {
-                document.documentElement.classList.add('dark');
+        (function() {
+            const appearance = '{{ $appearance ?? "system" }}';
+            if (appearance === 'system') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) {
+                    document.documentElement.classList.add('dark');
+                }
             }
-        }
-    })();
+        })();
     </script>
 
     <style>
-    html {
-        background-color: oklch(1 0 0);
-    }
+        html {
+            background-color: oklch(1 0 0);
+        }
 
-    html.dark {
-        background-color: oklch(0.145 0 0);
-    }
+        html.dark {
+            background-color: oklch(0.145 0 0);
+        }
     </style>
 
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="tH+o+/Cdpn18Efh2crVnhQ" async></script>
