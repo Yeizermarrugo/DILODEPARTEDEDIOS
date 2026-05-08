@@ -20,7 +20,7 @@ interface Props {
 }
 
 function getContentType(is_devocional?: number): 'devocional' | 'estudio' | 'ensenanza' {
-    if (is_devocional === 0) return 'estudio';
+    if (is_devocional === 3) return 'estudio';
     if (is_devocional === 2) return 'ensenanza';
     return 'devocional';
 }

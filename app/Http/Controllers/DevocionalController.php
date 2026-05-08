@@ -256,7 +256,7 @@ class DevocionalController extends Controller
     {
         $devocionales = Cache::remember('estudios-list', 3600, function () {
             $orderMap = array_flip(self::$biblicalOrder);
-            return Devocional::where('is_devocional', 0)
+            return Devocional::where('is_devocional', Devocional::TYPE_ESTUDIO)
                 ->select('id', 'categoria', 'contenido', 'views_count', 'shares_count', 'created_at')
                 ->get()
                 ->sortBy(function ($e) use ($orderMap) {
@@ -321,7 +321,7 @@ class DevocionalController extends Controller
         $devocional = Devocional::findOrFail($id);
 
         $nav = null;
-        if ((int) $devocional->is_devocional === 0) {
+        if ((int) $devocional->is_devocional === Devocional::TYPE_ESTUDIO) {
             $nav = $this->computeStudyNav($id, $devocional->categoria);
         }
 
@@ -343,8 +343,8 @@ class DevocionalController extends Controller
     {
         $orderMap = array_flip(self::$biblicalOrder);
 
-        // Only visible estudios (is_devocional=0); sorted by biblical book then chapter:verse
-        $allEstudios = Devocional::where('is_devocional', 0)
+        // Only visible estudios (is_devocional=3); sorted by biblical book then chapter:verse
+        $allEstudios = Devocional::where('is_devocional', Devocional::TYPE_ESTUDIO)
             ->get(['id', 'categoria', 'contenido'])
             ->sortBy(function ($e) use ($orderMap) {
                 $book = strtoupper(trim($e->categoria ?? ''));
@@ -427,7 +427,7 @@ class DevocionalController extends Controller
             'categoria'     => 'required|string',
             'imagen'        => 'nullable|string',
             'autor'         => 'nullable|string|max:255',
-            'is_devocional' => 'required|integer|in:0,1,2',
+            'is_devocional' => 'required|integer|in:0,1,2,3',
             'serie'         => 'nullable|string|max:255',
             'created_at'    => 'nullable|date',
             'pdf'           => 'nullable|string|max:255',
@@ -462,6 +462,38 @@ class DevocionalController extends Controller
         ], 201);
     }
 
+    /**
+     * Builds a MySQL REGEXP pattern that matches a word regardless of whether
+     * accented vowels are stored as UTF-8 chars or HTML entities (HTMLPurifier converts é→&eacute;).
+     */
+    private static function accentRegexp(string $word): string
+    {
+        static $map = [
+            'a' => '(a|á|à|â|ã|ä|&aacute;|&agrave;|&acirc;|&atilde;|&auml;)',
+            'á' => '(a|á|&aacute;)', 'à' => '(a|à|&agrave;)',
+            'â' => '(a|â|&acirc;)', 'ã' => '(a|ã|&atilde;)', 'ä' => '(a|ä|&auml;)',
+            'e' => '(e|é|è|ê|ë|&eacute;|&egrave;|&ecirc;|&euml;)',
+            'é' => '(e|é|&eacute;)', 'è' => '(e|è|&egrave;)',
+            'ê' => '(e|ê|&ecirc;)', 'ë' => '(e|ë|&euml;)',
+            'i' => '(i|í|ì|î|ï|&iacute;|&igrave;|&icirc;|&iuml;)',
+            'í' => '(i|í|&iacute;)', 'ì' => '(i|ì|&igrave;)',
+            'î' => '(i|î|&icirc;)', 'ï' => '(i|ï|&iuml;)',
+            'o' => '(o|ó|ò|ô|õ|ö|&oacute;|&ograve;|&ocirc;|&otilde;|&ouml;)',
+            'ó' => '(o|ó|&oacute;)', 'ò' => '(o|ò|&ograve;)',
+            'ô' => '(o|ô|&ocirc;)', 'õ' => '(o|õ|&otilde;)', 'ö' => '(o|ö|&ouml;)',
+            'u' => '(u|ú|ù|û|ü|&uacute;|&ugrave;|&ucirc;|&uuml;)',
+            'ú' => '(u|ú|&uacute;)', 'ù' => '(u|ù|&ugrave;)',
+            'û' => '(u|û|&ucirc;)', 'ü' => '(u|ü|&uuml;)',
+            'ñ' => '(ñ|&ntilde;)',
+        ];
+
+        $pattern = '';
+        foreach (mb_str_split(mb_strtolower($word)) as $char) {
+            $pattern .= $map[$char] ?? preg_quote($char, null);
+        }
+        return $pattern;
+    }
+
     public function adminIndex(Request $request)
     {
         $perPage   = $request->input('per_page', 50);
@@ -473,10 +505,17 @@ class DevocionalController extends Controller
         $baseQuery = Devocional::query();
 
         if ($search) {
-            $baseQuery->where(function ($q) use ($search) {
-                $q->where('contenido', 'like', "%{$search}%")
-                    ->orWhere('categoria', 'like', "%{$search}%");
-            });
+            $words = array_filter(array_map('trim', explode(' ', $search)));
+            foreach ($words as $word) {
+                $like    = "%{$word}%";
+                $pattern = self::accentRegexp($word);
+                $baseQuery->where(function ($q) use ($pattern, $like) {
+                    // contenido stored with HTML entities (HTMLPurifier) → REGEXP match
+                    $q->whereRaw('REGEXP_LIKE(contenido, ?, "i")', [$pattern])
+                        ->orWhereRaw('categoria COLLATE utf8mb4_0900_ai_ci LIKE ?', [$like])
+                        ->orWhereRaw('autor COLLATE utf8mb4_0900_ai_ci LIKE ?', [$like]);
+                });
+            }
         }
 
         if ($categoria) {
@@ -489,19 +528,25 @@ class DevocionalController extends Controller
 
         // Clonar la query base para cada grupo
         $devocionales = (clone $baseQuery)
-            ->where('is_devocional', 1)
+            ->where('is_devocional', Devocional::TYPE_DEVOCIONAL)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'devocionales_page')
             ->withQueryString();
 
         $estudios = (clone $baseQuery)
-            ->where('is_devocional', 0)
+            ->where('is_devocional', Devocional::TYPE_ESTUDIO)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'estudios_page')
             ->withQueryString();
 
+        $series = (clone $baseQuery)
+            ->where('is_devocional', Devocional::TYPE_SERIE)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'series_page')
+            ->withQueryString();
+
         $ocultos = (clone $baseQuery)
-            ->where('is_devocional', 2)
+            ->where('is_devocional', Devocional::TYPE_OCULTO)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'ocultos_page')
             ->withQueryString();
@@ -519,9 +564,10 @@ class DevocionalController extends Controller
             ->get();
 
         return Inertia::render('Edit', [
-            'devocionales' => $devocionales,   // is_devocional = 1
-            'estudios'     => $estudios,       // is_devocional = 0
-            'ocultos'      => $ocultos,        // is_devocional = 2
+            'devocionales' => $devocionales,
+            'estudios'     => $estudios,
+            'series'       => $series,
+            'ocultos'      => $ocultos,
             'categorias'   => $categorias,
             'autores'      => $autores,
             'filters'      => [
@@ -549,7 +595,7 @@ class DevocionalController extends Controller
             // permite que imagen venga null o string; si viene vacía, conservamos la anterior
             'imagen'        => 'nullable|string|url',
             'autor'         => 'nullable|string|max:255',
-            'is_devocional' => 'required|integer|in:0,1,2',
+            'is_devocional' => 'required|integer|in:0,1,2,3',
             'serie'         => 'nullable|string|max:255',
             'created_at'    => 'nullable|date',
             'pdf'           => 'nullable|string|max:255',

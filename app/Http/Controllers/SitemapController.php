@@ -16,12 +16,12 @@ class SitemapController extends Controller
                 ->orderByDesc('updated_at')
                 ->get();
 
-            $estudios = Devocional::where('is_devocional', 0)
+            $estudios = Devocional::where('is_devocional', Devocional::TYPE_ESTUDIO)
                 ->select('id', 'updated_at')
                 ->orderByDesc('updated_at')
                 ->get();
 
-            $series = Devocional::whereNotNull('ensenanza_id')
+            $series = Devocional::where('is_devocional', Devocional::TYPE_SERIE)
                 ->select('id', 'updated_at')
                 ->orderByDesc('updated_at')
                 ->get();

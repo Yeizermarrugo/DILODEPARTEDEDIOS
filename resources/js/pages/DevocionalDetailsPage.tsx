@@ -42,7 +42,7 @@ type Props = {
 
 function getContentType(is_devocional?: number | string): 'devocional' | 'estudio' | 'ensenanza' {
     const val = Number(is_devocional);
-    if (val === 0) return 'estudio';
+    if (val === 3) return 'estudio';
     if (val === 2) return 'ensenanza';
     return 'devocional';
 }

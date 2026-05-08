@@ -49,13 +49,18 @@ class Devocional extends Model
         });
     }
 
+    // is_devocional values
+    const TYPE_OCULTO    = 0;
+    const TYPE_DEVOCIONAL = 1;
+    const TYPE_SERIE     = 2;
+    const TYPE_ESTUDIO   = 3;
+
     /**
-     * Scope: solo registros que son enseñanzas (Series + is_devocional = 1)
+     * Scope: solo episodios de series (is_devocional = 2, tienen ensenanza_id)
      */
     public function scopeSoloEnsenanzas($query)
     {
-        return $query->where('serie', 'Series')
-            ->whereIn('is_devocional', [1, 2]);
+        return $query->where('is_devocional', self::TYPE_SERIE);
     }
 
     /**

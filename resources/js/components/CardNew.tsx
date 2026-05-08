@@ -32,15 +32,16 @@ interface CardNewProps {
     todasLasCategorias: string[];
     onClick?: () => void;
     buildHref?: (dev: DevItem) => string;
+    hideActions?: boolean;
 }
 
 function getContentType(is_devocional?: number): 'devocional' | 'estudio' | 'ensenanza' {
-    if (is_devocional === 0) return 'estudio';
+    if (is_devocional === 3) return 'estudio';
     if (is_devocional === 2) return 'ensenanza';
     return 'devocional';
 }
 
-const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) => {
+const CardNew = ({ dev, todasLasCategorias, onClick, buildHref, hideActions = false }: CardNewProps) => {
     const { id, imagen, titulo, autor, categoria, views_count, is_devocional } = dev;
 
     const categoryColorMap = buildCategoryColorMap(todasLasCategorias);
@@ -99,29 +100,31 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref }: CardNewProps) 
                     </div>
 
                     {/* ── LIKE + SHARE fijos — esquina inferior derecha ── */}
-                    <div
-                        className="card-like-fixed"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <ul className="menu-content" style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0px' }}>
-                            <li style={{ display: 'flex', alignItems: 'center' }}>
-                                <ShareButton
-                                    type={contentType}
-                                    id={id}
-                                    variant="compact"
-                                    className="text-white"
-                                />
-                            </li>
-                            <li style={{ display: 'flex', alignItems: 'center' }}>
-                                <LikeButton
-                                    type={contentType}
-                                    id={id}
-                                    variant="default"
-                                    className="text-white"
-                                />
-                            </li>
-                        </ul>
-                    </div>
+                    {!hideActions && (
+                        <div
+                            className="card-like-fixed"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <ul className="menu-content" style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0px' }}>
+                                <li style={{ display: 'flex', alignItems: 'center' }}>
+                                    <ShareButton
+                                        type={contentType}
+                                        id={id}
+                                        variant="compact"
+                                        className="text-white"
+                                    />
+                                </li>
+                                <li style={{ display: 'flex', alignItems: 'center' }}>
+                                    <LikeButton
+                                        type={contentType}
+                                        id={id}
+                                        variant="default"
+                                        className="text-white"
+                                    />
+                                </li>
+                            </ul>
+                        </div>
+                    )}
 
                     {/* ── FOOTER: autor + título + leer ── */}
                     <div className="data">
