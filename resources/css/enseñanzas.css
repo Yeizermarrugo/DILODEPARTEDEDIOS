@@ -221,6 +221,23 @@
     transform: translateY(-3px);
     box-shadow: 0 12px 32px rgba(45, 70, 94, .12);
 }
+/* 
+.ens-card--coming {
+    opacity: 0.72;
+    cursor: default;
+}
+
+.ens-card--coming:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.ens-card--coming .ens-body,
+.ens-card--coming .ens-footer-container,
+.ens-card--coming .ens-stats {
+    pointer-events: none;
+    user-select: none;
+} */
 
 /* DISEÑO PRÓXIMAMENTE ESPECTACULAR */
 .ens-card--coming-container {
