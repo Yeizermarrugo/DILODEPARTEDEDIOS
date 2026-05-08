@@ -2,7 +2,7 @@ import LikeButton from '@/components/LikeButton';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import DOMPurify from 'dompurify';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -135,7 +135,7 @@ const DevocionalDetailsPage = (props: Props) => {
     const likeType = (props.like_type ?? (page.like_type as string | undefined) ?? getContentType(devocional?.is_devocional)) as 'devocional' | 'estudio' | 'ensenanza';
     const nav = (props.nav ?? (page.nav as StudyNav | undefined | null)) ?? null;
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(typeof window !== 'undefined');
     const [viewsCount, setViewsCount] = useState(devocional?.views_count ?? 0);
     const imageLoaded = useImagePreload(devocional?.imagen ?? '');
 
@@ -235,7 +235,6 @@ const DevocionalDetailsPage = (props: Props) => {
 
     return (
         <div className="devocional">
-            <Head title={`Dilo de parte de Dios | ${devocional.titulo ?? 'Contenido'}`} />
             <a href={backHref} className="back-floating-button">
                 <i className="bi bi-arrow-left" /> Atrás
             </a>
