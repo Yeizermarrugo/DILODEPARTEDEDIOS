@@ -117,9 +117,11 @@ return [
     | Octane triggers PHP garbage collection when a worker's memory
     | usage exceeds this value (in megabytes).
     */
-    'garbage' => 50,
+    'workers' => env('OCTANE_WORKERS', 1),
 
-    'max_requests' => 500,
+    'garbage' => 25,
+
+    'max_requests' => 150,
 
     'max_execution_time' => 30,
 
