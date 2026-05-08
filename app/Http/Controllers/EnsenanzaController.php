@@ -17,7 +17,9 @@ class EnsenanzaController extends Controller
 
         $ensenanzas = Ensenanza::query()
             ->with(['devocionales' => function ($q) {
-                $q->soloEnsenanzas()
+                // Include published (TYPE_SERIE=2) AND hidden (TYPE_OCULTO=0) episodes
+                // Hidden ones render as disabled/opaque "Próximamente" rows in the UI
+                $q->whereIn('is_devocional', [Devocional::TYPE_SERIE, Devocional::TYPE_OCULTO])
                     ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at', 'is_devocional', 'views_count')
                     ->orderBy('created_at', 'asc');
             }])

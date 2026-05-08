@@ -535,13 +535,15 @@ class DevocionalController extends Controller
 
         $estudios = (clone $baseQuery)
             ->where('is_devocional', Devocional::TYPE_ESTUDIO)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('categoria', 'asc')
+            ->orderBy('created_at', 'asc')
             ->paginate($perPage, ['*'], 'estudios_page')
             ->withQueryString();
 
         $series = (clone $baseQuery)
             ->where('is_devocional', Devocional::TYPE_SERIE)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('ensenanza_id', 'asc')
+            ->orderBy('created_at', 'asc')
             ->paginate($perPage, ['*'], 'series_page')
             ->withQueryString();
 
