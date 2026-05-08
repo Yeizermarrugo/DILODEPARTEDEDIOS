@@ -1,30 +1,57 @@
-import ImageUpload from '@/components/ImageUpload';
 import LoaderBook from '@/components/LoaderBook';
-import { Editor } from '@tinymce/tinymce-react';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
+import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
+import {
+    ArrowLeft,
+    BookOpen,
+    Calendar,
+    Eye,
+    EyeOff,
+    FileText,
+    GraduationCap,
+    Image as ImageIcon,
+    Instagram,
+    Link2,
+    Loader2,
+    Save,
+    Tv2,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { Editor as TinyMCEEditor } from 'tinymce';
-import type { SharedData } from '@/types';
-import styles from '../../css/categoriaSelect.module.css';
+import '../../css/devocionalesForm.css';
 
-interface DevocionalFormProps {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface PageProps extends SharedData {
     mode: 'create' | 'edit';
     id?: string;
 }
 
-const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
-    const { tinymce_key } = usePage<SharedData>().props;
+type ContentType = 1 | 2 | 3;
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function DevocionalesForm() {
+    const { tinymce_key, mode, id } = usePage<PageProps>().props;
     const editorRef = useRef<TinyMCEEditor | null>(null);
 
-    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-    const [imagenUrl, setImagenUrl] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Image
+    const [dragActive, setDragActive] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imageName, setImageName] = useState('');
+    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+    const [imagenUrl, setImagenUrl] = useState('');
+    const imageInputRef = useRef<HTMLInputElement>(null);
+
+    // Metadata selects
     const [categorias, setCategorias] = useState<string[]>([]);
     const [autores, setAutores] = useState<string[]>([]);
-
     const [categoria, setCategoria] = useState('');
     const [autor, setAutor] = useState('');
     const [nuevaCategoria, setNuevaCategoria] = useState('');
@@ -32,60 +59,58 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const [useNuevaCategoria, setUseNuevaCategoria] = useState(false);
     const [useNuevoAutor, setUseNuevoAutor] = useState(false);
 
-    const [contentType, setContentType] = useState<1 | 2 | 3>(1); // 1=devocional 2=serie 3=estudio
+    // Content type and visibility
+    const [contentType, setContentType] = useState<ContentType>(1);
     const [ocultar, setOcultar] = useState(false);
 
+    // Series / Enseñanzas
     const [series, setSeries] = useState<{ id: string; nombre: string }[]>([]);
-    const [serie, setSerie] = useState('');
     const [ensenanzas, setEnsenanzas] = useState<{ id: string; titulo: string }[]>([]);
+    const [serie, setSerie] = useState('');
     const [ensenanzaId, setEnsenanzaId] = useState('');
     const [nuevaSerie, setNuevaSerie] = useState('');
     const [useNuevaSerie, setUseNuevaSerie] = useState(false);
-
     const [useNuevaEnsenanza, setUseNuevaEnsenanza] = useState(false);
     const [nuevaEnsenanzaTitulo, setNuevaEnsenanzaTitulo] = useState('');
     const [nuevaEnsenanzaDescripcion, setNuevaEnsenanzaDescripcion] = useState('');
-    const [, setNuevaEnsenanzaImagenFile] = useState<File | null>(null);
     const [nuevaEnsenanzaImagenUrl, setNuevaEnsenanzaImagenUrl] = useState('');
 
-    const [initialContent, setInitialContent] = useState('<p>This is the initial content of the editor.</p>');
-    const [createdAt, setCreatedAt] = useState<string>('');
-
+    // Media links
     const [pdf, setPdf] = useState('');
     const [instagram, setInstagram] = useState('');
     const [tiktok, setTiktok] = useState('');
 
-    const showLoader = isLoading || isSubmitting;
+    // Date
+    const [createdAt, setCreatedAt] = useState('');
 
-    // Cargar categorías / autores / series / enseñanzas
+    // Editor
+    const [initialContent, setInitialContent] = useState('');
+
+    const showLoader = isLoading || isSubmitting;
+    const hasSerie = !!(serie || useNuevaSerie);
+
+    // ── Load data ────────────────────────────────────────────────────────────
+
     useEffect(() => {
         axios.get('/devocionales-searchCategories').then((res) => {
-            const cats = res.data.categorias.map((c: { categoria: string }) => c.categoria);
-            setCategorias(cats);
-
-            const auts = res.data.autores.map((a: { autor: string }) => a.autor);
-            setAutores(auts);
-
-            const sers = (res.data.series || []).map((s: { id: string; nombre: string }) => s);
-            setSeries(sers);
-
-            axios.get('/api/series').then((res2) => {
-                setEnsenanzas(res2.data);
-            });
+            setCategorias(res.data.categorias.map((c: { categoria: string }) => c.categoria).sort());
+            setAutores(res.data.autores.map((a: { autor: string }) => a.autor).sort());
+            setSeries(res.data.series || []);
+            axios.get('/api/series').then((res2) => setEnsenanzas(res2.data));
         });
     }, []);
 
-    // Cargar devocional en modo edición
     useEffect(() => {
         if (mode === 'edit' && id) {
             axios.get(`/devocionales/${id}`).then((res) => {
                 const d = res.data;
                 setImagenUrl(d.imagen || '');
+                if (d.imagen) setImagePreview(d.imagen);
                 setCategoria(d.categoria || '');
                 setAutor(d.autor || '');
                 const devType = d.is_devocional ?? 1;
                 setOcultar(devType === 0);
-                setContentType((devType === 0 ? 1 : devType) as 1 | 2 | 3);
+                setContentType((devType === 0 ? 1 : devType) as ContentType);
                 setInitialContent(d.contenido || '');
                 setSerie(d.serie || '');
                 setPdf(d.pdf || '');
@@ -93,117 +118,120 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 setTiktok(d.tiktok || '');
                 setEnsenanzaId(d.ensenanza_id || '');
                 if (d.created_at) {
-                    const iso = new Date(d.created_at).toISOString();
-                    const local = iso.slice(0, 16); // YYYY-MM-DDTHH:MM
-                    setCreatedAt(local);
+                    setCreatedAt(new Date(d.created_at).toISOString().slice(0, 16));
                 }
             });
         }
     }, [mode, id]);
 
-    const handleEditorInit = (_evt: unknown, editor: TinyMCEEditor) => {
-        editorRef.current = editor;
-        setIsLoading(false);
-    };
+    // ── Image handlers ───────────────────────────────────────────────────────
 
-    const handleImageChange = (file: File | null) => {
-        console.log('handleImageChange file', file);
-        setSelectedImageFile(file);
-        if (file) {
-            setImagenUrl('');
+    const processImageFile = (file: File | null) => {
+        if (!file) {
+            setSelectedImageFile(null);
+            setImagePreview(imagenUrl || null);
+            setImageName('');
+            return;
         }
+        setSelectedImageFile(file);
+        setImageName(file.name);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (e.target?.result) setImagePreview(e.target.result as string);
+        };
+        reader.readAsDataURL(file);
     };
 
+    const handleImageDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragActive(false);
+        processImageFile(e.dataTransfer.files?.[0] ?? null);
+    };
+
+    const handleRemoveImage = () => {
+        setSelectedImageFile(null);
+        setImagePreview(null);
+        setImageName('');
+        setImagenUrl('');
+        if (imageInputRef.current) imageInputRef.current.value = '';
+    };
+
+    // ── PDF / enseñanza image ────────────────────────────────────────────────
 
     const handlePdfChange = async (file: File | null) => {
         if (!file) return;
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            const response = await axios.post('/upload-pdf', formData, {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await axios.post('/upload-pdf', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'X-CSRF-TOKEN':
-                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
             });
-            setPdf(response.data.location);
-        } catch (e) {
-            console.error(e);
+            setPdf(res.data.location);
+        } catch {
             alert('Error al subir el PDF');
         }
     };
 
     const handleEnsenanzaImageChange = async (file: File | null) => {
-        if (!file) {
-            setNuevaEnsenanzaImagenFile(null);
-            setNuevaEnsenanzaImagenUrl('');
-            return;
-        }
+        if (!file) { setNuevaEnsenanzaImagenUrl(''); return; }
         try {
-            setNuevaEnsenanzaImagenFile(file);
-            const formData = new FormData();
-            formData.append('file', file);
-            const response = await axios.post('/upload-image', formData, {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await axios.post('/upload-image', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'X-CSRF-TOKEN':
-                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
             });
-            const url = response.data.location || response.data.url;
-            setNuevaEnsenanzaImagenUrl(url);
-        } catch (e) {
-            console.error(e);
+            setNuevaEnsenanzaImagenUrl(res.data.location || res.data.url);
+        } catch {
             alert('Error al subir la imagen de la enseñanza');
         }
     };
 
+    // ── Submit ───────────────────────────────────────────────────────────────
+
     const handleGuardar = async () => {
-        if (isSubmitting) return;
-
-        if (!editorRef.current) {
-            alert('Editor no encontrado');
-            return;
-        }
-
+        if (isSubmitting || !editorRef.current) return;
         setIsSubmitting(true);
 
         try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            const standardHeaders = { 'X-CSRF-TOKEN': csrfToken };
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const headers = { 'X-CSRF-TOKEN': csrf };
 
             let urlImagenFinal = imagenUrl;
 
-            // 1. Subir imagen principal si existe
             if (selectedImageFile) {
-                const formData = new FormData();
-                formData.append('file', selectedImageFile);
-                const response = await axios.post('/upload-image', formData, {
-                    headers: { ...standardHeaders, 'Content-Type': 'multipart/form-data' },
+                const fd = new FormData();
+                fd.append('file', selectedImageFile);
+                const res = await axios.post('/upload-image', fd, {
+                    headers: { ...headers, 'Content-Type': 'multipart/form-data' },
                 });
-                urlImagenFinal = response.data.location || response.data.url;
+                urlImagenFinal = res.data.location || res.data.url;
             }
 
-            // 2. Crear nueva enseñanza si es necesario
             let ensenanzaIdFinal: string | null = ensenanzaId || null;
-            if ((serie || useNuevaSerie) && useNuevaEnsenanza) {
+            if (hasSerie && useNuevaEnsenanza) {
                 if (!nuevaEnsenanzaTitulo.trim()) {
                     alert('El título de la enseñanza es obligatorio');
                     setIsSubmitting(false);
                     return;
                 }
-
-                const resEnsenanza = await axios.post('/api/series', {
-                    titulo: nuevaEnsenanzaTitulo.trim(),
-                    descripcion: nuevaEnsenanzaDescripcion.trim(),
-                    imagen: nuevaEnsenanzaImagenUrl || null,
-                }, { headers: standardHeaders });
-
-                ensenanzaIdFinal = resEnsenanza.data.id?.toString();
+                const resE = await axios.post(
+                    '/api/series',
+                    {
+                        titulo: nuevaEnsenanzaTitulo.trim(),
+                        descripcion: nuevaEnsenanzaDescripcion.trim(),
+                        imagen: nuevaEnsenanzaImagenUrl || null,
+                    },
+                    { headers },
+                );
+                ensenanzaIdFinal = resE.data.id?.toString();
             }
 
-            // 3. Payload final
             const payload = {
                 contenido: editorRef.current.getContent(),
                 imagen: urlImagenFinal,
@@ -218,390 +246,564 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 tiktok: tiktok || null,
             };
 
-            // 4. Enviar a Laravel
             const endpoint = mode === 'create' ? '/devocionalesadd' : `/devocionales/${id}`;
             const method = mode === 'create' ? 'post' : 'put';
+            await axios[method](endpoint, payload, { headers });
 
-            await axios[method](endpoint, payload, { headers: standardHeaders });
-
-            alert(mode === 'create' ? '¡Guardado con éxito!' : '¡Actualizado con éxito!');
+            alert(mode === 'create' ? '¡Publicado con éxito!' : '¡Actualizado con éxito!');
             window.location.href = mode === 'create' ? '/dashboard' : '/devocionales-edit';
-
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
                 const data = error.response?.data;
-
                 if (status === 422) {
-                    // Error de validación: Falta algo en el formulario
-                    const errores = data.errors ? Object.values(data.errors).flat().join('\n') : data.message;
-                    alert(`⚠️ Datos incompletos o incorrectos:\n\n${errores}`);
+                    const errores = data.errors
+                        ? Object.values(data.errors).flat().join('\n')
+                        : data.message;
+                    alert(`Datos incompletos:\n\n${errores}`);
                 } else if (status === 500) {
-                    // Error de servidor: Probablemente un duplicado
-                    console.error('Detalle 500:', data);
-                    alert('🔥 Error 500: El servidor no pudo procesar la solicitud. Posiblemente el título o el slug ya existen en la base de datos.');
+                    alert('Error 500: posiblemente el título o slug ya existen en la base de datos.');
                 } else {
-                    alert(`Error inesperado (${status}): ${data?.message || 'Consulta la consola'}`);
+                    alert(`Error (${status}): ${data?.message || 'Consulta la consola'}`);
                 }
             } else {
-                alert('Error de conexión o de red.');
+                alert('Error de conexión.');
             }
         } finally {
             setIsSubmitting(false);
         }
     };
-    const categoriasCompletas = Array.from(new Set([...categorias])).sort();
+
+    // ── Breadcrumbs ──────────────────────────────────────────────────────────
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Contenido', href: '/devocionales-edit' },
+        { title: mode === 'create' ? 'Nuevo' : 'Editar', href: '#' },
+    ];
+
+    const contentTypeOptions: { value: ContentType; label: string; desc: string; icon: React.ReactNode }[] = [
+        { value: 1, label: 'Devocional', desc: 'Reflexión diaria', icon: <BookOpen size={14} /> },
+        { value: 3, label: 'Estudio Bíblico', desc: 'Estudio temático', icon: <GraduationCap size={14} /> },
+        { value: 2, label: 'Serie / Enseñanza', desc: 'Episodio de serie', icon: <Tv2 size={14} /> },
+    ];
+
+    // ── Render ───────────────────────────────────────────────────────────────
 
     return (
-        <div style={{ position: 'relative', minHeight: 400 }}>
-            {showLoader && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        zIndex: 9999,
-                        background: 'rgba(255,255,255,0.85)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <LoaderBook />
-                </div>
-            )}
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <div className="df-root">
 
-            <div
-                className="aggregar-devocionales"
-                style={{ pointerEvents: showLoader ? 'none' : 'auto', opacity: showLoader ? 0.5 : 1 }}
-            >
-                <ImageUpload onImageSelected={handleImageChange} />
-
-                {/* Preview imagen actual o nueva */}
-                {selectedImageFile ? (
-                    <div style={{ margin: '16px 0' }}>
-                        <img
-                            src={URL.createObjectURL(selectedImageFile)}
-                            alt="Preview"
-                            style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }}
-                        />
+                {/* ── Loader Overlay ── */}
+                {showLoader && (
+                    <div className="df-loader-overlay">
+                        <LoaderBook />
+                        <span className="df-loader-text">
+                            {isSubmitting ? 'Guardando contenido…' : 'Cargando editor…'}
+                        </span>
                     </div>
-                ) : imagenUrl ? (
-                    <div style={{ margin: '16px 0' }}>
-                        <img
-                            src={imagenUrl}
-                            alt="Imagen actual"
-                            style={{ maxWidth: 300, maxHeight: 200, borderRadius: 8 }}
-                        />
+                )}
+
+                {/* ── Sticky Header ── */}
+                <header className="df-header">
+                    <div className="df-header__left">
+                        <a href="/devocionales-edit" className="df-header__back" title="Volver al panel">
+                            <ArrowLeft size={16} />
+                        </a>
+                        <div className="df-header__meta">
+                            <span className="df-header__mode">
+                                {mode === 'create' ? 'Nuevo contenido' : 'Editando'}
+                            </span>
+                            <h1 className="df-header__title">
+                                {mode === 'create' ? 'Crear publicación' : 'Editar publicación'}
+                            </h1>
+                        </div>
                     </div>
-                ) : null}
 
-                <button className="btn-guardar" onClick={handleGuardar} disabled={showLoader}>
-                    {mode === 'create' ? 'Guardar' : 'Actualizar'}
-                </button>
-
-                {/* Serie */}
-                <div className={styles['categoria-wrapper']} style={{ marginTop: 16 }}>
-                    <label className={styles['categoria-label']}>Serie (opcional):</label>
-                    <select
-                        className={styles['categoria-select']}
-                        value={useNuevaSerie ? 'nueva' : serie}
-                        onChange={(e) => {
-                            if (e.target.value === 'nueva') {
-                                setUseNuevaSerie(true);
-                                setSerie('');
-                            } else {
-                                setUseNuevaSerie(false);
-                                setSerie(e.target.value);
-                            }
-                        }}
-                    >
-                        <option value="">Sin serie</option>
-                        {series.map((s) => (
-                            <option key={s.nombre} value={s.nombre}>
-                                {s.nombre}
-                            </option>
-                        ))}
-                        <option value="nueva">Agregar nueva serie...</option>
-                    </select>
-
-                    {useNuevaSerie && (
-                        <input
-                            className={styles['categoria-input']}
-                            type="text"
-                            placeholder='Nombre de la serie (ej: "Series", "Yugo desigual", etc.)'
-                            value={nuevaSerie}
-                            onChange={(e) => setNuevaSerie(e.target.value)}
-                        />
-                    )}
-                </div>
-
-                {/* Enseñanza */}
-                {(serie || useNuevaSerie) && (
-                    <div className={styles['categoria-wrapper']} style={{ marginTop: 8 }}>
-                        <label className={styles['categoria-label']}>Enseñanza:</label>
-                        <select
-                            className={styles['categoria-select']}
-                            value={useNuevaEnsenanza ? 'nueva' : ensenanzaId}
-                            onChange={(e) => {
-                                if (e.target.value === 'nueva') {
-                                    setUseNuevaEnsenanza(true);
-                                    setEnsenanzaId('');
-                                } else {
-                                    setUseNuevaEnsenanza(false);
-                                    setEnsenanzaId(e.target.value);
-                                }
-                            }}
+                    <div className="df-header__actions">
+                        {ocultar && (
+                            <span className="df-badge df-badge--hidden">
+                                <EyeOff size={10} /> Oculto
+                            </span>
+                        )}
+                        {!ocultar && mode === 'edit' && (
+                            <span className="df-badge df-badge--visible">
+                                <Eye size={10} /> Publicado
+                            </span>
+                        )}
+                        <button
+                            className="df-btn-primary"
+                            onClick={handleGuardar}
+                            disabled={showLoader}
                         >
-                            <option value="">Selecciona una enseñanza</option>
-                            {ensenanzas.map((e) => (
-                                <option key={e.id} value={e.id}>
-                                    {e.titulo}
-                                </option>
-                            ))}
-                            <option value="nueva">Agregar nueva enseñanza...</option>
-                        </select>
+                            {isSubmitting ? (
+                                <Loader2 size={15} className="df-spin" />
+                            ) : (
+                                <Save size={15} />
+                            )}
+                            {mode === 'create' ? 'Publicar' : 'Actualizar'}
+                        </button>
+                    </div>
+                </header>
 
-                        {useNuevaEnsenanza && (
-                            <div style={{ marginTop: 8 }}>
-                                <input
-                                    className={styles['categoria-input']}
-                                    type="text"
-                                    placeholder="Título de la nueva enseñanza"
-                                    value={nuevaEnsenanzaTitulo}
-                                    onChange={(e) => setNuevaEnsenanzaTitulo(e.target.value)}
-                                />
+                {/* ── Body ── */}
+                <div
+                    className="df-body"
+                    style={{ pointerEvents: showLoader ? 'none' : 'auto', opacity: showLoader ? 0.5 : 1 }}
+                >
+                    {/* ── MAIN: Editor ── */}
+                    <div className="df-section df-section--editor">
+                        <div className="df-section__header">
+                            <span className="df-section__icon"><FileText size={15} /></span>
+                            <span className="df-section__label">Contenido</span>
+                        </div>
+                        <div className="df-section__body df-section__body--editor">
+                            <Editor
+                                apiKey={tinymce_key ?? ''}
+                                onInit={(_evt, editor) => {
+                                    editorRef.current = editor;
+                                    setIsLoading(false);
+                                }}
+                                initialValue={initialContent}
+                                init={{
+                                    height: 750,
+                                    width: '100%',
+                                    menubar: true,
+                                    automatic_uploads: false,
+                                    plugins: [
+                                        'advlist', 'autolink', 'lists', 'link', 'charmap',
+                                        'preview', 'anchor', 'searchreplace', 'visualblocks',
+                                        'code', 'fullscreen', 'insertdatetime', 'media',
+                                        'table', 'help', 'wordcount',
+                                    ],
+                                    toolbar:
+                                        'undo redo | blocks | bold italic forecolor | ' +
+                                        'alignleft aligncenter alignright alignjustify | ' +
+                                        'bullist numlist outdent indent | removeformat | help',
+                                    content_style:
+                                        'body { font-family: "Instrument Sans", Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.7; color: #1c1917; padding: 16px; }',
+                                    skin: 'oxide',
+                                    content_css: 'default',
+                                }}
+                            />
+                        </div>
+                    </div>
 
-                                <textarea
-                                    className={styles['categoria-input']}
-                                    placeholder="Descripción de la enseñanza"
-                                    value={nuevaEnsenanzaDescripcion}
-                                    onChange={(e) => setNuevaEnsenanzaDescripcion(e.target.value)}
-                                    style={{ marginTop: 8, minHeight: 80 }}
-                                />
+                    {/* ── SIDEBAR ── */}
+                    <aside className="df-sidebar">
 
-                                <div style={{ marginTop: 8 }}>
-                                    <label style={{ display: 'block', marginBottom: 4 }}>
-                                        Imagen de la enseñanza (opcional):
-                                    </label>
+                        {/* Imagen */}
+                        <div className="df-section">
+                            <div className="df-section__header">
+                                <span className="df-section__icon"><ImageIcon size={15} /></span>
+                                <span className="df-section__label">Imagen destacada</span>
+                            </div>
+                            <div className="df-section__body df-section__body--tight">
+                                <div
+                                    className={`df-image-zone${dragActive ? ' df-image-zone--drag' : ''}`}
+                                    onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                                    onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+                                    onDrop={handleImageDrop}
+                                    onClick={() => imageInputRef.current?.click()}
+                                >
                                     <input
+                                        ref={imageInputRef}
+                                        className="df-image-zone__input"
                                         type="file"
                                         accept="image/*"
-                                        onChange={(e) => handleEnsenanzaImageChange(e.target.files?.[0] || null)}
+                                        onChange={(e) => processImageFile(e.target.files?.[0] ?? null)}
                                     />
-                                    {nuevaEnsenanzaImagenUrl && (
-                                        <div style={{ marginTop: 6 }}>
-                                            <img
-                                                src={nuevaEnsenanzaImagenUrl}
-                                                alt="Imagen enseñanza"
-                                                style={{ maxWidth: 200, borderRadius: 8 }}
-                                            />
+                                    {imagePreview ? (
+                                        <>
+                                            <img className="df-image-zone__preview" src={imagePreview} alt="Preview" />
+                                            <div className="df-image-zone__overlay">
+                                                <ImageIcon size={18} />
+                                                Cambiar imagen
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="df-image-zone__placeholder">
+                                            <div className="df-image-zone__placeholder-icon">
+                                                <ImageIcon size={20} />
+                                            </div>
+                                            <div className="df-image-zone__placeholder-text">
+                                                <strong>Arrastra o haz clic</strong>
+                                                PNG, JPG, WEBP · máx. 10 MB
+                                            </div>
                                         </div>
+                                    )}
+                                </div>
+                                {imagePreview && (
+                                    <div className="df-image-info">
+                                        <span>{imageName || 'Imagen actual'}</span>
+                                        <button className="df-image-remove" onClick={handleRemoveImage}>
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Tipo de contenido */}
+                        <div className="df-section">
+                            <div className="df-section__header">
+                                <span className="df-section__icon"><BookOpen size={15} /></span>
+                                <span className="df-section__label">Tipo de contenido</span>
+                            </div>
+                            <div className="df-section__body df-section__body--tight">
+                                <div className="df-type-grid">
+                                    {contentTypeOptions.map((opt) => (
+                                        <label
+                                            key={opt.value}
+                                            className={`df-type-option${contentType === opt.value ? ' df-type-option--active' : ''}`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="contentType"
+                                                value={opt.value}
+                                                checked={contentType === opt.value}
+                                                onChange={() => setContentType(opt.value)}
+                                            />
+                                            <span className="df-type-dot" />
+                                            <span className="df-type-icon">{opt.icon}</span>
+                                            <span>
+                                                <span className="df-type-text">{opt.label}</span>
+                                                <br />
+                                                <span className="df-type-desc">{opt.desc}</span>
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Visibilidad */}
+                        <div className="df-section">
+                            <div className="df-section__header">
+                                <span className="df-section__icon">
+                                    {ocultar ? <EyeOff size={15} /> : <Eye size={15} />}
+                                </span>
+                                <span className="df-section__label">Visibilidad</span>
+                            </div>
+                            <div className="df-section__body df-section__body--tight">
+                                <div className={`df-visibility${ocultar ? ' df-visibility--hidden' : ''}`}>
+                                    <div className="df-visibility__text">
+                                        <span className="df-visibility__label">
+                                            {ocultar ? 'Contenido oculto' : 'Publicado'}
+                                        </span>
+                                        <span className="df-visibility__sub">
+                                            {ocultar
+                                                ? 'No visible para el público'
+                                                : 'Visible para todos los visitantes'}
+                                        </span>
+                                    </div>
+                                    <label className="df-toggle">
+                                        <input
+                                            type="checkbox"
+                                            checked={ocultar}
+                                            onChange={(e) => setOcultar(e.target.checked)}
+                                        />
+                                        <span className="df-toggle__track" />
+                                        <span className="df-toggle__thumb" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Categoría */}
+                        <div className="df-section">
+                            <div className="df-section__header">
+                                <span className="df-section__icon"><FileText size={15} /></span>
+                                <span className="df-section__label">Categoría y Autor</span>
+                            </div>
+                            <div className="df-section__body">
+                                <div className="df-field">
+                                    <label className="df-label">Categoría</label>
+                                    <select
+                                        className="df-select"
+                                        value={useNuevaCategoria ? 'nueva' : categoria}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'nueva') {
+                                                setUseNuevaCategoria(true);
+                                                setCategoria('');
+                                            } else {
+                                                setUseNuevaCategoria(false);
+                                                setCategoria(e.target.value);
+                                            }
+                                        }}
+                                    >
+                                        <option value="">Selecciona una categoría</option>
+                                        {categorias.map((cat) => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                        <option value="nueva">+ Nueva categoría…</option>
+                                    </select>
+                                    {useNuevaCategoria && (
+                                        <input
+                                            className="df-input df-input-new"
+                                            type="text"
+                                            placeholder="Nombre de la nueva categoría"
+                                            value={nuevaCategoria}
+                                            onChange={(e) => setNuevaCategoria(e.target.value)}
+                                        />
+                                    )}
+                                </div>
+
+                                <div className="df-divider" />
+
+                                <div className="df-field">
+                                    <label className="df-label">Autor</label>
+                                    <select
+                                        className="df-select"
+                                        value={useNuevoAutor ? 'nuevo' : autor}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'nuevo') {
+                                                setUseNuevoAutor(true);
+                                                setAutor('');
+                                            } else {
+                                                setUseNuevoAutor(false);
+                                                setAutor(e.target.value);
+                                            }
+                                        }}
+                                    >
+                                        <option value="">Selecciona un autor</option>
+                                        {autores.map((a) => (
+                                            <option key={a} value={a}>{a}</option>
+                                        ))}
+                                        <option value="nuevo">+ Nuevo autor…</option>
+                                    </select>
+                                    {useNuevoAutor && (
+                                        <input
+                                            className="df-input df-input-new"
+                                            type="text"
+                                            placeholder="Nombre del nuevo autor"
+                                            value={nuevoAutor}
+                                            onChange={(e) => setNuevoAutor(e.target.value)}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Serie (solo cuando contentType = 2) */}
+                        {contentType === 2 && (
+                            <div className="df-section">
+                                <div className="df-section__header">
+                                    <span className="df-section__icon"><Tv2 size={15} /></span>
+                                    <span className="df-section__label">Serie</span>
+                                </div>
+                                <div className="df-section__body">
+                                    <div className="df-field">
+                                        <label className="df-label">Nombre de serie</label>
+                                        <select
+                                            className="df-select"
+                                            value={useNuevaSerie ? 'nueva' : serie}
+                                            onChange={(e) => {
+                                                if (e.target.value === 'nueva') {
+                                                    setUseNuevaSerie(true);
+                                                    setSerie('');
+                                                } else {
+                                                    setUseNuevaSerie(false);
+                                                    setSerie(e.target.value);
+                                                }
+                                            }}
+                                        >
+                                            <option value="">Sin serie</option>
+                                            {series.map((s) => (
+                                                <option key={s.nombre} value={s.nombre}>{s.nombre}</option>
+                                            ))}
+                                            <option value="nueva">+ Nueva serie…</option>
+                                        </select>
+                                        {useNuevaSerie && (
+                                            <input
+                                                className="df-input df-input-new"
+                                                type="text"
+                                                placeholder="Nombre de la serie"
+                                                value={nuevaSerie}
+                                                onChange={(e) => setNuevaSerie(e.target.value)}
+                                            />
+                                        )}
+                                    </div>
+
+                                    {hasSerie && (
+                                        <>
+                                            <div className="df-divider" />
+                                            <div className="df-field">
+                                                <label className="df-label">Enseñanza</label>
+                                                <select
+                                                    className="df-select"
+                                                    value={useNuevaEnsenanza ? 'nueva' : ensenanzaId}
+                                                    onChange={(e) => {
+                                                        if (e.target.value === 'nueva') {
+                                                            setUseNuevaEnsenanza(true);
+                                                            setEnsenanzaId('');
+                                                        } else {
+                                                            setUseNuevaEnsenanza(false);
+                                                            setEnsenanzaId(e.target.value);
+                                                        }
+                                                    }}
+                                                >
+                                                    <option value="">Selecciona una enseñanza</option>
+                                                    {ensenanzas.map((e) => (
+                                                        <option key={e.id} value={e.id}>{e.titulo}</option>
+                                                    ))}
+                                                    <option value="nueva">+ Nueva enseñanza…</option>
+                                                </select>
+                                            </div>
+
+                                            {useNuevaEnsenanza && (
+                                                <div className="df-expand">
+                                                    <span className="df-expand__label">Nueva Enseñanza</span>
+                                                    <div className="df-field">
+                                                        <label className="df-label">Título</label>
+                                                        <input
+                                                            className="df-input"
+                                                            type="text"
+                                                            placeholder="Título de la enseñanza"
+                                                            value={nuevaEnsenanzaTitulo}
+                                                            onChange={(e) => setNuevaEnsenanzaTitulo(e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div className="df-field">
+                                                        <label className="df-label">Descripción</label>
+                                                        <textarea
+                                                            className="df-textarea"
+                                                            placeholder="Descripción breve"
+                                                            value={nuevaEnsenanzaDescripcion}
+                                                            onChange={(e) => setNuevaEnsenanzaDescripcion(e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div className="df-field">
+                                                        <label className="df-label">Imagen (opcional)</label>
+                                                        <label className="df-file-label">
+                                                            <ImageIcon size={13} />
+                                                            Seleccionar imagen
+                                                            <input
+                                                                className="df-file-input"
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(e) => handleEnsenanzaImageChange(e.target.files?.[0] ?? null)}
+                                                            />
+                                                        </label>
+                                                        {nuevaEnsenanzaImagenUrl && (
+                                                            <img
+                                                                src={nuevaEnsenanzaImagenUrl}
+                                                                alt="Imagen enseñanza"
+                                                                style={{ maxWidth: '100%', borderRadius: 8, marginTop: 6 }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>
                         )}
-                    </div>
-                )}
 
-                {/* Categoría */}
-                <div className={styles['categoria-wrapper']}>
-                    <label className={styles['categoria-label']}>Categoría:</label>
-                    <select
-                        className={styles['categoria-select']}
-                        value={useNuevaCategoria ? 'nueva' : categoria}
-                        onChange={(e) => {
-                            if (e.target.value === 'nueva') {
-                                setUseNuevaCategoria(true);
-                                setCategoria('');
-                            } else {
-                                setUseNuevaCategoria(false);
-                                setCategoria(e.target.value);
-                            }
-                        }}
-                    >
-                        <option value="">Selecciona una categoría</option>
-                        {categoriasCompletas.map((cat) => (
-                            <option key={cat} value={cat}>
-                                {cat}
-                            </option>
-                        ))}
-                        <option value="nueva">Agregar nueva categoría...</option>
-                    </select>
-
-                    {useNuevaCategoria && (
-                        <input
-                            className={styles['categoria-input']}
-                            type="text"
-                            placeholder="Nueva categoría"
-                            value={nuevaCategoria}
-                            onChange={(e) => setNuevaCategoria(e.target.value)}
-                        />
-                    )}
-                </div>
-
-                {/* Autor */}
-                <div className={styles['autor-wrapper']}>
-                    <label className={styles['autor-label']}>Autor:</label>
-                    <select
-                        className={styles['autor-select']}
-                        value={useNuevoAutor ? 'nuevo' : autor}
-                        onChange={(e) => {
-                            if (e.target.value === 'nuevo') {
-                                setUseNuevoAutor(true);
-                                setAutor('');
-                            } else {
-                                setUseNuevoAutor(false);
-                                setAutor(e.target.value);
-                            }
-                        }}
-                    >
-                        <option value="">Selecciona un Autor</option>
-                        {autores.map((aut) => (
-                            <option key={aut} value={aut}>
-                                {aut}
-                            </option>
-                        ))}
-                        <option value="nuevo">Agregar nuevo autor...</option>
-                    </select>
-                    {useNuevoAutor && (
-                        <input
-                            className={styles['autor-input']}
-                            type="text"
-                            placeholder="Nuevo autor"
-                            value={nuevoAutor}
-                            onChange={(e) => setNuevoAutor(e.target.value)}
-                        />
-                    )}
-                </div>
-
-                {/* PDF / IG / TikTok: solo cuando hay serie */}
-                {(serie || useNuevaSerie) && (
-                    <>
-                        <div className={styles['autor-wrapper']} style={{ marginTop: 16 }}>
-                            <label className={styles['autor-label']}>PDF (opcional):</label>
-                            <input
-                                type="file"
-                                accept="application/pdf"
-                                className={styles['autor-input']}
-                                onChange={(e) => handlePdfChange(e.target.files?.[0] || null)}
-                            />
-                            {pdf && (
-                                <div style={{ marginTop: 6 }}>
-                                    <a href={pdf} target="_blank" rel="noopener noreferrer">
-                                        Ver PDF subido
-                                    </a>
+                        {/* Recursos multimedia (solo cuando hay serie) */}
+                        {hasSerie && contentType === 2 && (
+                            <div className="df-section">
+                                <div className="df-section__header">
+                                    <span className="df-section__icon"><Link2 size={15} /></span>
+                                    <span className="df-section__label">Recursos multimedia</span>
                                 </div>
+                                <div className="df-section__body">
+                                    <div className="df-field">
+                                        <label className="df-label">PDF</label>
+                                        <label className="df-file-label">
+                                            <FileText size={13} />
+                                            {pdf ? 'Cambiar PDF' : 'Subir PDF'}
+                                            <input
+                                                className="df-file-input"
+                                                type="file"
+                                                accept="application/pdf"
+                                                onChange={(e) => handlePdfChange(e.target.files?.[0] ?? null)}
+                                            />
+                                        </label>
+                                        {pdf && (
+                                            <a href={pdf} target="_blank" rel="noopener noreferrer" className="df-file-link">
+                                                <FileText size={11} />
+                                                Ver PDF subido
+                                            </a>
+                                        )}
+                                    </div>
+
+                                    <div className="df-divider" />
+
+                                    <div className="df-field">
+                                        <label className="df-label">Instagram</label>
+                                        <input
+                                            className="df-input"
+                                            type="url"
+                                            placeholder="https://www.instagram.com/…"
+                                            value={instagram}
+                                            onChange={(e) => setInstagram(e.target.value)}
+                                        />
+                                        {instagram && (
+                                            <a href={instagram} target="_blank" rel="noopener noreferrer" className="df-file-link">
+                                                <Instagram size={11} />
+                                                Ver en Instagram
+                                            </a>
+                                        )}
+                                    </div>
+
+                                    <div className="df-divider" />
+
+                                    <div className="df-field">
+                                        <label className="df-label">TikTok</label>
+                                        <input
+                                            className="df-input"
+                                            type="url"
+                                            placeholder="https://www.tiktok.com/…"
+                                            value={tiktok}
+                                            onChange={(e) => setTiktok(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Fecha y hora */}
+                        <div className="df-section">
+                            <div className="df-section__header">
+                                <span className="df-section__icon"><Calendar size={15} /></span>
+                                <span className="df-section__label">Fecha de publicación</span>
+                            </div>
+                            <div className="df-section__body">
+                                <div className="df-field">
+                                    <label className="df-label">Fecha y hora</label>
+                                    <input
+                                        className="df-input"
+                                        type="datetime-local"
+                                        value={createdAt}
+                                        onChange={(e) => setCreatedAt(e.target.value)}
+                                    />
+                                    <span style={{ fontSize: 10, color: 'var(--df-muted)', fontFamily: 'var(--df-sans)' }}>
+                                        Vacío = fecha actual al guardar
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Bottom save button (mobile UX) */}
+                        <button
+                            className="df-btn-primary"
+                            onClick={handleGuardar}
+                            disabled={showLoader}
+                            style={{ width: '100%', justifyContent: 'center', padding: '12px 22px' }}
+                        >
+                            {isSubmitting ? (
+                                <Loader2 size={15} className="df-spin" />
+                            ) : (
+                                <Save size={15} />
                             )}
-                        </div>
+                            {mode === 'create' ? 'Publicar contenido' : 'Guardar cambios'}
+                        </button>
 
-                        <div className={styles['autor-wrapper']} style={{ marginTop: 8 }}>
-                            <label className={styles['autor-label']}>Instagram (URL opcional):</label>
-                            <input
-                                type="url"
-                                className={styles['autor-input']}
-                                placeholder="https://www.instagram.com/..."
-                                value={instagram}
-                                onChange={(e) => setInstagram(e.target.value)}
-                            />
-                        </div>
-
-                        <div className={styles['autor-wrapper']} style={{ marginTop: 8 }}>
-                            <label className={styles['autor-label']}>TikTok (URL opcional):</label>
-                            <input
-                                type="url"
-                                className={styles['autor-input']}
-                                placeholder="https://www.tiktok.com/..."
-                                value={tiktok}
-                                onChange={(e) => setTiktok(e.target.value)}
-                            />
-                        </div>
-                    </>
-                )}
-
-                {/* Tipo de contenido */}
-                <div className={styles['autor-wrapper']}>
-                    <label className={styles['autor-label']}>Tipo de contenido</label>
-                    <div style={{ display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' }}>
-                        {([
-                            { value: 1, label: 'Devocional' },
-                            { value: 3, label: 'Estudio Bíblico' },
-                            { value: 2, label: 'Serie / Enseñanza' },
-                        ] as { value: 1 | 2 | 3; label: string }[]).map((opt) => (
-                            <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13 }}>
-                                <input
-                                    type="radio"
-                                    name="contentType"
-                                    value={opt.value}
-                                    checked={contentType === opt.value}
-                                    onChange={() => setContentType(opt.value)}
-                                />
-                                {opt.label}
-                            </label>
-                        ))}
-                    </div>
+                    </aside>
                 </div>
-
-                <div style={{ marginTop: 10 }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
-                        <input
-                            type="checkbox"
-                            checked={ocultar}
-                            onChange={(e) => setOcultar(e.target.checked)}
-                        />
-                        Ocultar (no publicar)
-                    </label>
-                </div>
-
-                {/* Fecha y hora */}
-                <div className={styles['autor-wrapper']} style={{ marginTop: 16 }}>
-                    <label className={styles['autor-label']}>Fecha y hora:</label>
-                    <input
-                        type="datetime-local"
-                        className={styles['autor-input']}
-                        value={createdAt}
-                        onChange={(e) => setCreatedAt(e.target.value)}
-                    />
-                </div>
-
-                {/* Editor */}
-                <Editor
-                    apiKey={tinymce_key ?? ''}
-                    onInit={handleEditorInit}
-                    initialValue={initialContent}
-                    init={{
-                        height: '100%',
-                        width: '100%',
-                        menubar: true,
-                        automatic_uploads: false,
-                        plugins: [
-                            'advlist',
-                            'autolink',
-                            'lists',
-                            'link',
-                            'charmap',
-                            'preview',
-                            'anchor',
-                            'searchreplace',
-                            'visualblocks',
-                            'code',
-                            'fullscreen',
-                            'insertdatetime',
-                            'media',
-                            'table',
-                            'help',
-                            'wordcount',
-                        ],
-                        toolbar:
-                            'undo redo | blocks | ' +
-                            'bold italic forecolor | alignleft aligncenter ' +
-                            'alignright alignjustify | bullist numlist outdent indent | ' +
-                            'removeformat | help',
-                        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-                    }}
-                />
             </div>
-        </div>
+        </AppLayout>
     );
-};
-
-export default DevocionalForm;
+}
