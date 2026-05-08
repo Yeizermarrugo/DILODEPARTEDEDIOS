@@ -15,9 +15,9 @@ class ShortUrlController extends Controller
 
         if ($devocional) {
             $url = match ($devocional->is_devocional) {
-                0       => route('estudio-biblico.details', $devocional->id),
-                2       => route('ensenanza.details', $devocional->id),
-                default => route('devocional.details', $devocional->id),
+                Devocional::TYPE_ESTUDIO => route('estudio-biblico.details', $devocional->id),
+                Devocional::TYPE_SERIE   => route('ensenanza.details', $devocional->id),
+                default                  => route('devocional.details', $devocional->id),
             };
 
             return redirect($url, 302);

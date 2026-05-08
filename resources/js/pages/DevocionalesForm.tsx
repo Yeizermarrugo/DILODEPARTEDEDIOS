@@ -32,7 +32,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
     const [useNuevaCategoria, setUseNuevaCategoria] = useState(false);
     const [useNuevoAutor, setUseNuevoAutor] = useState(false);
 
-    const [is_devocional, setIsDevocional] = useState<0 | 1 | 2>(1);
+    const [contentType, setContentType] = useState<1 | 2 | 3>(1); // 1=devocional 2=serie 3=estudio
     const [ocultar, setOcultar] = useState(false);
 
     const [series, setSeries] = useState<{ id: string; nombre: string }[]>([]);
@@ -83,10 +83,11 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 setImagenUrl(d.imagen || '');
                 setCategoria(d.categoria || '');
                 setAutor(d.autor || '');
-                setIsDevocional((d.is_devocional ?? 1) as 0 | 1 | 2);
+                const devType = d.is_devocional ?? 1;
+                setOcultar(devType === 0);
+                setContentType((devType === 0 ? 1 : devType) as 1 | 2 | 3);
                 setInitialContent(d.contenido || '');
                 setSerie(d.serie || '');
-                setOcultar(d.is_devocional === 2);
                 setPdf(d.pdf || '');
                 setInstagram(d.instagram || '');
                 setTiktok(d.tiktok || '');
@@ -208,7 +209,7 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                 imagen: urlImagenFinal,
                 categoria: useNuevaCategoria ? nuevaCategoria : categoria,
                 autor: useNuevoAutor ? nuevoAutor : autor,
-                is_devocional: is_devocional,
+                is_devocional: ocultar ? 0 : contentType,
                 serie: useNuevaSerie ? nuevaSerie : serie,
                 created_at: createdAt || null,
                 ensenanza_id: ensenanzaIdFinal,
@@ -517,41 +518,38 @@ const DevocionalForm = ({ mode, id }: DevocionalFormProps) => {
                     </>
                 )}
 
-                {/* Flags devocional / oculto */}
-                <div>
-                    <label>¿Es un devocional?</label>
-                    <input
-                        type="checkbox"
-                        checked={is_devocional === 1}
-                        onChange={(e) => {
-                            const checked = e.target.checked;
-                            if (checked) {
-                                setIsDevocional(1);
-                                setOcultar(false);
-                            } else {
-                                setIsDevocional(0);
-                            }
-                        }}
-                        style={{ marginLeft: '8px' }}
-                    />
+                {/* Tipo de contenido */}
+                <div className={styles['autor-wrapper']}>
+                    <label className={styles['autor-label']}>Tipo de contenido</label>
+                    <div style={{ display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' }}>
+                        {([
+                            { value: 1, label: 'Devocional' },
+                            { value: 3, label: 'Estudio Bíblico' },
+                            { value: 2, label: 'Serie / Enseñanza' },
+                        ] as { value: 1 | 2 | 3; label: string }[]).map((opt) => (
+                            <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13 }}>
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value={opt.value}
+                                    checked={contentType === opt.value}
+                                    onChange={() => setContentType(opt.value)}
+                                />
+                                {opt.label}
+                            </label>
+                        ))}
+                    </div>
                 </div>
 
-                <div style={{ marginTop: 8 }}>
-                    <label>Ocultar devocional</label>
-                    <input
-                        type="checkbox"
-                        checked={ocultar}
-                        onChange={(e) => {
-                            const checked = e.target.checked;
-                            setOcultar(checked);
-                            if (checked) {
-                                setIsDevocional(2);
-                            } else {
-                                setIsDevocional(is_devocional);
-                            }
-                        }}
-                        style={{ marginLeft: 8 }}
-                    />
+                <div style={{ marginTop: 10 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+                        <input
+                            type="checkbox"
+                            checked={ocultar}
+                            onChange={(e) => setOcultar(e.target.checked)}
+                        />
+                        Ocultar (no publicar)
+                    </label>
                 </div>
 
                 {/* Fecha y hora */}

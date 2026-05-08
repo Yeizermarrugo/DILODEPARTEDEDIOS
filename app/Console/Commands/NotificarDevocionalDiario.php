@@ -41,7 +41,7 @@ class NotificarDevocionalDiario extends Command
         }
 
         // 2. Estudio Bíblico
-        $estudio = Devocional::where('is_devocional', 0)
+        $estudio = Devocional::where('is_devocional', Devocional::TYPE_ESTUDIO)
             ->whereNull('notificado_at')
             ->whereDate('created_at', today())
             ->orderBy('created_at', 'desc')
@@ -59,7 +59,7 @@ class NotificarDevocionalDiario extends Command
 
 
         // 3. Enseñanza
-        $ensenanza = Devocional::where('is_devocional', 1)
+        $ensenanza = Devocional::where('is_devocional', Devocional::TYPE_SERIE)
             ->whereNotNull('ensenanza_id')
             ->whereNull('notificado_at')
             ->whereDate('created_at', today())

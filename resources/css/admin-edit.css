@@ -1,0 +1,504 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --ae-blue: #2d465e;
+    --ae-orange: #f75815;
+    --ae-cream: #faf8f4;
+    --ae-warm: #f5f0e8;
+    --ae-border: #e8e2d8;
+    --ae-muted: #8a7f72;
+    --ae-text: #1c1917;
+    --ae-serif: 'Cormorant Garamond', serif;
+    --ae-sans: 'Instrument Sans', sans-serif;
+}
+
+.ae-root {
+    padding: 24px;
+    background: var(--ae-cream);
+    min-height: 100%;
+    font-family: var(--ae-sans);
+}
+
+/* ── Header ── */
+.ae-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 16px;
+}
+
+.ae-header__left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.ae-header__accent {
+    width: 4px;
+    height: 42px;
+    border-radius: 2px;
+    background: var(--ae-orange);
+    flex-shrink: 0;
+}
+
+.ae-header__title {
+    font-family: var(--ae-serif);
+    font-size: 1.75rem;
+    color: var(--ae-text);
+    line-height: 1;
+    margin: 0 0 5px;
+}
+
+.ae-header__sub {
+    font-size: 11px;
+    color: var(--ae-muted);
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+
+/* ── New Button ── */
+.ae-btn-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    background: var(--ae-blue);
+    color: #fff !important;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+    font-family: var(--ae-sans);
+    transition: background 0.2s, transform 0.15s;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.ae-btn-new:hover {
+    background: #1e3347;
+    transform: translateY(-1px);
+}
+
+/* ── Toolbar ── */
+.ae-toolbar {
+    background: #fff;
+    border: 1px solid var(--ae-border);
+    border-radius: 12px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+/* ── Tabs ── */
+.ae-tabs {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--ae-border);
+    padding-right: 14px;
+}
+
+.ae-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ae-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: var(--ae-sans);
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.ae-tab:hover {
+    background: var(--ae-warm);
+    color: var(--ae-text);
+}
+
+.ae-tab--active {
+    background: var(--ae-blue) !important;
+    color: #fff !important;
+}
+
+.ae-tab__count {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 100px;
+    background: rgba(0, 0, 0, 0.08);
+    color: inherit;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+}
+
+.ae-tab--active .ae-tab__count {
+    background: rgba(247, 88, 21, 0.28);
+    color: #f98150;
+}
+
+/* ── Filters ── */
+.ae-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+/* ── Search ── */
+.ae-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ae-search__icon {
+    position: absolute;
+    left: 10px;
+    color: var(--ae-muted);
+    pointer-events: none;
+}
+
+.ae-search__input {
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--ae-border);
+    padding: 0 32px 0 32px;
+    font-size: 12px;
+    color: var(--ae-text);
+    background: var(--ae-cream);
+    font-family: var(--ae-sans);
+    width: 210px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, width 0.3s;
+}
+
+.ae-search__input:focus {
+    border-color: var(--ae-orange);
+    box-shadow: 0 0 0 3px rgba(247, 88, 21, 0.1);
+    background: #fff;
+    width: 250px;
+}
+
+.ae-search__input::placeholder { color: var(--ae-muted); }
+
+.ae-search__clear {
+    position: absolute;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--ae-muted);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    padding: 0;
+    transition: background 0.2s;
+}
+
+.ae-search__clear:hover { background: var(--ae-orange); }
+
+/* ── Select ── */
+.ae-select {
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--ae-border);
+    padding: 0 10px;
+    font-size: 12px;
+    color: var(--ae-text);
+    background: var(--ae-cream);
+    font-family: var(--ae-sans);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    max-width: 190px;
+}
+
+.ae-select:focus { border-color: var(--ae-orange); }
+
+/* ── Clear Button ── */
+.ae-btn-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--ae-muted);
+    background: var(--ae-warm);
+    border: 1px solid var(--ae-border);
+    cursor: pointer;
+    font-family: var(--ae-sans);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.ae-btn-clear:hover {
+    background: #fee2dc;
+    color: var(--ae-orange);
+    border-color: rgba(247, 88, 21, 0.3);
+}
+
+/* ── Filter Chips ── */
+.ae-chips {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 2px 10px;
+    flex-wrap: wrap;
+}
+
+.ae-chips__label {
+    font-size: 9px;
+    color: var(--ae-muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+.ae-chip {
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--ae-blue);
+    color: #fff;
+    font-size: 11px;
+    font-family: var(--ae-sans);
+}
+
+.ae-chips__count {
+    font-size: 11px;
+    color: var(--ae-muted);
+    margin-left: 2px;
+}
+
+/* ── Cards Grid ── */
+.ae-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px 14px;
+    margin-bottom: 4px;
+}
+
+/* ── Admin Card Wrapper ── */
+.ae-card-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ae-card-wrap .card-wrapper-link {
+    width: 100% !important;
+    height: 250px !important;
+}
+
+/* ── Card Actions ── */
+.ae-card-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.ae-card-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 7px 8px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--ae-sans);
+    text-decoration: none !important;
+    transition: opacity 0.2s, transform 0.15s;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.ae-card-btn:hover {
+    opacity: 0.82;
+    transform: translateY(-1px);
+}
+
+.ae-card-btn--edit {
+    background: var(--ae-blue);
+    color: #fff !important;
+}
+
+.ae-card-btn--view {
+    background: var(--ae-warm);
+    color: var(--ae-blue) !important;
+    border: 1px solid var(--ae-border);
+}
+
+.ae-card-hidden-badge {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 8px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--ae-sans);
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    letter-spacing: 0.5px;
+}
+
+/* ── Empty State ── */
+.ae-empty {
+    text-align: center;
+    padding: 64px 24px;
+}
+
+.ae-empty__icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.35;
+}
+
+.ae-empty__text {
+    font-family: var(--ae-serif);
+    font-size: 1.25rem;
+    color: var(--ae-muted);
+}
+
+/* ── Pager ── */
+.ae-pager {
+    padding: 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--ae-border);
+    margin-top: 12px;
+}
+
+.ae-pager__info {
+    font-size: 11px;
+    color: var(--ae-muted);
+    font-family: var(--ae-sans);
+}
+
+.ae-pager__btns {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.ae-pager__btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--ae-border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--ae-muted);
+    cursor: pointer;
+    font-family: var(--ae-sans);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.ae-pager__btn:hover:not(:disabled) {
+    border-color: var(--ae-orange);
+    color: var(--ae-orange);
+}
+
+.ae-pager__btn--active {
+    background: var(--ae-orange) !important;
+    border-color: var(--ae-orange) !important;
+    color: #fff !important;
+}
+
+.ae-pager__btn:disabled {
+    opacity: 0.28;
+    cursor: default;
+}
+
+.ae-pager__dots {
+    color: var(--ae-muted);
+    font-size: 13px;
+    line-height: 1;
+    padding: 0 3px;
+    user-select: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1280px) {
+    .ae-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 960px) {
+    .ae-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px 10px;
+    }
+
+    .ae-tabs {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid var(--ae-border);
+        padding-bottom: 8px;
+        width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .ae-filters {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .ae-root {
+        padding: 14px;
+    }
+
+    .ae-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .ae-btn-new {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .ae-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px 8px;
+    }
+
+    .ae-search__input {
+        width: 100%;
+    }
+
+    .ae-select {
+        max-width: none;
+        flex: 1;
+    }
+
+    .ae-toolbar {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+}
