@@ -244,7 +244,7 @@ const DevocionalDetailsPage = (props: Props) => {
             <section style={{ background: '#fff', padding: '24px', borderRadius: '8px', width: '100%', position: 'relative' }}>
                 <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
 
-                <p style={{ padding: '5px', textAlign: 'justify' }}
+                <div className="devocional-content" style={{ padding: '5px', textAlign: 'justify' }}
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(devocionalContent) }}
                 />
 

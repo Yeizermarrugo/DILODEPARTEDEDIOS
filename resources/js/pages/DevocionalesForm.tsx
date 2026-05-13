@@ -165,7 +165,6 @@ export default function DevocionalesForm() {
             fd.append('file', file);
             const res = await axios.post('/upload-pdf', fd, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
             });
@@ -182,13 +181,13 @@ export default function DevocionalesForm() {
             fd.append('file', file);
             const res = await axios.post('/upload-image', fd, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
             });
             setNuevaEnsenanzaImagenUrl(res.data.location || res.data.url);
-        } catch {
-            alert('Error al subir la imagen de la enseñanza');
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { errors?: { file?: string[] } } } })?.response?.data?.errors?.file?.[0];
+            alert(msg ? `Error imagen: ${msg}` : 'Error al subir la imagen de la enseñanza');
         }
     };
 
@@ -208,7 +207,7 @@ export default function DevocionalesForm() {
                 const fd = new FormData();
                 fd.append('file', selectedImageFile);
                 const res = await axios.post('/upload-image', fd, {
-                    headers: { ...headers, 'Content-Type': 'multipart/form-data' },
+                    headers,
                 });
                 urlImagenFinal = res.data.location || res.data.url;
             }
@@ -410,7 +409,7 @@ export default function DevocionalesForm() {
                                         ref={imageInputRef}
                                         className="df-image-zone__input"
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                         onChange={(e) => processImageFile(e.target.files?.[0] ?? null)}
                                     />
                                     {imagePreview ? (
@@ -681,7 +680,7 @@ export default function DevocionalesForm() {
                                                             <input
                                                                 className="df-file-input"
                                                                 type="file"
-                                                                accept="image/*"
+                                                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                                                 onChange={(e) => handleEnsenanzaImageChange(e.target.files?.[0] ?? null)}
                                                             />
                                                         </label>
