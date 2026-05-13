@@ -494,3 +494,19 @@ body {
         word-break: break-word;
     }
 }
+.devocional-content p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #222;
+    margin: 0 0 1em 0;
+    word-break: break-word;
+}
+
+.devocional-content p:last-child {
+    margin-bottom: 0;
+}
+
+.devocional-content br {
+    display: block;
+    margin-bottom: 0.5em;
+}
