@@ -54,8 +54,7 @@ export default function Estudios() {
                         </h1>
 
                         <p className="est-hero__desc">
-                            A través de estudios libro por libro y capítulo por capítulo,
-                            acompañamos tu crecimiento espiritual con enseñanza fiel de la Palabra de Dios.
+                            A través de estudios bíblicos libro por libro y capítulo por capítulo, acompañamos tu crecimiento espiritual con exposiciones fieles, claras y fundamentadas en la Palabra de Dios.
                         </p>
 
                         <div className="est-hero__verse">
