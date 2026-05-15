@@ -55,6 +55,7 @@ export default function DevocionalesForm() {
     const [categoria, setCategoria] = useState('');
     const [autor, setAutor] = useState('');
     const [nuevaCategoria, setNuevaCategoria] = useState('');
+    const [nuevaCategoriaDescripcion, setNuevaCategoriaDescripcion] = useState('');
     const [nuevoAutor, setNuevoAutor] = useState('');
     const [useNuevaCategoria, setUseNuevaCategoria] = useState(false);
     const [useNuevoAutor, setUseNuevoAutor] = useState(false);
@@ -200,6 +201,7 @@ export default function DevocionalesForm() {
         try {
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const headers = { 'X-CSRF-TOKEN': csrf };
+            const categoriaFinal = useNuevaCategoria ? nuevaCategoria.trim() : categoria;
 
             let urlImagenFinal = imagenUrl;
 
@@ -231,10 +233,25 @@ export default function DevocionalesForm() {
                 ensenanzaIdFinal = resE.data.id?.toString();
             }
 
+            if (useNuevaCategoria) {
+                if (!categoriaFinal) {
+                    alert('El nombre de la nueva categoría es obligatorio');
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                if (!nuevaCategoriaDescripcion.trim()) {
+                    alert('La descripción de la nueva categoría es obligatoria');
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+
             const payload = {
                 contenido: editorRef.current.getContent(),
                 imagen: urlImagenFinal,
-                categoria: useNuevaCategoria ? nuevaCategoria : categoria,
+                categoria: categoriaFinal,
+                category_description: useNuevaCategoria ? nuevaCategoriaDescripcion.trim() : null,
                 autor: useNuevoAutor ? nuevoAutor : autor,
                 is_devocional: ocultar ? 0 : contentType,
                 serie: useNuevaSerie ? nuevaSerie : serie,
@@ -527,6 +544,7 @@ export default function DevocionalesForm() {
                                                 setCategoria('');
                                             } else {
                                                 setUseNuevaCategoria(false);
+                                                setNuevaCategoriaDescripcion('');
                                                 setCategoria(e.target.value);
                                             }
                                         }}
@@ -538,13 +556,27 @@ export default function DevocionalesForm() {
                                         <option value="nueva">+ Nueva categoría…</option>
                                     </select>
                                     {useNuevaCategoria && (
-                                        <input
-                                            className="df-input df-input-new"
-                                            type="text"
-                                            placeholder="Nombre de la nueva categoría"
-                                            value={nuevaCategoria}
-                                            onChange={(e) => setNuevaCategoria(e.target.value)}
-                                        />
+                                        <div className="df-expand df-expand--compact">
+                                            <div className="df-field">
+                                                <label className="df-label">Nombre de la nueva categoría</label>
+                                                <input
+                                                    className="df-input"
+                                                    type="text"
+                                                    placeholder="Nombre de la nueva categoría"
+                                                    value={nuevaCategoria}
+                                                    onChange={(e) => setNuevaCategoria(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="df-field">
+                                                <label className="df-label">Descripción</label>
+                                                <textarea
+                                                    className="df-textarea"
+                                                    placeholder="Descripción que se mostrará al filtrar esta categoría"
+                                                    value={nuevaCategoriaDescripcion}
+                                                    onChange={(e) => setNuevaCategoriaDescripcion(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
 

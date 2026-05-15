@@ -597,6 +597,11 @@
     margin-top: 10px;
 }
 
+.df-expand--compact {
+    padding: 12px;
+    gap: 9px;
+}
+
 .df-expand__label {
     font-size: 11px;
     font-weight: 700;

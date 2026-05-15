@@ -194,6 +194,15 @@
     color: rgba(247, 88, 21, 0.5);
 }
 
+.dv-sidebar__cat-desc {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+    padding: 4px 12px 6px 12px;
+    margin: 0;
+    line-height: 1.4;
+    font-family: var(--dv-sans);
+}
+
 .dv-sidebar__sort {
     display: flex;
     flex-direction: column;
@@ -277,13 +286,19 @@
     z-index: 10;
 }
 
+.dv-topbar__left {
+    border-left: 3px solid var(--dv-orange);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .dv-topbar__heading {
     font-family: var(--dv-serif);
     font-size: 1.15rem;
     color: var(--dv-text);
     line-height: 1;
     padding-left: 12px;
-    border-left: 3px solid var(--dv-orange);
 }
 
 .dv-topbar__count {
@@ -291,13 +306,77 @@
     color: var(--dv-muted);
     font-family: var(--dv-sans);
     padding-left: 15px;
-    margin-top: 2px;
+    margin-top: 0;
+}
+
+.dv-topbar__cat-desc {
+    margin: 4px 0 0;
+    padding-left: 15px;
+    font-family: var(--dv-sans);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--dv-muted);
+    /* max-width: 420px; */
 }
 
 .dv-topbar__right {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.dv-category-description {
+    margin: 18px 24px 0;
+    padding: 18px 22px;
+    background: #fff;
+    border-bottom: 1px solid var(--dv-border);
+}
+
+.dv-category-description__title {
+    margin: 0 0 6px;
+    font-family: var(--dv-serif);
+    font-size: 1.35rem;
+    line-height: 1.15;
+    color: var(--dv-text);
+}
+
+.dv-category-description__text {
+    max-width: 860px;
+    margin: 0;
+    color: #5f574f;
+    font-family: var(--dv-sans);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+/* Category banner — arriba del grid */
+.dv-cat-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    background: #faf8f4;
+    border-left: 3px solid var(--dv-orange);
+    border-radius: 0 8px 8px 0;
+}
+
+.dv-cat-banner__label {
+    font-family: var(--dv-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dv-orange);
+}
+
+.dv-cat-banner__desc {
+    margin: 0;
+    font-family: var(--dv-sans);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #5f574f;
+    max-width: 680px;
 }
 
 /* Search — live con debounce */
@@ -560,6 +639,19 @@
     .dv-topbar {
         padding: 12px 16px;
         position: static;
+    }
+
+    .dv-category-description {
+        margin: 14px 16px 0;
+        padding: 15px 16px;
+    }
+
+    .dv-category-description__title {
+        font-size: 1.2rem;
+    }
+
+    .dv-category-description__text {
+        font-size: 0.86rem;
     }
 }
 

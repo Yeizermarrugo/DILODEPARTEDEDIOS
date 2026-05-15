@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Devocional;
+use App\Models\DevocionalCategory;
 use App\Models\DevocionalView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -17,6 +18,40 @@ use HTMLPurifier_Config;
 
 class DevocionalController extends Controller
 {
+    private function categoriesWithDescriptions($categories)
+    {
+        $descriptions = DevocionalCategory::whereIn('name', $categories->pluck('categoria')->filter()->unique())
+            ->pluck('description', 'name');
+
+        return $categories->map(fn ($category) => [
+            'categoria' => $category->categoria,
+            'count' => $category->count,
+            'description' => $descriptions[$category->categoria] ?? null,
+        ]);
+    }
+
+    private function syncCategory(string $name, ?string $description = null): void
+    {
+        $name = trim($name);
+        if ($name === '') {
+            return;
+        }
+
+        $category = DevocionalCategory::firstOrNew(['name' => $name]);
+        if ($description !== null && trim($description) !== '') {
+            $category->description = trim($description);
+        }
+        $category->save();
+    }
+
+    private function forgetCategoryCaches(): void
+    {
+        Cache::forget('devocional-categorias');
+        Cache::forget('devocional-autores');
+        Cache::forget('search-categorias-series');
+        Cache::forget('estudios-list');
+    }
+
     private function purifyHtml(string $html): string
     {
         static $purifier = null;
@@ -107,14 +142,22 @@ class DevocionalController extends Controller
 
             $series             = [];
             $categoriasSinSerie = [];
+            $descriptionMap = DevocionalCategory::pluck('description', 'name');
+
             foreach ($categoriasRaw as $row) {
+                $categoryData = [
+                    'categoria' => $row->categoria,
+                    'count' => $row->count,
+                    'description' => $descriptionMap[$row->categoria] ?? null,
+                ];
+
                 if ($row->serie) {
                     if (!isset($series[$row->serie])) {
                         $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
                     }
-                    $series[$row->serie]['categorias'][] = ['categoria' => $row->categoria, 'count' => $row->count];
+                    $series[$row->serie]['categorias'][] = $categoryData;
                 } else {
-                    $categoriasSinSerie[] = ['categoria' => $row->categoria, 'count' => $row->count];
+                    $categoriasSinSerie[] = $categoryData;
                 }
             }
             return [$categoriasSinSerie, array_values($series)];
@@ -163,16 +206,21 @@ class DevocionalController extends Controller
                 ->get();
 
             $series = [];
+            $descriptionMap = DevocionalCategory::pluck('description', 'name');
             foreach ($categoriasRaw as $row) {
                 if ($row->serie) {
                     if (!isset($series[$row->serie])) {
                         $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
                     }
-                    $series[$row->serie]['categorias'][] = ['categoria' => $row->categoria, 'count' => $row->count];
+                    $series[$row->serie]['categorias'][] = [
+                        'categoria' => $row->categoria,
+                        'count' => $row->count,
+                        'description' => $descriptionMap[$row->categoria] ?? null,
+                    ];
                 }
             }
 
-            return [$todasLasCategorias, array_values($series)];
+            return [$this->categoriesWithDescriptions($todasLasCategorias), array_values($series)];
         });
 
         $autores = Cache::remember('devocional-autores', 3600, fn () =>
@@ -241,6 +289,7 @@ class DevocionalController extends Controller
         return response()->json([
             'devocionales' => $devocionales,
             'categoria'    => $categoria,
+            'category'     => DevocionalCategory::where('name', $categoria)->first(['name', 'description']),
         ]);
     }
     //devolver los ultimos 5 devocionales
@@ -434,7 +483,22 @@ class DevocionalController extends Controller
             'instagram'     => 'nullable|string|max:255',
             'tiktok'        => 'nullable|string|max:255',
             'ensenanza_id'  => 'nullable|uuid|exists:ensenanzas,id',
+            'category_description' => 'nullable|string|max:1000',
         ]);
+
+        if (
+            !DevocionalCategory::where('name', $validated['categoria'])->exists()
+            && trim((string) ($validated['category_description'] ?? '')) === ''
+        ) {
+            return response()->json([
+                'message' => 'La descripción de la nueva categoría es obligatoria.',
+                'errors' => [
+                    'category_description' => ['La descripción de la nueva categoría es obligatoria.'],
+                ],
+            ], 422);
+        }
+
+        $this->syncCategory($validated['categoria'], $validated['category_description'] ?? null);
 
         // Creamos el registro usando SOLO los campos que existen en la DB
         $devocional = Devocional::create([
@@ -451,10 +515,7 @@ class DevocionalController extends Controller
             'ensenanza_id'  => $validated['ensenanza_id'] ?? null,
         ]);
 
-        Cache::forget('devocional-categorias');
-        Cache::forget('devocional-autores');
-        Cache::forget('search-categorias-series');
-        Cache::forget('estudios-list');
+        $this->forgetCategoryCaches();
 
         return response()->json([
             'message' => '¡Guardado con éxito!',
@@ -604,7 +665,23 @@ class DevocionalController extends Controller
             'instagram'     => 'nullable|string|max:255',
             'tiktok'        => 'nullable|string|max:255',
             'ensenanza_id'  => 'nullable|uuid|exists:ensenanzas,id',
+            'category_description' => 'nullable|string|max:1000',
         ]);
+
+        $categoryName = $request->input('categoria');
+        if (
+            !DevocionalCategory::where('name', $categoryName)->exists()
+            && trim((string) $request->input('category_description')) === ''
+        ) {
+            return response()->json([
+                'message' => 'La descripción de la nueva categoría es obligatoria.',
+                'errors' => [
+                    'category_description' => ['La descripción de la nueva categoría es obligatoria.'],
+                ],
+            ], 422);
+        }
+
+        $this->syncCategory($categoryName, $request->input('category_description'));
 
         $createdAt = $request->input('created_at');
 
@@ -624,10 +701,7 @@ class DevocionalController extends Controller
             'ensenanza_id'  => $request->input('ensenanza_id'),
         ]);
 
-        Cache::forget('devocional-categorias');
-        Cache::forget('devocional-autores');
-        Cache::forget('search-categorias-series');
-        Cache::forget('estudios-list');
+        $this->forgetCategoryCaches();
 
         return response()->json([
             'message'    => 'Devocional actualizado correctamente',
