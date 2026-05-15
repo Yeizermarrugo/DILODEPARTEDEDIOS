@@ -43,13 +43,13 @@ return new class extends Migration
                 'updated_at' => $now,
             ],
             [
-                'name' => 'Dirección y guía',
+                'name' => 'Dirección y Guía',
                 'description' => 'Devocionales para quienes necesitan dirección, sabiduría y guía de Dios en diferentes áreas de su vida. Aquí encontrarás respuestas y principios bíblicos para tomar decisiones con sabiduría.',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
-                'name' => 'Propósito y carácter',
+                'name' => 'Propósito y Carácter',
                 'description' => 'Devocionales que te ayudarán a comprender tu identidad en Cristo y el propósito para el cual Dios te creó. Aquí encontrarás mensajes para crecer espiritualmente y desarrollar un carácter conforme a Dios.',
                 'created_at' => $now,
                 'updated_at' => $now,
