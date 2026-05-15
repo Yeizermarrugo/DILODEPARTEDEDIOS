@@ -34,10 +34,27 @@ type StudyNav = {
     total_in_book: number;
 };
 
+type SeriesNavEp = {
+    id: string;
+    titulo: string;
+    visible: boolean;
+    publish_at: string;
+};
+
+type SeriesNav = {
+    serie_titulo: string;
+    serie_id: string;
+    position: number;
+    total: number;
+    prev: SeriesNavEp | null;
+    next: SeriesNavEp | null;
+};
+
 type Props = {
     devocional: Devocional;
     like_type?: 'devocional' | 'estudio' | 'ensenanza';
     nav?: StudyNav | null;
+    series_nav?: SeriesNav | null;
 };
 
 function getContentType(is_devocional?: number | string): 'devocional' | 'estudio' | 'ensenanza' {
@@ -129,11 +146,98 @@ const StudyNavigation = ({ nav }: { nav: StudyNav }) => {
     );
 };
 
+function useCountdown(targetIso: string | null) {
+    const [time, setTime] = useState<{ h: number; m: number; s: number } | null>(null);
+
+    useEffect(() => {
+        if (!targetIso) { setTime(null); return; }
+
+        const tick = () => {
+            const diff = new Date(targetIso).getTime() - Date.now();
+            if (diff <= 0 || diff >= 24 * 3600 * 1000) { setTime(null); return; }
+            const totalSec = Math.floor(diff / 1000);
+            setTime({ h: Math.floor(totalSec / 3600), m: Math.floor((totalSec % 3600) / 60), s: totalSec % 60 });
+        };
+
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [targetIso]);
+
+    return time;
+}
+
+const SeriesNavigation = ({ nav }: { nav: SeriesNav }) => {
+    const progressPct = Math.round((nav.position / nav.total) * 100);
+    const nextCountdown = useCountdown(nav.next && !nav.next.visible ? nav.next.publish_at : null);
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const formatDate = (iso: string) =>
+        new Date(iso).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+            .replace(/^\w/, c => c.toUpperCase());
+
+    return (
+        <div className="study-nav">
+            <div className="study-nav__header">
+                <span className="study-nav__book-name">{nav.serie_titulo}</span>
+                <span className="study-nav__counter">{nav.position} / {nav.total}</span>
+            </div>
+
+            <div className="study-nav__progress-bar">
+                <div className="study-nav__progress-fill" style={{ width: `${progressPct}%` }} />
+            </div>
+
+            <div className="study-nav__buttons">
+                {nav.prev && nav.prev.visible ? (
+                    <Link href={`/series/${nav.prev.id}`} className="study-nav__btn study-nav__btn--prev">
+                        <ChevronLeft className="study-nav__icon" size={20} />
+                        <span className="study-nav__label"><span>Anterior</span></span>
+                    </Link>
+                ) : (
+                    <div className="study-nav__btn study-nav__btn--prev study-nav__btn--disabled">
+                        <ChevronLeft className="study-nav__icon" size={20} />
+                        <span className="study-nav__label"><span>Inicio</span></span>
+                    </div>
+                )}
+
+                {nav.next ? (
+                    nav.next.visible ? (
+                        <Link href={`/series/${nav.next.id}`} className="study-nav__btn study-nav__btn--next">
+                            <span className="study-nav__label"><span>Siguiente</span></span>
+                            <ChevronRight className="study-nav__icon" size={20} />
+                        </Link>
+                    ) : (
+                        <div className="study-nav__btn study-nav__btn--next study-nav__btn--upcoming">
+                            <span className="study-nav__label">
+                                <small>Próximamente</small>
+                                {nextCountdown ? (
+                                    <span className="study-nav__countdown">
+                                        {pad(nextCountdown.h)}:{pad(nextCountdown.m)}:{pad(nextCountdown.s)}
+                                    </span>
+                                ) : (
+                                    <strong>{formatDate(nav.next.publish_at)}</strong>
+                                )}
+                            </span>
+                            <ChevronRight className="study-nav__icon" size={20} />
+                        </div>
+                    )
+                ) : (
+                    <div className="study-nav__btn study-nav__btn--next study-nav__btn--disabled">
+                        <span className="study-nav__label"><span>Fin</span></span>
+                        <ChevronRight className="study-nav__icon" size={20} />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const DevocionalDetailsPage = (props: Props) => {
     const page = usePage().props as Record<string, unknown>;
     const devocional = props.devocional ?? (page.devocional as Devocional | undefined);
     const likeType = (props.like_type ?? (page.like_type as string | undefined) ?? getContentType(devocional?.is_devocional)) as 'devocional' | 'estudio' | 'ensenanza';
     const nav = (props.nav ?? (page.nav as StudyNav | undefined | null)) ?? null;
+    const seriesNav = (props.series_nav ?? (page.series_nav as SeriesNav | undefined | null)) ?? null;
 
     const [loading, setLoading] = useState(typeof window !== 'undefined');
     const [viewsCount, setViewsCount] = useState(devocional?.views_count ?? 0);
@@ -280,6 +384,7 @@ const DevocionalDetailsPage = (props: Props) => {
                 )}
 
                 {nav && likeType === 'estudio' && <StudyNavigation nav={nav} />}
+                {seriesNav && likeType === 'ensenanza' && <SeriesNavigation nav={seriesNav} />}
             </section>
         </div>
     );
