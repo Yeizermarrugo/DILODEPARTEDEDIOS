@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use App\Models\Ensenanza;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
@@ -94,18 +95,70 @@ class EnsenanzaController extends Controller
 
     public function details($id)
     {
-        $devocional = Devocional::findOrFail($id);
+        $devocional = Devocional::with('ensenanza')->findOrFail($id);
+
+        $seriesNav = null;
+
+        if ($devocional->ensenanza_id) {
+            $allEpisodes = Devocional::where('ensenanza_id', $devocional->ensenanza_id)
+                ->whereIn('is_devocional', [Devocional::TYPE_SERIE, Devocional::TYPE_OCULTO])
+                ->orderBy('created_at', 'asc')
+                ->get(['id', 'is_devocional', 'created_at', DB::raw('SUBSTRING(contenido, 1, 500) as contenido')])
+                ->values();
+
+            $currentIdx = $allEpisodes->search(fn ($ep) => $ep->id === $devocional->id);
+
+            if ($currentIdx !== false) {
+                $extractTitle = function ($dev) {
+                    $contenido = $dev->contenido ?? '';
+                    if (preg_match('/<h2[^>]*>(.*?)<\/h2>/is', $contenido, $m)) {
+                        $titulo = $m[1];
+                    } elseif (preg_match('/<h1[^>]*>(.*?)<\/h1>/is', $contenido, $m)) {
+                        $titulo = $m[1];
+                    } else {
+                        $titulo = strip_tags($contenido);
+                    }
+                    $titulo = strip_tags($titulo);
+                    $titulo = html_entity_decode($titulo, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $titulo = preg_replace('/\s+/u', ' ', trim($titulo));
+                    return Str::limit($titulo, 80) ?: 'Episodio';
+                };
+
+                $prevEp = $currentIdx > 0 ? $allEpisodes[$currentIdx - 1] : null;
+                $nextEp = $currentIdx < $allEpisodes->count() - 1 ? $allEpisodes[$currentIdx + 1] : null;
+
+                $seriesNav = [
+                    'serie_titulo' => $devocional->ensenanza?->titulo ?? '',
+                    'serie_id'     => $devocional->ensenanza_id,
+                    'position'     => $currentIdx + 1,
+                    'total'        => $allEpisodes->count(),
+                    'prev'         => $prevEp ? [
+                        'id'         => $prevEp->id,
+                        'titulo'     => $extractTitle($prevEp),
+                        'visible'    => $prevEp->is_devocional === Devocional::TYPE_SERIE,
+                        'publish_at' => $prevEp->created_at->toISOString(),
+                    ] : null,
+                    'next'         => $nextEp ? [
+                        'id'         => $nextEp->id,
+                        'titulo'     => $extractTitle($nextEp),
+                        'visible'    => $nextEp->is_devocional === Devocional::TYPE_SERIE,
+                        'publish_at' => $nextEp->created_at->toISOString(),
+                    ] : null,
+                ];
+            }
+        }
 
         return Inertia::render('DevocionalDetailsPage', [
             'devocional'    => $devocional,
             'is_devocional' => $devocional->is_devocional,
             'like_type'     => 'ensenanza',
-            'meta' => [
+            'series_nav'    => $seriesNav,
+            'meta'          => [
                 'title'       => $devocional->titulo,
                 'description' => Str::limit(strip_tags($devocional->contenido), 150),
                 'image'       => $devocional->imagen,
                 'url'         => url()->current(),
-            ]
+            ],
         ]);
     }
 
