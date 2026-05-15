@@ -70,4 +70,9 @@ class Devocional extends Model
     {
         return $this->belongsTo(Ensenanza::class);
     }
+
+    public function category()
+    {
+        return $this->belongsTo(DevocionalCategory::class, 'categoria', 'name');
+    }
 }

@@ -12,7 +12,7 @@ import '../../css/main.css';
 
 type SortId = 'latest' | 'likes' | 'views' | 'shares';
 
-type Category = { categoria: string; count: number };
+type Category = { categoria: string; count: number; description?: string | null };
 
 type Devocional = {
     id: string;
@@ -141,11 +141,14 @@ function Devocionals() {
     // ── Valores Derivados ─────────────────────────────────────────────────────
 
     const totalResults = pagination.total || 0;
+    const totalAll = categories.reduce((sum, c) => sum + c.count, 0) || totalResults;
     const hasFilter = selectedCategory !== null || sort !== 'latest';
     const gridHeading = debouncedSearch.trim()
         ? `Resultados de "${debouncedSearch.trim()}"`
         : selectedCategory ?? 'Todos los Devocionales';
-
+    const selectedCategoryDescription = selectedCategory
+        ? categories.find(c => c.categoria === selectedCategory)?.description
+        : null;
     const sortOptions: { key: SortId; icon: string; label: string }[] = [
         { key: 'latest', icon: 'bi-clock', label: 'Más recientes' },
         { key: 'likes', icon: pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-heart', label: 'Más likes' },
@@ -216,7 +219,7 @@ function Devocionals() {
                                     onClick={() => setSelectedCategory(null)}
                                 >
                                     <span>Todas</span>
-                                    <span className="dv-sidebar__cat-count">{totalResults}</span>
+                                    <span className="dv-sidebar__cat-count">{totalAll}</span>
                                 </button>
                                 {categories.map(cat => (
                                     <button
@@ -254,6 +257,9 @@ function Devocionals() {
                             <div className="dv-topbar__left">
                                 <div className="dv-topbar__heading">{gridHeading}</div>
                                 <div className="dv-topbar__count">{totalResults} publicaciones</div>
+                                {selectedCategoryDescription && !debouncedSearch.trim() && (
+                                    <p className="dv-topbar__cat-desc">{selectedCategoryDescription}</p>
+                                )}
                             </div>
 
                             <div className="dv-topbar__right">
