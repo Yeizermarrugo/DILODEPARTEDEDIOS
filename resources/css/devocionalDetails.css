@@ -459,6 +459,22 @@ body {
     }
 }
 
+.study-nav__btn--upcoming {
+    border-color: #ffd4bf;
+    background: #fff8f5;
+    cursor: default;
+    pointer-events: none;
+}
+
+.study-nav__countdown {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #f75815;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    line-height: 1;
+}
+
 @media (max-width: 400px) {
     .devocional-details {
         padding: 0;
