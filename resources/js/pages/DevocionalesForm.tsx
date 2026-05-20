@@ -119,7 +119,11 @@ export default function DevocionalesForm() {
                 setTiktok(d.tiktok || '');
                 setEnsenanzaId(d.ensenanza_id || '');
                 if (d.created_at) {
-                    setCreatedAt(new Date(d.created_at).toISOString().slice(0, 16));
+                    const dt = new Date(d.created_at);
+                    const pad = (n: number) => String(n).padStart(2, '0');
+                    setCreatedAt(
+                        `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`
+                    );
                 }
             });
         }
@@ -420,7 +424,11 @@ export default function DevocionalesForm() {
                                     onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                                     onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
                                     onDrop={handleImageDrop}
-                                    onClick={() => imageInputRef.current?.click()}
+                                    onClick={(e) => {
+                                        if ((e.target as HTMLElement) !== imageInputRef.current) {
+                                            imageInputRef.current?.click();
+                                        }
+                                    }}
                                 >
                                     <input
                                         ref={imageInputRef}
@@ -478,7 +486,16 @@ export default function DevocionalesForm() {
                                                 name="contentType"
                                                 value={opt.value}
                                                 checked={contentType === opt.value}
-                                                onChange={() => setContentType(opt.value)}
+                                                onChange={() => {
+                                                    setContentType(opt.value);
+                                                    if (opt.value !== 1) setOcultar(false);
+                                                    if (opt.value !== 2) {
+                                                        setSerie('');
+                                                        setEnsenanzaId('');
+                                                        setUseNuevaSerie(false);
+                                                        setUseNuevaEnsenanza(false);
+                                                    }
+                                                }}
                                             />
                                             <span className="df-type-dot" />
                                             <span className="df-type-icon">{opt.icon}</span>
@@ -513,10 +530,11 @@ export default function DevocionalesForm() {
                                                 : 'Visible para todos los visitantes'}
                                         </span>
                                     </div>
-                                    <label className="df-toggle">
+                                    <label className="df-toggle" style={contentType !== 1 ? { opacity: 0.4, pointerEvents: 'none' } : undefined}>
                                         <input
                                             type="checkbox"
                                             checked={ocultar}
+                                            disabled={contentType !== 1}
                                             onChange={(e) => setOcultar(e.target.checked)}
                                         />
                                         <span className="df-toggle__track" />
