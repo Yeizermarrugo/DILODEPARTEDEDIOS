@@ -14,3 +14,9 @@ Schedule::command('devocional:notificar-diario')
     ->cron('0-10 6 * * *')
     ->timezone('America/Bogota')
     ->withoutOverlapping();
+
+// Corre cada minuto entre 3:00 y 3:10 AM — publica contenido oculto programado para hoy y notifica por correo.
+Schedule::command('contenido:publicar-programado')
+    ->cron('0-10 3 * * *')
+    ->timezone('America/Bogota')
+    ->withoutOverlapping();
