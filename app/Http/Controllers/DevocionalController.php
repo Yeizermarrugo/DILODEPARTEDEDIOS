@@ -81,6 +81,7 @@ class DevocionalController extends Controller
 
         // ── Base query con filtro de búsqueda ──────────────────────────────
         $base = Devocional::where('is_devocional', 1)
+            ->where('hidden', false)
             ->where('ensenanza_id', null);
 
         if ($search) {
@@ -135,6 +136,7 @@ class DevocionalController extends Controller
             $categoriasRaw = Devocional::whereNotNull('categoria')
                 ->where('categoria', '!=', '')
                 ->where('is_devocional', 1)
+                ->where('hidden', false)
                 ->where('ensenanza_id', '=', null)
                 ->selectRaw('categoria, serie, COUNT(*) as count')
                 ->groupBy('categoria', 'serie')
@@ -167,6 +169,7 @@ class DevocionalController extends Controller
             Devocional::whereNotNull('autor')
                 ->where('autor', '!=', '')
                 ->where('is_devocional', 1)
+                ->where('hidden', false)
                 ->groupBy('autor')
                 ->selectRaw('autor, COUNT(*) as count')
                 ->get()
@@ -183,6 +186,7 @@ class DevocionalController extends Controller
     {
         $perPage = $request->input('per_page', 16);
         $devocionales = Devocional::where('is_devocional', 1)
+            ->where('hidden', false)
             ->where('ensenanza_id', null)
             ->select([
                 'id', 'imagen', 'categoria', 'autor', 'is_devocional',
@@ -296,6 +300,7 @@ class DevocionalController extends Controller
     public function latest()
     {
         $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', 1)
+            ->where('hidden', false)
             ->where('ensenanza_id', '=', null)
             ->take(5)->get();
         return response()->json($devocionales);
@@ -306,6 +311,7 @@ class DevocionalController extends Controller
         $devocionales = Cache::remember('estudios-list', 3600, function () {
             $orderMap = array_flip(self::$biblicalOrder);
             return Devocional::where('is_devocional', Devocional::TYPE_ESTUDIO)
+                ->where('hidden', false)
                 ->select('id', 'categoria', 'contenido', 'views_count', 'shares_count', 'created_at')
                 ->get()
                 ->sortBy(function ($e) use ($orderMap) {
@@ -476,7 +482,8 @@ class DevocionalController extends Controller
             'categoria'     => 'required|string',
             'imagen'        => 'nullable|string',
             'autor'         => 'nullable|string|max:255',
-            'is_devocional' => 'required|integer|in:0,1,2,3',
+            'is_devocional' => 'required|integer|in:1,2,3',
+            'hidden'        => 'boolean',
             'serie'         => 'nullable|string|max:255',
             'created_at'    => 'nullable|date',
             'pdf'           => 'nullable|string|max:255',
@@ -507,6 +514,7 @@ class DevocionalController extends Controller
             'imagen'        => $validated['imagen'] ?? null,
             'autor'         => $validated['autor'] ?? null,
             'is_devocional' => $validated['is_devocional'],
+            'hidden'        => $validated['hidden'] ?? false,
             'serie'         => $validated['serie'] ?? null,
             'created_at'    => ($validated['created_at'] ?? null) ?: now(),
             'pdf'           => $validated['pdf'] ?? null,
@@ -590,12 +598,14 @@ class DevocionalController extends Controller
         // Clonar la query base para cada grupo
         $devocionales = (clone $baseQuery)
             ->where('is_devocional', Devocional::TYPE_DEVOCIONAL)
+            ->where('hidden', false)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'devocionales_page')
             ->withQueryString();
 
         $estudios = (clone $baseQuery)
             ->where('is_devocional', Devocional::TYPE_ESTUDIO)
+            ->where('hidden', false)
             ->orderBy('categoria', 'asc')
             ->orderBy('created_at', 'asc')
             ->paginate($perPage, ['*'], 'estudios_page')
@@ -603,13 +613,14 @@ class DevocionalController extends Controller
 
         $series = (clone $baseQuery)
             ->where('is_devocional', Devocional::TYPE_SERIE)
+            ->where('hidden', false)
             ->orderBy('ensenanza_id', 'asc')
             ->orderBy('created_at', 'asc')
             ->paginate($perPage, ['*'], 'series_page')
             ->withQueryString();
 
         $ocultos = (clone $baseQuery)
-            ->where('is_devocional', Devocional::TYPE_OCULTO)
+            ->where('hidden', true)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'ocultos_page')
             ->withQueryString();
@@ -658,7 +669,8 @@ class DevocionalController extends Controller
             // permite que imagen venga null o string; si viene vacía, conservamos la anterior
             'imagen'        => 'nullable|string|url',
             'autor'         => 'nullable|string|max:255',
-            'is_devocional' => 'required|integer|in:0,1,2,3',
+            'is_devocional' => 'required|integer|in:1,2,3',
+            'hidden'        => 'boolean',
             'serie'         => 'nullable|string|max:255',
             'created_at'    => 'nullable|date',
             'pdf'           => 'nullable|string|max:255',
@@ -691,6 +703,7 @@ class DevocionalController extends Controller
             'imagen'        => $request->input('imagen') ?: $devocional->imagen,
             'autor'         => $request->input('autor'),
             'is_devocional' => $request->input('is_devocional'),
+            'hidden'        => $request->boolean('hidden', false),
             'serie'         => $request->input('serie'),
             'created_at'    => $createdAt
                 ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')

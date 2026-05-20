@@ -16,6 +16,7 @@ interface Devocional {
     categoria: string;
     autor: string;
     is_devocional: number;
+    hidden?: boolean;
     ensenanza_id?: string | null;
     views_count?: number;
     shares_count?: number;
@@ -73,13 +74,13 @@ const getPublicUrl = (dev: Devocional): string | null => {
     if (dev.is_devocional === 1) return `/devocional/${dev.id}`;
     if (dev.is_devocional === 2 && dev.ensenanza_id) return `/series/${dev.ensenanza_id}`;
     if (dev.is_devocional === 3) return `/estudio-biblico/${dev.id}`;
-    return null; // 0 = oculto, no public URL
+    return null;
 };
 
 // ─── AdminCard ────────────────────────────────────────────────────────────────
 
 function AdminCard({ dev, todasLasCategorias }: { dev: Devocional; todasLasCategorias: string[] }) {
-    const publicUrl = getPublicUrl(dev);
+    const publicUrl = dev.hidden ? null : getPublicUrl(dev);
     const processedDev = {
         ...dev,
         titulo: extractTitle(decodeHtml(dev.contenido)),

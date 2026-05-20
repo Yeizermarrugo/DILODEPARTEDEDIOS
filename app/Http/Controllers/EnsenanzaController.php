@@ -18,10 +18,9 @@ class EnsenanzaController extends Controller
 
         $ensenanzas = Ensenanza::query()
             ->with(['devocionales' => function ($q) {
-                // Include published (TYPE_SERIE=2) AND hidden (TYPE_OCULTO=0) episodes
-                // Hidden ones render as disabled/opaque "Próximamente" rows in the UI
-                $q->whereIn('is_devocional', [Devocional::TYPE_SERIE, Devocional::TYPE_OCULTO])
-                    ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at', 'is_devocional', 'views_count')
+                // Include all episodes (both visible and hidden); hidden ones render as "Próximamente" rows
+                $q->where('is_devocional', Devocional::TYPE_SERIE)
+                    ->select('id', 'ensenanza_id', 'autor', 'pdf', 'tiktok', 'instagram', 'contenido', 'created_at', 'is_devocional', 'hidden', 'views_count')
                     ->orderBy('created_at', 'asc');
             }])
             ->withCount('devocionales')
@@ -70,7 +69,7 @@ class EnsenanzaController extends Controller
                     'pdf'        => $dev->pdf,
                     'tiktok'     => $dev->tiktok,
                     'instagram'  => $dev->instagram,
-                    'is_devocional' => $dev->is_devocional,
+                    'hidden'     => (bool) $dev->hidden,
                     'views_count' => $dev->views_count ?? 0,
                 ];
             })->values()->all();
@@ -101,9 +100,9 @@ class EnsenanzaController extends Controller
 
         if ($devocional->ensenanza_id) {
             $allEpisodes = Devocional::where('ensenanza_id', $devocional->ensenanza_id)
-                ->whereIn('is_devocional', [Devocional::TYPE_SERIE, Devocional::TYPE_OCULTO])
+                ->where('is_devocional', Devocional::TYPE_SERIE)
                 ->orderBy('created_at', 'asc')
-                ->get(['id', 'is_devocional', 'created_at', DB::raw('SUBSTRING(contenido, 1, 500) as contenido')])
+                ->get(['id', 'hidden', 'created_at', DB::raw('SUBSTRING(contenido, 1, 500) as contenido')])
                 ->values();
 
             $currentIdx = $allEpisodes->search(fn ($ep) => $ep->id === $devocional->id);
@@ -135,13 +134,13 @@ class EnsenanzaController extends Controller
                     'prev'         => $prevEp ? [
                         'id'         => $prevEp->id,
                         'titulo'     => $extractTitle($prevEp),
-                        'visible'    => $prevEp->is_devocional === Devocional::TYPE_SERIE,
+                        'visible'    => !$prevEp->hidden,
                         'publish_at' => $prevEp->created_at->toISOString(),
                     ] : null,
                     'next'         => $nextEp ? [
                         'id'         => $nextEp->id,
                         'titulo'     => $extractTitle($nextEp),
-                        'visible'    => $nextEp->is_devocional === Devocional::TYPE_SERIE,
+                        'visible'    => !$nextEp->hidden,
                         'publish_at' => $nextEp->created_at->toISOString(),
                     ] : null,
                 ];

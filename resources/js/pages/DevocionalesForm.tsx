@@ -109,9 +109,8 @@ export default function DevocionalesForm() {
                 if (d.imagen) setImagePreview(d.imagen);
                 setCategoria(d.categoria || '');
                 setAutor(d.autor || '');
-                const devType = d.is_devocional ?? 1;
-                setOcultar(devType === 0);
-                setContentType((devType === 0 ? 1 : devType) as ContentType);
+                setOcultar(!!d.hidden);
+                setContentType((d.is_devocional ?? 1) as ContentType);
                 setInitialContent(d.contenido || '');
                 setSerie(d.serie || '');
                 setPdf(d.pdf || '');
@@ -257,7 +256,8 @@ export default function DevocionalesForm() {
                 categoria: categoriaFinal,
                 category_description: useNuevaCategoria ? nuevaCategoriaDescripcion.trim() : null,
                 autor: useNuevoAutor ? nuevoAutor : autor,
-                is_devocional: ocultar ? 0 : contentType,
+                is_devocional: contentType,
+                hidden: ocultar,
                 serie: useNuevaSerie ? nuevaSerie : serie,
                 created_at: createdAt || null,
                 ensenanza_id: ensenanzaIdFinal,
@@ -488,8 +488,7 @@ export default function DevocionalesForm() {
                                                 checked={contentType === opt.value}
                                                 onChange={() => {
                                                     setContentType(opt.value);
-                                                    if (opt.value !== 1) setOcultar(false);
-                                                    if (opt.value !== 2) {
+                                                                    if (opt.value !== 2) {
                                                         setSerie('');
                                                         setEnsenanzaId('');
                                                         setUseNuevaSerie(false);
@@ -530,11 +529,10 @@ export default function DevocionalesForm() {
                                                 : 'Visible para todos los visitantes'}
                                         </span>
                                     </div>
-                                    <label className="df-toggle" style={contentType !== 1 ? { opacity: 0.4, pointerEvents: 'none' } : undefined}>
+                                    <label className="df-toggle">
                                         <input
                                             type="checkbox"
                                             checked={ocultar}
-                                            disabled={contentType !== 1}
                                             onChange={(e) => setOcultar(e.target.checked)}
                                         />
                                         <span className="df-toggle__track" />
