@@ -12,7 +12,7 @@ type DevocionalEnsenanza = {
     instagram?: string | null;
     tiktok?: string | null;
     views_count?: number | null;
-    is_devocional: boolean;
+    hidden?: boolean;
 };
 
 type EnsenanzaItem = {
@@ -49,7 +49,7 @@ function initials(name: string): string {
 
 export default function EnsenanzaCard({ ensenanza }: Props) {
     const devocionales = ensenanza.devocionales ?? [];
-    const published = devocionales.filter((d) => String(d.is_devocional) === '2');
+    const published = devocionales.filter((d) => !d.hidden);
     const isComingSoon = published.length === 0;
     const sinImagen = !ensenanza.imagen;
     const sinDesc = !ensenanza.descripcion?.trim();
@@ -230,7 +230,7 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                                         dev={dev}
                                         idx={idx + 1}
                                         isEven={idx % 2 === 1}
-                                        disabled={String(dev.is_devocional) !== '2'}
+                                        disabled={!!dev.hidden}
                                     />
                                 ))}
                             </div>

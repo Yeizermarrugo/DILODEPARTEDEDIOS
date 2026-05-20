@@ -18,6 +18,7 @@ class Devocional extends Model
         'categoria',
         'autor',
         'is_devocional',
+        'hidden',
         'serie',
         'created_at',
         'ensenanza_id',
@@ -35,7 +36,8 @@ class Devocional extends Model
 
     protected $casts = [
         'is_devocional' => 'integer',
-        'created_at' => 'datetime',
+        'hidden'        => 'boolean',
+        'created_at'    => 'datetime',
     ];
 
     protected static function boot()
