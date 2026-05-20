@@ -24,6 +24,7 @@ class NotificarDevocionalDiario extends Command
 
         // 1. Devocional
         $devocional = Devocional::where('is_devocional', 1)
+            ->where('hidden', false)
             ->whereNull('ensenanza_id')
             ->whereNull('notificado_at')
             ->whereDate('created_at', today())
@@ -36,12 +37,13 @@ class NotificarDevocionalDiario extends Command
                 $devocional,
                 '📖 Devocional de hoy',
                 "/devocional/{$devocional->id}",
-                'h1'   // 👈
+                'h1'
             );
         }
 
         // 2. Estudio Bíblico
         $estudio = Devocional::where('is_devocional', Devocional::TYPE_ESTUDIO)
+            ->where('hidden', false)
             ->whereNull('notificado_at')
             ->whereDate('created_at', today())
             ->orderBy('created_at', 'desc')
@@ -53,13 +55,13 @@ class NotificarDevocionalDiario extends Command
                 $estudio,
                 '📚 Nuevo Estudio Bíblico',
                 "/estudio-biblico/{$estudio->id}",
-                'h2'   // 👈
+                'h2'
             );
         }
 
-
         // 3. Enseñanza
         $ensenanza = Devocional::where('is_devocional', Devocional::TYPE_SERIE)
+            ->where('hidden', false)
             ->whereNotNull('ensenanza_id')
             ->whereNull('notificado_at')
             ->whereDate('created_at', today())
@@ -72,7 +74,7 @@ class NotificarDevocionalDiario extends Command
                 $ensenanza,
                 '🎓 Nueva Enseñanza',
                 "/series/{$ensenanza->id}",
-                'h2'   // 👈
+                'h2'
             );
         }
 
