@@ -15,7 +15,10 @@ class ImageUploadController extends Controller
             'file' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120', new ValidImageContent()],
         ]);
 
-        $path = $request->file('file')->store('imagenes', 's3', 'public');
+        $path = Storage::disk('s3')->putFile('imagenes', $request->file('file'), [
+            'visibility'    => 'public',
+            'CacheControl'  => 'max-age=31536000, public',
+        ]);
         $url  = Storage::disk('s3')->url($path);
 
         return response()->json(['location' => $url]);
@@ -30,7 +33,10 @@ class ImageUploadController extends Controller
 
         if ($request->hasFile('file')) {
             // Subir a S3 en carpeta devocionales
-            $path = $request->file('file')->store('postCard', 's3', 'public');
+            $path = Storage::disk('s3')->putFile('postCard', $request->file('file'), [
+                'visibility'   => 'public',
+                'CacheControl' => 'max-age=31536000, public',
+            ]);
             $url = Storage::disk('s3')->url($path);
 
             // Guardar en BD

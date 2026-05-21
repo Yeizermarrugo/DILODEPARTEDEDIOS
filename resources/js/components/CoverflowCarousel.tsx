@@ -84,7 +84,7 @@ export default function CoverflowCarousel() {
             </div>
             <div id="items">
                 {visibleImages.map((img, idx) => (
-                    <img key={img.id} src={img.url} draggable={false} alt={`Slide ${idx + 1}`} className={getImageClass(idx)} />
+                    <img key={img.id} src={img.url} draggable={false} alt={`Slide ${idx + 1}`} className={getImageClass(idx)} loading="lazy" />
                 ))}
             </div>
         </div>
