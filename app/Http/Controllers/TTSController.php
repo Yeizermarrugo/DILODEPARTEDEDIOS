@@ -52,7 +52,7 @@ class TTSController extends Controller
             'v' => $voice,
         ];
 
-        $response = Http::get($voiceRssUrl, $params);
+        $response = Http::timeout(15)->get($voiceRssUrl, $params);
 
         if ($response->ok() && strpos($response->header('Content-Type'), 'audio') !== false) {
             $audio = $response->body();
