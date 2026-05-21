@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\UsesStoragePrefix;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PdfUploadController extends Controller
 {
+    use UsesStoragePrefix;
     public function store(Request $request)
     {
         // Validar que viene un PDF
@@ -16,7 +18,7 @@ class PdfUploadController extends Controller
 
         if ($request->hasFile('file')) {
             // Subir a S3 en carpeta "pdfs-devocionales"
-            $path = $request->file('file')->store('pdf', 's3', 'public');
+            $path = $request->file('file')->store($this->storageFolder('pdf'), 's3', 'public');
             $url = Storage::disk('s3')->url($path);
 
             return response()->json([

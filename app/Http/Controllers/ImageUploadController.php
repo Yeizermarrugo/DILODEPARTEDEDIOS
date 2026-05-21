@@ -4,22 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\PostImage;
 use App\Rules\ValidImageContent;
+use App\Traits\UsesStoragePrefix;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ImageUploadController extends Controller
 {
+    use UsesStoragePrefix;
     public function store(Request $request)
     {
         $request->validate([
             'file' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120', new ValidImageContent()],
         ]);
 
-        $path = Storage::disk('s3')->putFile('imagenes', $request->file('file'), [
+        $path = Storage::disk('s3')->putFile($this->storageFolder('imagenes'), $request->file('file'), [
             'visibility'    => 'public',
             'CacheControl'  => 'max-age=31536000, public',
         ]);
-        $url  = Storage::disk('s3')->url($path);
+
+        if (! $path) {
+            return response()->json(['error' => 'Upload failed.'], 500);
+        }
+
+        $url = Storage::disk('s3')->url($path);
 
         return response()->json(['location' => $url]);
     }
@@ -33,10 +40,15 @@ class ImageUploadController extends Controller
 
         if ($request->hasFile('file')) {
             // Subir a S3 en carpeta devocionales
-            $path = Storage::disk('s3')->putFile('postCard', $request->file('file'), [
+            $path = Storage::disk('s3')->putFile($this->storageFolder('postCard'), $request->file('file'), [
                 'visibility'   => 'public',
                 'CacheControl' => 'max-age=31536000, public',
             ]);
+
+            if (! $path) {
+                return response()->json(['error' => 'Upload failed.'], 500);
+            }
+
             $url = Storage::disk('s3')->url($path);
 
             // Guardar en BD

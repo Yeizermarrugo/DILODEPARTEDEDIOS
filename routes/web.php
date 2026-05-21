@@ -8,6 +8,7 @@ use App\Http\Controllers\PdfUploadController;
 use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\StorageCleanupController;
 use App\Http\Controllers\TTSController;
 use App\Http\Controllers\YouTubeController;
 use App\Models\DevocionalView;
@@ -172,6 +173,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('postImage', function () {
         return Inertia::render('PostImage');
     })->name('PostImage');
+
+    Route::get('/storage-cleanup', [StorageCleanupController::class, 'index'])->name('storage.cleanup');
+    Route::delete('/storage-cleanup', [StorageCleanupController::class, 'destroy'])->name('storage.destroy');
 });
 
 Route::post('/upload-post-image', [ImageUploadController::class, 'post'])->middleware(['auth', 'verified']);

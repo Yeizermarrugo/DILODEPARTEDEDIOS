@@ -2,17 +2,20 @@
 namespace App\Http\Controllers;
 
 use App\Rules\ValidImageContent;
+use App\Traits\UsesStoragePrefix;
 use Illuminate\Http\Request;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 
 class BulkUploadController extends Controller
 {
+    use UsesStoragePrefix;
+
     public function index()
     {
         /** @var FilesystemAdapter $disk */
         $disk  = Storage::disk('s3');
-        $paths = $disk->allFiles('imagenes');
+        $paths = $disk->allFiles($this->storageFolder('imagenes'));
 
         $files = array_map(fn($path) => [
             'path' => $path,
@@ -36,7 +39,7 @@ class BulkUploadController extends Controller
         $paths = [];
 
         foreach ($request->file('files') as $file) {
-            $path    = $file->store('imagenes', 's3');
+            $path    = $file->store($this->storageFolder('imagenes'), 's3');
             $url     = $disk->url($path);
             $paths[] = compact('path', 'url');
         }
@@ -56,7 +59,7 @@ class BulkUploadController extends Controller
 
         /** @var FilesystemAdapter $disk */
         $disk   = Storage::disk('s3');
-        $folder = $request->input('folder', 'videos');
+        $folder = $this->storageFolder($request->input('folder', 'videos'));
         $path   = $request->file('file')->store($folder, 's3');
         $url    = $disk->url($path);
 
