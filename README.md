@@ -15,6 +15,8 @@ Plataforma web para una comunidad cristiana que publica devocionales diarios, es
 - **Notificaciones push** — opt-in vía Web Push (VAPID); enviadas desde Laravel
 - **Formulario de contacto** — mensajes con lectura/archivo gestionados desde el dashboard
 - **Panel de administración** — estadísticas, publicaciones recientes, gestión de mensajes de contacto
+- **Limpieza de almacenamiento** — detecta y elimina archivos huérfanos en el bucket comparando contra `devocionals.imagen`, `devocionals.pdf`, `ensenanzas.imagen`, `post_images.url` y URLs embebidas en el contenido HTML. Separación por entorno (`local/` vs raíz) para no mezclar archivos de desarrollo con producción
+- **Contenido programado** — publicación automática de contenido oculto con notificación por correo
 - **Donaciones** — integración con ePayco (webhook con validación de firma)
 - **Podcast** — sección de contenido de audio
 - **Librería de recursos** — descarga de materiales (PDF y otros)
@@ -36,7 +38,7 @@ Plataforma web para una comunidad cristiana que publica devocionales diarios, es
 | Estilos | Tailwind CSS v4, MUI 7, Radix UI |
 | Editor | TinyMCE 6 |
 | Base de datos | MySQL / PostgreSQL |
-| Archivos | AWS S3 |
+| Archivos | Cloudflare R2 (vía Laravel Cloud Object Storage) |
 | Email | Resend |
 | Push | Web Push + VAPID (`laravel-notification-channels/webpush`) |
 | TTS | Voice RSS API |
@@ -52,7 +54,7 @@ Plataforma web para una comunidad cristiana que publica devocionales diarios, es
 - Composer
 - Node.js 20+
 - MySQL o PostgreSQL
-- Cuenta de AWS S3
+- Bucket de almacenamiento S3-compatible (Cloudflare R2, AWS S3, etc.)
 
 ### Pasos
 
@@ -99,11 +101,14 @@ DB_PASSWORD=
 # Email (Resend)
 RESEND_KEY=
 
-# AWS S3
+# Almacenamiento S3-compatible (Cloudflare R2 / AWS S3)
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
+AWS_DEFAULT_REGION=auto
 AWS_BUCKET=
+AWS_ENDPOINT=           # URL del endpoint S3 (ej: https://xxx.r2.cloudflarestorage.com)
+AWS_URL=                # URL pública de archivos (ej: https://bucket.laravel.cloud)
+AWS_USE_PATH_STYLE_ENDPOINT=false
 
 # Web Push
 VAPID_PUBLIC_KEY=
@@ -142,16 +147,17 @@ app/
 │   │   ├── YouTubeController.php       # Feed YouTube (caché 30min)
 │   │   ├── PaymentController.php       # Webhook ePayco
 │   │   ├── PushSubscriptionController.php
-│   │   ├── ImageUploadController.php   # Subida imágenes a S3
+│   │   ├── ImageUploadController.php   # Subida imágenes a S3 (env-prefixed, CacheControl)
 │   │   ├── BulkUploadController.php    # Subida masiva imágenes/videos a S3
-│   │   └── PdfUploadController.php
-│   └── Middleware/
+│   │   ├── PdfUploadController.php
+│   │   └── StorageCleanupController.php # Detecta y elimina archivos huérfanos del bucket
+│   ├── Middleware/
 │       ├── AssignVisitorId.php         # Cookie visitor_id (1 año, HttpOnly)
 │       ├── HandleInertiaRequests.php   # Props globales Inertia
 │       ├── HandleAppearance.php        # Tema dark/light/system
 │       └── AddSecurityHeaders.php      # CSP, X-Frame-Options, etc.
 ├── Models/
-│   ├── Devocional.php                  # UUID PK, is_devocional (0/1/2)
+│   ├── Devocional.php                  # UUID PK, is_devocional (0/1/2), hidden
 │   ├── Ensenanza.php                   # UUID PK, slug único
 │   ├── DevocionalView.php              # Analytics de vistas
 │   ├── ContentLike.php                 # Likes por visitor_hash
@@ -159,8 +165,20 @@ app/
 │   ├── Donation.php                    # Registro de donaciones ePayco
 │   ├── Visitor.php                     # Suscriptores push
 │   └── PostImage.php                   # URLs de imágenes de posts
+├── Traits/
+│   └── UsesStoragePrefix.php           # storageFolder() — prefijo local/ en dev
+├── Jobs/
+│   └── TrackDevocionalView.php         # View tracking asíncrono
+├── Services/
+│   └── ShortCodeService.php            # Genera short codes únicos
+├── Rules/
+│   └── ValidImageContent.php           # Valida contenido real de imagen subida
+├── Console/Commands/
+│   ├── NotificarDevocionalDiario.php   # Push notification del contenido de hoy
+│   └── PublicarContenidoProgramado.php # Publica contenido oculto programado
 └── Mail/
-    └── ContactFormMail.php
+    ├── ContactFormMail.php
+    └── ContenidoPublicadoMail.php
 
 resources/
 ├── js/
@@ -218,6 +236,10 @@ php artisan webpush:vapid
 
 # Ver rutas registradas
 php artisan route:list
+
+# Comandos programados (ejecutados por el scheduler)
+php artisan devocional:notificar-diario       # Push para contenido de hoy
+php artisan contenido:publicar-programado     # Publica contenido oculto de hoy
 
 # TypeScript check
 npm run types

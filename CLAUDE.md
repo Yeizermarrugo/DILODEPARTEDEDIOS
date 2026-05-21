@@ -26,6 +26,10 @@ php artisan migrate:fresh --seed
 php artisan octane:start   # Production server (Laravel Octane)
 php artisan tinker
 php artisan pint           # Laravel code formatter
+
+# Scheduled commands (run by cron/scheduler)
+php artisan devocional:notificar-diario      # Send push notification for today's content
+php artisan contenido:publicar-programado    # Publish scheduled hidden content + email notify
 ```
 
 No backend or frontend test suite — verify changes visually in the browser.
@@ -182,6 +186,8 @@ A single table serves three content types, distinguished by `is_devocional`:
 | POST | `/upload-post-image` | `ImageUploadController@post` | ✓ | S3 + DB record |
 | POST | `/upload-pdf` | `PdfUploadController@store` | ✓ | S3, 10MB max |
 | GET | `/postImage` | Inertia 'PostImage' | ✓ | |
+| GET | `/storage-cleanup` | `StorageCleanupController@index` | ✓ | Orphaned file manager |
+| DELETE | `/storage-cleanup` | `StorageCleanupController@destroy` | ✓ | Delete S3 paths |
 | GET | `/post-images` | `PostController@index` | — | JSON list |
 | DELETE | `/post-image/{id}` | `PostController@delete` | ✓ | |
 | PATCH | `/contact-messages/{id}/read` | `ContactController@markRead` | ✓ | Sets read_at if null |
@@ -226,18 +232,24 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | `TTSController` | `voiceRss()` proxy VoiceRSS→cache MP3, `voices()` list voices |
 | `YouTubeController` | `latestVideos()` fetch+filter by "CLASE"+cache 30min |
 | `PaymentController` | `confirmation()` ePayco webhook: validate signature, upsert Donation |
-| `ImageUploadController` | `store()` → S3 'imagenes', `post()` → S3 'postCard' + PostImage record |
-| `BulkUploadController` | `store()` images, `storeVideo()` video, `index()` list S3 bucket |
+| `ImageUploadController` | `store()` → S3 'imagenes' (env-prefixed), `post()` → S3 'postCard' (env-prefixed) + PostImage record. Both set `CacheControl: max-age=31536000`. Uses `UsesStoragePrefix` trait. |
+| `BulkUploadController` | `store()` images, `storeVideo()` video, `index()` list S3 bucket. Uses `UsesStoragePrefix` trait. |
 | `PushSubscriptionController` | `subscribe()`, `unsubscribe()`, `vapidKey()` |
 | `PostController` | `index()` list, `delete($id)` remove |
-| `PdfUploadController` | `store()` → S3, 10MB max |
+| `PdfUploadController` | `store()` → S3 'pdf' (env-prefixed), 10MB max. Uses `UsesStoragePrefix` trait. |
+| `StorageCleanupController` | `index()` Inertia page with orphaned file list, `destroy()` delete paths from S3. Scans env-prefixed folders, compares against 5 sources to find orphans (see implementation details). Path security validation on delete. |
+| `SitemapController` | Generates XML sitemap |
 
 ### Key implementation details
 - **HTML sanitization:** `DevocionalController` runs `HTMLPurifier` on `contenido` before store/update. `DOMPurify` also used client-side before TinyMCE renders.
-- **View tracking:** IP anonymized (last octet → `.0`). Throttled 1 view/IP/hour via DB index. Browser+platform detected via `jenssegers/agent`.
+- **View tracking:** IP anonymized (last octet → `.0`). Throttled 1 view/IP/hour via DB index. Browser+platform detected via `jenssegers/agent`. Dispatched via `TrackDevocionalView` job.
 - **Like hashing:** `visitor_hash = SHA256(visitor_uuid + "|" + content_id + "|" + content_type)` — no PII in DB.
-- **Short URLs:** 8-char alphanumeric codes stored on `devocionals.short_code` and `ensenanzas.short_code`. Lazy-generated on first share.
+- **Short URLs:** 8-char alphanumeric codes stored on `devocionals.short_code` and `ensenanzas.short_code`. Lazy-generated on first share via `ShortCodeService`.
 - **Cache keys:** `dashboard.stats` (5min), `dashboard.recientes` (2min), `devocionales.categorias` (1h), `devocionales.autores` (1h), `estudios.all` (1h), `youtube.latest_videos` (30min).
+- **Storage env prefix:** Upload controllers use `UsesStoragePrefix` trait. `StorageCleanupController` inlines `storageFolder()` directly (avoids intelephense false-positive on trait detection). `storageFolder($base)` returns `local/$base` when `APP_ENV != production`, or `$base` in production. Prevents local dev uploads from appearing as orphans in prod cleanup.
+- **Storage cleanup orphan detection — 5 sources:** `devocionals.imagen`, `devocionals.pdf`, `ensenanzas.imagen`, `post_images.url`, and URLs extracted via regex from `devocionals.contenido` HTML (catches images/videos embedded by TinyMCE). Comparison uses path, not full URL (strips `AWS_URL` prefix → robust if domain changes). Delete validates each path starts with a known env-prefixed folder — rejects arbitrary paths. Frontend uses `router.delete()` from Inertia (auto-handles CSRF, avoids 419).
+- **S3 CacheControl:** All image uploads set `CacheControl: max-age=31536000, public` on the S3 object. Combined with Cloudflare R2 edge caching this gives 1-year browser+CDN cache.
+- **Content visibility:** `hidden` boolean on `devocionals`. `PublicarContenidoProgramado` command unhides content scheduled for today and sends email. `NotificarDevocionalDiario` command sends push notifications for today's content.
 
 ---
 
@@ -261,6 +273,7 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | `Libreria.tsx` | `/recursos` | Resource library |
 | `Obras.tsx` | `/obras` | Works listing |
 | `PostImage.tsx` | `/postImage` | Auth-only bulk image upload + management |
+| `StorageCleanup.tsx` | `/storage-cleanup` | Auth-only orphaned S3 file viewer + bulk delete |
 | `PaginaLegal.tsx` | `/content-usage` | Legal/content usage terms |
 | `ThanksPage.tsx` | `/gracias` | Post-donation confirmation |
 | `Offline.tsx` | — | Service worker offline fallback |
@@ -295,7 +308,13 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | `app-shell.tsx` / `app-sidebar.tsx` / `app-header.tsx` | Auth layout (sidebar, breadcrumbs) |
 | `LoaderBook.tsx` / `Spinner.tsx` | Loading states |
 | `ui/*` | shadcn/Radix primitives: dialog, sheet, badge, button, select, collapsible, navigation-menu, sidebar, etc. |
+| `ui/FilterSheet.tsx` | Mobile filter sheet overlay |
 | `dashboard/Devocionales.tsx` | Admin devocional management panel |
+| `dashboard/DevocionalesEdit.tsx` | Edit form within admin panel |
+| `dashboard/Post.tsx` | Post image management panel |
+| `main.tsx` | Hero/home page main content section |
+| `LibroList.tsx` | Book list for Libreria page |
+| `ObrasList.tsx` | Works list for Obras page |
 
 ### Hooks (`resources/js/hooks/`)
 
@@ -333,7 +352,17 @@ Color palette used across components: `#2d465e` (dark blue), `#f75815` (orange),
 ## Infrastructure & Services
 
 ### Storage
-All uploads (images, PDFs, videos) go to **AWS S3** via `flysystem-aws-s3-v3`. Folders: `imagenes/` for devotional images, `postCard/` for post images.
+All uploads (images, PDFs, videos) go to **Cloudflare R2** (S3-compatible, zero egress cost) via `flysystem-aws-s3-v3`. Hosted via Laravel Cloud Object Storage — credentials use `AWS_ENDPOINT` pointing to `r2.cloudflarestorage.com`. `AWS_URL` is the public-facing CDN URL (`*.laravel.cloud` domain, Cloudflare-backed edge).
+
+**Folder structure (env-prefixed via `UsesStoragePrefix` trait):**
+| Env | imagenes | postCard | pdf | videos |
+|-----|----------|----------|-----|--------|
+| production | `imagenes/` | `postCard/` | `pdf/` | `videos/` |
+| local/staging | `local/imagenes/` | `local/postCard/` | `local/pdf/` | `local/videos/` |
+
+This prevents local dev uploads from appearing as orphans in the production storage cleanup tool.
+
+All image uploads set `CacheControl: max-age=31536000, public` → 1-year CDN cache at Cloudflare edge.
 
 ### Visitor identification
 `AssignVisitorId` sets HttpOnly `visitor_id` UUID cookie (1 year). The raw UUID is never stored in DB — only SHA256 hashes are stored (`visitors.visitor_id`, `content_likes.visitor_hash`).
@@ -354,7 +383,40 @@ Resend via `resend/resend-laravel`. Contact form sends `ContactFormMail` to `dil
 TinyMCE 6 (self-hosted via CDN, key from `config/services.php`). Content sanitized with HTMLPurifier (PHP) on store/update. Client-side DOMPurify used before rendering untrusted HTML.
 
 ### ngrok support
-`AppServiceProvider::boot()` forces HTTPS scheme when the host contains `ngrok-free.app`.
+`AppServiceProvider::boot()` calls `URL::forceScheme('https')` when `config('app.url')` contains `ngrok-free.app`.
+
+### Traits
+| Trait | Location | Purpose |
+|-------|----------|---------|
+| `UsesStoragePrefix` | `app/Traits/UsesStoragePrefix.php` | `storageFolder(string $base): string` — prefixes S3 folder with `local/` when not in production |
+
+### Jobs
+| Job | Purpose |
+|-----|---------|
+| `TrackDevocionalView` | Queued job to record a page view asynchronously |
+
+### Services
+| Service | Purpose |
+|---------|---------|
+| `ShortCodeService` | Generates unique 8-char alphanumeric short codes for devocionals/ensenanzas |
+
+### Rules
+| Rule | Purpose |
+|------|---------|
+| `ValidImageContent` | Custom validation rule: verifies uploaded file is a real image (not just extension) |
+
+### Console Commands
+| Command | Signature | Purpose |
+|---------|-----------|---------|
+| `NotificarDevocionalDiario` | `devocional:notificar-diario` | Sends push notification to all subscribers for today's published content |
+| `PublicarContenidoProgramado` | `contenido:publicar-programado` | Unhides content with `hidden=true` scheduled for today, sends email to `dilodepartededios@gmail.com` |
+
+### Notifications / Mail
+| Class | Purpose |
+|-------|---------|
+| `NuevoContenidoNotification` | Web push notification payload for new content |
+| `ContactFormMail` | Email sent to admin on contact form submission |
+| `ContenidoPublicadoMail` | Email notification when scheduled content is published |
 
 ---
 
