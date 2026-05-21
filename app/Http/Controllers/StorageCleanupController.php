@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use App\Models\Ensenanza;
 use App\Models\PostImage;
-use App\Traits\UsesStoragePrefix;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,8 +12,7 @@ use Inertia\Inertia;
 
 class StorageCleanupController extends Controller
 {
-    use UsesStoragePrefix;
-
+    /** @var string[] */
     private array $baseFolders = ['imagenes', 'postCard', 'pdf', 'videos'];
 
     public function index()
@@ -31,52 +29,122 @@ class StorageCleanupController extends Controller
             'paths.*' => 'required|string',
         ]);
 
-        /** @var FilesystemAdapter $disk */
-        $disk    = Storage::disk('s3');
-        $deleted = [];
-        $failed  = [];
+        $allowedFolders = $this->prefixedFolders();
+        $paths          = $request->paths;
 
-        foreach ($request->paths as $path) {
-            $disk->delete($path) ? $deleted[] = $path : $failed[] = $path;
-        }
-
-        return response()->json(compact('deleted', 'failed'));
-    }
-
-    private function orphanedFiles(): array
-    {
-        /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
-
-        $allPaths = [];
-        foreach (array_map(fn($f) => $this->storageFolder($f), $this->baseFolders) as $folder) {
-            try {
-                $allPaths = array_merge($allPaths, $disk->allFiles($folder));
-            } catch (\Exception) {
-                // Folder may not exist yet
+        // Reject any path not rooted in a known env-prefixed folder
+        foreach ($paths as $path) {
+            $valid = false;
+            foreach ($allowedFolders as $folder) {
+                if (str_starts_with($path, $folder . '/')) {
+                    $valid = true;
+                    break;
+                }
+            }
+            if (!$valid) {
+                return back()->withErrors(['paths' => "Path not allowed: {$path}"]);
             }
         }
 
-        $inUse = collect()
+        /** @var FilesystemAdapter $disk */
+        $disk    = Storage::disk('s3');
+        $deleted = 0;
+
+        foreach ($paths as $path) {
+            if ($disk->delete($path)) {
+                $deleted++;
+            }
+        }
+
+        return redirect()->route('storage.cleanup')
+            ->with('deleted', $deleted);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+
+    private function storageFolder(string $folder): string
+    {
+        return app()->isProduction() ? $folder : 'local/' . $folder;
+    }
+
+    /** @return string[] */
+    private function prefixedFolders(): array
+    {
+        return array_map(fn($f) => $this->storageFolder($f), $this->baseFolders);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function orphanedFiles(): array
+    {
+        /** @var FilesystemAdapter $disk */
+        $disk    = Storage::disk('s3');
+        $baseUrl = rtrim((string) config('filesystems.disks.s3.url', ''), '/');
+
+        // ── 1. Collect all bucket paths in env folders ──────────
+        $allPaths = [];
+        foreach ($this->prefixedFolders() as $folder) {
+            try {
+                $allPaths = array_merge($allPaths, $disk->allFiles($folder));
+            } catch (\Throwable) {
+                // folder not created yet
+            }
+        }
+
+        if (empty($allPaths)) {
+            return [];
+        }
+
+        // ── 2. Build set of in-use paths ────────────────────────
+        // Helper: strip base URL → path key for comparison
+        $toPath = function (?string $url) use ($baseUrl): ?string {
+            if (!$url || !$baseUrl) {
+                return null;
+            }
+            $prefix = $baseUrl . '/';
+            if (str_starts_with($url, $prefix)) {
+                return substr($url, strlen($prefix));
+            }
+            return null;
+        };
+
+        // Direct column references
+        $directUrls = collect()
             ->merge(Devocional::whereNotNull('imagen')->pluck('imagen'))
             ->merge(Devocional::whereNotNull('pdf')->pluck('pdf'))
             ->merge(Ensenanza::whereNotNull('imagen')->pluck('imagen'))
-            ->merge(PostImage::pluck('url'))
+            ->merge(PostImage::pluck('url'));
+
+        // URLs embedded inside TinyMCE HTML (covers images & videos inserted in contenido)
+        if ($baseUrl) {
+            $pattern  = '/' . preg_quote($baseUrl . '/', '/') . '[^\s"\'<>()]+/';
+            $contents = Devocional::whereNotNull('contenido')
+                ->where('contenido', 'LIKE', '%' . $baseUrl . '%')
+                ->pluck('contenido');
+
+            foreach ($contents as $html) {
+                if (preg_match_all($pattern, $html, $m)) {
+                    $directUrls = $directUrls->merge($m[0]);
+                }
+            }
+        }
+
+        $inUsePaths = $directUrls
+            ->map($toPath)
             ->filter()
             ->unique()
             ->flip()
             ->toArray();
 
+        // ── 3. Find orphans ─────────────────────────────────────
         $orphaned = [];
         foreach ($allPaths as $path) {
-            $url = $disk->url($path);
-            if (isset($inUse[$url])) {
+            if (isset($inUsePaths[$path])) {
                 continue;
             }
             $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
             $orphaned[] = [
                 'path'      => $path,
-                'url'       => $url,
+                'url'       => $disk->url($path),
                 'name'      => basename($path),
                 'folder'    => dirname($path),
                 'extension' => $ext,
