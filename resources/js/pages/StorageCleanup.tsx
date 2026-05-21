@@ -1,7 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/react';
-import axios from 'axios';
 import { FileText, Film, Image, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -25,9 +24,6 @@ interface Props {
     orphaned: OrphanedFile[];
 }
 
-const csrfToken = () =>
-    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
-
 const FOLDER_LABELS: Record<string, string> = {
     imagenes: 'Imágenes',
     postCard: 'Post Cards',
@@ -42,10 +38,8 @@ function FileIcon({ file }: { file: OrphanedFile }) {
 }
 
 export default function StorageCleanup({ orphaned }: Props) {
-    const [files, setFiles] = useState<OrphanedFile[]>(orphaned);
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [deleting, setDeleting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const toggleSelect = (path: string) => {
         setSelected(prev => {
@@ -57,33 +51,22 @@ export default function StorageCleanup({ orphaned }: Props) {
 
     const toggleAll = () => {
         setSelected(prev =>
-            prev.size === files.length
+            prev.size === orphaned.length
                 ? new Set()
-                : new Set(files.map(f => f.path))
+                : new Set(orphaned.map(f => f.path))
         );
     };
 
-    const deletePaths = async (paths: string[]) => {
+    const deletePaths = (paths: string[]) => {
         setDeleting(true);
-        setError(null);
-        try {
-            const res = await axios.delete('/storage-cleanup', {
-                data: { paths },
-                headers: { 'X-CSRF-TOKEN': csrfToken() },
-            });
-            const { deleted } = res.data as { deleted: string[]; failed: string[] };
-            const deletedSet = new Set(deleted);
-            setFiles(prev => prev.filter(f => !deletedSet.has(f.path)));
-            setSelected(prev => {
-                const next = new Set(prev);
-                deleted.forEach(p => next.delete(p));
-                return next;
-            });
-        } catch {
-            setError('Error al eliminar. Intenta de nuevo.');
-        } finally {
-            setDeleting(false);
-        }
+        router.delete('/storage-cleanup', {
+            data: { paths },
+            preserveScroll: true,
+            onFinish: () => {
+                setDeleting(false);
+                setSelected(new Set());
+            },
+        });
     };
 
     const deleteSelected = () => {
@@ -97,7 +80,7 @@ export default function StorageCleanup({ orphaned }: Props) {
         deletePaths([path]);
     };
 
-    const byFolder = files.reduce<Record<string, OrphanedFile[]>>((acc, f) => {
+    const byFolder = orphaned.reduce<Record<string, OrphanedFile[]>>((acc, f) => {
         (acc[f.folder] ??= []).push(f);
         return acc;
     }, {});
@@ -113,20 +96,20 @@ export default function StorageCleanup({ orphaned }: Props) {
                             Limpieza de almacenamiento
                         </h1>
                         <p className="text-sm mt-1" style={{ color: '#8a7f72' }}>
-                            {files.length === 0
+                            {orphaned.length === 0
                                 ? 'No hay archivos huérfanos. El bucket está limpio.'
-                                : `${files.length} archivo${files.length > 1 ? 's' : ''} sin usar en el bucket`}
+                                : `${orphaned.length} archivo${orphaned.length > 1 ? 's' : ''} sin usar en el bucket`}
                         </p>
                     </div>
 
-                    {files.length > 0 && (
+                    {orphaned.length > 0 && (
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={toggleAll}
                                 className="text-sm px-4 py-2 rounded-xl border transition-colors"
                                 style={{ borderColor: '#e8e2d8', backgroundColor: '#fff', color: '#2d465e' }}
                             >
-                                {selected.size === files.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                                {selected.size === orphaned.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
                             </button>
                             {selected.size > 0 && (
                                 <button
@@ -143,14 +126,8 @@ export default function StorageCleanup({ orphaned }: Props) {
                     )}
                 </div>
 
-                {error && (
-                    <div className="rounded-xl px-4 py-3 text-sm" style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
-                        {error}
-                    </div>
-                )}
-
                 {/* Empty state */}
-                {files.length === 0 && (
+                {orphaned.length === 0 && (
                     <div className="flex flex-col items-center justify-center rounded-2xl border py-20 text-center"
                         style={{ backgroundColor: '#fff', borderColor: '#e8e2d8' }}>
                         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
