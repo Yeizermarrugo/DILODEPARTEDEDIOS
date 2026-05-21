@@ -12,6 +12,7 @@ import {
     Image,
     Inbox,
     PlusCircle,
+    Trash2,
     TrendingUp
 } from 'lucide-react';
 import { useState } from 'react';
@@ -307,6 +308,7 @@ export default function Dashboard({ stats, recientes, contactMessages }: Dashboa
                                 { label: 'Nuevo Devocional', href: '/devocionalesAgregar', icon: PlusCircle, color: '#f75815', bg: '#fff5f0' },
                                 { label: 'Editar contenido', href: '/devocionales-edit',   icon: Edit3,      color: '#2d465e', bg: '#f0f4f7' },
                                 { label: 'Imágenes de post', href: '/postImage',           icon: Image,      color: '#2a7d4f', bg: '#f0f9f4' },
+                                { label: 'Limpiar bucket',   href: '/storage-cleanup',     icon: Trash2,     color: '#92400e', bg: '#fffbeb' },
                             ].map(({ label, href, icon: Icon, color, bg }) => (
                                 <Link key={label} href={href}
                                     className="group flex items-center gap-3 rounded-2xl border px-3 py-3 sm:px-4 sm:py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
