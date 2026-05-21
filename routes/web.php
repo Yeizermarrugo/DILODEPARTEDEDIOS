@@ -193,6 +193,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/devocionales-edit', [DevocionalController::class, 'adminIndex']);
     Route::get('/devocionales/{id}', [DevocionalController::class, 'showJson'])->name('devocionales.showJson');
     Route::put('/devocionales/{id}', [DevocionalController::class, 'update'])->name('devocionales.update');
+    Route::patch('/devocionales/{id}/hidden', [DevocionalController::class, 'toggleHidden'])->name('devocionales.toggleHidden');
     Route::patch('/contact-messages/{id}/read',    [ContactController::class, 'markRead']);
     Route::patch('/contact-messages/{id}/archive', [ContactController::class, 'archive']);
 });
