@@ -2,7 +2,8 @@ import CardNew from '@/components/CardNew';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Eye, GraduationCap, Hash, Pencil, PlusCircle, Search, Tv2, X } from 'lucide-react';
+import axios from 'axios';
+import { BookOpen, Eye, EyeOff, GraduationCap, Hash, Pencil, PlusCircle, Search, Tv2, X } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import '../../css/admin-edit.css';
 import '../../css/cardNew.css';
@@ -77,45 +78,132 @@ const getPublicUrl = (dev: Devocional): string | null => {
     return null;
 };
 
+// ─── ConfirmModal ─────────────────────────────────────────────────────────────
+
+function ConfirmModal({
+    hidden,
+    titulo,
+    onConfirm,
+    onCancel,
+    loading,
+}: {
+    hidden: boolean;
+    titulo: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+    loading: boolean;
+}) {
+    const action = hidden ? 'mostrar' : 'ocultar';
+    const actionCap = hidden ? 'Mostrar' : 'Ocultar';
+
+    return (
+        <div className="ae-modal-backdrop" onClick={onCancel}>
+            <div className="ae-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="ae-modal__icon">
+                    {hidden ? <Eye size={22} /> : <EyeOff size={22} />}
+                </div>
+                <h3 className="ae-modal__title">¿{actionCap} contenido?</h3>
+                <p className="ae-modal__desc">
+                    <strong>"{titulo}"</strong>
+                    <br />
+                    {hidden
+                        ? 'El contenido quedará visible para todos los visitantes.'
+                        : 'El contenido dejará de ser visible para el público.'}
+                </p>
+                <div className="ae-modal__actions">
+                    <button className="ae-modal__btn ae-modal__btn--cancel" onClick={onCancel} disabled={loading}>
+                        Cancelar
+                    </button>
+                    <button
+                        className={`ae-modal__btn ae-modal__btn--confirm${hidden ? ' ae-modal__btn--show' : ' ae-modal__btn--hide'}`}
+                        onClick={onConfirm}
+                        disabled={loading}
+                    >
+                        {loading ? 'Guardando…' : `Sí, ${action}`}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ─── AdminCard ────────────────────────────────────────────────────────────────
 
-function AdminCard({ dev, todasLasCategorias }: { dev: Devocional; todasLasCategorias: string[] }) {
+function AdminCard({ dev, todasLasCategorias, onHiddenChange }: {
+    dev: Devocional;
+    todasLasCategorias: string[];
+    onHiddenChange: (id: string, hidden: boolean, dev: Devocional) => void;
+}) {
+    const [showModal, setShowModal] = useState(false);
+    const [toggling, setToggling] = useState(false);
     const publicUrl = dev.hidden ? null : getPublicUrl(dev);
+    const titulo = extractTitle(decodeHtml(dev.contenido));
+
     const processedDev = {
         ...dev,
-        titulo: extractTitle(decodeHtml(dev.contenido)),
+        titulo,
         autor: dev.autor || 'Redacción',
     };
 
+    const handleToggle = async () => {
+        setToggling(true);
+        try {
+            const { data } = await axios.patch(`/devocionales/${dev.id}/hidden`, {
+                hidden: !dev.hidden,
+            });
+            onHiddenChange(dev.id, data.hidden, dev);
+        } finally {
+            setToggling(false);
+            setShowModal(false);
+        }
+    };
+
     return (
-        <div className="ae-card-wrap">
-            <CardNew
-                dev={processedDev}
-                todasLasCategorias={todasLasCategorias}
-                buildHref={(d) => `/devocionales-editar/${d.id}`}
-                hideActions
-            />
-            <div className="ae-card-actions">
-                <a href={`/devocionales-editar/${dev.id}`} className="ae-card-btn ae-card-btn--edit">
-                    <Pencil size={11} />
-                    Editar
-                </a>
-                {publicUrl ? (
-                    <a
-                        href={publicUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ae-card-btn ae-card-btn--view"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Eye size={11} />
-                        Ver
+        <>
+            <div className="ae-card-wrap">
+                <CardNew
+                    dev={processedDev}
+                    todasLasCategorias={todasLasCategorias}
+                    buildHref={(d) => `/devocionales-editar/${d.id}`}
+                    hideActions
+                />
+                <div className="ae-card-actions">
+                    <a href={`/devocionales-editar/${dev.id}`} className="ae-card-btn ae-card-btn--edit">
+                        <Pencil size={11} />
+                        Editar
                     </a>
-                ) : (
-                    <span className="ae-card-hidden-badge">Oculto</span>
-                )}
+                    {publicUrl && (
+                        <a
+                            href={publicUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ae-card-btn ae-card-btn--view"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <Eye size={11} />
+                            Ver
+                        </a>
+                    )}
+                    <button
+                        className={`ae-card-btn ${dev.hidden ? 'ae-card-btn--show' : 'ae-card-btn--hide'}`}
+                        onClick={() => setShowModal(true)}
+                    >
+                        {dev.hidden ? <Eye size={11} /> : <EyeOff size={11} />}
+                        {dev.hidden ? 'Mostrar' : 'Ocultar'}
+                    </button>
+                </div>
             </div>
-        </div>
+
+            {showModal && (
+                <ConfirmModal
+                    hidden={!!dev.hidden}
+                    titulo={titulo}
+                    onConfirm={handleToggle}
+                    onCancel={() => setShowModal(false)}
+                    loading={toggling}
+                />
+            )}
+        </>
     );
 }
 
@@ -187,6 +275,13 @@ export default function Edit() {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selectedCategoria, setSelectedCategoria] = useState(filters.categoria ?? '');
     const [selectedAutor, setSelectedAutor] = useState(filters.autor ?? '');
+    const [hiddenOverrides, setHiddenOverrides] = useState<Record<string, boolean>>({});
+    const [movedDevs, setMovedDevs] = useState<Record<string, Devocional>>({});
+
+    const handleHiddenChange = (id: string, hidden: boolean, dev: Devocional) => {
+        setHiddenOverrides((prev) => ({ ...prev, [id]: hidden }));
+        setMovedDevs((prev) => ({ ...prev, [id]: dev }));
+    };
 
     const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -390,11 +485,29 @@ export default function Edit() {
                     ) : (
                         <>
                             <div className="ae-grid">
-                                {activeSection.data.data.map((dev) => (
+                                {[
+                                    // Server data — filtered by current toggle state
+                                    ...activeSection.data.data.filter((dev) => {
+                                        if (!(dev.id in hiddenOverrides)) return true;
+                                        if (activeTab === 'ocultos') return hiddenOverrides[dev.id] === true;
+                                        return hiddenOverrides[dev.id] === false;
+                                    }),
+                                    // Moved items that now belong to this tab
+                                    ...Object.values(movedDevs).filter((dev) => {
+                                        // Already rendered by server data above — skip
+                                        if (activeSection.data.data.some((d) => d.id === dev.id)) return false;
+                                        if (activeTab === 'ocultos') return hiddenOverrides[dev.id] === true;
+                                        if (activeTab === 'devocionales') return hiddenOverrides[dev.id] === false && dev.is_devocional === 1;
+                                        if (activeTab === 'estudios')    return hiddenOverrides[dev.id] === false && dev.is_devocional === 3;
+                                        if (activeTab === 'series')      return hiddenOverrides[dev.id] === false && dev.is_devocional === 2;
+                                        return false;
+                                    }),
+                                ].map((dev) => (
                                     <AdminCard
                                         key={dev.id}
-                                        dev={dev}
+                                        dev={{ ...dev, hidden: dev.id in hiddenOverrides ? hiddenOverrides[dev.id] : dev.hidden }}
                                         todasLasCategorias={todasLasCategorias}
+                                        onHiddenChange={handleHiddenChange}
                                     />
                                 ))}
                             </div>

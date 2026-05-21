@@ -659,6 +659,18 @@ class DevocionalController extends Controller
         return response()->json($devocional);
     }
 
+    public function toggleHidden(Request $request, $id)
+    {
+        $devocional = Devocional::findOrFail($id);
+        $devocional->update(['hidden' => $request->boolean('hidden')]);
+
+        $this->forgetCategoryCaches();
+
+        return response()->json([
+            'hidden' => $devocional->hidden,
+        ]);
+    }
+
     public function update(Request $request, $id)
     {
         $devocional = Devocional::findOrFail($id);
