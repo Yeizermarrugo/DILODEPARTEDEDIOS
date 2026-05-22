@@ -14,6 +14,7 @@ interface Resource {
     meta: string;
     author?: string;
     descriptionNode?: React.ReactNode;
+    imageUrl?: string;
 }
 
 // ─── Mock data — replace with LearnHub API response ──────────────────────────
@@ -38,6 +39,7 @@ const resources: Resource[] = [
         icon: 'bi-journal-text',
         meta: '3 volúmenes',
         author: 'Diana López',
+        imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/generaciones.png'
     },
     {
         id: '3',
@@ -97,7 +99,13 @@ function ResourceCard({ resource }: { resource: Resource }) {
         <article className="lib-card">
             <div className={`lib-card__cover lib-card__cover--${resource.coverVariant}`}>
                 <div className="lib-card__cover-shine" aria-hidden />
-                <i className={`bi ${resource.icon} lib-card__cover-icon`} aria-hidden />
+                {resource.imageUrl ? (
+                    <img src={resource.imageUrl} alt={`${resource.title} cover`} className="lib-card__cover-image" />
+                ) : (
+                    <div className="lib-card__cover-placeholder" aria-hidden>
+                        <i className={`bi ${resource.icon} lib-card__cover-icon`} aria-hidden />
+                    </div>
+                )}
                 <span className="lib-card__badge">{resource.category}</span>
             </div>
             <div className="lib-card__body">
