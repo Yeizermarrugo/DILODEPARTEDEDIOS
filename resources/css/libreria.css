@@ -181,8 +181,8 @@
 
 .lib-resources__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-    gap: 1.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+    gap: 1.5rem;
     max-width: 1120px;
     margin: 0 auto;
 }
@@ -191,30 +191,33 @@
 
 .lib-card {
     background: #fff;
-    border-radius: 18px;
+    border-radius: 16px;
     overflow: hidden;
     box-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.06),
-        0 0 0 1px rgba(0, 0, 0, 0.04);
+        0 2px 16px rgba(0, 0, 0, 0.07),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
     transition: transform 0.28s ease, box-shadow 0.28s ease;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 220px;
 }
 
 .lib-card:hover {
-    transform: translateY(-7px);
+    transform: translateY(-5px);
     box-shadow:
-        0 20px 48px rgba(0, 0, 0, 0.13),
-        0 0 0 1px rgba(0, 0, 0, 0.04);
+        0 18px 44px rgba(0, 0, 0, 0.13),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 .lib-card__cover {
-    height: 190px;
+    width: 260px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: hidden;
 }
 
 .lib-card__cover--navy {
@@ -257,7 +260,37 @@
     inset: 0;
     background: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.14) 0%, transparent 65%);
     pointer-events: none;
+    z-index: 2;
 }
+
+.lib-card__cover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.22));
+    z-index: 4;
+    pointer-events: none;
+}
+
+.lib-card__cover-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+    display: block;
+    z-index: 1;
+    transition: transform 0.5s ease;
+}
+
+.lib-card:hover .lib-card__cover-image {
+    transform: scale(1.04);
+}
+
 
 .lib-card__badge {
     position: absolute;
@@ -277,10 +310,11 @@
 }
 
 .lib-card__body {
-    padding: 1.5rem 1.5rem 1.75rem;
+    padding: 1.5rem 1.75rem 1.75rem;
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 .lib-card__title {
@@ -289,7 +323,7 @@
     font-weight: 700;
     color: var(--lib-navy);
     line-height: 1.25;
-    margin: 0 0 0.65rem;
+    margin: 0 0 0.55rem;
 }
 
 .lib-card__author {
@@ -313,7 +347,7 @@
 .lib-card__meta {
     font-size: 11px;
     color: #9ca3af;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.1rem;
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -778,9 +812,27 @@
     .lib-resources__grid,
     .lib-why__grid {
         grid-template-columns: 1fr;
-        max-width: 420px;
+        max-width: auto;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    .lib-card {
+        flex-direction: column;
+        min-height: unset;
+    }
+
+    .lib-card__cover {
+        width: 100%;
+        height: 220px;
+    }
+
+    .lib-card__cover::after {
+        display: none;
+    }
+
+    .lib-card__body {
+        justify-content: flex-start;
     }
 
     .lib-cta__actions {
