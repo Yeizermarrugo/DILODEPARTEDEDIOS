@@ -1,8 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/react';
-import { FileText, Film, Image, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import axios from 'axios';
+import { FileText, Film, Image, Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -20,15 +21,15 @@ interface OrphanedFile {
     is_video: boolean;
 }
 
-interface Props {
-    orphaned: OrphanedFile[];
-}
-
 const FOLDER_LABELS: Record<string, string> = {
     imagenes: 'Imágenes',
+    'local/imagenes': 'Imágenes (local)',
     postCard: 'Post Cards',
+    'local/postCard': 'Post Cards (local)',
     pdf: 'PDFs',
+    'local/pdf': 'PDFs (local)',
     videos: 'Videos',
+    'local/videos': 'Videos (local)',
 };
 
 function FileIcon({ file }: { file: OrphanedFile }) {
@@ -37,9 +38,22 @@ function FileIcon({ file }: { file: OrphanedFile }) {
     return <Image size={32} style={{ color: '#2d465e' }} />;
 }
 
-export default function StorageCleanup({ orphaned }: Props) {
+export default function StorageCleanup() {
+    const [orphaned, setOrphaned] = useState<OrphanedFile[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [deleting, setDeleting] = useState(false);
+
+    const fetchOrphaned = () => {
+        setLoading(true);
+        setSelected(new Set());
+        axios.get<OrphanedFile[]>('/storage-cleanup/orphaned')
+            .then(res => setOrphaned(res.data))
+            .catch(() => setOrphaned([]))
+            .finally(() => setLoading(false));
+    };
+
+    useEffect(() => { fetchOrphaned(); }, []);
 
     const toggleSelect = (path: string) => {
         setSelected(prev => {
@@ -61,7 +75,9 @@ export default function StorageCleanup({ orphaned }: Props) {
         setDeleting(true);
         router.delete('/storage-cleanup', {
             data: { paths },
+            preserveState: true,
             preserveScroll: true,
+            onSuccess: () => fetchOrphaned(),
             onFinish: () => {
                 setDeleting(false);
                 setSelected(new Set());
@@ -96,38 +112,62 @@ export default function StorageCleanup({ orphaned }: Props) {
                             Limpieza de almacenamiento
                         </h1>
                         <p className="text-sm mt-1" style={{ color: '#8a7f72' }}>
-                            {orphaned.length === 0
-                                ? 'No hay archivos huérfanos. El bucket está limpio.'
-                                : `${orphaned.length} archivo${orphaned.length > 1 ? 's' : ''} sin usar en el bucket`}
+                            {loading
+                                ? 'Escaneando bucket…'
+                                : orphaned.length === 0
+                                    ? 'No hay archivos huérfanos. El bucket está limpio.'
+                                    : `${orphaned.length} archivo${orphaned.length > 1 ? 's' : ''} sin usar en el bucket`}
                         </p>
                     </div>
 
-                    {orphaned.length > 0 && (
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={toggleAll}
-                                className="text-sm px-4 py-2 rounded-xl border transition-colors"
-                                style={{ borderColor: '#e8e2d8', backgroundColor: '#fff', color: '#2d465e' }}
-                            >
-                                {selected.size === orphaned.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
-                            </button>
-                            {selected.size > 0 && (
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={fetchOrphaned}
+                            disabled={loading}
+                            className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl border transition-colors disabled:opacity-50"
+                            style={{ borderColor: '#e8e2d8', backgroundColor: '#fff', color: '#2d465e' }}
+                        >
+                            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                            Actualizar
+                        </button>
+
+                        {!loading && orphaned.length > 0 && (
+                            <>
                                 <button
-                                    onClick={deleteSelected}
-                                    disabled={deleting}
-                                    className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-opacity disabled:opacity-50"
-                                    style={{ backgroundColor: '#dc2626', color: '#fff' }}
+                                    onClick={toggleAll}
+                                    className="text-sm px-4 py-2 rounded-xl border transition-colors"
+                                    style={{ borderColor: '#e8e2d8', backgroundColor: '#fff', color: '#2d465e' }}
                                 >
-                                    <Trash2 size={14} />
-                                    Eliminar {selected.size} seleccionado{selected.size > 1 ? 's' : ''}
+                                    {selected.size === orphaned.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
                                 </button>
-                            )}
-                        </div>
-                    )}
+                                {selected.size > 0 && (
+                                    <button
+                                        onClick={deleteSelected}
+                                        disabled={deleting}
+                                        className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-opacity disabled:opacity-50"
+                                        style={{ backgroundColor: '#dc2626', color: '#fff' }}
+                                    >
+                                        <Trash2 size={14} />
+                                        Eliminar {selected.size} seleccionado{selected.size > 1 ? 's' : ''}
+                                    </button>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
 
+                {/* Loading state */}
+                {loading && (
+                    <div className="flex flex-col items-center justify-center rounded-2xl border py-20"
+                        style={{ backgroundColor: '#fff', borderColor: '#e8e2d8' }}>
+                        <Loader2 size={32} className="animate-spin mb-3" style={{ color: '#2d465e' }} />
+                        <p className="text-sm" style={{ color: '#8a7f72' }}>Escaneando archivos en el bucket…</p>
+                        <p className="text-xs mt-1" style={{ color: '#d1c9bc' }}>Esto puede tomar unos segundos</p>
+                    </div>
+                )}
+
                 {/* Empty state */}
-                {orphaned.length === 0 && (
+                {!loading && orphaned.length === 0 && (
                     <div className="flex flex-col items-center justify-center rounded-2xl border py-20 text-center"
                         style={{ backgroundColor: '#fff', borderColor: '#e8e2d8' }}>
                         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
@@ -140,7 +180,7 @@ export default function StorageCleanup({ orphaned }: Props) {
                 )}
 
                 {/* Files by folder */}
-                {Object.entries(byFolder).map(([folder, folderFiles]) => (
+                {!loading && Object.entries(byFolder).map(([folder, folderFiles]) => (
                     <div key={folder} className="flex flex-col gap-3">
                         <h2 className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#8a7f72' }}>
                             {FOLDER_LABELS[folder] ?? folder} — {folderFiles.length} archivo{folderFiles.length > 1 ? 's' : ''}
@@ -151,14 +191,14 @@ export default function StorageCleanup({ orphaned }: Props) {
                                 <div
                                     key={file.path}
                                     onClick={() => toggleSelect(file.path)}
-                                    className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all"
+                                    className="group relative rounded-2xl border overflow-hidden cursor-pointer transition-all"
                                     style={{
                                         backgroundColor: '#fff',
                                         borderColor: selected.has(file.path) ? '#f75815' : '#e8e2d8',
                                         boxShadow: selected.has(file.path) ? '0 0 0 2px #f75815' : 'none',
                                     }}
                                 >
-                                    {/* Checkbox indicator */}
+                                    {/* Checkbox */}
                                     <div
                                         className="absolute top-2 left-2 z-10 h-5 w-5 rounded-md flex items-center justify-center border-2 transition-all"
                                         style={{
@@ -177,7 +217,7 @@ export default function StorageCleanup({ orphaned }: Props) {
                                     <button
                                         onClick={e => { e.stopPropagation(); deleteSingle(file.path); }}
                                         disabled={deleting}
-                                        className="absolute top-2 right-2 z-10 h-7 w-7 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity group-hover:opacity-100 disabled:cursor-not-allowed"
+                                        className="absolute top-2 right-2 z-10 h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-not-allowed"
                                         style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
                                         title="Eliminar"
                                     >
@@ -191,8 +231,8 @@ export default function StorageCleanup({ orphaned }: Props) {
                                             <img
                                                 src={file.url}
                                                 alt={file.name}
-                                                loading="lazy"
                                                 className="w-full h-full object-cover"
+                                                crossOrigin="anonymous"
                                             />
                                         ) : (
                                             <FileIcon file={file} />

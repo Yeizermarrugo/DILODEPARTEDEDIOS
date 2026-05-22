@@ -175,6 +175,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('PostImage');
 
     Route::get('/storage-cleanup', [StorageCleanupController::class, 'index'])->name('storage.cleanup');
+    Route::get('/storage-cleanup/orphaned', [StorageCleanupController::class, 'orphaned'])->name('storage.orphaned');
     Route::delete('/storage-cleanup', [StorageCleanupController::class, 'destroy'])->name('storage.destroy');
 });
 

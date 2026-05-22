@@ -17,9 +17,12 @@ class StorageCleanupController extends Controller
 
     public function index()
     {
-        return Inertia::render('StorageCleanup', [
-            'orphaned' => $this->orphanedFiles(),
-        ]);
+        return Inertia::render('StorageCleanup');
+    }
+
+    public function orphaned()
+    {
+        return response()->json($this->orphanedFiles());
     }
 
     public function destroy(Request $request)
