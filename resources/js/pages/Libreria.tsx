@@ -39,7 +39,7 @@ const resources: Resource[] = [
         icon: 'bi-journal-text',
         meta: '3 volúmenes',
         author: 'Diana López',
-        imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/generaciones.png'
+        imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/nueva_imagen.png'
     },
     {
         id: '3',
