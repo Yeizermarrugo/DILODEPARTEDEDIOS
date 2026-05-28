@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Devocional;
 use App\Models\Ensenanza;
 use App\Models\PostImage;
+use App\Traits\UsesStoragePrefix;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,8 +13,10 @@ use Inertia\Inertia;
 
 class StorageCleanupController extends Controller
 {
+    use UsesStoragePrefix;
+
     /** @var string[] */
-    private array $baseFolders = ['imagenes', 'postCard', 'pdf', 'videos'];
+    private array $baseFolders = ['imagenes', 'postCard', 'pdf', 'videos', 'tts'];
 
     public function index()
     {
@@ -28,29 +31,29 @@ class StorageCleanupController extends Controller
     public function destroy(Request $request)
     {
         $request->validate([
-            'paths'   => 'required|array|min:1',
+            'paths' => 'required|array|min:1',
             'paths.*' => 'required|string',
         ]);
 
         $allowedFolders = $this->prefixedFolders();
-        $paths          = $request->paths;
+        $paths = $request->paths;
 
         // Reject any path not rooted in a known env-prefixed folder
         foreach ($paths as $path) {
             $valid = false;
             foreach ($allowedFolders as $folder) {
-                if (str_starts_with($path, $folder . '/')) {
+                if (str_starts_with($path, $folder.'/')) {
                     $valid = true;
                     break;
                 }
             }
-            if (!$valid) {
+            if (! $valid) {
                 return back()->withErrors(['paths' => "Path not allowed: {$path}"]);
             }
         }
 
         /** @var FilesystemAdapter $disk */
-        $disk    = Storage::disk('s3');
+        $disk = Storage::disk('s3');
         $deleted = 0;
 
         foreach ($paths as $path) {
@@ -65,22 +68,17 @@ class StorageCleanupController extends Controller
 
     // ─────────────────────────────────────────────────────────────
 
-    private function storageFolder(string $folder): string
-    {
-        return app()->isProduction() ? $folder : 'local/' . $folder;
-    }
-
     /** @return string[] */
     private function prefixedFolders(): array
     {
-        return array_map(fn($f) => $this->storageFolder($f), $this->baseFolders);
+        return array_map(fn ($f) => $this->storageFolder($f), $this->baseFolders);
     }
 
     /** @return array<int, array<string, mixed>> */
     private function orphanedFiles(): array
     {
         /** @var FilesystemAdapter $disk */
-        $disk    = Storage::disk('s3');
+        $disk = Storage::disk('s3');
         $baseUrl = rtrim((string) config('filesystems.disks.s3.url', ''), '/');
 
         // ── 1. Collect all bucket paths in env folders ──────────
@@ -100,13 +98,14 @@ class StorageCleanupController extends Controller
         // ── 2. Build set of in-use paths ────────────────────────
         // Helper: strip base URL → path key for comparison
         $toPath = function (?string $url) use ($baseUrl): ?string {
-            if (!$url || !$baseUrl) {
+            if (! $url || ! $baseUrl) {
                 return null;
             }
-            $prefix = $baseUrl . '/';
+            $prefix = $baseUrl.'/';
             if (str_starts_with($url, $prefix)) {
                 return substr($url, strlen($prefix));
             }
+
             return null;
         };
 
@@ -119,9 +118,9 @@ class StorageCleanupController extends Controller
 
         // URLs embedded inside TinyMCE HTML (covers images & videos inserted in contenido)
         if ($baseUrl) {
-            $pattern  = '/' . preg_quote($baseUrl . '/', '/') . '[^\s"\'<>()]+/';
+            $pattern = '/'.preg_quote($baseUrl.'/', '/').'[^\s"\'<>()]+/';
             $contents = Devocional::whereNotNull('contenido')
-                ->where('contenido', 'LIKE', '%' . $baseUrl . '%')
+                ->where('contenido', 'LIKE', '%'.$baseUrl.'%')
                 ->pluck('contenido');
 
             foreach ($contents as $html) {
@@ -146,14 +145,15 @@ class StorageCleanupController extends Controller
             }
             $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
             $orphaned[] = [
-                'path'      => $path,
-                'url'       => $disk->url($path),
-                'name'      => basename($path),
-                'folder'    => dirname($path),
+                'path' => $path,
+                'url' => $disk->url($path),
+                'name' => basename($path),
+                'folder' => dirname($path),
                 'extension' => $ext,
-                'is_image'  => in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']),
-                'is_pdf'    => $ext === 'pdf',
-                'is_video'  => in_array($ext, ['mp4', 'webm', 'mov']),
+                'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']),
+                'is_pdf' => $ext === 'pdf',
+                'is_video' => in_array($ext, ['mp4', 'webm', 'mov']),
+                'is_audio' => in_array($ext, ['mp3', 'wav', 'm4a', 'ogg']),
             ];
         }
 
