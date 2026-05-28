@@ -35,7 +35,6 @@ export default function TextToSpeechButton({ html }: { html: string }) {
 
         const selectedVoiceConfig = VOICES.find((voice) => voice.value === selectedVoice);
         const lang = selectedVoiceConfig?.lang ?? LANG;
-        const rateParam = Math.round((rate - 1) * 100);
 
         try {
             const res = await fetch('/api/tts', {
@@ -49,7 +48,6 @@ export default function TextToSpeechButton({ html }: { html: string }) {
                     texto: html,
                     format: 'html',
                     lang,
-                    r: rateParam,
                     v: selectedVoice,
                 }),
             });
@@ -74,6 +72,7 @@ export default function TextToSpeechButton({ html }: { html: string }) {
             }
 
             audio.src = audioUrl;
+            audio.playbackRate = rate;
 
             setLoading(false);
             setAudioReady(true);
@@ -91,6 +90,7 @@ export default function TextToSpeechButton({ html }: { html: string }) {
 
     const handleMainClick = () => {
         if (audioReady && audioRef.current && !loading) {
+            audioRef.current.playbackRate = rate;
             audioRef.current.play()
                 .then(() => {
                     setAudioReady(false);
@@ -202,6 +202,9 @@ export default function TextToSpeechButton({ html }: { html: string }) {
                                     key={r}
                                     onClick={() => {
                                         setRate(r);
+                                        if (audioRef.current) {
+                                            audioRef.current.playbackRate = r;
+                                        }
                                         setShowSpeed(false);
                                     }}
                                     style={{
