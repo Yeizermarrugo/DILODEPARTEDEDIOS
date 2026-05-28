@@ -9,13 +9,13 @@ Plataforma web para una comunidad cristiana que publica devocionales diarios, es
 - **Devocionales diarios** — listado con filtros por categoría, búsqueda y orden por fecha, likes, vistas o compartidos
 - **Estudios bíblicos** — sección separada con el mismo modelo de datos
 - **Series de enseñanza (Enseñanzas)** — series con episodios agrupados, portada y descripción
-- **Text-to-Speech** — reproducción de audio del contenido vía Voice RSS (voces en es-MX y es-ES)
+- **Text-to-Speech** — reproducción de audio del contenido vía Azure AI Speech, con voces neuronales en español
 - **Likes anónimos** — sin registro; identificación por cookie + hash SHA256
 - **Compartir con short URL** — genera código corto de 8 caracteres al compartir; registra confirmaciones
 - **Notificaciones push** — opt-in vía Web Push (VAPID); enviadas desde Laravel
 - **Formulario de contacto** — mensajes con lectura/archivo gestionados desde el dashboard
 - **Panel de administración** — estadísticas, publicaciones recientes, gestión de mensajes de contacto
-- **Limpieza de almacenamiento** — detecta y elimina archivos huérfanos en el bucket comparando contra `devocionals.imagen`, `devocionals.pdf`, `ensenanzas.imagen`, `post_images.url` y URLs embebidas en el contenido HTML. Separación por entorno (`local/` vs raíz) para no mezclar archivos de desarrollo con producción
+- **Limpieza de almacenamiento** — detecta y elimina archivos huérfanos en el bucket comparando contra `devocionals.imagen`, `devocionals.pdf`, `ensenanzas.imagen`, `post_images.url` y URLs embebidas en el contenido HTML. En desarrollo usa subcarpetas `dev` dentro de cada carpeta base para no mezclar archivos de prueba con producción
 - **Contenido programado** — publicación automática de contenido oculto con notificación por correo
 - **Donaciones** — integración con ePayco (webhook con validación de firma)
 - **Podcast** — sección de contenido de audio
@@ -41,7 +41,7 @@ Plataforma web para una comunidad cristiana que publica devocionales diarios, es
 | Archivos | Cloudflare R2 (vía Laravel Cloud Object Storage) |
 | Email | Resend |
 | Push | Web Push + VAPID (`laravel-notification-channels/webpush`) |
-| TTS | Voice RSS API |
+| TTS | Azure AI Speech |
 | Pagos | ePayco |
 | Geolocalización | `stevebauman/location` |
 
@@ -115,7 +115,9 @@ VAPID_PUBLIC_KEY=
 VAPID_PRIVATE_KEY=
 
 # Text-to-Speech
-VOICE_RSS_API_KEY=
+AZURE_SPEECH_KEY=
+AZURE_SPEECH_REGION=eastus
+AZURE_SPEECH_OUTPUT_FORMAT=audio-24khz-48kbitrate-mono-mp3
 
 # YouTube
 YOUTUBE_API_KEY=
@@ -143,11 +145,11 @@ app/
 │   │   ├── ContactController.php       # Formulario de contacto, read/archive
 │   │   ├── LikeController.php          # Likes anónimos (hash)
 │   │   ├── ShortUrlController.php      # Short URLs + share tracking
-│   │   ├── TTSController.php           # Proxy Voice RSS, caché MP3
+│   │   ├── TTSController.php           # Azure Speech, caché MP3 en S3
 │   │   ├── YouTubeController.php       # Feed YouTube (caché 30min)
 │   │   ├── PaymentController.php       # Webhook ePayco
 │   │   ├── PushSubscriptionController.php
-│   │   ├── ImageUploadController.php   # Subida imágenes a S3 (env-prefixed, CacheControl)
+│   │   ├── ImageUploadController.php   # Subida imágenes a S3 (dev subfolder, CacheControl)
 │   │   ├── BulkUploadController.php    # Subida masiva imágenes/videos a S3
 │   │   ├── PdfUploadController.php
 │   │   └── StorageCleanupController.php # Detecta y elimina archivos huérfanos del bucket
@@ -166,7 +168,7 @@ app/
 │   ├── Visitor.php                     # Suscriptores push
 │   └── PostImage.php                   # URLs de imágenes de posts
 ├── Traits/
-│   └── UsesStoragePrefix.php           # storageFolder() — prefijo local/ en dev
+│   └── UsesStoragePrefix.php           # storageFolder() — base/dev en dev, base en prod
 ├── Jobs/
 │   └── TrackDevocionalView.php         # View tracking asíncrono
 ├── Services/

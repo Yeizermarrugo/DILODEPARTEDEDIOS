@@ -208,7 +208,7 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | POST | `/api/push/subscribe` | — | Register push subscription |
 | POST | `/api/push/unsubscribe` | — | Delete push subscription |
 | GET | `/api/push/vapid-key` | — | Public VAPID key |
-| GET | `/api/tts` | — | Generate TTS MP3 (VoiceRSS proxy) |
+| GET | `/api/tts` | — | Generate Azure Speech TTS MP3 and cache in S3 |
 | GET | `/api/tts/voices` | — | Available voices by language |
 | GET | `/api/series` | ✓ | Simple list (id, titulo) for dropdowns |
 | POST | `/api/series` | ✓ | Create series |
@@ -232,12 +232,12 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 | `TTSController` | `voiceRss()` proxy VoiceRSS→cache MP3, `voices()` list voices |
 | `YouTubeController` | `latestVideos()` fetch+filter by "CLASE"+cache 30min |
 | `PaymentController` | `confirmation()` ePayco webhook: validate signature, upsert Donation |
-| `ImageUploadController` | `store()` → S3 'imagenes' (env-prefixed), `post()` → S3 'postCard' (env-prefixed) + PostImage record. Both set `CacheControl: max-age=31536000`. Uses `UsesStoragePrefix` trait. |
+| `ImageUploadController` | `store()` → S3 'imagenes' (dev subfolder outside production), `post()` → S3 'postCard' (dev subfolder outside production) + PostImage record. Both set `CacheControl: max-age=31536000`. Uses `UsesStoragePrefix` trait. |
 | `BulkUploadController` | `store()` images, `storeVideo()` video, `index()` list S3 bucket. Uses `UsesStoragePrefix` trait. |
 | `PushSubscriptionController` | `subscribe()`, `unsubscribe()`, `vapidKey()` |
 | `PostController` | `index()` list, `delete($id)` remove |
-| `PdfUploadController` | `store()` → S3 'pdf' (env-prefixed), 10MB max. Uses `UsesStoragePrefix` trait. |
-| `StorageCleanupController` | `index()` Inertia page with orphaned file list, `destroy()` delete paths from S3. Scans env-prefixed folders, compares against 5 sources to find orphans (see implementation details). Path security validation on delete. |
+| `PdfUploadController` | `store()` → S3 'pdf' (dev subfolder outside production), 10MB max. Uses `UsesStoragePrefix` trait. |
+| `StorageCleanupController` | `index()` Inertia page with orphaned file list, `destroy()` delete paths from S3. Scans env-specific folders, compares against 5 sources to find orphans (see implementation details). Path security validation on delete. |
 | `SitemapController` | Generates XML sitemap |
 
 ### Key implementation details
@@ -246,7 +246,7 @@ Auth routes in `routes/auth.php`; settings routes in `routes/settings.php`.
 - **Like hashing:** `visitor_hash = SHA256(visitor_uuid + "|" + content_id + "|" + content_type)` — no PII in DB.
 - **Short URLs:** 8-char alphanumeric codes stored on `devocionals.short_code` and `ensenanzas.short_code`. Lazy-generated on first share via `ShortCodeService`.
 - **Cache keys:** `dashboard.stats` (5min), `dashboard.recientes` (2min), `devocionales.categorias` (1h), `devocionales.autores` (1h), `estudios.all` (1h), `youtube.latest_videos` (30min).
-- **Storage env prefix:** Upload controllers use `UsesStoragePrefix` trait. `StorageCleanupController` inlines `storageFolder()` directly (avoids intelephense false-positive on trait detection). `storageFolder($base)` returns `local/$base` when `APP_ENV != production`, or `$base` in production. Prevents local dev uploads from appearing as orphans in prod cleanup.
+- **Storage env split:** Upload controllers, TTS, and storage cleanup use `UsesStoragePrefix`. `storageFolder($base)` returns `$base/dev` when `APP_ENV != production`, or `$base` in production. Nested paths keep the same shape, e.g. `tts/hash.mp3` becomes `tts/dev/hash.mp3` in development.
 - **Storage cleanup orphan detection — 5 sources:** `devocionals.imagen`, `devocionals.pdf`, `ensenanzas.imagen`, `post_images.url`, and URLs extracted via regex from `devocionals.contenido` HTML (catches images/videos embedded by TinyMCE). Comparison uses path, not full URL (strips `AWS_URL` prefix → robust if domain changes). Delete validates each path starts with a known env-prefixed folder — rejects arbitrary paths. Frontend uses `router.delete()` from Inertia (auto-handles CSRF, avoids 419).
 - **S3 CacheControl:** All image uploads set `CacheControl: max-age=31536000, public` on the S3 object. Combined with Cloudflare R2 edge caching this gives 1-year browser+CDN cache.
 - **Content visibility:** `hidden` boolean on `devocionals`. `PublicarContenidoProgramado` command unhides content scheduled for today and sends email. `NotificarDevocionalDiario` command sends push notifications for today's content.
@@ -354,11 +354,11 @@ Color palette used across components: `#2d465e` (dark blue), `#f75815` (orange),
 ### Storage
 All uploads (images, PDFs, videos) go to **Cloudflare R2** (S3-compatible, zero egress cost) via `flysystem-aws-s3-v3`. Hosted via Laravel Cloud Object Storage — credentials use `AWS_ENDPOINT` pointing to `r2.cloudflarestorage.com`. `AWS_URL` is the public-facing CDN URL (`*.laravel.cloud` domain, Cloudflare-backed edge).
 
-**Folder structure (env-prefixed via `UsesStoragePrefix` trait):**
-| Env | imagenes | postCard | pdf | videos |
-|-----|----------|----------|-----|--------|
-| production | `imagenes/` | `postCard/` | `pdf/` | `videos/` |
-| local/staging | `local/imagenes/` | `local/postCard/` | `local/pdf/` | `local/videos/` |
+**Folder structure (env-split via `UsesStoragePrefix` trait):**
+| Env | imagenes | postCard | pdf | videos | tts |
+|-----|----------|----------|-----|--------|-----|
+| production | `imagenes/` | `postCard/` | `pdf/` | `videos/` | `tts/` |
+| local/staging | `imagenes/dev/` | `postCard/dev/` | `pdf/dev/` | `videos/dev/` | `tts/dev/` |
 
 This prevents local dev uploads from appearing as orphans in the production storage cleanup tool.
 
@@ -371,7 +371,7 @@ All image uploads set `CacheControl: max-age=31536000, public` → 1-year CDN ca
 Visitors opt in via `<PushSubscribeButton>` (globally mounted). Subscriptions stored in `push_subscriptions` table linked to `Visitor`. Requires VAPID keys.
 
 ### Text-to-Speech
-`TTSController` proxies Voice RSS API. Supported: `es-mx` (voices: Juana, Silvia, Teresa, Jose) and `es-es` (Jorge, Francisco, Mia, Sofia). Generated MP3s cached on public disk.
+`TTSController` proxies Azure AI Speech. Supported voices include `es-CO-SalomeNeural`, `es-CO-GonzaloNeural`, `es-MX-DaliaNeural`, and `es-MX-JorgeNeural`. Generated MP3s are cached in S3 under `tts/` in production and `tts/dev/` outside production.
 
 ### Payments
 `PaymentController@confirmation` handles ePayco webhook: validates SHA256 signature, upserts `Donation` record with full `raw_response` JSON.
@@ -388,7 +388,7 @@ TinyMCE 6 (self-hosted via CDN, key from `config/services.php`). Content sanitiz
 ### Traits
 | Trait | Location | Purpose |
 |-------|----------|---------|
-| `UsesStoragePrefix` | `app/Traits/UsesStoragePrefix.php` | `storageFolder(string $base): string` — prefixes S3 folder with `local/` when not in production |
+| `UsesStoragePrefix` | `app/Traits/UsesStoragePrefix.php` | `storageFolder(string $base): string` — inserts `/dev` after the base folder when not in production |
 
 ### Jobs
 | Job | Purpose |
@@ -429,7 +429,7 @@ TinyMCE 6 (self-hosted via CDN, key from `config/services.php`). Content sanitiz
 | `VITE_APP_URL` | Frontend base URL |
 | `DB_*` | Database connection |
 | `RESEND_KEY` | Resend transactional email API key |
-| `VOICE_RSS_API_KEY` | Voice RSS TTS API |
+| `AZURE_SPEECH_KEY` | Azure AI Speech key |
 | `YOUTUBE_API_KEY` | YouTube Data API v3 |
 | `YOUTUBE_CHANNEL_ID` | Channel to fetch videos from |
 | `AWS_ACCESS_KEY_ID` | S3 credentials |
