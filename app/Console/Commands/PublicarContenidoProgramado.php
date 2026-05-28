@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\GenerateDevocionalAudio;
 use App\Mail\ContenidoPublicadoMail;
 use App\Models\Devocional;
 use App\Services\ShortCodeService;
@@ -14,11 +15,13 @@ use Illuminate\Support\Str;
 
 class PublicarContenidoProgramado extends Command
 {
-    protected $signature   = 'contenido:publicar-programado';
+    protected $signature = 'contenido:publicar-programado';
+
     protected $description = 'Publica contenido oculto programado para hoy y notifica por correo';
 
     private const NOTIFY_EMAIL = 'dilodepartededios@gmail.com';
-    private const TIMEZONE     = 'America/Bogota';
+
+    private const TIMEZONE = 'America/Bogota';
 
     public function handle(): int
     {
@@ -30,31 +33,33 @@ class PublicarContenidoProgramado extends Command
 
         if ($publicados->isEmpty()) {
             $this->line('Sin contenido programado para hoy.');
+
             return Command::SUCCESS;
         }
 
-        $shortCodeService = new ShortCodeService();
+        $shortCodeService = new ShortCodeService;
 
         foreach ($publicados as $devocional) {
             $devocional->update(['hidden' => false]);
+            GenerateDevocionalAudio::dispatch($devocional->id);
 
             // Ensure short_code exists
-            if (!$devocional->short_code) {
+            if (! $devocional->short_code) {
                 $devocional->short_code = $shortCodeService->generate();
                 $devocional->save();
             }
 
-            $shortUrl = url('/' . $devocional->short_code);
-            $tipo     = $this->tipo($devocional->is_devocional);
-            $titulo   = $this->extractTitle($devocional->contenido);
+            $shortUrl = url('/'.$devocional->short_code);
+            $tipo = $this->tipo($devocional->is_devocional);
+            $titulo = $this->extractTitle($devocional->contenido);
 
             Mail::to(self::NOTIFY_EMAIL)
                 ->send(new ContenidoPublicadoMail($devocional, $shortUrl, $tipo, $titulo));
 
             Log::info('contenido:publicar-programado publicado', [
-                'id'           => $devocional->id,
+                'id' => $devocional->id,
                 'is_devocional' => $devocional->is_devocional,
-                'short_url'    => $shortUrl,
+                'short_url' => $shortUrl,
             ]);
 
             $this->info("✓ Publicado [{$tipo}]: {$titulo}");
@@ -72,8 +77,8 @@ class PublicarContenidoProgramado extends Command
     {
         return match ($isDevocional) {
             Devocional::TYPE_ESTUDIO => 'Estudio Bíblico',
-            Devocional::TYPE_SERIE   => 'Episodio de Serie',
-            default                  => 'Devocional',
+            Devocional::TYPE_SERIE => 'Episodio de Serie',
+            default => 'Devocional',
         };
     }
 
@@ -84,12 +89,15 @@ class PublicarContenidoProgramado extends Command
                 $text = strip_tags($m[1]);
                 $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
                 $text = preg_replace('/\s+/u', ' ', trim($text));
-                if ($text) return Str::limit($text, 100);
+                if ($text) {
+                    return Str::limit($text, 100);
+                }
             }
         }
 
         $plain = strip_tags($contenido);
         $plain = html_entity_decode($plain, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         return Str::limit(trim($plain), 100) ?: 'Sin título';
     }
 }
