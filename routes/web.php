@@ -184,6 +184,7 @@ Route::get('/post-images', [PostController::class, 'index']);
 Route::delete('/post-image/{id}', [PostController::class, 'delete'])->middleware(['auth', 'verified']);
 
 Route::get('/api/tts', [TTSController::class, 'voiceRss']);
+Route::post('/api/tts', [TTSController::class, 'voiceRss']);
 Route::get('/api/tts/voices', [TTSController::class, 'voices']);
 
 

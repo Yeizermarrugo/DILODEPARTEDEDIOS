@@ -1,30 +1,16 @@
 import { useRef, useState } from 'react';
 
-const LANG = 'es-mx';
-const MAX_LENGTH = 900;
+const LANG = 'es-CO';
 
-// Lista de voces de Voice RSS para español (México)
 const VOICES = [
-    { label: 'Jose (masculino)', value: 'Jose', available: true },
-    { label: 'Juana (femenino)', value: 'Juana', available: true },
-    { label: 'Silvia (femenino)', value: 'Silvia', available: true },
-    { label: 'Teresa (femenino)', value: 'Teresa', available: true },
+    { label: 'Salomé (Colombia)', value: 'es-CO-SalomeNeural', available: true },
+    { label: 'Gonzalo (Colombia)', value: 'es-CO-GonzaloNeural', available: true },
+    { label: 'Dalia (México)', value: 'es-MX-DaliaNeural', available: true, lang: 'es-MX' },
+    { label: 'Jorge (México)', value: 'es-MX-JorgeNeural', available: true, lang: 'es-MX' },
 ];
 
-function splitText(text: string, maxLength = MAX_LENGTH): string[] {
-    const parts = [];
-    let i = 0;
-    while (i < text.length) {
-        let end = i + maxLength;
-        if (end < text.length) {
-            const lastDot = text.lastIndexOf('.', end);
-            if (lastDot > i) end = lastDot + 1;
-            end = lastDot > i ? lastDot + 1 : end;
-        }
-        parts.push(text.slice(i, end).trim());
-        i = end;
-    }
-    return parts;
+function csrfToken(): string {
+    return document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
 }
 
 export default function TextToSpeechButton({ texto }: { texto: string }) {
@@ -34,71 +20,96 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
     const [rate, setRate] = useState(1);
     const [showSpeed, setShowSpeed] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [currentPartIdx, setCurrentPartIdx] = useState(0);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const [audioReady, setAudioReady] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const parts = splitText(texto);
 
-    // Reproduce la parte actual (usando backend Laravel)
-    const playPart = async (idx: number) => {
+    const playAudio = async (): Promise<boolean> => {
         setLoading(true);
         setAudioUrl(null);
+        setAudioReady(false);
 
-        const rateParam = Math.round((rate - 1) * 10);
-        const url = `/api/tts?texto=${encodeURIComponent(parts[idx])}&lang=${LANG}&r=${rateParam}&v=${selectedVoice}`;
+        const selectedVoiceConfig = VOICES.find((voice) => voice.value === selectedVoice);
+        const lang = selectedVoiceConfig?.lang ?? LANG;
+        const rateParam = Math.round((rate - 1) * 100);
 
         try {
-            const res = await fetch(url);
+            const res = await fetch('/api/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken(),
+                },
+                body: JSON.stringify({
+                    texto,
+                    lang,
+                    r: rateParam,
+                    v: selectedVoice,
+                }),
+            });
+
             if (!res.ok) {
                 const errorText = await res.text();
                 setLoading(false);
                 alert('Error generando el audio:\n' + errorText);
                 setIsPlaying(false);
-                return;
+                return false;
             }
             const data = await res.json();
             const audioUrl = data.url.startsWith('http') ? data.url : window.location.origin + data.url;
 
             setAudioUrl(audioUrl);
-            console.log('audioUrl', audioUrl);
+            const audio = audioRef.current;
 
-            setTimeout(() => {
-                audioRef.current?.play();
-                setIsPlaying(true);
+            if (!audio) {
+                setLoading(false);
+                setIsPlaying(false);
+                return false;
+            }
+
+            audio.src = audioUrl;
+
+            try {
+                await audio.play();
+            } catch {
+                setLoading(false);
+                setIsPlaying(false);
                 setIsPaused(false);
-            }, 100);
+                setAudioReady(true);
+                return false;
+            }
+
+            setLoading(false);
+            setIsPlaying(true);
+            setIsPaused(false);
+            setAudioReady(false);
+
+            return true;
         } catch {
             setLoading(false);
             setIsPlaying(false);
             alert('Error generando el audio.');
+            return false;
         }
-    };
-    console.log('audioUrl', audioUrl);
-
-    const playAllParts = async () => {
-        setCurrentPartIdx(0);
-        for (let idx = 0; idx < parts.length; idx++) {
-            setCurrentPartIdx(idx);
-            await playPartSync(idx);
-        }
-        setIsPlaying(false);
-        setCurrentPartIdx(0);
-    };
-
-    const playPartSync = async (idx: number) => {
-        await playPart(idx);
-        await new Promise<void>((resolve) => {
-            if (audioRef.current) {
-                audioRef.current.onended = () => resolve();
-            } else {
-                resolve();
-            }
-        });
     };
 
     const handleMainClick = () => {
+        if (audioReady && audioRef.current && !loading) {
+            audioRef.current.play()
+                .then(() => {
+                    setAudioReady(false);
+                    setIsPlaying(true);
+                    setIsPaused(false);
+                })
+                .catch(() => {
+                    alert('No se pudo reproducir el audio. Abre el enlace del audio o recarga la página.');
+                });
+            return;
+        }
+
         if (!isPlaying && !loading) {
-            playAllParts();
+            playAudio();
         } else if (isPlaying && !isPaused) {
             audioRef.current?.pause();
             setIsPaused(true);
@@ -115,11 +126,14 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
         setIsPlaying(false);
         setIsPaused(false);
         setLoading(false);
-        setCurrentPartIdx(0);
+        setAudioReady(false);
     };
 
     const onEnded = () => {
         setLoading(false);
+        setAudioReady(false);
+        setIsPlaying(false);
+        setIsPaused(false);
     };
 
     return (
@@ -220,9 +234,9 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                 style={{ display: 'none' }}
             />
 
-            {parts.length > 1 && isPlaying && (
+            {audioReady && (
                 <div style={{ textAlign: 'center', marginTop: 12, fontSize: '0.95em', color: '#6C63FF' }}>
-                    Fragmento {currentPartIdx + 1} de {parts.length}
+                    Audio listo. Toca Play para escucharlo.
                 </div>
             )}
         </div>
