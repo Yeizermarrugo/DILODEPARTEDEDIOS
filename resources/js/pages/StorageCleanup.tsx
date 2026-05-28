@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/react';
 import axios from 'axios';
-import { FileText, Film, Image, Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { FileText, Film, Image, Loader2, RefreshCw, Trash2, Volume2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -19,23 +19,34 @@ interface OrphanedFile {
     is_image: boolean;
     is_pdf: boolean;
     is_video: boolean;
+    is_audio?: boolean;
 }
 
 const FOLDER_LABELS: Record<string, string> = {
     imagenes: 'Imágenes',
-    'local/imagenes': 'Imágenes (local)',
+    'imagenes/dev': 'Imágenes (dev)',
     postCard: 'Post Cards',
-    'local/postCard': 'Post Cards (local)',
+    'postCard/dev': 'Post Cards (dev)',
     pdf: 'PDFs',
-    'local/pdf': 'PDFs (local)',
+    'pdf/dev': 'PDFs (dev)',
     videos: 'Videos',
-    'local/videos': 'Videos (local)',
+    'videos/dev': 'Videos (dev)',
+    tts: 'Audios TTS',
+    'tts/dev': 'Audios TTS (dev)',
 };
 
 function FileIcon({ file }: { file: OrphanedFile }) {
     if (file.is_pdf) return <FileText size={32} style={{ color: '#e53e3e' }} />;
     if (file.is_video) return <Film size={32} style={{ color: '#805ad5' }} />;
+    if (file.is_audio) return <Volume2 size={32} style={{ color: '#0f766e' }} />;
     return <Image size={32} style={{ color: '#2d465e' }} />;
+}
+
+function folderLabel(folder: string): string {
+    const parts = folder.split('/').filter(Boolean);
+    const key = parts[1] === 'dev' ? `${parts[0]}/dev` : (parts[0] ?? folder);
+
+    return FOLDER_LABELS[key] ?? folder;
 }
 
 export default function StorageCleanup() {
@@ -183,7 +194,7 @@ export default function StorageCleanup() {
                 {!loading && Object.entries(byFolder).map(([folder, folderFiles]) => (
                     <div key={folder} className="flex flex-col gap-3">
                         <h2 className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#8a7f72' }}>
-                            {FOLDER_LABELS[folder] ?? folder} — {folderFiles.length} archivo{folderFiles.length > 1 ? 's' : ''}
+                            {folderLabel(folder)} — {folderFiles.length} archivo{folderFiles.length > 1 ? 's' : ''}
                         </h2>
 
                         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

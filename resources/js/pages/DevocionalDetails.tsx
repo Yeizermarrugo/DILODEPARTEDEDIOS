@@ -81,12 +81,6 @@ const DevocionalDetails = ({ devocional }: Props) => {
         );
     };
 
-    const stripHtml = (html: string) => {
-        const tmp = document.createElement('DIV');
-        tmp.innerHTML = html;
-        return tmp.textContent || tmp.innerText || '';
-    };
-
     if (loading && !imageLoaded) {
         return (
             <div id="preloader" className="d-flex align-items-center justify-content-center">
@@ -102,7 +96,7 @@ const DevocionalDetails = ({ devocional }: Props) => {
             <H1Custom contenido={devocional.contenido} />
 
             <section>
-                <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
+                <TextToSpeechButton html={devocional.contenido ?? ''} />
 
                 <p style={{ padding: '5px', textAlign: 'justify' }}
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(devocionalContent) }}

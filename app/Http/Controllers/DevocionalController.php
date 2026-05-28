@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateDevocionalAudio;
 use App\Models\Devocional;
 use App\Models\DevocionalCategory;
 use App\Models\DevocionalView;
+use App\Services\TextToSpeechService;
+use Carbon\Carbon;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
+use Inertia\Inertia;
 use Jenssegers\Agent\Agent;
 use Stevebauman\Location\Facades\Location;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 
 class DevocionalController extends Controller
 {
@@ -52,6 +54,18 @@ class DevocionalController extends Controller
         Cache::forget('estudios-list');
     }
 
+    private function queueAudioIfVisible(Devocional $devocional): void
+    {
+        if (! $devocional->hidden) {
+            GenerateDevocionalAudio::dispatch($devocional->id)->afterCommit();
+        }
+    }
+
+    private function deleteAudioForContent(string $html): void
+    {
+        app(TextToSpeechService::class)->deleteForHtml($html);
+    }
+
     private function purifyHtml(string $html): string
     {
         static $purifier = null;
@@ -66,6 +80,7 @@ class DevocionalController extends Controller
             $config->set('Cache.DefinitionImpl', null);
             $purifier = new HTMLPurifier($config);
         }
+
         return $purifier->purify($html);
     }
 
@@ -76,8 +91,8 @@ class DevocionalController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 16);
-        $sort    = $request->input('sort', 'latest');
-        $search  = $request->input('search');           // ← NUEVO
+        $sort = $request->input('sort', 'latest');
+        $search = $request->input('search');           // ← NUEVO
 
         // ── Base query con filtro de búsqueda ──────────────────────────────
         $base = Devocional::where('is_devocional', 1)
@@ -142,7 +157,7 @@ class DevocionalController extends Controller
                 ->groupBy('categoria', 'serie')
                 ->get();
 
-            $series             = [];
+            $series = [];
             $categoriasSinSerie = [];
             $descriptionMap = DevocionalCategory::pluck('description', 'name');
 
@@ -154,7 +169,7 @@ class DevocionalController extends Controller
                 ];
 
                 if ($row->serie) {
-                    if (!isset($series[$row->serie])) {
+                    if (! isset($series[$row->serie])) {
                         $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
                     }
                     $series[$row->serie]['categorias'][] = $categoryData;
@@ -162,26 +177,27 @@ class DevocionalController extends Controller
                     $categoriasSinSerie[] = $categoryData;
                 }
             }
+
             return [$categoriasSinSerie, array_values($series)];
         });
 
-        $autores = Cache::remember('devocional-autores', 3600, fn () =>
-            Devocional::whereNotNull('autor')
-                ->where('autor', '!=', '')
-                ->where('is_devocional', 1)
-                ->where('hidden', false)
-                ->groupBy('autor')
-                ->selectRaw('autor, COUNT(*) as count')
-                ->get()
+        $autores = Cache::remember('devocional-autores', 3600, fn () => Devocional::whereNotNull('autor')
+            ->where('autor', '!=', '')
+            ->where('is_devocional', 1)
+            ->where('hidden', false)
+            ->groupBy('autor')
+            ->selectRaw('autor, COUNT(*) as count')
+            ->get()
         );
 
         return response()->json([
             'devocionales' => $devocionales,
-            'categorias'   => $categoriasSinSerie,
-            'series'       => $series,
-            'autores'      => $autores,
+            'categorias' => $categoriasSinSerie,
+            'series' => $series,
+            'autores' => $autores,
         ]);
     }
+
     public function searchCategories(Request $request)
     {
         $perPage = $request->input('per_page', 16);
@@ -213,7 +229,7 @@ class DevocionalController extends Controller
             $descriptionMap = DevocionalCategory::pluck('description', 'name');
             foreach ($categoriasRaw as $row) {
                 if ($row->serie) {
-                    if (!isset($series[$row->serie])) {
+                    if (! isset($series[$row->serie])) {
                         $series[$row->serie] = ['nombre' => $row->serie, 'categorias' => []];
                     }
                     $series[$row->serie]['categorias'][] = [
@@ -227,22 +243,20 @@ class DevocionalController extends Controller
             return [$this->categoriesWithDescriptions($todasLasCategorias), array_values($series)];
         });
 
-        $autores = Cache::remember('devocional-autores', 3600, fn () =>
-            Devocional::whereNotNull('autor')
-                ->where('autor', '!=', '')
-                ->groupBy('autor')
-                ->selectRaw('autor, COUNT(*) as count')
-                ->get()
+        $autores = Cache::remember('devocional-autores', 3600, fn () => Devocional::whereNotNull('autor')
+            ->where('autor', '!=', '')
+            ->groupBy('autor')
+            ->selectRaw('autor, COUNT(*) as count')
+            ->get()
         );
 
         return response()->json([
             'devocionales' => $devocionales,
-            'categorias'   => $todasLasCategorias,
-            'series'       => $series,
-            'autores'      => $autores,
+            'categorias' => $todasLasCategorias,
+            'series' => $series,
+            'autores' => $autores,
         ]);
     }
-
 
     public function porCategoria(Request $request, $categoria)
     {
@@ -292,17 +306,19 @@ class DevocionalController extends Controller
 
         return response()->json([
             'devocionales' => $devocionales,
-            'categoria'    => $categoria,
-            'category'     => DevocionalCategory::where('name', $categoria)->first(['name', 'description']),
+            'categoria' => $categoria,
+            'category' => DevocionalCategory::where('name', $categoria)->first(['name', 'description']),
         ]);
     }
-    //devolver los ultimos 5 devocionales
+
+    // devolver los ultimos 5 devocionales
     public function latest()
     {
         $devocionales = Devocional::orderBy('created_at', 'desc')->where('is_devocional', 1)
             ->where('hidden', false)
             ->where('ensenanza_id', '=', null)
             ->take(5)->get();
+
         return response()->json($devocionales);
     }
 
@@ -310,6 +326,7 @@ class DevocionalController extends Controller
     {
         $devocionales = Cache::remember('estudios-list', 3600, function () {
             $orderMap = array_flip(self::$biblicalOrder);
+
             return Devocional::where('is_devocional', Devocional::TYPE_ESTUDIO)
                 ->where('hidden', false)
                 ->select('id', 'categoria', 'contenido', 'views_count', 'shares_count', 'created_at')
@@ -318,10 +335,12 @@ class DevocionalController extends Controller
                     $book = strtoupper(trim($e->categoria ?? ''));
                     $bookPos = $orderMap[$book] ?? 999;
                     [$cap, $ver] = self::parseChapterVerse($e->contenido ?? '');
+
                     return [$bookPos, $cap, $ver];
                 })
                 ->values();
         });
+
         return response()->json($devocionales);
     }
 
@@ -331,12 +350,13 @@ class DevocionalController extends Controller
     public function show($id)
     {
         $devocional = Devocional::find($id);
-        if (!$devocional) {
+        if (! $devocional) {
             abort(404);
         }
+
         return Inertia::render('DevocionalDetails', [
             'devocional' => $devocional,
-            'is_devocional' => $devocional->is_devocional
+            'is_devocional' => $devocional->is_devocional,
         ]);
     }
 
@@ -351,6 +371,7 @@ class DevocionalController extends Controller
                 return [(int) $ref[1], 0];
             }
         }
+
         return [9999, 9999];
     }
 
@@ -390,7 +411,7 @@ class DevocionalController extends Controller
                 'description' => Str::limit(strip_tags($devocional->contenido), 150),
                 'image' => $devocional->imagen,
                 'url' => url()->current(),
-            ]
+            ],
         ]);
     }
 
@@ -405,6 +426,7 @@ class DevocionalController extends Controller
                 $book = strtoupper(trim($e->categoria ?? ''));
                 $bookPos = $orderMap[$book] ?? 999;
                 [$cap, $ver] = self::parseChapterVerse($e->contenido ?? '');
+
                 return [$bookPos, $cap, $ver];
             })
             ->values();
@@ -425,7 +447,7 @@ class DevocionalController extends Controller
         // Prev: within book or jump to first of previous book
         $prevData = null;
         $prevCrossesBook = false;
-        if (!$isFirstInBook) {
+        if (! $isFirstInBook) {
             $prevData = $bookEstudios[$posInBook - 1];
         } elseif ($currentBookIdx > 0) {
             $prevBook = $sortedBooks[$currentBookIdx - 1];
@@ -436,7 +458,7 @@ class DevocionalController extends Controller
         // Next: within book or jump to first of next book
         $nextData = null;
         $nextCrossesBook = false;
-        if (!$isLastInBook) {
+        if (! $isLastInBook) {
             $nextData = $bookEstudios[$posInBook + 1];
         } elseif ($currentBookIdx !== false && $currentBookIdx < count($sortedBooks) - 1) {
             $nextBook = $sortedBooks[$currentBookIdx + 1];
@@ -461,14 +483,13 @@ class DevocionalController extends Controller
         ];
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
     public function create(Request $request)
     {
         Devocional::create([
-            'contenido' => $request->input('contenido')
+            'contenido' => $request->input('contenido'),
         ]);
     }
 
@@ -478,23 +499,23 @@ class DevocionalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'contenido'     => 'required|string',
-            'categoria'     => 'required|string',
-            'imagen'        => 'nullable|string',
-            'autor'         => 'nullable|string|max:255',
+            'contenido' => 'required|string',
+            'categoria' => 'required|string',
+            'imagen' => 'nullable|string',
+            'autor' => 'nullable|string|max:255',
             'is_devocional' => 'required|integer|in:1,2,3',
-            'hidden'        => 'boolean',
-            'serie'         => 'nullable|string|max:255',
-            'created_at'    => 'nullable|date',
-            'pdf'           => 'nullable|string|max:255',
-            'instagram'     => 'nullable|string|max:255',
-            'tiktok'        => 'nullable|string|max:255',
-            'ensenanza_id'  => 'nullable|uuid|exists:ensenanzas,id',
+            'hidden' => 'boolean',
+            'serie' => 'nullable|string|max:255',
+            'created_at' => 'nullable|date',
+            'pdf' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'tiktok' => 'nullable|string|max:255',
+            'ensenanza_id' => 'nullable|uuid|exists:ensenanzas,id',
             'category_description' => 'nullable|string|max:1000',
         ]);
 
         if (
-            !DevocionalCategory::where('name', $validated['categoria'])->exists()
+            ! DevocionalCategory::where('name', $validated['categoria'])->exists()
             && trim((string) ($validated['category_description'] ?? '')) === ''
         ) {
             return response()->json([
@@ -509,25 +530,26 @@ class DevocionalController extends Controller
 
         // Creamos el registro usando SOLO los campos que existen en la DB
         $devocional = Devocional::create([
-            'contenido'     => $this->purifyHtml($validated['contenido']),
-            'categoria'     => $validated['categoria'],
-            'imagen'        => $validated['imagen'] ?? null,
-            'autor'         => $validated['autor'] ?? null,
+            'contenido' => $this->purifyHtml($validated['contenido']),
+            'categoria' => $validated['categoria'],
+            'imagen' => $validated['imagen'] ?? null,
+            'autor' => $validated['autor'] ?? null,
             'is_devocional' => $validated['is_devocional'],
-            'hidden'        => $validated['hidden'] ?? false,
-            'serie'         => $validated['serie'] ?? null,
-            'created_at'    => ($validated['created_at'] ?? null) ?: now(),
-            'pdf'           => $validated['pdf'] ?? null,
-            'instagram'     => $validated['instagram'] ?? null,
-            'tiktok'        => $validated['tiktok'] ?? null,
-            'ensenanza_id'  => $validated['ensenanza_id'] ?? null,
+            'hidden' => $validated['hidden'] ?? false,
+            'serie' => $validated['serie'] ?? null,
+            'created_at' => ($validated['created_at'] ?? null) ?: now(),
+            'pdf' => $validated['pdf'] ?? null,
+            'instagram' => $validated['instagram'] ?? null,
+            'tiktok' => $validated['tiktok'] ?? null,
+            'ensenanza_id' => $validated['ensenanza_id'] ?? null,
         ]);
 
         $this->forgetCategoryCaches();
+        $this->queueAudioIfVisible($devocional);
 
         return response()->json([
             'message' => '¡Guardado con éxito!',
-            'devocional' => $devocional
+            'devocional' => $devocional,
         ], 201);
     }
 
@@ -560,15 +582,16 @@ class DevocionalController extends Controller
         foreach (mb_str_split(mb_strtolower($word)) as $char) {
             $pattern .= $map[$char] ?? preg_quote($char, null);
         }
+
         return $pattern;
     }
 
     public function adminIndex(Request $request)
     {
-        $perPage   = $request->input('per_page', 50);
-        $search    = $request->input('search');
+        $perPage = $request->input('per_page', 50);
+        $search = $request->input('search');
         $categoria = $request->input('categoria');
-        $autor     = $request->input('autor');
+        $autor = $request->input('autor');
 
         // Base query con filtros comunes
         $baseQuery = Devocional::query();
@@ -576,7 +599,7 @@ class DevocionalController extends Controller
         if ($search) {
             $words = array_filter(array_map('trim', explode(' ', $search)));
             foreach ($words as $word) {
-                $like    = "%{$word}%";
+                $like = "%{$word}%";
                 $pattern = self::accentRegexp($word);
                 $baseQuery->where(function ($q) use ($pattern, $like) {
                     // contenido stored with HTML entities (HTMLPurifier) → REGEXP match
@@ -639,23 +662,23 @@ class DevocionalController extends Controller
 
         return Inertia::render('Edit', [
             'devocionales' => $devocionales,
-            'estudios'     => $estudios,
-            'series'       => $series,
-            'ocultos'      => $ocultos,
-            'categorias'   => $categorias,
-            'autores'      => $autores,
-            'filters'      => [
-                'search'    => $search,
+            'estudios' => $estudios,
+            'series' => $series,
+            'ocultos' => $ocultos,
+            'categorias' => $categorias,
+            'autores' => $autores,
+            'filters' => [
+                'search' => $search,
                 'categoria' => $categoria,
-                'autor'     => $autor,
+                'autor' => $autor,
             ],
         ]);
     }
 
-
     public function showJson($id)
     {
         $devocional = Devocional::findOrFail($id);
+
         return response()->json($devocional);
     }
 
@@ -665,6 +688,7 @@ class DevocionalController extends Controller
         $devocional->update(['hidden' => $request->boolean('hidden')]);
 
         $this->forgetCategoryCaches();
+        $this->queueAudioIfVisible($devocional);
 
         return response()->json([
             'hidden' => $devocional->hidden,
@@ -676,25 +700,25 @@ class DevocionalController extends Controller
         $devocional = Devocional::findOrFail($id);
 
         $request->validate([
-            'contenido'     => 'required|string',
-            'categoria'     => 'required|string',
+            'contenido' => 'required|string',
+            'categoria' => 'required|string',
             // permite que imagen venga null o string; si viene vacía, conservamos la anterior
-            'imagen'        => 'nullable|string|url',
-            'autor'         => 'nullable|string|max:255',
+            'imagen' => 'nullable|string|url',
+            'autor' => 'nullable|string|max:255',
             'is_devocional' => 'required|integer|in:1,2,3',
-            'hidden'        => 'boolean',
-            'serie'         => 'nullable|string|max:255',
-            'created_at'    => 'nullable|date',
-            'pdf'           => 'nullable|string|max:255',
-            'instagram'     => 'nullable|string|max:255',
-            'tiktok'        => 'nullable|string|max:255',
-            'ensenanza_id'  => 'nullable|uuid|exists:ensenanzas,id',
+            'hidden' => 'boolean',
+            'serie' => 'nullable|string|max:255',
+            'created_at' => 'nullable|date',
+            'pdf' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'tiktok' => 'nullable|string|max:255',
+            'ensenanza_id' => 'nullable|uuid|exists:ensenanzas,id',
             'category_description' => 'nullable|string|max:1000',
         ]);
 
         $categoryName = $request->input('categoria');
         if (
-            !DevocionalCategory::where('name', $categoryName)->exists()
+            ! DevocionalCategory::where('name', $categoryName)->exists()
             && trim((string) $request->input('category_description')) === ''
         ) {
             return response()->json([
@@ -708,28 +732,35 @@ class DevocionalController extends Controller
         $this->syncCategory($categoryName, $request->input('category_description'));
 
         $createdAt = $request->input('created_at');
+        $previousContenido = (string) $devocional->contenido;
+        $previousHidden = (bool) $devocional->hidden;
+        $newContenido = $this->purifyHtml($request->input('contenido'));
 
         $devocional->update([
-            'contenido'     => $this->purifyHtml($request->input('contenido')),
-            'categoria'     => $request->input('categoria'),
-            'imagen'        => $request->input('imagen') ?: $devocional->imagen,
-            'autor'         => $request->input('autor'),
+            'contenido' => $newContenido,
+            'categoria' => $request->input('categoria'),
+            'imagen' => $request->input('imagen') ?: $devocional->imagen,
+            'autor' => $request->input('autor'),
             'is_devocional' => $request->input('is_devocional'),
-            'hidden'        => $request->boolean('hidden', false),
-            'serie'         => $request->input('serie'),
-            'created_at'    => $createdAt
+            'hidden' => $request->boolean('hidden', false),
+            'serie' => $request->input('serie'),
+            'created_at' => $createdAt
                 ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')
                 : $devocional->created_at,
-            'pdf'           => $request->input('pdf'),
-            'instagram'     => $request->input('instagram'),
-            'tiktok'        => $request->input('tiktok'),
-            'ensenanza_id'  => $request->input('ensenanza_id'),
+            'pdf' => $request->input('pdf'),
+            'instagram' => $request->input('instagram'),
+            'tiktok' => $request->input('tiktok'),
+            'ensenanza_id' => $request->input('ensenanza_id'),
         ]);
 
         $this->forgetCategoryCaches();
+        if (! $previousHidden && $previousContenido !== $newContenido) {
+            $this->deleteAudioForContent($previousContenido);
+        }
+        $this->queueAudioIfVisible($devocional);
 
         return response()->json([
-            'message'    => 'Devocional actualizado correctamente',
+            'message' => 'Devocional actualizado correctamente',
             'devocional' => $devocional,
         ]);
     }
@@ -811,7 +842,7 @@ class DevocionalController extends Controller
     {
         $rawIp = $request->ip();
         $localTime = $request->input('local_time');
-        $agent = new Agent();
+        $agent = new Agent;
         $agent->setUserAgent($request->userAgent());
 
         // 1. DETERMINAR SI ES UNA IP DE TRABAJO (Tú o tu pareja)
@@ -824,7 +855,7 @@ class DevocionalController extends Controller
             $ipToSave = $rawIp;
         } else {
             $ipParts = explode('.', $rawIp);
-            $ipToSave = (count($ipParts) === 4) ? implode('.', array_slice($ipParts, 0, 3)) . '.0' : $rawIp;
+            $ipToSave = (count($ipParts) === 4) ? implode('.', array_slice($ipParts, 0, 3)).'.0' : $rawIp;
         }
 
         // 3. REGLA ESPECIAL PARA TU EQUIPO (isWorkIp)
@@ -844,21 +875,21 @@ class DevocionalController extends Controller
             ->where('created_at', '>', Carbon::parse($localTime)->subHour())
             ->exists();
 
-        if (!$recentAnalytic) {
+        if (! $recentAnalytic) {
             \App\Jobs\TrackDevocionalView::dispatch(
                 $id,
                 $ipToSave,
                 $rawIp,
-                $agent->browser() . ' ' . $agent->version($agent->browser()),
+                $agent->browser().' '.$agent->version($agent->browser()),
                 $agent->platform(),
                 $localTime,
                 $isWorkIp,
             )->afterResponse();
 
             return response()->json([
-                'status'     => 'recorded',
+                'status' => 'recorded',
                 'is_work_log' => $isWorkIp,
-                'ip_stored'  => $ipToSave,
+                'ip_stored' => $ipToSave,
             ]);
         }
 
