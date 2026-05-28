@@ -19,7 +19,9 @@ class TTSController extends Controller
         }
 
         try {
-            $url = $tts->generate($texto, $lang, $voice, $rate);
+            $url = $request->input('format') === 'html'
+                ? $tts->generateFromHtml($texto, $lang, $voice, $rate)
+                : $tts->generate($texto, $lang, $voice, $rate);
         } catch (\InvalidArgumentException $exception) {
             return response($exception->getMessage(), 400);
         } catch (\RuntimeException $exception) {

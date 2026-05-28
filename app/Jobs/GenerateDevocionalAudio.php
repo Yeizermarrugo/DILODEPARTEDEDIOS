@@ -27,16 +27,15 @@ class GenerateDevocionalAudio implements ShouldQueue
             return;
         }
 
-        $text = $tts->plainTextFromHtml($devocional->contenido ?? '');
-        if ($text === '') {
+        if ($tts->plainTextFromHtml($devocional->contenido ?? '') === '') {
             return;
         }
 
         try {
             $lock = Cache::lock("dilodepartededios:tts:devocional:{$devocional->id}", 180);
 
-            $lock->block(5, function () use ($tts, $text, $devocional) {
-                $url = $tts->generate($text);
+            $lock->block(5, function () use ($tts, $devocional) {
+                $url = $tts->generateFromHtml($devocional->contenido ?? '');
 
                 Cache::put(
                     "dilodepartededios:tts:devocional:{$devocional->id}:url",

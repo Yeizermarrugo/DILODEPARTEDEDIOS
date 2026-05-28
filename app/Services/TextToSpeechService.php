@@ -16,6 +16,18 @@ class TextToSpeechService
 
     private const CACHE_NAMESPACE = 'dilodepartededios:tts';
 
+    private const BREAK_TOKEN_PREFIX = '[[TTS_BREAK_';
+
+    private const BREAK_TOKEN_SUFFIX = ']]';
+
+    /** @var array<string, string> */
+    private const BREAKS = [
+        'short' => '350ms',
+        'line' => '450ms',
+        'paragraph' => '650ms',
+        'heading' => '850ms',
+    ];
+
     /** @var array<string, array<string, string>> */
     private array $allowedVoices = [
         'es-CO' => [
@@ -55,6 +67,15 @@ class TextToSpeechService
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         return Str::of($text)->squish()->toString();
+    }
+
+    public function generateFromHtml(
+        string $html,
+        string $lang = 'es-CO',
+        string $voice = 'es-CO-SalomeNeural',
+        int $rate = 0
+    ): string {
+        return $this->generate($this->speechTextFromHtml($html), $lang, $voice, $rate);
     }
 
     public function generate(
@@ -156,6 +177,15 @@ class TextToSpeechService
         $rateText = $rate === 0 ? 'default' : sprintf('%+d%%', $rate);
 
         return $this->audioPath($cleanText, $lang, $voice, $rateText, config('services.azure_speech.output_format'));
+    }
+
+    public function deleteForHtml(
+        string $html,
+        string $lang = 'es-CO',
+        string $voice = 'es-CO-SalomeNeural',
+        int $rate = 0
+    ): void {
+        $this->deleteForText($this->speechTextFromHtml($html), $lang, $voice, $rate);
     }
 
     public function deleteForText(
@@ -264,7 +294,7 @@ class TextToSpeechService
 
     private function buildSsml(string $lang, string $voice, string $rate, string $text): string
     {
-        $escapedText = e($text);
+        $escapedText = $this->escapeTextWithBreaks($text);
 
         return <<<SSML
 <speak version="1.0" xml:lang="{$lang}" xmlns="http://www.w3.org/2001/10/synthesis">
@@ -273,5 +303,61 @@ class TextToSpeechService
     </voice>
 </speak>
 SSML;
+    }
+
+    private function speechTextFromHtml(string $html): string
+    {
+        $html = preg_replace('/<\s*br\s*\/?\s*>/iu', ' '.$this->breakToken('line').' ', $html) ?? $html;
+        $html = preg_replace('/<\/\s*(h1|h2|h3|h4|h5|h6)\s*>/iu', ' '.$this->breakToken('heading').' ', $html) ?? $html;
+        $html = preg_replace('/<\/\s*(p|div|section|article|blockquote|tr)\s*>/iu', ' '.$this->breakToken('paragraph').' ', $html) ?? $html;
+        $html = preg_replace('/<\/\s*li\s*>/iu', ' '.$this->breakToken('short').' ', $html) ?? $html;
+        $html = preg_replace('/<\/\s*(ul|ol|table)\s*>/iu', ' '.$this->breakToken('paragraph').' ', $html) ?? $html;
+
+        $text = strip_tags($html);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return $this->normalizeSpeechText($text);
+    }
+
+    private function normalizeSpeechText(string $text): string
+    {
+        $tokens = implode('|', array_map(fn (string $name) => preg_quote($this->breakToken($name), '/'), array_keys(self::BREAKS)));
+        $text = preg_replace('/\s*('.$tokens.')\s*/u', ' $1 ', $text) ?? $text;
+        $text = preg_replace('/[ \t]+/u', ' ', $text) ?? $text;
+        $text = preg_replace('/(?:\s*(?:'.$tokens.')\s*){4,}/u', ' '.$this->breakToken('heading').' ', $text) ?? $text;
+
+        return trim($text);
+    }
+
+    private function breakToken(string $name): string
+    {
+        return self::BREAK_TOKEN_PREFIX.$name.self::BREAK_TOKEN_SUFFIX;
+    }
+
+    private function escapeTextWithBreaks(string $text): string
+    {
+        $pattern = '/'.preg_quote(self::BREAK_TOKEN_PREFIX, '/').'('.implode('|', array_keys(self::BREAKS)).')'.preg_quote(self::BREAK_TOKEN_SUFFIX, '/').'/';
+        $chunks = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+        if ($chunks === false) {
+            return e($text);
+        }
+
+        $ssml = '';
+        foreach ($chunks as $index => $chunk) {
+            if ($chunk === '') {
+                continue;
+            }
+
+            if ($index % 2 === 1 && isset(self::BREAKS[$chunk])) {
+                $ssml .= '<break time="'.self::BREAKS[$chunk].'" />';
+
+                continue;
+            }
+
+            $ssml .= e($chunk);
+        }
+
+        return $ssml;
     }
 }

@@ -63,8 +63,7 @@ class DevocionalController extends Controller
 
     private function deleteAudioForContent(string $html): void
     {
-        $tts = app(TextToSpeechService::class);
-        $tts->deleteForText($tts->plainTextFromHtml($html));
+        app(TextToSpeechService::class)->deleteForHtml($html);
     }
 
     private function purifyHtml(string $html): string

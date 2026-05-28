@@ -295,13 +295,6 @@ const DevocionalDetailsPage = (props: Props) => {
         return el.value;
     };
 
-    const stripHtml = (html: string) => {
-        if (typeof document === 'undefined') return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-        const el = document.createElement('div');
-        el.innerHTML = html;
-        return el.textContent || el.innerText || '';
-    };
-
     const devocionalContent = removeFirstH1(devocional.contenido);
 
     const H1Custom = () => {
@@ -346,7 +339,7 @@ const DevocionalDetailsPage = (props: Props) => {
             <H1Custom />
 
             <section style={{ background: '#fff', padding: '24px', borderRadius: '8px', width: '100%', position: 'relative' }}>
-                <TextToSpeechButton texto={stripHtml(devocional.contenido ?? '')} />
+                <TextToSpeechButton html={devocional.contenido ?? ''} />
 
                 <div className="devocional-content" style={{ padding: '5px', textAlign: 'justify' }}
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(devocionalContent) }}

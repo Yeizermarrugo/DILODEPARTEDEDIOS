@@ -3,17 +3,19 @@ import { useRef, useState } from 'react';
 const LANG = 'es-CO';
 
 const VOICES = [
-    { label: 'Salomé (Colombia)', value: 'es-CO-SalomeNeural', available: true },
-    { label: 'Gonzalo (Colombia)', value: 'es-CO-GonzaloNeural', available: true },
+    { label: 'Alonso (EE.UU.)', value: 'es-US-AlonsoNeural', available: true, lang: 'es-US' },
+    { label: 'Paloma (EE.UU.)', value: 'es-US-PalomaNeural', available: true, lang: 'es-US' },
     { label: 'Dalia (México)', value: 'es-MX-DaliaNeural', available: true, lang: 'es-MX' },
     { label: 'Jorge (México)', value: 'es-MX-JorgeNeural', available: true, lang: 'es-MX' },
+    { label: 'Elvira (España)', value: 'es-ES-ElviraNeural', available: true, lang: 'es-ES' },
+    { label: 'Alvaro (España)', value: 'es-ES-AlvaroNeural', available: true, lang: 'es-ES' },
 ];
 
 function csrfToken(): string {
     return document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
 }
 
-export default function TextToSpeechButton({ texto }: { texto: string }) {
+export default function TextToSpeechButton({ html }: { html: string }) {
     const [selectedVoice, setSelectedVoice] = useState(VOICES[0].value);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -24,10 +26,12 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
     const [audioReady, setAudioReady] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    const playAudio = async (): Promise<boolean> => {
+    const loadAudio = async (): Promise<boolean> => {
         setLoading(true);
         setAudioUrl(null);
         setAudioReady(false);
+        setIsPlaying(false);
+        setIsPaused(false);
 
         const selectedVoiceConfig = VOICES.find((voice) => voice.value === selectedVoice);
         const lang = selectedVoiceConfig?.lang ?? LANG;
@@ -42,7 +46,8 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                     'X-CSRF-TOKEN': csrfToken(),
                 },
                 body: JSON.stringify({
-                    texto,
+                    texto: html,
+                    format: 'html',
                     lang,
                     r: rateParam,
                     v: selectedVoice,
@@ -52,8 +57,8 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
             if (!res.ok) {
                 const errorText = await res.text();
                 setLoading(false);
-                alert('Error generando el audio:\n' + errorText);
                 setIsPlaying(false);
+                alert('Error generando el audio:\n' + errorText);
                 return false;
             }
             const data = await res.json();
@@ -70,20 +75,10 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
 
             audio.src = audioUrl;
 
-            try {
-                await audio.play();
-            } catch {
-                setLoading(false);
-                setIsPlaying(false);
-                setIsPaused(false);
-                setAudioReady(true);
-                return false;
-            }
-
             setLoading(false);
-            setIsPlaying(true);
+            setAudioReady(true);
+            setIsPlaying(false);
             setIsPaused(false);
-            setAudioReady(false);
 
             return true;
         } catch {
@@ -103,17 +98,17 @@ export default function TextToSpeechButton({ texto }: { texto: string }) {
                     setIsPaused(false);
                 })
                 .catch(() => {
-                    alert('No se pudo reproducir el audio. Abre el enlace del audio o recarga la página.');
+                    alert('No se pudo reproducir el audio. Intenta tocar Play otra vez.');
                 });
             return;
         }
 
         if (!isPlaying && !loading) {
-            playAudio();
-        } else if (isPlaying && !isPaused) {
+            loadAudio();
+        } else if (isPlaying && !isPaused && !loading) {
             audioRef.current?.pause();
             setIsPaused(true);
-        } else if (isPlaying && isPaused) {
+        } else if (isPlaying && isPaused && !loading) {
             audioRef.current?.play();
             setIsPaused(false);
         }
