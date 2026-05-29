@@ -1,516 +1,412 @@
-* {
-    box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Playfair+Display:wght@700;800;900&display=swap');
+
+/* ── Design tokens ─────────────────────────────────── */
+:root {
+    --dd-bg:            #faf8f4;
+    --dd-surface:       #ffffff;
+    --dd-text:          #26221e;
+    --dd-text-muted:    #7a7168;
+    --dd-accent:        #2d465e;
+    --dd-accent2:       #f75815;
+    --dd-border:        #e8e3dc;
+    --dd-font-serif:    'Lora', Georgia, 'Times New Roman', serif;
+    --dd-font-display:  'Playfair Display', Georgia, serif;
+    --dd-max-width:     680px;
+    --dd-gutter:        1.5rem;
 }
 
-body {
-    margin: 0;
-    /* font-family: 'IM Fell French Canon Pro', serif; */
-    background: #ffffff;
-}
+/* ── Reset ─────────────────────────────────────────── */
+* { box-sizing: border-box; }
 
-.devocional-details {
+/* ── Page shell ────────────────────────────────────── */
+.dd-page {
     width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
+    background: var(--dd-bg);
+    min-height: 100vh;
+}
+
+/* ── Back button ───────────────────────────────────── */
+.dd-back-btn {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.dd-back-btn:hover {
+    background: rgba(255,255,255,0.92);
+    color: var(--dd-accent);
+    border-color: transparent;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+}
+
+/* Over content area: solid white with dark text for contrast against cream bg */
+.dd-back-btn--scrolled {
+    background: rgba(255,255,255,0.96);
+    color: var(--dd-accent);
+    border-color: rgba(45,70,94,0.18);
+    box-shadow: 0 2px 14px rgba(45,70,94,0.12);
+}
+.dd-back-btn--scrolled:hover {
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0px 6px 32px 0px rgba(0, 0, 0, 0.13);
+    border-color: transparent;
+    box-shadow: 0 4px 20px rgba(45,70,94,0.18);
+}
+
+/* ── Hero ──────────────────────────────────────────── */
+.dd-hero {
     position: relative;
-    z-index: 2;
-    overflow: visible;
-}
-
-.devocional {
     width: 100%;
-    margin: 0 auto;
-    background: #fff;
-    position: relative;
-    z-index: 2;
-    overflow: visible;
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+    background: #1a1a1a;
+}
+@supports not (aspect-ratio: 16/7) {
+    .dd-hero { padding-top: 43.75%; height: 0; }
 }
 
-.devocional h2,
-.devocional-details h2 {
-    color: #222;
-    font-weight: bold;
-}
-
-.devocional h3 {
-    color: black;
-}
-
-.header-modal {
-    width: 100%;
-    min-height: 220px;
-    background-position: center;
+.dd-hero__bg {
+    position: absolute;
+    inset: 0;
     background-size: cover;
-    border-radius: 8px 8px 0 0;
-    position: relative;
-    color: white;
+    background-position: center;
+    transform: scale(1.04);
+    transition: transform 8s ease-out;
+    will-change: transform;
+}
+.dd-hero:hover .dd-hero__bg { transform: scale(1); }
+
+.dd-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.05) 0%,
+        rgba(0,0,0,0.15) 40%,
+        rgba(0,0,0,0.6) 75%,
+        rgba(0,0,0,0.82) 100%
+    );
+}
+
+/* Fixed wrapper — visually aligns title at bottom of hero.
+   .dd-body has z-index: 5 and solid background, slides over this as user scrolls. */
+.dd-hero__title-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 43.75vw; /* matches 16:7 hero aspect ratio */
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    padding-top: 60%;
-    padding-bottom: 200px;
+    padding-bottom: 2rem;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
 }
 
-.header-modal .title {
-    position: fixed;
-    /* font-family: 'Sucrose Bold Two', cursive; */
-    font-weight: bold;
-    font-size: 3rem;
-    max-width: 10%;
-    line-height: 1;
-    /* margin: 0 0 -4rem 0; */
-    text-align: center;
-    text-shadow: 0 2px 12px rgb(34, 34, 34);
-    /* padding: 1rem 0; */
-    padding-bottom: 50px !important;
-}
-
-.header-modal .title span {
-    display: block;
-    font-size: 4rem;
-    margin: 0.5rem 0;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.devocional-details section {
-    padding: 2rem 1.5rem 1rem 1.5rem;
-}
-
-.devocional-details p {
-    font-size: 1.25rem;
-    line-height: 1.7;
-    color: #222;
+.dd-hero__title {
+    font-family: var(--dd-font-display);
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
     margin: 0;
+    text-align: center;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.35);
+    max-width: 80%;
+    pointer-events: auto;
+}
+.dd-hero__title span {
+    display: block;
+}
+.dd-hero__title span:last-child:not(:first-child) {
+    color: rgba(255,255,255,0.82);
+    font-weight: 700;
+}
+
+/* ── Body wrapper ──────────────────────────────────── */
+.dd-body {
+    background: var(--dd-bg);
+    width: 100%;
+    position: relative;
+    z-index: 5; /* scrolls over the fixed title */
+}
+
+/* ── Content column ────────────────────────────────── */
+.dd-content {
+    max-width: var(--dd-max-width);
+    margin: 0 auto;
+    padding: 2rem var(--dd-gutter) 3rem;
+}
+
+/* ── Article typography ────────────────────────────── */
+.dd-article {
+    padding-top: 0.25rem;
+}
+
+/* Body text blocks (paragraphs rendered by ReadingContentBlocks) */
+.dd-article div,
+.dd-article p {
+    font-family: var(--dd-font-serif);
+    font-size: 1.075rem;
+    line-height: 1.9;
+    color: var(--dd-text);
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
     word-break: break-word;
+    margin: 0;
 }
 
-.devocional-details .date {
-    margin-top: 1.5rem;
-    color: #888;
+/* Headings within content */
+.dd-article h1,
+.dd-article h2 {
+    font-family: var(--dd-font-display);
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    font-weight: 800;
+    color: var(--dd-accent);
+    line-height: 1.2;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.dd-article h3,
+.dd-article h4 {
+    font-family: var(--dd-font-display);
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--dd-accent);
+    line-height: 1.3;
+    margin: 0;
+}
+.dd-article h5,
+.dd-article h6 {
+    font-family: var(--dd-font-serif);
     font-size: 1rem;
-    text-align: right;
+    font-weight: 700;
+    color: var(--dd-text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
 }
 
-.devocional section {
-    padding: 2rem 1.5rem 1rem 1.5rem;
+/* Blockquotes (scripture citations) */
+.dd-article blockquote {
+    border-left: 3px solid var(--dd-accent2);
+    margin: 0;
+    padding-left: 1.2rem;
+    font-style: italic;
+    color: #46403a;
 }
 
-.devocional p {
-    font-size: 1.25rem;
-    line-height: 1.7;
-    color: #222;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-    word-break: break-word;
+/* Lists */
+.dd-article ul, .dd-article ol {
+    padding-left: 1.4rem;
+    margin: 0;
+}
+.dd-article li {
+    font-family: var(--dd-font-serif);
+    font-size: 1.075rem;
+    line-height: 1.8;
+    color: var(--dd-text);
 }
 
-.devocional ul,
-.devocional ol,
-.devocional-details ul,
-.devocional-details ol {
-    list-style-position: outside;
-    padding-left: 1.5rem;
+/* ── Byline / footer ───────────────────────────────── */
+.dd-footer {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--dd-border);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.devocional ul,
-.devocional-details ul {
-    list-style-type: disc;
+.dd-byline {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.dd-byline__author {
+    font-family: var(--dd-font-serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--dd-text-muted);
+}
+.dd-byline__author::before {
+    content: "— ";
+    color: var(--dd-accent2);
+    font-style: normal;
+}
+.dd-byline__date {
+    font-size: 0.78rem;
+    color: var(--dd-text-muted);
+    letter-spacing: 0.04em;
+    padding-left: 1.1rem;
+    font-family: var(--dd-font-serif);
 }
 
-.devocional ol,
-.devocional-details ol {
-    list-style-type: decimal;
-}
-
-
-
-.devocional .date {
-    margin-top: 1.5rem;
-    color: #888;
-    font-size: 1rem;
-    text-align: right;
-}
-
-.back-floating-button {
-    position: fixed;
-    /* se fija al viewport, no al scroll */
-    top: 16px;
-    /* distancia desde arriba */
-    left: 16px;
-    /* distancia desde la izquierda */
-    z-index: 1000;
-    /* por encima del contenido */
-
-    display: inline-flex;
+/* ── Action bar (views, share, like) ───────────────── */
+.dd-actions {
+    display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    justify-content: flex-end;
+}
+.dd-actions__views {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: var(--dd-text-muted);
+}
+.dd-actions__views i { font-size: 1rem; }
 
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid #6c757d;
-    background-color: #ffffff5e;
-    color: #202427;
-    font-size: 14px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+
+/* ── Responsive ────────────────────────────────────── */
+
+/* Desktop: use more horizontal space */
+@media (min-width: 1100px) {
+    :root { --dd-max-width: 820px; --dd-gutter: 3rem; }
+    .dd-article div, .dd-article p { font-size: 1.1rem; }
+    .dd-hero__title { font-size: clamp(2.2rem, 3.5vw, 3.4rem); }
+    .dd-hero__content { padding: 2rem 3rem 2.5rem; }
 }
 
-.back-floating-button:hover {
-    background-color: #6c757d;
-    color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
-}
-
-.back-floating-button i {
-    font-size: 16px;
-}
-
-
-
-@media (min-width: 800px) {
-    .header-modal .title {
-        font-size: 1.8rem;
-        max-width: 60%;
-        /* margin: 0 0 -1rem 0; */
-        margin-bottom: 0px;
-        padding-bottom: 200px;
-    }
-
-    .header-modal {
-        padding-top: 50%;
-        padding-bottom: 70px;
-    }
-}
-
-
-@media (max-width: 800px) {
-    .header-modal .title {
-        font-size: 2.1rem;
-        max-width: 80%;
-        /* margin: 0 0 -8rem 0; */
-        margin-bottom: 0px;
-        padding-bottom: 150px;
-    }
-
-    .header-modal {
-        padding-top: 50%;
-        /* Reducimos un poco en tablets */
-        padding-bottom: 70px;
-    }
+@media (min-width: 1400px) {
+    :root { --dd-max-width: 920px; --dd-gutter: 4rem; }
+    .dd-article div, .dd-article p { font-size: 1.125rem; }
 }
 
 @media (max-width: 700px) {
-    .devocional-details {
-        max-width: 98vw;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
-    .devocional {
-        max-width: 100%;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
-    .header-modal {
-        padding-top: 30%;
-        /* Reducimos un poco en tablets */
-        padding-bottom: 150px;
-    }
-
-    .header-modal .title {
-        font-size: 1.6rem;
-        max-width: 80%;
-        margin: 0 0 -8rem 0;
-    }
-
-    .header-modal .title span {
-        font-size: 2.1rem;
-    }
-
-    .devocional-details section {
-        padding: 1rem 0.5rem;
-    }
-
-    .devocional section {
-        padding: 1rem 0.5rem;
-    }
+    .dd-hero { aspect-ratio: 4 / 3; }
+    .dd-hero__title-wrapper { height: 75vw; padding-bottom: 1.5rem; }
+    .dd-hero__title { font-size: clamp(1.35rem, 6vw, 1.9rem); }
+    .dd-content { padding: 1.5rem 1rem 2.5rem; }
 }
 
-@media (max-width: 500px) {
-    .devocional-details {
-        padding: 0;
-    }
-
-    .devocional {
-        padding: 0;
-    }
-
-    .header-modal {
-        padding-top: 0%;
-        padding-bottom: 150px;
-    }
-
-    .header-modal .title {
-        font-size: 1.2rem;
-        max-width: 70%;
-        margin: 0 0 -9rem 0;
-    }
-
-    .header-modal .title span {
-        font-size: 1.4rem;
-    }
-
-    .devocional p {
-        font-size: 1rem;
-        line-height: 1.7;
-        color: #222;
-        margin: 0;
-        word-break: break-word;
-    }
-
-    .devocional-details p {
-        font-size: 1rem;
-        line-height: 1.7;
-        color: #222;
-        margin: 0;
-        word-break: break-word;
-    }
+@media (max-width: 480px) {
+    .dd-hero { aspect-ratio: 3 / 2; }
+    .dd-hero__title-wrapper { height: 66.67vw; padding-bottom: 1.25rem; }
+    .dd-hero__title { font-size: clamp(1.2rem, 5.5vw, 1.6rem); }
+    .dd-article div, .dd-article p, .dd-article li { font-size: 1rem; }
+    .dd-content { padding: 1.25rem 0.85rem 2rem; }
 }
 
-/* ── Study navigation ─────────────────────────────────── */
+
+/* ── Study / Series navigation ─────────────────────── */
 .study-nav {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #e8e8e8;
+    border-top: 1px solid var(--dd-border);
 }
-
 .study-nav__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 8px;
 }
-
 .study-nav__book-name {
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #2d465e;
+    color: var(--dd-accent);
 }
-
 .study-nav__counter {
     font-size: 0.72rem;
     color: #aaa;
     font-variant-numeric: tabular-nums;
 }
-
 .study-nav__progress-bar {
     height: 3px;
-    background: #f0f0f0;
+    background: #e8e3dc;
     border-radius: 2px;
     margin-bottom: 16px;
     overflow: hidden;
 }
-
 .study-nav__progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #2d465e 0%, #f75815 100%);
+    background: linear-gradient(90deg, var(--dd-accent) 0%, var(--dd-accent2) 100%);
     border-radius: 2px;
     transition: width 0.4s ease;
 }
-
 .study-nav__buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
-
 .study-nav__btn {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 14px 16px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--dd-border);
     border-radius: 12px;
-    background: #fff;
-    color: #2d465e;
+    background: var(--dd-surface);
+    color: var(--dd-accent);
     cursor: pointer;
-    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, transform 0.18s;
     text-decoration: none;
     min-height: 64px;
 }
-
-.study-nav__btn--prev {
-    justify-content: flex-start;
-    text-align: left;
-}
-
-.study-nav__btn--next {
-    justify-content: flex-end;
-    text-align: right;
-}
-
+.study-nav__btn--prev { justify-content: flex-start; text-align: left; }
+.study-nav__btn--next { justify-content: flex-end;  text-align: right; }
 .study-nav__btn:hover:not(.study-nav__btn--disabled) {
-    border-color: #2d465e;
-    background: #f7fafc;
+    border-color: var(--dd-accent);
+    background: #f0f4f7;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(45, 70, 94, 0.12);
+    box-shadow: 0 4px 12px rgba(45,70,94,0.12);
     text-decoration: none;
-    color: #2d465e;
+    color: var(--dd-accent);
 }
-
-.study-nav__btn--disabled {
-    opacity: 0.32;
-    cursor: default;
-    pointer-events: none;
-}
-
-.study-nav__btn--cross-book {
-    border-color: #ffd4bf;
-    background: #fff8f5;
-}
-
+.study-nav__btn--disabled   { opacity: 0.32; cursor: default; pointer-events: none; }
+.study-nav__btn--cross-book { border-color: #ffd4bf; background: #fff8f5; }
 .study-nav__btn--cross-book:hover:not(.study-nav__btn--disabled) {
-    border-color: #f75815;
+    border-color: var(--dd-accent2);
     background: #fff0ea;
-    box-shadow: 0 4px 12px rgba(247, 88, 21, 0.12);
+    box-shadow: 0 4px 12px rgba(247,88,21,0.12);
 }
-
-.study-nav__icon {
-    flex-shrink: 0;
-    color: currentColor;
-    opacity: 0.7;
-}
-
-.study-nav__label {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
+.study-nav__icon   { flex-shrink: 0; color: currentColor; opacity: 0.7; }
+.study-nav__label  { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .study-nav__label small {
-    font-size: 0.65rem;
-    color: #f75815;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    line-height: 1;
+    font-size: 0.65rem; color: var(--dd-accent2); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em; line-height: 1;
 }
-
 .study-nav__label strong {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #2d465e;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.82rem; font-weight: 700; color: var(--dd-accent);
+    line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-
 .study-nav__label span {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #2d465e;
-    line-height: 1;
+    font-size: 0.85rem; font-weight: 500; color: var(--dd-accent); line-height: 1;
+}
+.study-nav__btn--upcoming { border-color: #ffd4bf; background: #fff8f5; cursor: default; pointer-events: none; }
+.study-nav__countdown {
+    font-size: 0.9rem; font-weight: 700; color: var(--dd-accent2);
+    font-variant-numeric: tabular-nums; letter-spacing: 0.04em; line-height: 1;
 }
 
 @media (max-width: 500px) {
-    .study-nav__buttons {
-        gap: 8px;
-    }
-
-    .study-nav__btn {
-        padding: 10px 12px;
-        min-height: 54px;
-        border-radius: 10px;
-        gap: 8px;
-    }
-
-    .study-nav__label strong {
-        font-size: 0.75rem;
-    }
-
-    .study-nav__label span {
-        font-size: 0.78rem;
-    }
-
-    .study-nav__label small {
-        font-size: 0.6rem;
-    }
-}
-
-.study-nav__btn--upcoming {
-    border-color: #ffd4bf;
-    background: #fff8f5;
-    cursor: default;
-    pointer-events: none;
-}
-
-.study-nav__countdown {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #f75815;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.04em;
-    line-height: 1;
-}
-
-@media (max-width: 400px) {
-    .devocional-details {
-        padding: 0;
-    }
-
-    .devocional {
-        padding: 0;
-    }
-
-    .header-modal {
-        padding-top: 0%;
-    }
-
-    .header-modal .title {
-        font-size: 1rem;
-        max-width: 70%;
-        margin: 0 0 -10rem 0;
-    }
-
-    .devocional p {
-        font-size: 1rem;
-        line-height: 1.7;
-        color: #222;
-        margin: 0;
-        word-break: break-word;
-    }
-
-    .devocional-details p {
-        font-size: 1rem;
-        line-height: 1.7;
-        color: #222;
-        margin: 0;
-        word-break: break-word;
-    }
-}
-.devocional-content p {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: #222;
-    margin: 0 0 1em 0;
-    word-break: break-word;
-}
-
-.devocional-content p:last-child {
-    margin-bottom: 0;
-}
-
-.devocional-content br {
-    display: block;
-    margin-bottom: 0.5em;
+    .study-nav__buttons { gap: 8px; }
+    .study-nav__btn { padding: 10px 12px; min-height: 54px; border-radius: 10px; gap: 8px; }
+    .study-nav__label strong { font-size: 0.75rem; }
+    .study-nav__label span   { font-size: 0.78rem; }
+    .study-nav__label small  { font-size: 0.6rem; }
 }
