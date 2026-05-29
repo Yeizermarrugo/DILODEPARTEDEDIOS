@@ -19,7 +19,7 @@ class ImageUploadController extends Controller
 
         $path = Storage::disk('s3')->putFile($this->storageFolder('imagenes'), $request->file('file'), [
             'visibility'    => 'public',
-            'CacheControl'  => 'max-age=31536000, public',
+            'CacheControl'  => 'public, max-age=31536000, immutable',
         ]);
 
         if (! $path) {
@@ -42,7 +42,7 @@ class ImageUploadController extends Controller
             // Subir a S3 en carpeta devocionales
             $path = Storage::disk('s3')->putFile($this->storageFolder('postCard'), $request->file('file'), [
                 'visibility'   => 'public',
-                'CacheControl' => 'max-age=31536000, public',
+                'CacheControl' => 'public, max-age=31536000, immutable',
             ]);
 
             if (! $path) {

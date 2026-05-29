@@ -39,7 +39,10 @@ class BulkUploadController extends Controller
         $paths = [];
 
         foreach ($request->file('files') as $file) {
-            $path    = $file->store($this->storageFolder('imagenes'), 's3');
+            $path    = $disk->putFile($this->storageFolder('imagenes'), $file, [
+                'visibility' => 'public',
+                'CacheControl' => 'public, max-age=31536000, immutable',
+            ]);
             $url     = $disk->url($path);
             $paths[] = compact('path', 'url');
         }
@@ -60,7 +63,10 @@ class BulkUploadController extends Controller
         /** @var FilesystemAdapter $disk */
         $disk   = Storage::disk('s3');
         $folder = $this->storageFolder($request->input('folder', 'videos'));
-        $path   = $request->file('file')->store($folder, 's3');
+        $path   = $disk->putFile($folder, $request->file('file'), [
+            'visibility' => 'public',
+            'CacheControl' => 'public, max-age=31536000, immutable',
+        ]);
         $url    = $disk->url($path);
 
         return response()->json(compact('path', 'url'));
