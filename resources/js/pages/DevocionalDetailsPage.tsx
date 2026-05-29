@@ -243,6 +243,7 @@ const DevocionalDetailsPage = (props: Props) => {
     const [loading, setLoading] = useState(typeof window !== 'undefined');
     const [viewsCount, setViewsCount] = useState(devocional?.views_count ?? 0);
     const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
+    const [pastHero, setPastHero] = useState(false);
     const imageLoaded = useImagePreload(devocional?.imagen ?? '');
     const readingBlocks = useMemo(() => extractReadingBlocks(devocional?.contenido ?? ''), [devocional?.contenido]);
     const hasLeadingHeading = readingBlocks[0]?.kind === 'heading';
@@ -254,12 +255,25 @@ const DevocionalDetailsPage = (props: Props) => {
         return () => clearTimeout(t);
     }, []);
 
+    useEffect(() => {
+        const onScroll = () => {
+            // Hero height ≈ 43.75vw (16:7). Transition starts at 70% of hero.
+            const threshold = window.innerWidth * (7 / 16) * 0.7;
+            setPastHero(window.scrollY > threshold);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    useEffect(() => {
+        setViewsCount(devocional?.views_count ?? 0);
+    }, [devocional?.views_count]);
+
     // ── Track view ─────────────────────────────────────────────────────────────
     useEffect(() => {
         const devId = devocional?.id;
         if (!devId) return;
-
-        setViewsCount(devocional?.views_count ?? 0);
 
         const d = new Date();
         const pad = (n: number) => String(n).padStart(2, '0');
@@ -302,29 +316,16 @@ const DevocionalDetailsPage = (props: Props) => {
     };
 
     const devocionalContent = removeFirstH1(devocional.contenido);
-
-    const H1Custom = ({ active = false }: { active?: boolean }) => {
-        const h1Text = getH1Text(devocional.contenido) || devocional.titulo || '';
-        const [p1, p2] = splitH1Parts(decodeEntities(h1Text));
-        return (
-            <header
-                className="header-modal"
-                style={{
-                    background: `url(${devocional.imagen}) center center no-repeat`,
-                    backgroundSize: 'cover',
-                    position: 'relative',
-                    color: 'white',
-                    zIndex: -2,
-                }}
-            >
-                <h1 className="title" style={{ paddingTop: '70px', textTransform: 'uppercase' }}>
-                    {p1} {p2}
-                </h1>
-            </header>
-        );
-    };
+    const h1Text = getH1Text(devocional.contenido) || devocional.titulo || '';
+    const [titleP1, titleP2] = splitH1Parts(decodeEntities(h1Text));
 
     const backHref = likeType === 'estudio' ? '/estudios' : likeType === 'ensenanza' ? '/series' : '/devocionales';
+
+    const formattedDate = devocional.created_at
+        ? new Date(devocional.created_at)
+            .toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+            .replace(/^\w/, c => c.toUpperCase())
+        : '';
 
     if (loading && !imageLoaded) {
         return (
@@ -337,52 +338,64 @@ const DevocionalDetailsPage = (props: Props) => {
     }
 
     return (
-        <div className="devocional">
-            <a href={backHref} className="back-floating-button">
+        <div className="dd-page">
+            <a href={backHref} className={`dd-back-btn${pastHero ? ' dd-back-btn--scrolled' : ''}`}>
                 <i className="bi bi-arrow-left" /> Atrás
             </a>
 
-            <H1Custom />
+            {/* ── Hero ─────────────────────────────────────── */}
+            <div className="dd-hero">
+                <div
+                    className="dd-hero__bg"
+                    style={{ backgroundImage: `url(${devocional.imagen})` }}
+                    aria-hidden="true"
+                />
+                <div className="dd-hero__overlay" aria-hidden="true" />
+            </div>
 
-            <section style={{ background: '#fff', padding: '24px', borderRadius: '8px', width: '100%', position: 'relative' }}>
-                <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
+            {/* Title fixed in viewport — content scrolls over it for "hide behind" illusion */}
+            <div className="dd-hero__title-wrapper" aria-hidden="true">
+                <h1 className="dd-hero__title">
+                    <span>{titleP1}</span>
+                    {titleP2 && <span>{titleP2}</span>}
+                </h1>
+            </div>
 
-                <ReadingContentBlocks html={devocionalContent} activeIndex={bodyActiveIndex} />
+            {/* ── Body ─────────────────────────────────────── */}
+            <div className="dd-body">
+                <div className="dd-content">
+                    <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
-                <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
-                    {devocional.autor ?? ''}
-                </p>
+                    <article className="dd-article">
+                        <ReadingContentBlocks html={devocionalContent} activeIndex={bodyActiveIndex} />
+                    </article>
 
-                <div style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 10px 0' }}>
-                    {devocional.created_at
-                        ? new Date(devocional.created_at)
-                            .toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-                            .replace(/^\w/, c => c.toUpperCase())
-                        : ''}
+                    <footer className="dd-footer">
+                        <div className="dd-byline">
+                            {devocional.autor && (
+                                <span className="dd-byline__author">{devocional.autor}</span>
+                            )}
+                            {formattedDate && (
+                                <time className="dd-byline__date">{formattedDate}</time>
+                            )}
+                        </div>
+
+                        {devocional.id && (
+                            <div className="dd-actions">
+                                <span className="dd-actions__views">
+                                    <i className="bi bi-eye" />
+                                    {viewsCount}
+                                </span>
+                                <ShareButton type={likeType} id={devocional.id} sharesCount={devocional.shares_count ?? 0} variant="default" />
+                                <LikeButton type={likeType} id={devocional.id} variant="default" />
+                            </div>
+                        )}
+                    </footer>
+
+                    {nav && likeType === 'estudio' && <StudyNavigation nav={nav} />}
+                    {seriesNav && likeType === 'ensenanza' && <SeriesNavigation nav={seriesNav} />}
                 </div>
-
-                {/* ── Vistas + Compartir + Like al pie de la página ── */}
-                {devocional.id && (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        gap: '8px',
-                        padding: '12px 20px 4px 0',
-                        borderTop: '1px solid #f0f0f0',
-                        marginTop: '8px',
-                        color: '#888',
-                    }}>
-                        <i className="bi bi-eye" style={{ fontSize: '20px' }} />
-                        <span>{viewsCount}</span>
-                        <ShareButton type={likeType} id={devocional.id} sharesCount={devocional.shares_count ?? 0} variant="default" />
-                        <LikeButton type={likeType} id={devocional.id} variant="default" />
-                    </div>
-                )}
-
-                {nav && likeType === 'estudio' && <StudyNavigation nav={nav} />}
-                {seriesNav && likeType === 'ensenanza' && <SeriesNavigation nav={seriesNav} />}
-            </section>
+            </div>
         </div>
     );
 };

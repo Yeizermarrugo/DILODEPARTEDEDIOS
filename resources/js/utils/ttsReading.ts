@@ -9,6 +9,7 @@ export type ReadingBlock = {
     tag: string;
     text: string;
     weight: number;
+    align?: string;
 };
 
 export type ReadingTiming = {
@@ -25,7 +26,7 @@ export function extractReadingBlocks(html: string): ReadingBlock[] {
         return [];
     }
 
-    const sanitized = DOMPurify.sanitize(html);
+    const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['style'] });
     const parser = new DOMParser();
     const doc = parser.parseFromString(`<body>${sanitized}</body>`, 'text/html');
     const blocks: ReadingBlock[] = [];
@@ -187,7 +188,8 @@ function collectBlocks(node: ChildNode, blocks: ReadingBlock[]): void {
     }
 
     if (BLOCK_TAGS.has(tag)) {
-        pushBlock(tag, element.innerHTML, normalizeText(element.textContent ?? ''), kindForTag(tag), blocks);
+        const align = element.style.textAlign || undefined;
+        pushBlock(tag, element.innerHTML, normalizeText(element.textContent ?? ''), kindForTag(tag), blocks, align);
         return;
     }
 
@@ -204,7 +206,7 @@ function collectBlocks(node: ChildNode, blocks: ReadingBlock[]): void {
     pushBlock('div', element.innerHTML, text, 'other', blocks);
 }
 
-function pushBlock(tag: string, html: string, text: string, kind: ReadingBlockKind, blocks: ReadingBlock[]): void {
+function pushBlock(tag: string, html: string, text: string, kind: ReadingBlockKind, blocks: ReadingBlock[], align?: string): void {
     if (!text) {
         return;
     }
@@ -216,6 +218,7 @@ function pushBlock(tag: string, html: string, text: string, kind: ReadingBlockKi
         tag,
         text,
         weight: estimateWeight(text, kind),
+        ...(align && { align }),
     });
 }
 
@@ -245,7 +248,7 @@ function effectiveChars(text: string): number {
     let extra = 0;
 
     // Verse references: "13:14-15" — Azure reads each digit individually as a word.
-    working = working.replace(/\b\d+(?:[:\-]\d+)+\b/g, (m) => {
+    working = working.replace(/\b\d+(?:[:-]\d+)+\b/g, (m) => {
         extra += (m.match(/\d/g) ?? []).length * 4;
         return ' ';
     });

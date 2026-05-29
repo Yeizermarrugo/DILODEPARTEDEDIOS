@@ -35,17 +35,17 @@ class GenerateDevocionalAudio implements ShouldQueue
             $lock = Cache::lock("dilodepartededios:tts:devocional:{$devocional->id}", 180);
 
             $lock->block(5, function () use ($tts, $devocional) {
-                $url = $tts->generateFromHtml($devocional->contenido ?? '');
+                $payload = $tts->generateFromHtmlWithTimings($devocional->contenido ?? '');
 
                 Cache::put(
                     "dilodepartededios:tts:devocional:{$devocional->id}:url",
-                    $url,
+                    $payload['url'],
                     now()->addDays(30)
                 );
 
                 Log::info('Devocional audio pregenerated', [
                     'id' => $devocional->id,
-                    'url' => $url,
+                    'url' => $payload['url'],
                 ]);
             });
         } catch (\Throwable $exception) {

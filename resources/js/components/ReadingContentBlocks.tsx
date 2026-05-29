@@ -11,6 +11,12 @@ type Props = {
 const HEADING_TAGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
+function trimHtml(html: string): string {
+    return html
+        .replace(/^(\s|<br\s*\/?>|&nbsp;)*/gi, '')
+        .replace(/(\s|<br\s*\/?>|&nbsp;)*$/gi, '');
+}
+
 export default function ReadingContentBlocks({ html, activeIndex, className }: Props) {
     const blocks = useMemo(() => extractReadingBlocks(html), [html]);
 
@@ -23,25 +29,32 @@ export default function ReadingContentBlocks({ html, activeIndex, className }: P
             {blocks.map((block) => {
                 const active = activeIndex === block.index;
                 const isHeading = HEADING_TAGS.has(block.tag);
+                // Respect explicit alignment (e.g. text-align:center from TinyMCE).
+                // Fall back to justify for body text, no override for headings.
+                const textAlign: CSSProperties['textAlign'] =
+                    block.align ? (block.align as CSSProperties['textAlign'])
+                    : isHeading ? undefined
+                    : 'justify';
+
                 const sharedStyle: CSSProperties = {
                     position: 'relative',
                     padding: block.kind === 'list-item' ? '0.6rem 0.9rem 0.6rem 1rem' : '0.75rem 0.9rem',
                     margin: 0,
-                    borderLeft: active ? '4px solid #6C63FF' : '4px solid transparent',
-                    background: active ? 'rgba(108, 99, 255, 0.08)' : 'transparent',
+                    borderLeft: active ? '4px solid #f75815' : '4px solid transparent',
+                    background: active ? 'rgba(247, 88, 21, 0.08)' : 'transparent',
                     borderRadius: 8,
                     transition: 'background 50ms ease, border-color 50ms ease, box-shadow 50ms ease',
-                    boxShadow: active ? '0 10px 24px rgba(108, 99, 255, 0.08)' : 'none',
-                    ...(!isHeading && { textAlign: 'justify' }),
+                    boxShadow: active ? '0 10px 24px rgba(247, 88, 21, 0.08)' : 'none',
+                    ...(textAlign && { textAlign }),
                 };
 
                 if (block.kind === 'list-item') {
                     return (
                         <div key={block.index} style={sharedStyle}>
-                            <span style={{ display: 'inline-flex', width: 22, color: active ? '#6C63FF' : '#888' }}>
+                            <span style={{ display: 'inline-flex', width: 22, color: active ? '#f75815' : '#888' }}>
                                 •
                             </span>
-                            <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.html) }} />
+                            <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trimHtml(block.html)) }} />
                         </div>
                     );
                 }
@@ -56,7 +69,7 @@ export default function ReadingContentBlocks({ html, activeIndex, className }: P
                         style={{
                             ...sharedStyle,
                         }}
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.html) }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trimHtml(block.html)) }}
                     />
                 );
             })}
