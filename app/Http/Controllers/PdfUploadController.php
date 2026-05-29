@@ -18,7 +18,10 @@ class PdfUploadController extends Controller
 
         if ($request->hasFile('file')) {
             // Subir a S3 en carpeta "pdfs-devocionales"
-            $path = $request->file('file')->store($this->storageFolder('pdf'), 's3', 'public');
+            $path = Storage::disk('s3')->putFile($this->storageFolder('pdf'), $request->file('file'), [
+                'visibility' => 'public',
+                'CacheControl' => 'public, max-age=31536000, immutable',
+            ]);
             $url = Storage::disk('s3')->url($path);
 
             return response()->json([

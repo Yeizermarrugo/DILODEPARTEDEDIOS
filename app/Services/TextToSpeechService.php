@@ -204,7 +204,7 @@ class TextToSpeechService
 
             $stored = Storage::disk('s3')->put($audioPath, $response->body(), [
                 'visibility' => 'public',
-                'CacheControl' => 'max-age=31536000, public',
+                'CacheControl' => 'public, max-age=31536000, immutable',
                 'ContentType' => 'audio/mpeg',
             ]);
 
@@ -409,7 +409,7 @@ class TextToSpeechService
 
                 $stored = Storage::disk('s3')->put($audioPath, $audio, [
                     'visibility' => 'public',
-                    'CacheControl' => 'max-age=31536000, public',
+                    'CacheControl' => 'public, max-age=31536000, immutable',
                     'ContentType' => 'audio/mpeg',
                 ]);
 
