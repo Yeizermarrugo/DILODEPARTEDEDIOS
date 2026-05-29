@@ -35,6 +35,32 @@ export function extractReadingBlocks(html: string): ReadingBlock[] {
     return blocks;
 }
 
+// Must match TextToSpeechService::DICTIONARY in the PHP backend.
+// Longer entries first so e.g. "RVR1960" is matched before "RVR".
+const TTS_DICTIONARY: [RegExp, string][] = [
+    [/\bRVR1960\b/g, 'Reina Valera 1960'],
+    [/\bRVR2015\b/g, 'Reina Valera actualizada 2015'],
+    [/\bRVR1909\b/g, 'Reina Valera 1909'],
+    [/\bNBLH\b/g, 'Nueva Biblia Latinoamericana de Hoy'],
+    [/\bLBLA\b/g, 'La Biblia de las Américas'],
+    [/\bNTV\b/g, 'Nueva Traducción Viviente'],
+    [/\bNVI\b/g, 'Nueva Versión Internacional'],
+    [/\bDHH\b/g, 'Dios Habla Hoy'],
+    [/\bPDT\b/g, 'Palabra de Dios para Todos'],
+    [/\bTLA\b/g, 'Traducción en Lenguaje Actual'],
+    [/\bBLS\b/g, 'Biblia en Lenguaje Sencillo'],
+    [/\bRVR\b/g, 'Reina Valera'],
+    [/\bNKJV\b/g, 'New King James Version'],
+    [/\bKJV\b/g, 'King James Version'],
+    [/\bNIV\b/g, 'New International Version'],
+    [/\bESV\b/g, 'English Standard Version'],
+    [/\bNLT\b/g, 'New Living Translation'],
+];
+
+function expandDictionary(text: string): string {
+    return TTS_DICTIONARY.reduce((t, [re, expansion]) => t.replace(re, expansion), text);
+}
+
 // Must match TextToSpeechService::BREAKS in the PHP backend.
 const SSML_BREAK_SECONDS: Record<ReadingBlockKind | 'other', number> = {
     heading: 0.85,
@@ -214,36 +240,32 @@ function kindForTag(tag: string): ReadingBlockKind {
 
 function effectiveChars(text: string): number {
     const normalized = normalizeText(text);
-    let working = normalized;
+    // Expand known abbreviations to what Azure actually speaks — same mapping as backend.
+    let working = expandDictionary(normalized);
     let extra = 0;
 
-    // Verse references: "13:14-15", "3:16" — Azure reads each digit as a word.
-    // Each digit ≈ 4 extra base-chars worth of speech time.
+    // Verse references: "13:14-15" — Azure reads each digit individually as a word.
     working = working.replace(/\b\d+(?:[:\-]\d+)+\b/g, (m) => {
         extra += (m.match(/\d/g) ?? []).length * 4;
         return ' ';
     });
 
-    // Bible version codes with appended year/number: "RVR1960", "LBLA2000", "NTV2015".
-    // Azure spells out each letter and digit individually — very slow.
+    // Fallback for unknown abbreviation+digit codes not in TTS_DICTIONARY (e.g. "TLA2000").
     working = working.replace(/\b[A-ZÁÉÍÓÚÜÑ]{2,}[0-9]+\b/g, (m) => {
         extra += m.length * 4;
         return ' ';
     });
 
-    // Remaining standalone numbers.
+    // Standalone numbers: years, chapters, etc. Azure reads as words (≈5× per digit).
     working = working.replace(/\b\d+\b/g, (m) => {
-        extra += m.length * 2;
+        extra += m.length * 5;
         return ' ';
     });
 
     const baseChars = Math.max(4, working.replace(/\s/g, '').length);
 
-    // Sentence-end pauses (~0.5s each → ≈ 7 chars at 150wpm).
     const sentenceEnds = (normalized.match(/[.!?]/g) ?? []).length;
-    // Ellipsis gets a dramatic pause (0.5-0.8s → ≈ 7 chars).
     const ellipses = (normalized.match(/…|\.\.\./g) ?? []).length;
-    // Comma / semicolon pause (~0.15s → ≈ 2 chars). Exclude `:` to avoid double-counting verse refs.
     const commas = (normalized.match(/[,;]/g) ?? []).length;
 
     return baseChars + extra + sentenceEnds * 7 + ellipses * 7 + commas * 2;
