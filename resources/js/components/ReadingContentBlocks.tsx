@@ -9,6 +9,7 @@ type Props = {
 };
 
 const HEADING_TAGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
 export default function ReadingContentBlocks({ html, activeIndex, className }: Props) {
     const blocks = useMemo(() => extractReadingBlocks(html), [html]);
@@ -21,6 +22,7 @@ export default function ReadingContentBlocks({ html, activeIndex, className }: P
         <div className={className} style={{ display: 'grid', gap: '12px' }}>
             {blocks.map((block) => {
                 const active = activeIndex === block.index;
+                const isHeading = HEADING_TAGS.has(block.tag);
                 const sharedStyle: CSSProperties = {
                     position: 'relative',
                     padding: block.kind === 'list-item' ? '0.6rem 0.9rem 0.6rem 1rem' : '0.75rem 0.9rem',
@@ -28,8 +30,9 @@ export default function ReadingContentBlocks({ html, activeIndex, className }: P
                     borderLeft: active ? '4px solid #6C63FF' : '4px solid transparent',
                     background: active ? 'rgba(108, 99, 255, 0.08)' : 'transparent',
                     borderRadius: 8,
-                    transition: 'background 160ms ease, border-color 160ms ease, box-shadow 160ms ease',
+                    transition: 'background 50ms ease, border-color 50ms ease, box-shadow 50ms ease',
                     boxShadow: active ? '0 10px 24px rgba(108, 99, 255, 0.08)' : 'none',
+                    ...(!isHeading && { textAlign: 'justify' }),
                 };
 
                 if (block.kind === 'list-item') {
@@ -43,7 +46,9 @@ export default function ReadingContentBlocks({ html, activeIndex, className }: P
                     );
                 }
 
-                const Tag = (HEADING_TAGS.has(block.tag) ? block.tag : 'div') as keyof JSX.IntrinsicElements;
+                const Tag: HeadingTag | 'div' = HEADING_TAGS.has(block.tag)
+                    ? (block.tag as HeadingTag)
+                    : 'div';
 
                 return (
                     <Tag

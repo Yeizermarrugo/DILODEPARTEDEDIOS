@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react';
 import { buildReadingTimings, extractReadingBlocks, findActiveReadingBlock } from '@/utils/ttsReading';
+import { useEffect, useRef, useState } from 'react';
 
 const LANG = 'es-CO';
 
 const VOICES = [
-    { label: 'Alonso (EE.UU.)', value: 'es-US-AlonsoNeural', available: true, lang: 'es-US' },
-    { label: 'Paloma (EE.UU.)', value: 'es-US-PalomaNeural', available: true, lang: 'es-US' },
+    { label: 'Alonso (América)', value: 'es-US-AlonsoNeural', available: true, lang: 'es-US' },
+    { label: 'Paloma (América)', value: 'es-US-PalomaNeural', available: true, lang: 'es-US' },
     { label: 'Dalia (México)', value: 'es-MX-DaliaNeural', available: true, lang: 'es-MX' },
     { label: 'Jorge (México)', value: 'es-MX-JorgeNeural', available: true, lang: 'es-MX' },
     { label: 'Elvira (España)', value: 'es-ES-ElviraNeural', available: true, lang: 'es-ES' },
@@ -34,6 +34,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     const blocksRef = useRef(extractReadingBlocks(html));
     const timingsRef = useRef<{ end: number; index: number; start: number }[]>([]);
     const activeBlockRef = useRef<number | null>(null);
+    const rafRef = useRef<number | null>(null);
 
     const emitBlockChange = (index: number | null) => {
         if (activeBlockRef.current === index) {
@@ -43,6 +44,24 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
         activeBlockRef.current = index;
         onBlockChange?.(index);
     };
+
+    const stopRaf = () => {
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+        }
+    };
+
+    const startRaf = () => {
+        stopRaf();
+        const tick = () => {
+            syncActiveBlock();
+            rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+    };
+
+    useEffect(() => () => stopRaf(), []);
 
     const rebuildTimings = () => {
         const audio = audioRef.current;
@@ -134,7 +153,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
                     setAudioReady(false);
                     setIsPlaying(true);
                     setIsPaused(false);
-                    syncActiveBlock();
+                    startRaf();
                 })
                 .catch(() => {
                     alert('No se pudo reproducir el audio. Intenta tocar Play otra vez.');
@@ -146,9 +165,11 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
             loadAudio();
         } else if (isPlaying && !isPaused && !loading) {
             audioRef.current?.pause();
+            stopRaf();
             setIsPaused(true);
         } else if (isPlaying && isPaused && !loading) {
             audioRef.current?.play();
+            startRaf();
             setIsPaused(false);
         }
     };
@@ -157,6 +178,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
         e.stopPropagation();
         audioRef.current?.pause();
         if (audioRef.current) audioRef.current.currentTime = 0;
+        stopRaf();
         setIsPlaying(false);
         setIsPaused(false);
         setLoading(false);
@@ -165,6 +187,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     };
 
     const onEnded = () => {
+        stopRaf();
         setLoading(false);
         setAudioReady(false);
         setIsPlaying(false);
@@ -174,10 +197,6 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
 
     const onLoadedMetadata = () => {
         rebuildTimings();
-    };
-
-    const onTimeUpdate = () => {
-        syncActiveBlock();
     };
 
     return (
@@ -277,9 +296,8 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
                 src={audioUrl || undefined}
                 onEnded={onEnded}
                 onLoadedMetadata={onLoadedMetadata}
-                onTimeUpdate={onTimeUpdate}
-                onPause={() => setIsPaused(true)}
-                onPlay={() => setIsPaused(false)}
+                onPause={() => { stopRaf(); setIsPaused(true); }}
+                onPlay={() => { startRaf(); setIsPaused(false); }}
                 style={{ display: 'none' }}
             />
 
