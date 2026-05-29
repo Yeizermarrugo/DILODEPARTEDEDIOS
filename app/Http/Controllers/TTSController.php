@@ -19,16 +19,16 @@ class TTSController extends Controller
         }
 
         try {
-            $url = $request->input('format') === 'html'
-                ? $tts->generateFromHtml($texto, $lang, $voice, $rate)
-                : $tts->generate($texto, $lang, $voice, $rate);
+            $payload = $request->input('format') === 'html'
+                ? $tts->generateFromHtmlWithTimings($texto, $lang, $voice, $rate, $request->input('blocks'))
+                : ['url' => $tts->generate($texto, $lang, $voice, $rate), 'timings' => null];
         } catch (\InvalidArgumentException $exception) {
             return response($exception->getMessage(), 400);
         } catch (\RuntimeException $exception) {
             return response($exception->getMessage(), 500);
         }
 
-        return response()->json(['url' => $url]);
+        return response()->json($payload);
     }
 
     public function voices(Request $request, TextToSpeechService $tts)
