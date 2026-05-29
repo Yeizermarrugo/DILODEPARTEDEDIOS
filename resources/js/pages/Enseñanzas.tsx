@@ -1,5 +1,5 @@
 import EnsenanzaCard from '@/components/EnsenanzaCard';
-import Spinner from '@/components/Spinner';
+import { EnsenanzasGridSkeleton } from '@/components/SectionSkeletons';
 import { Head } from '@inertiajs/react';
 import { JSX, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -65,7 +65,9 @@ function Enseñanzas() {
     const debouncedSearch = useDebounce(searchTerm, 350);
 
     // Resetear página cuando cambia la búsqueda
-    useEffect(() => { setPage(1); }, [debouncedSearch]);
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch]);
 
     // ── Fetch Data ────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -75,7 +77,7 @@ function Enseñanzas() {
             try {
                 const params = new URLSearchParams({
                     page: String(page),
-                    ...(debouncedSearch.trim() && { search: debouncedSearch.trim() })
+                    ...(debouncedSearch.trim() && { search: debouncedSearch.trim() }),
                 });
 
                 const url = `/series-search?${params.toString()}`;
@@ -122,12 +124,9 @@ function Enseñanzas() {
 
         for (let i = start; i <= end; i++) {
             pages.push(
-                <button
-                    key={i}
-                    className={`ens-page-btn ${cur === i ? 'ens-page-btn--active' : ''}`}
-                    onClick={() => setPage(i)}
-                    disabled={cur === i}
-                >{i}</button>
+                <button key={i} className={`ens-page-btn ${cur === i ? 'ens-page-btn--active' : ''}`} onClick={() => setPage(i)} disabled={cur === i}>
+                    {i}
+                </button>,
             );
         }
 
@@ -138,7 +137,9 @@ function Enseñanzas() {
                 </button>
                 {start > 1 && (
                     <>
-                        <button className="ens-page-btn" onClick={() => setPage(1)}>1</button>
+                        <button className="ens-page-btn" onClick={() => setPage(1)}>
+                            1
+                        </button>
                         <span className="ens-paginator-dots">···</span>
                     </>
                 )}
@@ -146,7 +147,9 @@ function Enseñanzas() {
                 {end < last && (
                     <>
                         <span className="ens-paginator-dots">···</span>
-                        <button className="ens-page-btn" onClick={() => setPage(last)}>{last}</button>
+                        <button className="ens-page-btn" onClick={() => setPage(last)}>
+                            {last}
+                        </button>
                     </>
                 )}
                 <button className="ens-page-btn" onClick={() => setPage(cur + 1)} disabled={cur === last}>
@@ -170,8 +173,8 @@ function Enseñanzas() {
 
                                 <div className="ens-hero__description-box">
                                     <p className="ens-hero__text">
-                                        En esta sección encontrarás enseñanzas basadas en la Palabra de Dios, organizadas en series,
-                                        donde se desarrollan temas y principios bíblicos para comprender mejor la fe y vivir conforme a la verdad.
+                                        En esta sección encontrarás enseñanzas basadas en la Palabra de Dios, organizadas en series, donde se
+                                        desarrollan temas y principios bíblicos para comprender mejor la fe y vivir conforme a la verdad.
                                     </p>
                                     <div className="ens-hero__verse-v2">
                                         <p>“La exposición de tus palabras alumbra; hace entender a los simples.”</p>
@@ -213,8 +216,19 @@ function Enseñanzas() {
 
                             <div className="ens-section__actions">
                                 <div className="dv-search">
-                                    <svg className="dv-search__icon" viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                                    <svg
+                                        className="dv-search__icon"
+                                        viewBox="0 0 24 24"
+                                        width={14}
+                                        height={14}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth={2.2}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.35-4.35" />
                                     </svg>
                                     <input
                                         ref={inputRef}
@@ -227,23 +241,27 @@ function Enseñanzas() {
                                     />
                                     {loading && searchTerm && <div className="dv-search__spinner" />}
                                     {!loading && searchTerm && (
-                                        <button className="dv-search__clear" onClick={() => { setSearchTerm(''); inputRef.current?.focus(); }}>✕</button>
+                                        <button
+                                            className="dv-search__clear"
+                                            onClick={() => {
+                                                setSearchTerm('');
+                                                inputRef.current?.focus();
+                                            }}
+                                        >
+                                            ✕
+                                        </button>
                                     )}
                                 </div>
                             </div>
                         </div>
 
                         {loading && ensenanzas.length === 0 ? (
-                            <div className="ens-loading">
-                                <Spinner />
-                            </div>
+                            <EnsenanzasGridSkeleton />
                         ) : (
                             <>
                                 <div className="ens-grid">
                                     {ensenanzas.length > 0 ? (
-                                        ensenanzas.map((ens) => (
-                                            <EnsenanzaCard key={ens.id} ensenanza={ens} />
-                                        ))
+                                        ensenanzas.map((ens) => <EnsenanzaCard key={ens.id} ensenanza={ens} />)
                                     ) : (
                                         <div className="ens-empty">
                                             <p>No se encontraron series para esta búsqueda.</p>
@@ -256,7 +274,6 @@ function Enseñanzas() {
                     </section>
                 </main>
             </div>
-
         </PageLayout>
     );
 }

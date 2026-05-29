@@ -298,6 +298,12 @@
     gap: 16px;
     margin-top: 22px;
     flex-wrap: wrap;
+    min-height: 36px;
+}
+
+.sp-dev__nav--placeholder {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 /* Contador tipográfico  01 / 05 */

@@ -1,23 +1,76 @@
 import { router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import LikeButton from './LikeButton';
+import { EstudiosAccordionSkeleton } from './SectionSkeletons';
 import { ShareButton } from './ShareButton';
 
 const BIBLICAL_ORDER: string[] = [
-    'GÉNESIS', 'ÉXODO', 'LEVÍTICO', 'NÚMEROS', 'DEUTERONOMIO',
-    'JOSUÉ', 'JUECES', 'RUT', '1 SAMUEL', '2 SAMUEL',
-    '1 REYES', '2 REYES', '1 CRÓNICAS', '2 CRÓNICAS', 'ESDRAS',
-    'NEHEMÍAS', 'ESTER', 'JOB', 'SALMOS', 'PROVERBIOS',
-    'ECLESIASTÉS', 'CANTARES', 'ISAÍAS', 'JEREMÍAS', 'LAMENTACIONES',
-    'EZEQUIEL', 'DANIEL', 'OSEAS', 'JOEL', 'AMÓS', 'ABDÍAS',
-    'JONÁS', 'MIQUEAS', 'NAHÚM', 'HABACUC', 'SOFONÍAS',
-    'HAGEO', 'ZACARÍAS', 'MALAQUÍAS',
-    'MATEO', 'MARCOS', 'LUCAS', 'JUAN', 'HECHOS',
-    'ROMANOS', '1 CORINTIOS', '2 CORINTIOS', 'GÁLATAS', 'EFESIOS',
-    'FILIPENSES', 'COLOSENSES', '1 TESALONICENSES', '2 TESALONICENSES',
-    '1 TIMOTEO', '2 TIMOTEO', 'TITO', 'FILEMÓN', 'HEBREOS',
-    'SANTIAGO', '1 PEDRO', '2 PEDRO', '1 JUAN', '2 JUAN', '3 JUAN',
-    'JUDAS', 'APOCALIPSIS',
+    'GÉNESIS',
+    'ÉXODO',
+    'LEVÍTICO',
+    'NÚMEROS',
+    'DEUTERONOMIO',
+    'JOSUÉ',
+    'JUECES',
+    'RUT',
+    '1 SAMUEL',
+    '2 SAMUEL',
+    '1 REYES',
+    '2 REYES',
+    '1 CRÓNICAS',
+    '2 CRÓNICAS',
+    'ESDRAS',
+    'NEHEMÍAS',
+    'ESTER',
+    'JOB',
+    'SALMOS',
+    'PROVERBIOS',
+    'ECLESIASTÉS',
+    'CANTARES',
+    'ISAÍAS',
+    'JEREMÍAS',
+    'LAMENTACIONES',
+    'EZEQUIEL',
+    'DANIEL',
+    'OSEAS',
+    'JOEL',
+    'AMÓS',
+    'ABDÍAS',
+    'JONÁS',
+    'MIQUEAS',
+    'NAHÚM',
+    'HABACUC',
+    'SOFONÍAS',
+    'HAGEO',
+    'ZACARÍAS',
+    'MALAQUÍAS',
+    'MATEO',
+    'MARCOS',
+    'LUCAS',
+    'JUAN',
+    'HECHOS',
+    'ROMANOS',
+    '1 CORINTIOS',
+    '2 CORINTIOS',
+    'GÁLATAS',
+    'EFESIOS',
+    'FILIPENSES',
+    'COLOSENSES',
+    '1 TESALONICENSES',
+    '2 TESALONICENSES',
+    '1 TIMOTEO',
+    '2 TIMOTEO',
+    'TITO',
+    'FILEMÓN',
+    'HEBREOS',
+    'SANTIAGO',
+    '1 PEDRO',
+    '2 PEDRO',
+    '1 JUAN',
+    '2 JUAN',
+    '3 JUAN',
+    'JUDAS',
+    'APOCALIPSIS',
 ];
 
 const biblicalOrderMap = new Map(BIBLICAL_ORDER.map((b, i) => [b.toUpperCase(), i]));
@@ -53,7 +106,6 @@ function getH2(html: string) {
     return m ? decode(m[1].replace(/<[^>]+>/g, '')) : '';
 }
 
-
 function getCatNombre(c: Categoria) {
     return typeof c === 'object' ? c.nombre : c;
 }
@@ -76,7 +128,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
 
     useEffect(() => {
         fetch('/estudiosbiblicos')
-            .then(r => r.json())
+            .then((r) => r.json())
             .then((data: Libro[]) => {
                 const lista = Array.isArray(data) ? data : [];
                 setLibros(lista);
@@ -84,7 +136,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
 
                 const cats = lista.reduce<Set<string>>((s, l) => {
                     const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
-                    cs.forEach(c => c && s.add(getCatNombre(c)));
+                    cs.forEach((c) => c && s.add(getCatNombre(c)));
                     return s;
                 }, new Set());
                 onLoadRef.current?.({ total: lista.length, categorias: cats.size });
@@ -95,19 +147,16 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
     const search = searchTerm.trim().toLowerCase();
 
     const filtrados = search
-        ? libros.filter(l =>
-            getH1(l.contenido).toLowerCase().includes(search) ||
-            getH2(l.contenido).toLowerCase().includes(search),
-        )
+        ? libros.filter((l) => getH1(l.contenido).toLowerCase().includes(search) || getH2(l.contenido).toLowerCase().includes(search))
         : libros;
 
     const categorias = filtrados
         .reduce<{ nombre: string }[]>((acc, l) => {
             const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
-            cs.forEach(c => {
+            cs.forEach((c) => {
                 if (!c) return;
                 const nombre = getCatNombre(c);
-                if (!acc.find(x => x.nombre === nombre)) acc.push({ nombre });
+                if (!acc.find((x) => x.nombre === nombre)) acc.push({ nombre });
             });
             return acc;
         }, [])
@@ -120,32 +169,25 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
     useEffect(() => {
         if (search) {
             const open: Record<string, boolean> = {};
-            categorias.forEach(c => { open[c.nombre] = true; });
+            categorias.forEach((c) => {
+                open[c.nombre] = true;
+            });
             setOpenCategoria(open);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
-    const toggle = (nombre: string) =>
-        setOpenCategoria(prev => ({ ...prev, [nombre]: !prev[nombre] }));
+    const toggle = (nombre: string) => setOpenCategoria((prev) => ({ ...prev, [nombre]: !prev[nombre] }));
 
     if (loading) {
-        return (
-            <div className="est-loading">
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Cargando...</span>
-                </div>
-            </div>
-        );
+        return <EstudiosAccordionSkeleton />;
     }
 
     if (filtrados.length === 0) {
         return (
             <div className="est-empty">
                 <div className="est-empty__icon">📖</div>
-                <div className="est-empty__text">
-                    No se encontraron estudios para "{searchTerm}"
-                </div>
+                <div className="est-empty__text">No se encontraron estudios para "{searchTerm}"</div>
             </div>
         );
     }
@@ -155,9 +197,9 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
             {categorias.map((cat, catIdx) => {
                 const isOpen = openCategoria[cat.nombre] ?? false;
                 const items = filtrados
-                    .filter(l => {
+                    .filter((l) => {
                         const cs = Array.isArray(l.categoria) ? l.categoria : [l.categoria];
-                        return cs.some(c => c && getCatNombre(c) === cat.nombre);
+                        return cs.some((c) => c && getCatNombre(c) === cat.nombre);
                     })
                     .sort((a, b) => {
                         const ra = parseRef(a.contenido);
@@ -166,25 +208,21 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                     });
 
                 return (
-                    <div
-                        key={cat.nombre}
-                        className={`est-book ${isOpen ? 'est-book--open' : ''}`}
-                        style={{ animationDelay: `${catIdx * 40}ms` }}
-                    >
-                        <button
-                            className="est-book__head"
-                            onClick={() => toggle(cat.nombre)}
-                            aria-expanded={isOpen}
-                        >
-                            <span className="est-book__num">
-                                {String(catIdx + 1).padStart(2, '0')}
-                            </span>
+                    <div key={cat.nombre} className={`est-book ${isOpen ? 'est-book--open' : ''}`} style={{ animationDelay: `${catIdx * 40}ms` }}>
+                        <button className="est-book__head" onClick={() => toggle(cat.nombre)} aria-expanded={isOpen}>
+                            <span className="est-book__num">{String(catIdx + 1).padStart(2, '0')}</span>
                             <span className="est-book__name">{cat.nombre}</span>
                             <span className="est-book__count">{items.length} est.</span>
                             <span className={`est-book__chev ${isOpen ? 'est-book__chev--open' : ''}`}>
-                                <svg viewBox="0 0 24 24" width={14} height={14}
-                                    fill="none" stroke="currentColor"
-                                    strokeWidth={2.2} strokeLinecap="round">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    width={14}
+                                    height={14}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2.2}
+                                    strokeLinecap="round"
+                                >
                                     <path d="M6 9l6 6 6-6" />
                                 </svg>
                             </span>
@@ -201,13 +239,19 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                             role="link"
                                             tabIndex={0}
                                             onClick={() => router.visit(`/estudio-biblico/${libro.id}`)}
-                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.visit(`/estudio-biblico/${libro.id}`); }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') router.visit(`/estudio-biblico/${libro.id}`);
+                                            }}
                                             className="est-item"
-                                            style={{ animationDelay: `${libroIdx * 25}ms`, cursor: 'pointer', textDecoration: 'none', display: 'flex', color: 'inherit' }}
+                                            style={{
+                                                animationDelay: `${libroIdx * 25}ms`,
+                                                cursor: 'pointer',
+                                                textDecoration: 'none',
+                                                display: 'flex',
+                                                color: 'inherit',
+                                            }}
                                         >
-                                            <span className="est-item__num">
-                                                {String(libroIdx + 1).padStart(2, '0')}
-                                            </span>
+                                            <span className="est-item__num">{String(libroIdx + 1).padStart(2, '0')}</span>
 
                                             <span className="est-item__body">
                                                 <span className="est-item__title">{titulo}</span>
@@ -225,23 +269,30 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                                     <i className="bi bi-eye" style={{ fontSize: 12 }} />
                                                     {libro.views_count ?? 0}
                                                 </span>
-                                                <span
-                                                    onClick={e => e.stopPropagation()}
-                                                    style={{ display: 'flex', alignItems: 'center', gap: 2 }}
-                                                >
-                                                    <ShareButton type="estudio" id={libro.id} sharesCount={libro.shares_count ?? 0} variant="compact" showCount />
+                                                <span onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    <ShareButton
+                                                        type="estudio"
+                                                        id={libro.id}
+                                                        sharesCount={libro.shares_count ?? 0}
+                                                        variant="compact"
+                                                        showCount
+                                                    />
                                                 </span>
-                                                <span
-                                                    onClick={e => e.stopPropagation()}
-                                                >
+                                                <span onClick={(e) => e.stopPropagation()}>
                                                     <LikeButton type="estudio" id={libro.id} variant="default" />
                                                 </span>
                                             </span>
 
                                             <span className="est-item__arrow">
-                                                <svg viewBox="0 0 24 24" width={12} height={12}
-                                                    fill="none" stroke="currentColor"
-                                                    strokeWidth={2} strokeLinecap="round">
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    width={12}
+                                                    height={12}
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth={2}
+                                                    strokeLinecap="round"
+                                                >
                                                     <path d="M9 18l6-6-6-6" />
                                                 </svg>
                                             </span>
