@@ -33,8 +33,8 @@ export function useLike(type: ContentType, id: string): UseLikeReturn {
     const keyT = lsTotal(type, id);
 
     const [state, setState] = useState<LikeState>({
-        liked: localStorage.getItem(key) === 'true',
-        total: parseInt(localStorage.getItem(keyT) ?? '0', 10),
+        liked: typeof window !== 'undefined' ? localStorage.getItem(key) === 'true' : false,
+        total: typeof window !== 'undefined' ? parseInt(localStorage.getItem(keyT) ?? '0', 10) : 0,
         loading: false,
     });
 
