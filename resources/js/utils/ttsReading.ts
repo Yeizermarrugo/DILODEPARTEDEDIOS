@@ -248,7 +248,7 @@ function effectiveChars(text: string): number {
     let extra = 0;
 
     // Verse references: "13:14-15" — Azure reads each digit individually as a word.
-    working = working.replace(/\b\d+(?:[:\-]\d+)+\b/g, (m) => {
+    working = working.replace(/\b\d+(?:[:-]\d+)+\b/g, (m) => {
         extra += (m.match(/\d/g) ?? []).length * 4;
         return ' ';
     });

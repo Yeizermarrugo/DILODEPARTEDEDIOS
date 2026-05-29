@@ -69,7 +69,12 @@ export default function StorageCleanup() {
     const toggleSelect = (path: string) => {
         setSelected(prev => {
             const next = new Set(prev);
-            next.has(path) ? next.delete(path) : next.add(path);
+            if (next.has(path)) {
+                next.delete(path);
+            } else {
+                next.add(path);
+            }
+
             return next;
         });
     };
