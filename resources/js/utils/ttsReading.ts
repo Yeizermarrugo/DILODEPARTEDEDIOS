@@ -35,31 +35,72 @@ export function extractReadingBlocks(html: string): ReadingBlock[] {
     return blocks;
 }
 
+// Must match TextToSpeechService::BREAKS in the PHP backend.
+const SSML_BREAK_SECONDS: Record<ReadingBlockKind | 'other', number> = {
+    heading: 0.85,
+    paragraph: 0.65,
+    'list-item': 0.35,
+    other: 0.65,
+};
+
 export function buildReadingTimings(blocks: ReadingBlock[], durationSeconds: number | null | undefined): ReadingTiming[] {
     if (!blocks.length) {
         return [];
     }
 
-    const totalWeight = blocks.reduce((sum, block) => sum + block.weight, 0);
-    const estimatedTotal = blocks.reduce((sum, block) => sum + estimateSeconds(block), 0);
     const totalDuration = durationSeconds && Number.isFinite(durationSeconds) && durationSeconds > 0
         ? durationSeconds
-        : estimatedTotal;
+        : null;
 
-    if (!Number.isFinite(totalDuration) || totalDuration <= 0 || totalWeight <= 0) {
-        return [];
+    if (!totalDuration) {
+        return buildEstimatedTimings(blocks);
     }
+
+    // Each block (except the last) contributes a known SSML <break> after it.
+    const blockBreaks = blocks.map((block, i) =>
+        i < blocks.length - 1 ? (SSML_BREAK_SECONDS[block.kind] ?? 0.65) : 0
+    );
+    const totalBreakTime = blockBreaks.reduce((s, b) => s + b, 0);
+    const totalSpeechTime = Math.max(0.1, totalDuration - totalBreakTime);
+
+    const blockChars = blocks.map(b => effectiveChars(b.text));
+    const totalChars = blockChars.reduce((s, c) => s + c, 0);
+
+    // Calculate where each block's speech content starts in the timeline.
+    let cursor = 0;
+    const speechStarts: number[] = [];
+    const speechTimes: number[] = [];
+    for (let i = 0; i < blocks.length; i++) {
+        speechStarts.push(cursor);
+        const speechTime = (blockChars[i] / totalChars) * totalSpeechTime;
+        speechTimes.push(speechTime);
+        cursor += speechTime + blockBreaks[i];
+    }
+
+    // Block N transitions to block N+1 at the midpoint of the break between them.
+    // This highlights the next block slightly before its speech starts (anticipation effect).
+    return blocks.map((block, i) => {
+        const start = i === 0
+            ? 0
+            : speechStarts[i] - blockBreaks[i - 1] * 0.5;
+        const end = i < blocks.length - 1
+            ? speechStarts[i + 1] - blockBreaks[i] * 0.5
+            : totalDuration;
+
+        return { index: block.index, start, end };
+    });
+}
+
+function buildEstimatedTimings(blocks: ReadingBlock[]): ReadingTiming[] {
+    const totalWeight = blocks.reduce((sum, block) => sum + block.weight, 0);
+    if (totalWeight <= 0) return [];
+    const totalDuration = blocks.reduce((sum, block) => sum + estimateSeconds(block), 0);
 
     let cursor = 0;
     return blocks.map((block) => {
         const start = cursor;
         cursor += (block.weight / totalWeight) * totalDuration;
-
-        return {
-            index: block.index,
-            start,
-            end: cursor,
-        };
+        return { index: block.index, start, end: cursor };
     });
 }
 
@@ -171,12 +212,48 @@ function kindForTag(tag: string): ReadingBlockKind {
     return 'other';
 }
 
-function estimateWeight(text: string, kind: ReadingBlockKind): number {
-    const words = Math.max(1, normalizeText(text).split(/\s+/).filter(Boolean).length);
-    const base = kind === 'heading' ? 1.45 : kind === 'list-item' ? 0.88 : kind === 'paragraph' ? 1 : 1.05;
-    const bonus = kind === 'heading' ? 2.25 : kind === 'list-item' ? 0.85 : 1.15;
+function effectiveChars(text: string): number {
+    const normalized = normalizeText(text);
+    let working = normalized;
+    let extra = 0;
 
-    return Math.max(1, words * base + bonus);
+    // Verse references: "13:14-15", "3:16" — Azure reads each digit as a word.
+    // Each digit ≈ 4 extra base-chars worth of speech time.
+    working = working.replace(/\b\d+(?:[:\-]\d+)+\b/g, (m) => {
+        extra += (m.match(/\d/g) ?? []).length * 4;
+        return ' ';
+    });
+
+    // Bible version codes with appended year/number: "RVR1960", "LBLA2000", "NTV2015".
+    // Azure spells out each letter and digit individually — very slow.
+    working = working.replace(/\b[A-ZÁÉÍÓÚÜÑ]{2,}[0-9]+\b/g, (m) => {
+        extra += m.length * 4;
+        return ' ';
+    });
+
+    // Remaining standalone numbers.
+    working = working.replace(/\b\d+\b/g, (m) => {
+        extra += m.length * 2;
+        return ' ';
+    });
+
+    const baseChars = Math.max(4, working.replace(/\s/g, '').length);
+
+    // Sentence-end pauses (~0.5s each → ≈ 7 chars at 150wpm).
+    const sentenceEnds = (normalized.match(/[.!?]/g) ?? []).length;
+    // Ellipsis gets a dramatic pause (0.5-0.8s → ≈ 7 chars).
+    const ellipses = (normalized.match(/…|\.\.\./g) ?? []).length;
+    // Comma / semicolon pause (~0.15s → ≈ 2 chars). Exclude `:` to avoid double-counting verse refs.
+    const commas = (normalized.match(/[,;]/g) ?? []).length;
+
+    return baseChars + extra + sentenceEnds * 7 + ellipses * 7 + commas * 2;
+}
+
+function estimateWeight(text: string, kind: ReadingBlockKind): number {
+    const charUnit = effectiveChars(text) / 5.5;
+    const base = kind === 'list-item' ? 0.9 : 1.0;
+    const bonus = kind === 'heading' ? 1.2 : kind === 'list-item' ? 0.5 : 0.9;
+    return Math.max(1, charUnit * base + bonus);
 }
 
 function estimateSeconds(block: ReadingBlock): number {
