@@ -458,7 +458,7 @@ h6 {
         color: var(--nav-color);
         font-size: 24px;
         line-height: 0;
-        margin-right: 0px;
+        margin-right: 10px;
         cursor: pointer;
         padding: 5px;
         border-radius: 4px;
@@ -786,7 +786,6 @@ h6 {
 # Global Page Titles & Breadcrumbs
 --------------------------------------------------------------*/
 .page-title {
-    background-color: #ffffff;
     text-align: center;
     padding: 20px 0;
 }
@@ -3767,7 +3766,7 @@ section,
 .search-widget form:is(:focus-within) {
     border-color: var(--accent-color);
 }
-/* ------------Categories widget---------- */
+
 .categories-widget ul {
     list-style: none;
     padding: 0;
@@ -3796,96 +3795,6 @@ section,
     color: color-mix(in srgb, var(--default-color), transparent 50%);
     font-size: 14px;
 }
-
-/* Forzar contenedor flexible y con salto de línea */
-.top-categories-container .categories-widget {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-}
-
-.top-categories-container ul {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important; /* ESTO HACE QUE SALTEN DE LÍNEA */
-    gap: 10px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    list-style: none !important;
-    justify-content: flex-start !important;
-}
-
-.top-categories-container ul li {
-    padding: 0 !important;
-    margin: 0 !important;
-    flex: 0 0 auto !important; /* Evita que crezcan o se encojan de forma rara */
-}
-
-/* Estilo de los botones para que parezcan etiquetas modernas */
-.top-categories-container ul li button {
-    white-space: nowrap !important;
-    padding: 8px 16px !important;
-    background-color: #f1f3f5 !important;
-    border: 1px solid #e9ecef !important;
-    border-radius: 50px !important;
-    font-size: 14px !important;
-    color: #495057 !important;
-    transition: all 0.2s ease !important;
-}
-
-.top-categories-container ul li button.active {
-    background-color: var(--accent-color) !important;
-    color: #ffffff !important;
-    border-color: var(--accent-color) !important;
-}
-
-/* Para el efecto Sticky */
-.top-categories-sticky-wrapper {
-    position: sticky;
-    top: 0; /* Ajusta según tu header, ej: 70px */
-    z-index: 2;
-    background-color: #ffffff;
-    padding: 15px 0;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 20px;
-}
-
-/* --- Ajustes para Móviles (Pantallas menores a 768px) --- */
-@media (max-width: 768px) {
-    
-    /* Tamaño de letra de los botones de categoría */
-    .top-categories-container ul li button {
-        font-size: 12px !important; /* Letra más pequeña */
-        padding: 6px 12px !important; /* Menos espacio interno para que quepan más */
-    }
-
-    /* Tamaño del número dentro del paréntesis (ej: (17)) */
-    .top-categories-container ul li button span {
-        font-size: 10px !important;
-    }
-
-    /* Reducir el espacio entre botones para ganar ancho */
-    .top-categories-container ul {
-        gap: 6px !important;
-    }
-
-    /* Opcional: Reducir un poco el título de la sección para móviles */
-    .col-12 h2 {
-        font-size: 1.2rem !important;
-    }
-}
-
-/* --- Ajuste extra para móviles muy pequeños (menos de 400px) --- */
-@media (max-width: 400px) {
-    .top-categories-container ul li button {
-        font-size: 11px !important;
-        padding: 5px 10px !important;
-    }
-}
-
-/* ------------- */
 
 .recent-posts-widget .post-item {
     display: flex;
@@ -4092,133 +4001,83 @@ section,
 
 
 /* Enseñanzas Cards */
-
+/* --- CONTENEDOR GRID --- */
 .ensenanzas-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* minmax(0, 1fr) es vital para que las columnas sean matemáticamente iguales */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  align-items: flex-start;
+  align-items: flex-start; /* Evita que las cards de la fila se estiren entre sí */
+  width: 100%;
 }
 
 .ensenanza-card {
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;
+  background-color: #fff;
+  min-width: 0;
 }
 
 .ensenanza-card-top {
   display: flex;
   flex-direction: row;
-  gap: 10px;
-  padding: 10px;
-  /* Altura fija para que todas se vean iguales a la del medio */
-  min-height: 220px; 
+  gap: 12px;
+  padding: 12px;
+  /* ALTURA FIJA E INAMOVIBLE PARA TODAS */
+  height: 240px;
+  position: relative; /* Para el autor absoluto */
+  box-sizing: border-box;
 }
 
-/* --- LÓGICA DE TRUNCADO POR LÍNEAS --- */
-.descripcion-wrapper {
+/* --- BLOQUE DERECHO --- */
+.ensenanza-card-info-right {
+  flex: 1;
   display: flex;
-  flex-direction: column; /* Alinea el botón debajo del texto truncado */
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
 }
 
+.ensenanza-card-text-block {
+  /* Ocupa el espacio fijo para el texto */
+  height: 170px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* --- TRUNCADO CSS --- */
 .descripcion-texto.colapsada {
   display: -webkit-box;
-  -webkit-line-clamp: 7; /* Subimos a 7 para llenar el espacio blanco */
+  -webkit-line-clamp: 7; /* Ajustado para llenar el bloque de 170px */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Scroll interno solo si se expande, para NO mover la card ni al autor */
 .descripcion-texto.expandida {
   display: block;
-}
-
-.ver-mas-btn {
-  align-self: flex-start; /* Alinea el "ver más" a la izquierda */
-  background: white; /* Asegura que no se transparente si hay algo detrás */
-}
-/* -------------------------------------- */
-
-.ensenanza-card-text-block {
-  flex-grow: 1;
-}
-
-.ensenanza-card-info-right {
+  overflow-y: auto;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; 
 }
 
+/* --- AUTOR CLAVADO AL FONDO --- */
 .ensenanza-card-author {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  left: 174px; /* Imagen (150) + gap (12) + padding (12) */
   font-size: 11px;
   color: #6c757d;
   border-top: 1px solid #e9ecef;
   padding-top: 6px;
-  margin-top: auto;
-}
-
-.ensenanza-card-dropdown {
-  border-top: 1px solid #e9ecef;
-  background-color: #ebebeb;
-}
-
-.ensenanza-card-dropdown button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: #343a40;
-  text-transform: uppercase;
-}
-
-.ensenanza-card-devocionales-list {
-  border-top: 1px solid #e9ecef;
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
+  background: white; /* Cubre el texto si hay scroll */
 }
 
 /* Responsivo */
-@media (max-width: 1199px) {
-  .ensenanzas-cards { grid-template-columns: repeat(2, 1fr); }
-}
-
 @media (max-width: 991px) {
   .ensenanzas-cards { grid-template-columns: 1fr; }
-  .ensenanza-card-top { flex-direction: column !important; min-height: auto !important; padding: 0; }
-  .ensenanza-card-top > div:first-child { max-width: 100% !important; width: 100% !important; height: 200px !important; border-radius: 0; }
-  .ensenanza-card-info-right { padding: 15px; }
-}
-
-/* ── Responsive FilterBar ── */
-.filter-desktop {
-    display: none;
-}
-.filter-mobile {
-    display: block;
-}
-
-@media (min-width: 992px) {
-    .filter-desktop {
-        display: block;
-    }
-    .filter-mobile {
-        display: none;
-    }
-}
-
-.centered-main {
-    background-color: #ffffff;
-    min-height: 40vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
+  .ensenanza-card-top { height: auto; min-height: auto; flex-direction: column !important; }
+  .ensenanza-card-author { position: static; margin-top: 10px; width: auto; }
 }
