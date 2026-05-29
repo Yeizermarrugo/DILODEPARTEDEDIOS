@@ -382,12 +382,13 @@ function VideoSoonSection() {
                     <video
                         ref={videoRef}
                         className={`sp-vsec__video ${playing ? 'sp-vsec__video--visible' : ''}`}
-                        src={VIDEO_SRC}
+                        src={playing ? VIDEO_SRC : undefined}
                         poster={VIDEO_POSTER || undefined}
                         controls
                         playsInline
-                        preload="metadata" // carga solo metadatos hasta que el usuario da play
+                        preload="none"
                         onEnded={() => setPlaying(false)}
+                        onError={() => setPlaying(false)}
                     />
 
                     {/* Botón X para cerrar el player y volver al poster */}
@@ -429,36 +430,27 @@ function getYouTubeThumb(video: YoutubeVideo): string {
 }
 
 function YouTubeLiteCard({ video }: { video: YoutubeVideo }) {
-    const [active, setActive] = useState(false);
     const videoId = video.id.videoId;
     const title = video.snippet.title;
+    const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
     return (
         <div className="sp-yt__card">
             <div className="sp-yt__thumb">
-                {active ? (
-                    <iframe
-                        src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`}
-                        title={title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                    />
-                ) : (
-                    <button type="button" className="sp-yt__lite" onClick={() => setActive(true)} aria-label={`Reproducir ${title}`}>
-                        <img src={getYouTubeThumb(video)} alt="" className="sp-yt__lite-img" loading="lazy" decoding="async" />
-                        <span className="sp-yt__lite-overlay" aria-hidden />
-                        <span className="sp-yt__play" aria-hidden>
-                            <svg viewBox="0 0 24 24" width={24} height={24} fill="currentColor">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
-                        </span>
-                    </button>
-                )}
+                <a href={watchUrl} target="_blank" rel="noreferrer" className="sp-yt__lite" aria-label={`Reproducir ${title} en YouTube`}>
+                    <img src={getYouTubeThumb(video)} alt="" className="sp-yt__lite-img" loading="lazy" decoding="async" />
+                    <span className="sp-yt__lite-overlay" aria-hidden />
+                    <span className="sp-yt__play" aria-hidden>
+                        <svg viewBox="0 0 24 24" width={24} height={24} fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                    </span>
+                </a>
             </div>
             <div className="sp-yt__card-body">
                 <p className="sp-yt__card-title">{title}</p>
                 <div className="sp-yt__card-footer">
-                    <a href={`https://www.youtube.com/watch?v=${videoId}`} target="_blank" rel="noreferrer" className="sp-yt__card-link">
+                    <a href={watchUrl} target="_blank" rel="noreferrer" className="sp-yt__card-link">
                         <IconYTExternal /> Ver en YouTube
                     </a>
                     <span className="sp-yt__card-date">{new Date(video.snippet.publishedAt).toLocaleDateString('es-ES')}</span>
