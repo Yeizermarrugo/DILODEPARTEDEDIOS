@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { buildReadingTimings, extractReadingBlocks, findActiveReadingBlock } from '@/utils/ttsReading';
 
 const LANG = 'es-CO';
 
@@ -15,7 +16,12 @@ function csrfToken(): string {
     return document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
 }
 
-export default function TextToSpeechButton({ html }: { html: string }) {
+type Props = {
+    html: string;
+    onBlockChange?: (index: number | null) => void;
+};
+
+export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     const [selectedVoice, setSelectedVoice] = useState(VOICES[0].value);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -25,6 +31,34 @@ export default function TextToSpeechButton({ html }: { html: string }) {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [audioReady, setAudioReady] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const blocksRef = useRef(extractReadingBlocks(html));
+    const timingsRef = useRef<{ end: number; index: number; start: number }[]>([]);
+    const activeBlockRef = useRef<number | null>(null);
+
+    const emitBlockChange = (index: number | null) => {
+        if (activeBlockRef.current === index) {
+            return;
+        }
+
+        activeBlockRef.current = index;
+        onBlockChange?.(index);
+    };
+
+    const rebuildTimings = () => {
+        const audio = audioRef.current;
+        timingsRef.current = buildReadingTimings(blocksRef.current, audio?.duration);
+    };
+
+    const syncActiveBlock = () => {
+        const audio = audioRef.current;
+        if (!audio) {
+            emitBlockChange(null);
+            return;
+        }
+
+        const active = findActiveReadingBlock(timingsRef.current, audio.currentTime);
+        emitBlockChange(active);
+    };
 
     const loadAudio = async (): Promise<boolean> => {
         setLoading(true);
@@ -32,6 +66,9 @@ export default function TextToSpeechButton({ html }: { html: string }) {
         setAudioReady(false);
         setIsPlaying(false);
         setIsPaused(false);
+        emitBlockChange(null);
+        blocksRef.current = extractReadingBlocks(html);
+        timingsRef.current = [];
 
         const selectedVoiceConfig = VOICES.find((voice) => voice.value === selectedVoice);
         const lang = selectedVoiceConfig?.lang ?? LANG;
@@ -73,6 +110,7 @@ export default function TextToSpeechButton({ html }: { html: string }) {
 
             audio.src = audioUrl;
             audio.playbackRate = rate;
+            rebuildTimings();
 
             setLoading(false);
             setAudioReady(true);
@@ -96,6 +134,7 @@ export default function TextToSpeechButton({ html }: { html: string }) {
                     setAudioReady(false);
                     setIsPlaying(true);
                     setIsPaused(false);
+                    syncActiveBlock();
                 })
                 .catch(() => {
                     alert('No se pudo reproducir el audio. Intenta tocar Play otra vez.');
@@ -122,6 +161,7 @@ export default function TextToSpeechButton({ html }: { html: string }) {
         setIsPaused(false);
         setLoading(false);
         setAudioReady(false);
+        emitBlockChange(null);
     };
 
     const onEnded = () => {
@@ -129,6 +169,15 @@ export default function TextToSpeechButton({ html }: { html: string }) {
         setAudioReady(false);
         setIsPlaying(false);
         setIsPaused(false);
+        emitBlockChange(null);
+    };
+
+    const onLoadedMetadata = () => {
+        rebuildTimings();
+    };
+
+    const onTimeUpdate = () => {
+        syncActiveBlock();
     };
 
     return (
@@ -227,6 +276,8 @@ export default function TextToSpeechButton({ html }: { html: string }) {
                 ref={audioRef}
                 src={audioUrl || undefined}
                 onEnded={onEnded}
+                onLoadedMetadata={onLoadedMetadata}
+                onTimeUpdate={onTimeUpdate}
                 onPause={() => setIsPaused(true)}
                 onPlay={() => setIsPaused(false)}
                 style={{ display: 'none' }}

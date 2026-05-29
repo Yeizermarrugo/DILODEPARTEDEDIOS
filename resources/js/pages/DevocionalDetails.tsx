@@ -1,9 +1,10 @@
 import { LikeButton } from '@/components/LikeButton';
+import ReadingContentBlocks from '@/components/ReadingContentBlocks';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
-import DOMPurify from 'dompurify';
-import { useEffect, useState } from 'react';
+import { extractReadingBlocks } from '@/utils/ttsReading';
+import { useEffect, useMemo, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
 type Devocional = {
@@ -27,8 +28,13 @@ function getContentType(is_devocional?: number): 'devocional' | 'estudio' | 'ens
 
 const DevocionalDetails = ({ devocional }: Props) => {
     const [loading, setLoading] = useState(true);
+    const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
     const imageLoaded = useImagePreload(devocional.imagen);
     const contentType = getContentType(devocional.is_devocional);
+    const readingBlocks = useMemo(() => extractReadingBlocks(devocional.contenido), [devocional.contenido]);
+    const hasLeadingHeading = readingBlocks[0]?.kind === 'heading';
+    const bodyIndex = activeBlockIndex === null ? null : activeBlockIndex - (hasLeadingHeading ? 1 : 0);
+    const bodyActiveIndex = bodyIndex === null || bodyIndex < 0 ? null : bodyIndex;
 
     useEffect(() => {
         setLoading(true);
@@ -57,7 +63,7 @@ const DevocionalDetails = ({ devocional }: Props) => {
         return txt.value;
     };
 
-    const H1Custom = ({ contenido }: { contenido: string }) => {
+    const H1Custom = ({ contenido }: { contenido: string; active?: boolean }) => {
         const h1Text = getH1Text(contenido);
         const [parte1, parte2] = splitH1Parts(decodeHtmlEntities(h1Text));
         return (
@@ -96,11 +102,9 @@ const DevocionalDetails = ({ devocional }: Props) => {
             <H1Custom contenido={devocional.contenido} />
 
             <section>
-                <TextToSpeechButton html={devocional.contenido ?? ''} />
+                <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
-                <p style={{ padding: '5px', textAlign: 'justify' }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(devocionalContent) }}
-                />
+                <ReadingContentBlocks html={devocionalContent} activeIndex={bodyActiveIndex} />
 
                 <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
                     {devocional.autor ?? ''}
