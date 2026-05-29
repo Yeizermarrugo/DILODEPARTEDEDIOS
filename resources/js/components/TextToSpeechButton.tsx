@@ -1,4 +1,4 @@
-import { buildReadingTimings, extractReadingBlocks, findActiveReadingBlock } from '@/utils/ttsReading';
+import { buildReadingTimings, extractReadingBlocks, findActiveReadingBlock, type ReadingBlock, type ReadingTiming } from '@/utils/ttsReading';
 import { useEffect, useRef, useState } from 'react';
 
 const LANG = 'es-CO';
@@ -21,6 +21,11 @@ type Props = {
     onBlockChange?: (index: number | null) => void;
 };
 
+type TtsResponse = {
+    timings?: ReadingTiming[] | null;
+    url: string;
+};
+
 export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     const [selectedVoice, setSelectedVoice] = useState(VOICES[0].value);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -33,6 +38,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const blocksRef = useRef(extractReadingBlocks(html));
     const timingsRef = useRef<{ end: number; index: number; start: number }[]>([]);
+    const hasServerTimingsRef = useRef(false);
     const activeBlockRef = useRef<number | null>(null);
     const rafRef = useRef<number | null>(null);
 
@@ -64,8 +70,32 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     useEffect(() => () => stopRaf(), []);
 
     const rebuildTimings = () => {
+        if (hasServerTimingsRef.current) {
+            return;
+        }
+
         const audio = audioRef.current;
         timingsRef.current = buildReadingTimings(blocksRef.current, audio?.duration);
+    };
+
+    const setServerTimings = (timings: ReadingTiming[] | null | undefined, blocks: ReadingBlock[]) => {
+        if (!Array.isArray(timings)) {
+            hasServerTimingsRef.current = false;
+            return;
+        }
+
+        const blockIndexes = new Set(blocks.map((block) => block.index));
+        const validTimings = timings
+            .filter((timing) => blockIndexes.has(timing.index))
+            .sort((a, b) => a.start - b.start);
+
+        if (validTimings.length !== blocks.length) {
+            hasServerTimingsRef.current = false;
+            return;
+        }
+
+        timingsRef.current = validTimings;
+        hasServerTimingsRef.current = true;
     };
 
     const syncActiveBlock = () => {
@@ -88,9 +118,11 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
         emitBlockChange(null);
         blocksRef.current = extractReadingBlocks(html);
         timingsRef.current = [];
+        hasServerTimingsRef.current = false;
 
         const selectedVoiceConfig = VOICES.find((voice) => voice.value === selectedVoice);
         const lang = selectedVoiceConfig?.lang ?? LANG;
+        const readingBlocks = blocksRef.current;
 
         try {
             const res = await fetch('/api/tts', {
@@ -105,6 +137,11 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
                     format: 'html',
                     lang,
                     v: selectedVoice,
+                    blocks: readingBlocks.map((block) => ({
+                        index: block.index,
+                        kind: block.kind,
+                        text: block.text,
+                    })),
                 }),
             });
 
@@ -115,7 +152,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
                 alert('Error generando el audio:\n' + errorText);
                 return false;
             }
-            const data = await res.json();
+            const data = await res.json() as TtsResponse;
             const audioUrl = data.url.startsWith('http') ? data.url : window.location.origin + data.url;
 
             setAudioUrl(audioUrl);
@@ -130,6 +167,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
             audio.src = audioUrl;
             audio.playbackRate = rate;
             rebuildTimings();
+            setServerTimings(data.timings, readingBlocks);
 
             setLoading(false);
             setAudioReady(true);
