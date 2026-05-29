@@ -28,6 +28,32 @@ class TextToSpeechService
         'heading' => '850ms',
     ];
 
+    /**
+     * Abbreviation → natural spoken form.
+     * Longer keys must come first so partial matches don't fire before full ones.
+     *
+     * @var array<string, string>
+     */
+    private const DICTIONARY = [
+        'RVR1960' => 'Reina Valera 1960',
+        'RVR2015' => 'Reina Valera actualizada 2015',
+        'RVR1909' => 'Reina Valera 1909',
+        'NBLH'    => 'Nueva Biblia Latinoamericana de Hoy',
+        'LBLA'    => 'La Biblia de las Américas',
+        'NTV'     => 'Nueva Traducción Viviente',
+        'NVI'     => 'Nueva Versión Internacional',
+        'DHH'     => 'Dios Habla Hoy',
+        'PDT'     => 'Palabra de Dios para Todos',
+        'TLA'     => 'Traducción en Lenguaje Actual',
+        'BLS'     => 'Biblia en Lenguaje Sencillo',
+        'RVR'     => 'Reina Valera',
+        'NKJV'    => 'New King James Version',
+        'KJV'     => 'King James Version',
+        'NIV'     => 'New International Version',
+        'ESV'     => 'English Standard Version',
+        'NLT'     => 'New Living Translation',
+    ];
+
     /** @var array<string, array<string, string>> */
     private array $allowedVoices = [
         'es-CO' => [
@@ -88,6 +114,7 @@ class TextToSpeechService
         $region = config('services.azure_speech.region');
         $outputFormat = config('services.azure_speech.output_format');
         $cleanText = Str::of($text)->squish()->toString();
+        $cleanText = $this->applyDictionary($cleanText);
 
         if ($cleanText === '') {
             throw new \InvalidArgumentException('Texto requerido');
@@ -224,6 +251,15 @@ class TextToSpeechService
         }
 
         return [$lang, $voice];
+    }
+
+    private function applyDictionary(string $text): string
+    {
+        foreach (self::DICTIONARY as $abbr => $expansion) {
+            $text = (string) preg_replace('/\b'.preg_quote($abbr, '/').'\b/', $expansion, $text);
+        }
+
+        return $text;
     }
 
     private function audioPath(string $text, string $lang, string $voice, string $rate, string $outputFormat): string
