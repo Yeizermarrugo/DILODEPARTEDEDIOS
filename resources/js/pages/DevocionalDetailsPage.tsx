@@ -1,5 +1,6 @@
 import LikeButton from '@/components/LikeButton';
 import ReadingContentBlocks from '@/components/ReadingContentBlocks';
+import { DevocionalDetailsSkeleton } from '@/components/SectionSkeletons';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
@@ -66,9 +67,7 @@ function getContentType(is_devocional?: number | string): 'devocional' | 'estudi
 }
 
 const StudyNavigation = ({ nav }: { nav: StudyNav }) => {
-    const progressPct = nav.position_in_book && nav.total_in_book
-        ? Math.round((nav.position_in_book / nav.total_in_book) * 100)
-        : 0;
+    const progressPct = nav.position_in_book && nav.total_in_book ? Math.round((nav.position_in_book / nav.total_in_book) * 100) : 0;
 
     return (
         <div className="study-nav">
@@ -82,17 +81,14 @@ const StudyNavigation = ({ nav }: { nav: StudyNav }) => {
             </div>
 
             <div className="study-nav__progress-bar">
-                <div
-                    className="study-nav__progress-fill"
-                    style={{ width: `${progressPct}%` }}
-                />
+                <div className="study-nav__progress-fill" style={{ width: `${progressPct}%` }} />
             </div>
 
             <div className="study-nav__buttons">
                 {nav.prev ? (
                     <Link
                         href={`/estudio-biblico/${nav.prev.id}`}
-                        className={`study-nav__btn study-nav__btn--prev${nav.prev.crosses_book ? ' study-nav__btn--cross-book' : ''}`}
+                        className={`study-nav__btn study-nav__btn--prev${nav.prev.crosses_book ? 'study-nav__btn--cross-book' : ''}`}
                         title={nav.prev.crosses_book ? `Libro anterior: ${nav.prev.categoria}` : 'Estudio anterior'}
                     >
                         <ChevronLeft className="study-nav__icon" size={20} />
@@ -119,7 +115,7 @@ const StudyNavigation = ({ nav }: { nav: StudyNav }) => {
                 {nav.next ? (
                     <Link
                         href={`/estudio-biblico/${nav.next.id}`}
-                        className={`study-nav__btn study-nav__btn--next${nav.next.crosses_book ? ' study-nav__btn--cross-book' : ''}`}
+                        className={`study-nav__btn study-nav__btn--next${nav.next.crosses_book ? 'study-nav__btn--cross-book' : ''}`}
                         title={nav.next.crosses_book ? `Siguiente libro: ${nav.next.categoria}` : 'Siguiente estudio'}
                     >
                         <span className="study-nav__label">
@@ -151,11 +147,17 @@ function useCountdown(targetIso: string | null) {
     const [time, setTime] = useState<{ h: number; m: number; s: number } | null>(null);
 
     useEffect(() => {
-        if (!targetIso) { setTime(null); return; }
+        if (!targetIso) {
+            setTime(null);
+            return;
+        }
 
         const tick = () => {
             const diff = new Date(targetIso).getTime() - Date.now();
-            if (diff <= 0 || diff >= 24 * 3600 * 1000) { setTime(null); return; }
+            if (diff <= 0 || diff >= 24 * 3600 * 1000) {
+                setTime(null);
+                return;
+            }
             const totalSec = Math.floor(diff / 1000);
             setTime({ h: Math.floor(totalSec / 3600), m: Math.floor((totalSec % 3600) / 60), s: totalSec % 60 });
         };
@@ -174,14 +176,17 @@ const SeriesNavigation = ({ nav }: { nav: SeriesNav }) => {
     const pad = (n: number) => String(n).padStart(2, '0');
 
     const formatDate = (iso: string) =>
-        new Date(iso).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-            .replace(/^\w/, c => c.toUpperCase());
+        new Date(iso)
+            .toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+            .replace(/^\w/, (c) => c.toUpperCase());
 
     return (
         <div className="study-nav">
             <div className="study-nav__header">
                 <span className="study-nav__book-name">{nav.serie_titulo}</span>
-                <span className="study-nav__counter">{nav.position} / {nav.total}</span>
+                <span className="study-nav__counter">
+                    {nav.position} / {nav.total}
+                </span>
             </div>
 
             <div className="study-nav__progress-bar">
@@ -192,19 +197,25 @@ const SeriesNavigation = ({ nav }: { nav: SeriesNav }) => {
                 {nav.prev && nav.prev.visible ? (
                     <Link href={`/series/${nav.prev.id}`} className="study-nav__btn study-nav__btn--prev">
                         <ChevronLeft className="study-nav__icon" size={20} />
-                        <span className="study-nav__label"><span>Anterior</span></span>
+                        <span className="study-nav__label">
+                            <span>Anterior</span>
+                        </span>
                     </Link>
                 ) : (
                     <div className="study-nav__btn study-nav__btn--prev study-nav__btn--disabled">
                         <ChevronLeft className="study-nav__icon" size={20} />
-                        <span className="study-nav__label"><span>Inicio</span></span>
+                        <span className="study-nav__label">
+                            <span>Inicio</span>
+                        </span>
                     </div>
                 )}
 
                 {nav.next ? (
                     nav.next.visible ? (
                         <Link href={`/series/${nav.next.id}`} className="study-nav__btn study-nav__btn--next">
-                            <span className="study-nav__label"><span>Siguiente</span></span>
+                            <span className="study-nav__label">
+                                <span>Siguiente</span>
+                            </span>
                             <ChevronRight className="study-nav__icon" size={20} />
                         </Link>
                     ) : (
@@ -224,7 +235,9 @@ const SeriesNavigation = ({ nav }: { nav: SeriesNav }) => {
                     )
                 ) : (
                     <div className="study-nav__btn study-nav__btn--next study-nav__btn--disabled">
-                        <span className="study-nav__label"><span>Fin</span></span>
+                        <span className="study-nav__label">
+                            <span>Fin</span>
+                        </span>
                         <ChevronRight className="study-nav__icon" size={20} />
                     </div>
                 )}
@@ -236,9 +249,12 @@ const SeriesNavigation = ({ nav }: { nav: SeriesNav }) => {
 const DevocionalDetailsPage = (props: Props) => {
     const page = usePage().props as Record<string, unknown>;
     const devocional = props.devocional ?? (page.devocional as Devocional | undefined);
-    const likeType = (props.like_type ?? (page.like_type as string | undefined) ?? getContentType(devocional?.is_devocional)) as 'devocional' | 'estudio' | 'ensenanza';
-    const nav = (props.nav ?? (page.nav as StudyNav | undefined | null)) ?? null;
-    const seriesNav = (props.series_nav ?? (page.series_nav as SeriesNav | undefined | null)) ?? null;
+    const likeType = (props.like_type ?? (page.like_type as string | undefined) ?? getContentType(devocional?.is_devocional)) as
+        | 'devocional'
+        | 'estudio'
+        | 'ensenanza';
+    const nav = props.nav ?? (page.nav as StudyNav | undefined | null) ?? null;
+    const seriesNav = props.series_nav ?? (page.series_nav as SeriesNav | undefined | null) ?? null;
 
     const [loading, setLoading] = useState(typeof window !== 'undefined');
     const [viewsCount, setViewsCount] = useState(devocional?.views_count ?? 0);
@@ -287,10 +303,10 @@ const DevocionalDetailsPage = (props: Props) => {
             },
             body: JSON.stringify({ local_time: local }),
         })
-            .then(r => r.json())
+            .then((r) => r.json())
             .then((data: { status: string }) => {
                 if (data.status === 'recorded') {
-                    setViewsCount(c => c + 1);
+                    setViewsCount((c) => c + 1);
                 }
             });
     }, [devocional?.id]);
@@ -309,7 +325,14 @@ const DevocionalDetailsPage = (props: Props) => {
     const removeFirstH1 = (html: string) => html.replace(/<h1[^>]*>.*?<\/h1>/gi, '').trim();
 
     const decodeEntities = (str: string) => {
-        if (typeof document === 'undefined') return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ');
+        if (typeof document === 'undefined')
+            return str
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#039;/g, "'")
+                .replace(/&nbsp;/g, ' ');
         const el = document.createElement('textarea');
         el.innerHTML = str;
         return el.value;
@@ -323,33 +346,23 @@ const DevocionalDetailsPage = (props: Props) => {
 
     const formattedDate = devocional.created_at
         ? new Date(devocional.created_at)
-            .toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-            .replace(/^\w/, c => c.toUpperCase())
+              .toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+              .replace(/^\w/, (c) => c.toUpperCase())
         : '';
 
     if (loading && !imageLoaded) {
-        return (
-            <div id="preloader" className="d-flex align-items-center justify-content-center">
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        );
+        return <DevocionalDetailsSkeleton />;
     }
 
     return (
         <div className="dd-page">
-            <a href={backHref} className={`dd-back-btn${pastHero ? ' dd-back-btn--scrolled' : ''}`}>
+            <a href={backHref} className={`dd-back-btn${pastHero ? 'dd-back-btn--scrolled' : ''}`}>
                 <i className="bi bi-arrow-left" /> Atrás
             </a>
 
             {/* ── Hero ─────────────────────────────────────── */}
             <div className="dd-hero">
-                <div
-                    className="dd-hero__bg"
-                    style={{ backgroundImage: `url(${devocional.imagen})` }}
-                    aria-hidden="true"
-                />
+                <div className="dd-hero__bg" style={{ backgroundImage: `url(${devocional.imagen})` }} aria-hidden="true" />
                 <div className="dd-hero__overlay" aria-hidden="true" />
             </div>
 
@@ -372,12 +385,8 @@ const DevocionalDetailsPage = (props: Props) => {
 
                     <footer className="dd-footer">
                         <div className="dd-byline">
-                            {devocional.autor && (
-                                <span className="dd-byline__author">{devocional.autor}</span>
-                            )}
-                            {formattedDate && (
-                                <time className="dd-byline__date">{formattedDate}</time>
-                            )}
+                            {devocional.autor && <span className="dd-byline__author">{devocional.autor}</span>}
+                            {formattedDate && <time className="dd-byline__date">{formattedDate}</time>}
                         </div>
 
                         {devocional.id && (

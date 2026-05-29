@@ -1,5 +1,6 @@
 import { LikeButton } from '@/components/LikeButton';
 import ReadingContentBlocks from '@/components/ReadingContentBlocks';
+import { DevocionalDetailsSkeleton } from '@/components/SectionSkeletons';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
@@ -88,13 +89,7 @@ const DevocionalDetails = ({ devocional }: Props) => {
     };
 
     if (loading && !imageLoaded) {
-        return (
-            <div id="preloader" className="d-flex align-items-center justify-content-center">
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        );
+        return <DevocionalDetailsSkeleton />;
     }
 
     return (
@@ -106,30 +101,30 @@ const DevocionalDetails = ({ devocional }: Props) => {
 
                 <ReadingContentBlocks html={devocionalContent} activeIndex={bodyActiveIndex} />
 
-                <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>
-                    {devocional.autor ?? ''}
-                </p>
+                <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>{devocional.autor ?? ''}</p>
 
                 <div style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 10px 0' }}>
                     {devocional.created_at
                         ? new Date(devocional.created_at)
-                            .toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-                            .replace(/^\w/, c => c.toUpperCase())
+                              .toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                              .replace(/^\w/, (c) => c.toUpperCase())
                         : ''}
                 </div>
 
                 {/* ── Compartir + Like al pie ── */}
                 {devocional.id && (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        gap: '8px',
-                        padding: '10px 20px 4px 0',
-                        borderTop: '1px solid #f0f0f0',
-                        marginTop: '6px',
-                        color: '#888',
-                    }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            gap: '8px',
+                            padding: '10px 20px 4px 0',
+                            borderTop: '1px solid #f0f0f0',
+                            marginTop: '6px',
+                            color: '#888',
+                        }}
+                    >
                         <ShareButton type={contentType} id={devocional.id} variant="default" />
                         <LikeButton type={contentType} id={devocional.id} variant="default" />
                     </div>

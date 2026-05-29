@@ -34,6 +34,39 @@ type EditorWithContent = {
     getContent: () => string;
 };
 
+function EditorLoadingSkeleton() {
+    return (
+        <div className="df-loader-overlay" aria-busy="true">
+            <div className="w-[min(920px,92vw)] animate-pulse rounded-2xl border border-[#e8e2d8] bg-white p-5 shadow-xl">
+                <div className="mb-5 flex items-center justify-between gap-4">
+                    <div>
+                        <div className="mb-2 h-3 w-28 rounded-full bg-[#ece6dc]" />
+                        <div className="h-7 w-56 rounded-full bg-[#e8e2d8]" />
+                    </div>
+                    <div className="h-10 w-32 rounded-xl bg-[#ece6dc]" />
+                </div>
+                <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
+                    <div className="rounded-2xl border border-[#e8e2d8] p-4">
+                        <div className="mb-4 h-10 rounded-xl bg-[#ece6dc]" />
+                        <div className="space-y-3">
+                            <div className="h-4 rounded-full bg-[#f0ebe3]" />
+                            <div className="h-4 rounded-full bg-[#f0ebe3]" />
+                            <div className="h-4 w-3/4 rounded-full bg-[#f0ebe3]" />
+                        </div>
+                        <div className="mt-6 h-48 rounded-xl bg-[#ece6dc]" />
+                    </div>
+                    <div className="space-y-4">
+                        <div className="h-44 rounded-2xl bg-[#ece6dc]" />
+                        <div className="h-12 rounded-xl bg-[#f0ebe3]" />
+                        <div className="h-12 rounded-xl bg-[#f0ebe3]" />
+                        <div className="h-12 rounded-xl bg-[#f0ebe3]" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function DevocionalesForm() {
@@ -122,9 +155,7 @@ export default function DevocionalesForm() {
                 if (d.created_at) {
                     const dt = new Date(d.created_at);
                     const pad = (n: number) => String(n).padStart(2, '0');
-                    setCreatedAt(
-                        `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`
-                    );
+                    setCreatedAt(`${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`);
                 }
             });
         }
@@ -181,7 +212,10 @@ export default function DevocionalesForm() {
     };
 
     const handleEnsenanzaImageChange = async (file: File | null) => {
-        if (!file) { setNuevaEnsenanzaImagenUrl(''); return; }
+        if (!file) {
+            setNuevaEnsenanzaImagenUrl('');
+            return;
+        }
         try {
             const fd = new FormData();
             fd.append('file', file);
@@ -279,9 +313,7 @@ export default function DevocionalesForm() {
                 const status = error.response?.status;
                 const data = error.response?.data;
                 if (status === 422) {
-                    const errores = data.errors
-                        ? Object.values(data.errors).flat().join('\n')
-                        : data.message;
+                    const errores = data.errors ? Object.values(data.errors).flat().join('\n') : data.message;
                     alert(`Datos incompletos:\n\n${errores}`);
                 } else if (status === 500) {
                     alert('Error 500: posiblemente el título o slug ya existen en la base de datos.');
@@ -315,14 +347,12 @@ export default function DevocionalesForm() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="df-root">
-
                 {/* ── Loader Overlay ── */}
-                {showLoader && (
+                {isLoading && !isSubmitting && <EditorLoadingSkeleton />}
+                {isSubmitting && (
                     <div className="df-loader-overlay">
                         <LoaderBook />
-                        <span className="df-loader-text">
-                            {isSubmitting ? 'Guardando contenido…' : 'Cargando editor…'}
-                        </span>
+                        <span className="df-loader-text">Guardando contenido…</span>
                     </div>
                 )}
 
@@ -333,12 +363,8 @@ export default function DevocionalesForm() {
                             <ArrowLeft size={16} />
                         </a>
                         <div className="df-header__meta">
-                            <span className="df-header__mode">
-                                {mode === 'create' ? 'Nuevo contenido' : 'Editando'}
-                            </span>
-                            <h1 className="df-header__title">
-                                {mode === 'create' ? 'Crear publicación' : 'Editar publicación'}
-                            </h1>
+                            <span className="df-header__mode">{mode === 'create' ? 'Nuevo contenido' : 'Editando'}</span>
+                            <h1 className="df-header__title">{mode === 'create' ? 'Crear publicación' : 'Editar publicación'}</h1>
                         </div>
                     </div>
 
@@ -353,30 +379,21 @@ export default function DevocionalesForm() {
                                 <Eye size={10} /> Publicado
                             </span>
                         )}
-                        <button
-                            className="df-btn-primary"
-                            onClick={handleGuardar}
-                            disabled={showLoader}
-                        >
-                            {isSubmitting ? (
-                                <Loader2 size={15} className="df-spin" />
-                            ) : (
-                                <Save size={15} />
-                            )}
+                        <button className="df-btn-primary" onClick={handleGuardar} disabled={showLoader}>
+                            {isSubmitting ? <Loader2 size={15} className="df-spin" /> : <Save size={15} />}
                             {mode === 'create' ? 'Publicar' : 'Actualizar'}
                         </button>
                     </div>
                 </header>
 
                 {/* ── Body ── */}
-                <div
-                    className="df-body"
-                    style={{ pointerEvents: showLoader ? 'none' : 'auto', opacity: showLoader ? 0.5 : 1 }}
-                >
+                <div className="df-body" style={{ pointerEvents: showLoader ? 'none' : 'auto', opacity: showLoader ? 0.5 : 1 }}>
                     {/* ── MAIN: Editor ── */}
                     <div className="df-section df-section--editor">
                         <div className="df-section__header">
-                            <span className="df-section__icon"><FileText size={15} /></span>
+                            <span className="df-section__icon">
+                                <FileText size={15} />
+                            </span>
                             <span className="df-section__label">Contenido</span>
                         </div>
                         <div className="df-section__body df-section__body--editor">
@@ -393,10 +410,22 @@ export default function DevocionalesForm() {
                                     menubar: true,
                                     automatic_uploads: false,
                                     plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'charmap',
-                                        'preview', 'anchor', 'searchreplace', 'visualblocks',
-                                        'code', 'fullscreen', 'insertdatetime', 'media',
-                                        'table', 'help', 'wordcount',
+                                        'advlist',
+                                        'autolink',
+                                        'lists',
+                                        'link',
+                                        'charmap',
+                                        'preview',
+                                        'anchor',
+                                        'searchreplace',
+                                        'visualblocks',
+                                        'code',
+                                        'fullscreen',
+                                        'insertdatetime',
+                                        'media',
+                                        'table',
+                                        'help',
+                                        'wordcount',
                                     ],
                                     toolbar:
                                         'undo redo | blocks | bold italic forecolor | ' +
@@ -413,18 +442,25 @@ export default function DevocionalesForm() {
 
                     {/* ── SIDEBAR ── */}
                     <aside className="df-sidebar">
-
                         {/* Imagen */}
                         <div className="df-section">
                             <div className="df-section__header">
-                                <span className="df-section__icon"><ImageIcon size={15} /></span>
+                                <span className="df-section__icon">
+                                    <ImageIcon size={15} />
+                                </span>
                                 <span className="df-section__label">Imagen destacada</span>
                             </div>
                             <div className="df-section__body df-section__body--tight">
                                 <div
-                                    className={`df-image-zone${dragActive ? ' df-image-zone--drag' : ''}`}
-                                    onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-                                    onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+                                    className={`df-image-zone${dragActive ? 'df-image-zone--drag' : ''}`}
+                                    onDragOver={(e) => {
+                                        e.preventDefault();
+                                        setDragActive(true);
+                                    }}
+                                    onDragLeave={(e) => {
+                                        e.preventDefault();
+                                        setDragActive(false);
+                                    }}
                                     onDrop={handleImageDrop}
                                     onClick={(e) => {
                                         if ((e.target as HTMLElement) !== imageInputRef.current) {
@@ -473,7 +509,9 @@ export default function DevocionalesForm() {
                         {/* Tipo de contenido */}
                         <div className="df-section">
                             <div className="df-section__header">
-                                <span className="df-section__icon"><BookOpen size={15} /></span>
+                                <span className="df-section__icon">
+                                    <BookOpen size={15} />
+                                </span>
                                 <span className="df-section__label">Tipo de contenido</span>
                             </div>
                             <div className="df-section__body df-section__body--tight">
@@ -481,7 +519,7 @@ export default function DevocionalesForm() {
                                     {contentTypeOptions.map((opt) => (
                                         <label
                                             key={opt.value}
-                                            className={`df-type-option${contentType === opt.value ? ' df-type-option--active' : ''}`}
+                                            className={`df-type-option${contentType === opt.value ? 'df-type-option--active' : ''}`}
                                         >
                                             <input
                                                 type="radio"
@@ -490,7 +528,7 @@ export default function DevocionalesForm() {
                                                 checked={contentType === opt.value}
                                                 onChange={() => {
                                                     setContentType(opt.value);
-                                                                    if (opt.value !== 2) {
+                                                    if (opt.value !== 2) {
                                                         setSerie('');
                                                         setEnsenanzaId('');
                                                         setUseNuevaSerie(false);
@@ -514,29 +552,19 @@ export default function DevocionalesForm() {
                         {/* Visibilidad */}
                         <div className="df-section">
                             <div className="df-section__header">
-                                <span className="df-section__icon">
-                                    {ocultar ? <EyeOff size={15} /> : <Eye size={15} />}
-                                </span>
+                                <span className="df-section__icon">{ocultar ? <EyeOff size={15} /> : <Eye size={15} />}</span>
                                 <span className="df-section__label">Visibilidad</span>
                             </div>
                             <div className="df-section__body df-section__body--tight">
-                                <div className={`df-visibility${ocultar ? ' df-visibility--hidden' : ''}`}>
+                                <div className={`df-visibility${ocultar ? 'df-visibility--hidden' : ''}`}>
                                     <div className="df-visibility__text">
-                                        <span className="df-visibility__label">
-                                            {ocultar ? 'Contenido oculto' : 'Publicado'}
-                                        </span>
+                                        <span className="df-visibility__label">{ocultar ? 'Contenido oculto' : 'Publicado'}</span>
                                         <span className="df-visibility__sub">
-                                            {ocultar
-                                                ? 'No visible para el público'
-                                                : 'Visible para todos los visitantes'}
+                                            {ocultar ? 'No visible para el público' : 'Visible para todos los visitantes'}
                                         </span>
                                     </div>
                                     <label className="df-toggle">
-                                        <input
-                                            type="checkbox"
-                                            checked={ocultar}
-                                            onChange={(e) => setOcultar(e.target.checked)}
-                                        />
+                                        <input type="checkbox" checked={ocultar} onChange={(e) => setOcultar(e.target.checked)} />
                                         <span className="df-toggle__track" />
                                         <span className="df-toggle__thumb" />
                                     </label>
@@ -547,7 +575,9 @@ export default function DevocionalesForm() {
                         {/* Categoría */}
                         <div className="df-section">
                             <div className="df-section__header">
-                                <span className="df-section__icon"><FileText size={15} /></span>
+                                <span className="df-section__icon">
+                                    <FileText size={15} />
+                                </span>
                                 <span className="df-section__label">Categoría y Autor</span>
                             </div>
                             <div className="df-section__body">
@@ -569,7 +599,9 @@ export default function DevocionalesForm() {
                                     >
                                         <option value="">Selecciona una categoría</option>
                                         {categorias.map((cat) => (
-                                            <option key={cat} value={cat}>{cat}</option>
+                                            <option key={cat} value={cat}>
+                                                {cat}
+                                            </option>
                                         ))}
                                         <option value="nueva">+ Nueva categoría…</option>
                                     </select>
@@ -617,7 +649,9 @@ export default function DevocionalesForm() {
                                     >
                                         <option value="">Selecciona un autor</option>
                                         {autores.map((a) => (
-                                            <option key={a} value={a}>{a}</option>
+                                            <option key={a} value={a}>
+                                                {a}
+                                            </option>
                                         ))}
                                         <option value="nuevo">+ Nuevo autor…</option>
                                     </select>
@@ -638,7 +672,9 @@ export default function DevocionalesForm() {
                         {contentType === 2 && (
                             <div className="df-section">
                                 <div className="df-section__header">
-                                    <span className="df-section__icon"><Tv2 size={15} /></span>
+                                    <span className="df-section__icon">
+                                        <Tv2 size={15} />
+                                    </span>
                                     <span className="df-section__label">Serie</span>
                                 </div>
                                 <div className="df-section__body">
@@ -659,7 +695,9 @@ export default function DevocionalesForm() {
                                         >
                                             <option value="">Sin serie</option>
                                             {series.map((s) => (
-                                                <option key={s.nombre} value={s.nombre}>{s.nombre}</option>
+                                                <option key={s.nombre} value={s.nombre}>
+                                                    {s.nombre}
+                                                </option>
                                             ))}
                                             <option value="nueva">+ Nueva serie…</option>
                                         </select>
@@ -694,7 +732,9 @@ export default function DevocionalesForm() {
                                                 >
                                                     <option value="">Selecciona una enseñanza</option>
                                                     {ensenanzas.map((e) => (
-                                                        <option key={e.id} value={e.id}>{e.titulo}</option>
+                                                        <option key={e.id} value={e.id}>
+                                                            {e.titulo}
+                                                        </option>
                                                     ))}
                                                     <option value="nueva">+ Nueva enseñanza…</option>
                                                 </select>
@@ -754,7 +794,9 @@ export default function DevocionalesForm() {
                         {hasSerie && contentType === 2 && (
                             <div className="df-section">
                                 <div className="df-section__header">
-                                    <span className="df-section__icon"><Link2 size={15} /></span>
+                                    <span className="df-section__icon">
+                                        <Link2 size={15} />
+                                    </span>
                                     <span className="df-section__label">Recursos multimedia</span>
                                 </div>
                                 <div className="df-section__body">
@@ -816,7 +858,9 @@ export default function DevocionalesForm() {
                         {/* Fecha y hora */}
                         <div className="df-section">
                             <div className="df-section__header">
-                                <span className="df-section__icon"><Calendar size={15} /></span>
+                                <span className="df-section__icon">
+                                    <Calendar size={15} />
+                                </span>
                                 <span className="df-section__label">Fecha de publicación</span>
                             </div>
                             <div className="df-section__body">
@@ -842,14 +886,9 @@ export default function DevocionalesForm() {
                             disabled={showLoader}
                             style={{ width: '100%', justifyContent: 'center', padding: '12px 22px' }}
                         >
-                            {isSubmitting ? (
-                                <Loader2 size={15} className="df-spin" />
-                            ) : (
-                                <Save size={15} />
-                            )}
+                            {isSubmitting ? <Loader2 size={15} className="df-spin" /> : <Save size={15} />}
                             {mode === 'create' ? 'Publicar contenido' : 'Guardar cambios'}
                         </button>
-
                     </aside>
                 </div>
             </div>

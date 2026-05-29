@@ -97,6 +97,30 @@ body {
     transition: box-shadow 0.2s;
 }
 
+.post-image-card--skeleton {
+    aspect-ratio: 1 / 1;
+    box-shadow: none;
+}
+
+.post-image-skeleton__media {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #e8edf3 0%, #f8fafc 45%, #e8edf3 100%);
+    background-size: 220% 100%;
+    animation: post-image-skeleton 1.35s ease-in-out infinite;
+}
+
+@keyframes post-image-skeleton {
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: -100% 0;
+    }
+}
+
 /* Si el espacio es muy pequeño, el card se achica sin desbordar */
 @media (max-width: 600px) {
     .post-image-gallery-container {

@@ -228,7 +228,7 @@ function DevSection({ devocionales, onOpen }: DevSectionProps) {
                 </div>
 
                 {/* ── Navigator ── */}
-                {total > 0 && (
+                {total > 0 ? (
                     <div className="sp-dev__nav">
                         {/* Contador tipográfico */}
                         <div className="sp-dev__nav-info">
@@ -281,6 +281,8 @@ function DevSection({ devocionales, onOpen }: DevSectionProps) {
                             </button>
                         </div>
                     </div>
+                ) : (
+                    <div className="sp-dev__nav sp-dev__nav--placeholder" aria-hidden="true" />
                 )}
             </div>
         </section>
@@ -694,6 +696,9 @@ export default function MainContent() {
                     const found = data.find((d) => String(d.id) === id);
                     if (found) { setSelected(found); setModalOpen(true); }
                 }
+            })
+            .catch(() => {
+                setLoading(false);
             });
     }, [loading]);
 
@@ -714,16 +719,6 @@ export default function MainContent() {
         setSelected(null);
         window.history.pushState({}, '', window.location.pathname);
     }, []);
-
-    if (loading && videos.length === 0) {
-        return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Cargando...</span>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <main className="sp-home">

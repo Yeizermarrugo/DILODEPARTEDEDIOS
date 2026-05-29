@@ -1,6 +1,6 @@
 import CardNew from '@/components/CardNew';
 import PageLayout from '@/components/PageLayout';
-import Spinner from '@/components/Spinner';
+import { DevocionalGridSkeleton } from '@/components/SectionSkeletons';
 import FilterSheet from '@/components/ui/FilterSheet';
 import { Head } from '@inertiajs/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -79,7 +79,9 @@ function Devocionals() {
     const debouncedSearch = useDebounce(searchTerm, 350);
 
     // Resetear página al buscar o filtrar
-    useEffect(() => { setPage(1); }, [debouncedSearch, selectedCategory, sort]);
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, selectedCategory, sort]);
 
     // ── Fetch Data ────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -90,7 +92,7 @@ function Devocionals() {
                 let url = '';
                 const params = new URLSearchParams({
                     page: String(page),
-                    sort: sort
+                    sort: sort,
                 });
 
                 if (debouncedSearch.trim()) {
@@ -143,12 +145,8 @@ function Devocionals() {
     const totalResults = pagination.total || 0;
     const totalAll = categories.reduce((sum, c) => sum + c.count, 0) || totalResults;
     const hasFilter = selectedCategory !== null || sort !== 'latest';
-    const gridHeading = debouncedSearch.trim()
-        ? `Resultados de "${debouncedSearch.trim()}"`
-        : selectedCategory ?? 'Todos los Devocionales';
-    const selectedCategoryDescription = selectedCategory
-        ? categories.find(c => c.categoria === selectedCategory)?.description
-        : null;
+    const gridHeading = debouncedSearch.trim() ? `Resultados de "${debouncedSearch.trim()}"` : (selectedCategory ?? 'Todos los Devocionales');
+    const selectedCategoryDescription = selectedCategory ? categories.find((c) => c.categoria === selectedCategory)?.description : null;
     const sortOptions: { key: SortId; icon: string; label: string }[] = [
         { key: 'latest', icon: 'bi-clock', label: 'Más recientes' },
         { key: 'likes', icon: pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-heart', label: 'Más likes' },
@@ -156,9 +154,7 @@ function Devocionals() {
         { key: 'shares', icon: 'bi-share', label: 'Más compartidos' },
     ];
 
-    const todasLasCategorias = useMemo(() =>
-        categories.map(c => c.categoria.trim().toLowerCase()).sort()
-        , [categories]);
+    const todasLasCategorias = useMemo(() => categories.map((c) => c.categoria.trim().toLowerCase()).sort(), [categories]);
 
     // ── Render Helpers ───────────────────────────────────────────────────────
 
@@ -173,19 +169,22 @@ function Devocionals() {
                     {totalResults} publicaciones · pág. {cur} de {last}
                 </span>
                 <div className="dv-pager__btns">
-                    <button className="dv-pager__btn" onClick={() => setPage(cur - 1)} disabled={cur === 1}>‹</button>
+                    <button className="dv-pager__btn" onClick={() => setPage(cur - 1)} disabled={cur === 1}>
+                        ‹
+                    </button>
                     {Array.from({ length: last }, (_, i) => i + 1)
-                        .filter(p => p === 1 || p === last || Math.abs(p - cur) <= 1)
+                        .filter((p) => p === 1 || p === last || Math.abs(p - cur) <= 1)
                         .map((p, i, arr) => (
                             <React.Fragment key={p}>
                                 {i > 0 && arr[i - 1] !== p - 1 && <span className="dv-pager__dots">...</span>}
-                                <button
-                                    className={`dv-pager__btn ${cur === p ? 'dv-pager__btn--active' : ''}`}
-                                    onClick={() => setPage(p)}
-                                >{p}</button>
+                                <button className={`dv-pager__btn ${cur === p ? 'dv-pager__btn--active' : ''}`} onClick={() => setPage(p)}>
+                                    {p}
+                                </button>
                             </React.Fragment>
                         ))}
-                    <button className="dv-pager__btn" onClick={() => setPage(cur + 1)} disabled={cur === last}>›</button>
+                    <button className="dv-pager__btn" onClick={() => setPage(cur + 1)} disabled={cur === last}>
+                        ›
+                    </button>
                 </div>
             </div>
         );
@@ -221,7 +220,7 @@ function Devocionals() {
                                     <span>Todas</span>
                                     <span className="dv-sidebar__cat-count">{totalAll}</span>
                                 </button>
-                                {categories.map(cat => (
+                                {categories.map((cat) => (
                                     <button
                                         key={cat.categoria}
                                         className={`dv-sidebar__cat ${selectedCategory === cat.categoria ? 'dv-sidebar__cat--active' : ''}`}
@@ -237,7 +236,7 @@ function Devocionals() {
                         <div className="dv-sidebar__section">
                             <div className="dv-sidebar__section-label">Ordenar por</div>
                             <div className="dv-sidebar__sort">
-                                {sortOptions.map(opt => (
+                                {sortOptions.map((opt) => (
                                     <button
                                         key={opt.key}
                                         className={`dv-sidebar__sort-btn ${sort === opt.key ? 'dv-sidebar__sort-btn--active' : ''}`}
@@ -272,8 +271,14 @@ function Devocionals() {
                                         value={searchTerm}
                                         onChange={handleSearchChange}
                                     />
-                                    {loading ? <Spinner /> : searchTerm && (
-                                        <button className="dv-search__clear" onClick={handleClearSearch}>✕</button>
+                                    {loading && searchTerm ? (
+                                        <div className="dv-search__spinner" />
+                                    ) : (
+                                        searchTerm && (
+                                            <button className="dv-search__clear" onClick={handleClearSearch}>
+                                                ✕
+                                            </button>
+                                        )
                                     )}
                                 </div>
 
@@ -294,7 +299,7 @@ function Devocionals() {
                         {/* Grid de Contenido */}
                         <div className="dv-grid-wrapper">
                             {loading && devocionales.length === 0 ? (
-                                <div className="dv-loading"><Spinner /></div>
+                                <DevocionalGridSkeleton />
                             ) : devocionales.length === 0 ? (
                                 <div className="dv-empty">
                                     <div className="dv-empty__icon">📖</div>

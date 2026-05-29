@@ -91,7 +91,7 @@ const PostImage = () => {
     return (
         <div className="post-image-gallery-container">
             {/* Loader overlay */}
-            {showLoader && (
+            {isSubmitting && (
                 <div className="post-image-gallery-loader">
                     <LoaderBook />
                 </div>
@@ -103,21 +103,32 @@ const PostImage = () => {
                 </button>
             </div>
             {/* Cards pequeñas y responsive */}
-            <div className="post-image-gallery-grid">
-                {postImages.map((img) => (
-                    <div className="post-image-card" key={img.id}>
-                        <img src={img.url} alt={`Imagen ${img.id}`} className="post-image-card-img" loading="lazy" />
-                        <button
-                            className="post-image-card-delete"
-                            onClick={() => handleEliminar(img.id)}
-                            title="Eliminar imagen"
-                            disabled={isSubmitting}
-                        >
-                            &times;
-                        </button>
-                    </div>
-                ))}
-            </div>
+            {isLoading && !isSubmitting && (
+                <div className="post-image-gallery-grid" aria-hidden="true">
+                    {Array.from({ length: 10 }).map((_, index) => (
+                        <div className="post-image-card post-image-card--skeleton" key={index}>
+                            <div className="post-image-skeleton__media" />
+                        </div>
+                    ))}
+                </div>
+            )}
+            {!isLoading && (
+                <div className="post-image-gallery-grid">
+                    {postImages.map((img) => (
+                        <div className="post-image-card" key={img.id}>
+                            <img src={img.url} alt={`Imagen ${img.id}`} className="post-image-card-img" loading="lazy" />
+                            <button
+                                className="post-image-card-delete"
+                                onClick={() => handleEliminar(img.id)}
+                                title="Eliminar imagen"
+                                disabled={isSubmitting}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
