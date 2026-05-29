@@ -20,7 +20,6 @@ import {
     Tv2,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import type { Editor as TinyMCEEditor } from 'tinymce';
 import '../../css/devocionalesForm.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -31,12 +30,15 @@ interface PageProps extends SharedData {
 }
 
 type ContentType = 1 | 2 | 3;
+type EditorWithContent = {
+    getContent: () => string;
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function DevocionalesForm() {
     const { tinymce_key, mode, id } = usePage<PageProps>().props;
-    const editorRef = useRef<TinyMCEEditor | null>(null);
+    const editorRef = useRef<EditorWithContent | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
