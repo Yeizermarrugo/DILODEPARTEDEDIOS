@@ -36,6 +36,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const STORAGE_KEY = 'welcome_modal_ts';
 const TTL_MS = 12 * 60 * 60 * 1000;
 const WELCOME_IMAGE_SIZE = 1080;
+const WELCOME_IMAGE_SRC = '/assets/img/Estudio Bíblico - 1.png';
 
 function safeLocalStorage(action: 'get' | 'set' | 'remove', key: string, value?: string): string | null {
     try {
@@ -114,11 +115,12 @@ function WelcomeModal() {
                     &times;
                 </button>
                 <img
-                    src="/assets/img/Estudio Bíblico - 1.png"
+                    src={WELCOME_IMAGE_SRC}
                     alt="Bienvenido"
                     width={WELCOME_IMAGE_SIZE}
                     height={WELCOME_IMAGE_SIZE}
                     loading="eager"
+                    fetchPriority="high"
                     style={{
                         width: '90%', height: 'auto',
                         margin: '0 auto 50px auto',

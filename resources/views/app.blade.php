@@ -94,6 +94,11 @@
         <link rel="shortcut icon"
             href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
 
+        @if ($currentPath == '/' || empty($currentPath))
+            <link rel="preload" as="image" href="{{ asset('assets/img/Estudio Bíblico - 1.png') }}"
+                fetchpriority="high">
+        @endif
+
         <link rel="preload" as="style"
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
             onload="this.onload=null;this.rel='stylesheet'">
