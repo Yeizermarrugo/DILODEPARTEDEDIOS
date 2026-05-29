@@ -1,8 +1,6 @@
 /* ─── Sacred Pulse — Home Page ──────────────────────────────────────────────── */
 /*    Paleta alineada con about.css / header.css / footer.css                     */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
-
 :root {
     --sp-orange: #f75815;
     --sp-blue: #2d465e;

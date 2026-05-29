@@ -1,8 +1,6 @@
 /* ─── Header + Mobile Menu — Sacred Pulse ───────────────────────────────────
    Paleta alineada con main-home.css / footer.css / devocionals.css           */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&display=swap');
-
 :root {
     --hdr-orange: #f75815;
     --hdr-blue: #2d465e;
