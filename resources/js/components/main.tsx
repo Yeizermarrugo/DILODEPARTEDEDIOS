@@ -38,7 +38,8 @@ function obtenerPrimerEtiqueta(html: string): string {
 
 function TituloDevocional({ contenido }: { contenido: string }) {
     const titulo = obtenerPrimerEtiqueta(contenido);
-    return <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(titulo) }} style={{ textTransform: 'uppercase' }} />;
+    const safe = typeof window !== 'undefined' ? DOMPurify.sanitize(titulo) : titulo;
+    return <span dangerouslySetInnerHTML={{ __html: safe }} style={{ textTransform: 'uppercase' }} />;
 }
 
 function formatDate(dateStr?: string): string {
