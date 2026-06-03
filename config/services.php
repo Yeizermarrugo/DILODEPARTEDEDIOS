@@ -49,6 +49,7 @@ return [
         'key' => env('AZURE_SPEECH_KEY'),
         'region' => env('AZURE_SPEECH_REGION', 'eastus'),
         'output_format' => env('AZURE_SPEECH_OUTPUT_FORMAT', 'audio-24khz-48kbitrate-mono-mp3'),
+        'timed_timeout_seconds' => env('AZURE_SPEECH_TIMED_TIMEOUT_SECONDS', 15),
     ],
 
 ];

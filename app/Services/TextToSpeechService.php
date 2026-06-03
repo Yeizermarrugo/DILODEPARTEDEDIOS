@@ -478,14 +478,16 @@ SSML;
      */
     private function synthesizeWithBookmarks(string $apiKey, string $region, string $outputFormat, string $voice, string $ssml, string $outputPath): array
     {
+        $timeoutSeconds = max(5, min(45, (int) config('services.azure_speech.timed_timeout_seconds', 15)));
         $process = new Process(['node', base_path('scripts/azure-tts-bookmarks.mjs')]);
-        $process->setTimeout(60);
+        $process->setTimeout($timeoutSeconds + 10);
         $process->setInput(json_encode([
             'key' => $apiKey,
             'region' => $region,
             'outputFormat' => $outputFormat,
             'outputPath' => $outputPath,
             'ssml' => $ssml,
+            'timeoutMs' => $timeoutSeconds * 1000,
             'voice' => $voice,
         ], JSON_THROW_ON_ERROR));
         $process->run();

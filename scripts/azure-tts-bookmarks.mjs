@@ -41,9 +41,12 @@ function closeSynthesizer(synthesizer) {
     });
 }
 
-const SYNTHESIS_TIMEOUT_MS = 50_000;
+const DEFAULT_SYNTHESIS_TIMEOUT_MS = 15_000;
 
-async function synthesize({ key, region, outputFormat, outputPath, ssml, voice }) {
+async function synthesize({ key, region, outputFormat, outputPath, ssml, timeoutMs, voice }) {
+    const synthesisTimeoutMs = Number.isFinite(timeoutMs) && timeoutMs > 0
+        ? timeoutMs
+        : DEFAULT_SYNTHESIS_TIMEOUT_MS;
     const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key, region);
     speechConfig.speechSynthesisVoiceName = voice;
     speechConfig.speechSynthesisOutputFormat =
@@ -64,8 +67,8 @@ async function synthesize({ key, region, outputFormat, outputPath, ssml, voice }
     let timeoutHandle;
     const timeoutPromise = new Promise((_, reject) => {
         timeoutHandle = setTimeout(
-            () => reject(new Error(`Azure synthesis timed out after ${SYNTHESIS_TIMEOUT_MS / 1000}s`)),
-            SYNTHESIS_TIMEOUT_MS,
+            () => reject(new Error(`Azure synthesis timed out after ${synthesisTimeoutMs / 1000}s`)),
+            synthesisTimeoutMs,
         );
     });
 
