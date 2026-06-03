@@ -41,6 +41,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     const hasServerTimingsRef = useRef(false);
     const activeBlockRef = useRef<number | null>(null);
     const rafRef = useRef<number | null>(null);
+    const abortRef = useRef<AbortController | null>(null);
 
     const emitBlockChange = (index: number | null) => {
         if (activeBlockRef.current === index) {
@@ -67,7 +68,10 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
         rafRef.current = requestAnimationFrame(tick);
     };
 
-    useEffect(() => () => stopRaf(), []);
+    useEffect(() => () => {
+        stopRaf();
+        abortRef.current?.abort();
+    }, []);
 
     const rebuildTimings = () => {
         if (hasServerTimingsRef.current) {
@@ -110,6 +114,11 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
     };
 
     const loadAudio = async (): Promise<boolean> => {
+        // Cancel any in-flight request before starting a new one
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
+
         setLoading(true);
         setAudioUrl(null);
         setAudioReady(false);
@@ -127,6 +136,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
         try {
             const res = await fetch('/api/tts', {
                 method: 'POST',
+                signal: controller.signal,
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
@@ -175,7 +185,11 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
             setIsPaused(false);
 
             return true;
-        } catch {
+        } catch (err) {
+            if (err instanceof DOMException && err.name === 'AbortError') {
+                // Request was cancelled intentionally — don't show error
+                return false;
+            }
             setLoading(false);
             setIsPlaying(false);
             alert('Error generando el audio.');
