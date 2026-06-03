@@ -29,6 +29,8 @@ function closeSynthesizer(synthesizer) {
     });
 }
 
+const SYNTHESIS_TIMEOUT_MS = 50_000;
+
 async function synthesize({ key, region, outputFormat, outputPath, ssml, voice }) {
     const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key, region);
     speechConfig.speechSynthesisVoiceName = voice;
@@ -47,10 +49,23 @@ async function synthesize({ key, region, outputFormat, outputPath, ssml, voice }
         });
     };
 
+    let timeoutHandle;
+    const timeoutPromise = new Promise((_, reject) => {
+        timeoutHandle = setTimeout(
+            () => reject(new Error(`Azure synthesis timed out after ${SYNTHESIS_TIMEOUT_MS / 1000}s`)),
+            SYNTHESIS_TIMEOUT_MS,
+        );
+    });
+
     try {
-        const result = await new Promise((resolve, reject) => {
-            synthesizer.speakSsmlAsync(ssml, resolve, reject);
-        });
+        const result = await Promise.race([
+            new Promise((resolve, reject) => {
+                synthesizer.speakSsmlAsync(ssml, resolve, reject);
+            }),
+            timeoutPromise,
+        ]);
+
+        clearTimeout(timeoutHandle);
 
         if (result.reason !== SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
             throw new Error(result.errorDetails || `Azure synthesis failed with reason ${result.reason}`);
@@ -63,6 +78,7 @@ async function synthesize({ key, region, outputFormat, outputPath, ssml, voice }
             duration: result.audioDuration ? result.audioDuration / 10_000_000 : null,
         };
     } finally {
+        clearTimeout(timeoutHandle);
         await closeSynthesizer(synthesizer);
     }
 }

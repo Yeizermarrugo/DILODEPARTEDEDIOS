@@ -272,12 +272,17 @@ class TextToSpeechService
     {
         $voicesForLang = $this->allowedVoices[$lang] ?? [];
         if (empty($voicesForLang)) {
-            $lang = 'es-CO';
+            // Fall back to first available language/voice pair
+            $firstLang = array_key_first($this->allowedVoices);
+            if ($firstLang === null) {
+                throw new \RuntimeException('No hay voces configuradas');
+            }
+            $lang = $firstLang;
             $voicesForLang = $this->allowedVoices[$lang];
         }
 
         if (! array_key_exists($voice, $voicesForLang)) {
-            $voice = array_key_first($voicesForLang) ?? 'es-CO-SalomeNeural';
+            $voice = array_key_first($voicesForLang) ?? throw new \RuntimeException('No hay voces para el idioma seleccionado');
         }
 
         return [$lang, $voice];
@@ -474,7 +479,7 @@ SSML;
     private function synthesizeWithBookmarks(string $apiKey, string $region, string $outputFormat, string $voice, string $ssml, string $outputPath): array
     {
         $process = new Process(['node', base_path('scripts/azure-tts-bookmarks.mjs')]);
-        $process->setTimeout(90);
+        $process->setTimeout(60);
         $process->setInput(json_encode([
             'key' => $apiKey,
             'region' => $region,

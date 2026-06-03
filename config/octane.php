@@ -123,6 +123,6 @@ return [
 
     'max_requests' => 150,
 
-    'max_execution_time' => 30,
+    'max_execution_time' => 120,
 
 ];
