@@ -316,12 +316,6 @@ const DevocionalDetailsPage = (props: Props) => {
     // ── Helpers ────────────────────────────────────────────────────────────────
     const getH1Text = (html: string) => html.match(/<h1[^>]*>(.*?)<\/h1>/i)?.[1].trim() ?? '';
 
-    const splitH1Parts = (text: string): [string, string] => {
-        const words = text.trim().split(/\s+/);
-        const groupSize = Math.ceil(words.length / 2);
-        return [words.slice(0, groupSize).join(' '), words.slice(groupSize, groupSize * 2).join(' ')];
-    };
-
     const removeFirstH1 = (html: string) => html.replace(/<h1[^>]*>.*?<\/h1>/gi, '').trim();
 
     const decodeEntities = (str: string) => {
@@ -339,8 +333,7 @@ const DevocionalDetailsPage = (props: Props) => {
     };
 
     const devocionalContent = removeFirstH1(devocional.contenido);
-    const h1Text = getH1Text(devocional.contenido) || devocional.titulo || '';
-    const [titleP1, titleP2] = splitH1Parts(decodeEntities(h1Text));
+    const h1Text = decodeEntities(getH1Text(devocional.contenido) || devocional.titulo || '');
 
     const backHref = likeType === 'estudio' ? '/estudios' : likeType === 'ensenanza' ? '/series' : '/devocionales';
 
@@ -368,10 +361,7 @@ const DevocionalDetailsPage = (props: Props) => {
 
             {/* Title fixed in viewport — content scrolls over it for "hide behind" illusion */}
             <div className="dd-hero__title-wrapper" aria-hidden="true">
-                <h1 className="dd-hero__title">
-                    <span>{titleP1}</span>
-                    {titleP2 && <span>{titleP2}</span>}
-                </h1>
+                <h1 className="dd-hero__title">{h1Text}</h1>
             </div>
 
             {/* ── Body ─────────────────────────────────────── */}
