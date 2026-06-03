@@ -63,10 +63,6 @@ class TextToSpeechService
 
     /** @var array<string, array<string, string>> */
     private array $allowedVoices = [
-        'es-CO' => [
-            'es-CO-SalomeNeural' => 'Salomé (Colombia, femenino)',
-            'es-CO-GonzaloNeural' => 'Gonzalo (Colombia, masculino)',
-        ],
         'es-MX' => [
             'es-MX-DaliaNeural' => 'Dalia (México, femenino)',
             'es-MX-JorgeNeural' => 'Jorge (México, masculino)',
