@@ -99,6 +99,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 # Email (Resend)
+MAIL_ENABLED=true
 RESEND_KEY=
 
 # Almacenamiento S3-compatible (Cloudflare R2 / AWS S3)

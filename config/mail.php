@@ -18,6 +18,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mail Sending Kill Switch
+    |--------------------------------------------------------------------------
+    |
+    | Set MAIL_ENABLED=false during a suspected mail provider compromise to stop
+    | all application-originated email without changing provider credentials.
+    |
+    */
+
+    'enabled' => env('MAIL_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mailer Configurations
     |--------------------------------------------------------------------------
     |
