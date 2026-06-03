@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\TextToSpeechService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TTSController extends Controller
 {
@@ -24,7 +25,9 @@ class TTSController extends Controller
                 : ['url' => $tts->generate($texto, $lang, $voice, $rate), 'timings' => null];
         } catch (\InvalidArgumentException $exception) {
             return response($exception->getMessage(), 400);
-        } catch (\RuntimeException $exception) {
+        } catch (\Throwable $exception) {
+            Log::error('TTS generation failed', ['message' => $exception->getMessage(), 'class' => get_class($exception)]);
+
             return response($exception->getMessage(), 500);
         }
 
