@@ -37,8 +37,7 @@ async function synthesize({ key, region, outputFormat, outputPath, ssml, voice }
 
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-    const audioConfig = SpeechSDK.AudioConfig.fromAudioFileOutput(outputPath);
-    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
     const bookmarks = [];
 
     synthesizer.bookmarkReached = (_sender, event) => {
@@ -57,12 +56,13 @@ async function synthesize({ key, region, outputFormat, outputPath, ssml, voice }
             throw new Error(result.errorDetails || `Azure synthesis failed with reason ${result.reason}`);
         }
 
+        fs.writeFileSync(outputPath, Buffer.from(result.audioData));
+
         return {
             bookmarks,
             duration: result.audioDuration ? result.audioDuration / 10_000_000 : null,
         };
     } finally {
-        audioConfig.close();
         await closeSynthesizer(synthesizer);
     }
 }
