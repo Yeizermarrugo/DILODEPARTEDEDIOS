@@ -690,6 +690,7 @@ SSML;
     {
         try {
             $response = Http::timeout(10)
+                ->retry(2, 500, fn (\Exception $exception) => $exception instanceof ConnectionException, throw: false)
                 ->withHeaders(['Ocp-Apim-Subscription-Key' => $apiKey])
                 ->post("https://{$region}.api.cognitive.microsoft.com/sts/v1.0/issuetoken");
         } catch (ConnectionException $exception) {
@@ -717,6 +718,7 @@ SSML;
     {
         try {
             return Http::timeout(30)
+                ->retry(2, 750, fn (\Exception $exception) => $exception instanceof ConnectionException, throw: false)
                 ->withToken($token)
                 ->withHeaders([
                     'Content-Type' => 'application/ssml+xml',
