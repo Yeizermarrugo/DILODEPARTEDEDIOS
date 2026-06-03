@@ -1,5 +1,8 @@
 import { extractReadingBlocks } from '@/utils/ttsReading';
 import DOMPurify from 'dompurify';
+
+const sanitize = (html: string): string =>
+    typeof window !== 'undefined' ? (DOMPurify.sanitize(html) as string) : html;
 import { useMemo, type CSSProperties } from 'react';
 
 type Props = {
@@ -54,7 +57,7 @@ export default function ReadingContentBlocks({ html, activeIndex, className }: P
                             <span style={{ display: 'inline-flex', width: 22, color: active ? '#f75815' : '#888' }}>
                                 •
                             </span>
-                            <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trimHtml(block.html)) }} />
+                            <span dangerouslySetInnerHTML={{ __html: sanitize(trimHtml(block.html)) }} />
                         </div>
                     );
                 }
@@ -69,7 +72,7 @@ export default function ReadingContentBlocks({ html, activeIndex, className }: P
                         style={{
                             ...sharedStyle,
                         }}
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trimHtml(block.html)) }}
+                        dangerouslySetInnerHTML={{ __html: sanitize(trimHtml(block.html)) }}
                     />
                 );
             })}
