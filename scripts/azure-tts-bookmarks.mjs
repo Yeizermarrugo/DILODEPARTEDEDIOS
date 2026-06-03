@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -25,7 +26,18 @@ async function readStdin() {
 
 function closeSynthesizer(synthesizer) {
     return new Promise((resolve) => {
-        synthesizer.close(resolve, resolve);
+        const closeTimeout = setTimeout(resolve, 1_000);
+
+        synthesizer.close(
+            () => {
+                clearTimeout(closeTimeout);
+                resolve();
+            },
+            () => {
+                clearTimeout(closeTimeout);
+                resolve();
+            },
+        );
     });
 }
 

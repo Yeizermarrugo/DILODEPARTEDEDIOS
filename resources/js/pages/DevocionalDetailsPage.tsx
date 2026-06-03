@@ -369,7 +369,7 @@ const DevocionalDetailsPage = (props: Props) => {
                 <div className="dd-content">
                     <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
-                    <article className="dd-article">
+                    <article className="dd-article" lang="es">
                         <ReadingContentBlocks html={devocionalContent} activeIndex={bodyActiveIndex} />
                     </article>
 
