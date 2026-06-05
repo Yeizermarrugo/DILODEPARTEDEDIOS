@@ -13,9 +13,9 @@ class GenerateDevocionalAudio implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 2;
+    public int $tries = 3;
 
-    public int $timeout = 180;
+    public int $timeout = 900;
 
     public function __construct(private string $devocionalId) {}
 
@@ -32,21 +32,55 @@ class GenerateDevocionalAudio implements ShouldQueue
         }
 
         try {
-            $lock = Cache::lock("dilodepartededios:tts:devocional:{$devocional->id}", 180);
+            $lock = Cache::lock("dilodepartededios:tts:devocional:{$devocional->id}", 900);
 
             $lock->block(5, function () use ($tts, $devocional) {
-                $payload = $tts->generateFromHtmlWithTimings($devocional->contenido ?? '');
+                foreach ($tts->voicePairs() as $voicePair) {
+                    try {
+                        $existing = $tts->cachedFromHtmlWithTimings(
+                            $devocional->contenido ?? '',
+                            $voicePair['lang'],
+                            $voicePair['voice'],
+                        );
 
-                Cache::put(
-                    "dilodepartededios:tts:devocional:{$devocional->id}:url",
-                    $payload['url'],
-                    now()->addDays(30)
-                );
+                        if ($existing !== null) {
+                            Log::info('Devocional audio already exists; skipped pregeneration', [
+                                'id' => $devocional->id,
+                                'lang' => $voicePair['lang'],
+                                'voice' => $voicePair['voice'],
+                            ]);
 
-                Log::info('Devocional audio pregenerated', [
-                    'id' => $devocional->id,
-                    'url' => $payload['url'],
-                ]);
+                            continue;
+                        }
+
+                        $payload = $tts->generateFromHtmlWithTimings(
+                            $devocional->contenido ?? '',
+                            $voicePair['lang'],
+                            $voicePair['voice'],
+                        );
+
+                        Cache::put(
+                            "dilodepartededios:tts:devocional:{$devocional->id}:{$voicePair['lang']}:{$voicePair['voice']}:url",
+                            $payload['url'],
+                            now()->addDays(30)
+                        );
+
+                        Log::info('Devocional audio pregenerated', [
+                            'id' => $devocional->id,
+                            'lang' => $voicePair['lang'],
+                            'voice' => $voicePair['voice'],
+                            'url' => $payload['url'],
+                            'has_timings' => $payload['timings'] !== null,
+                        ]);
+                    } catch (\Throwable $exception) {
+                        Log::warning('Devocional audio voice pregeneration failed', [
+                            'id' => $devocional->id,
+                            'lang' => $voicePair['lang'],
+                            'voice' => $voicePair['voice'],
+                            'message' => $exception->getMessage(),
+                        ]);
+                    }
+                }
             });
         } catch (\Throwable $exception) {
             Log::warning('Devocional audio pregeneration failed', [

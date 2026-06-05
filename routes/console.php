@@ -19,3 +19,9 @@ Schedule::command('contenido:publicar-programado')
     ->cron('0-10 3 * * 1,3,5')
     ->timezone('America/Bogota')
     ->withoutOverlapping();
+
+// Refuerza el cache de audios para contenido visible reciente; ignora voces ya generadas.
+Schedule::command('tts:pregenerate-devocionales --days=15')
+    ->dailyAt('03:20')
+    ->timezone('America/Bogota')
+    ->withoutOverlapping();

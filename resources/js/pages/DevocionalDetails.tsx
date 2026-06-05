@@ -97,7 +97,7 @@ const DevocionalDetails = ({ devocional }: Props) => {
             <H1Custom contenido={devocional.contenido} />
 
             <section>
-                <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
+                <TextToSpeechButton contentId={devocional.id} html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
                 <PublishedContent html={devocionalContent} activeIndex={bodyActiveIndex} />
 

@@ -90,6 +90,26 @@ class TextToSpeechService
             ->all();
     }
 
+    /**
+     * @return array<int, array{lang: string, voice: string, label: string}>
+     */
+    public function voicePairs(): array
+    {
+        $pairs = [];
+
+        foreach ($this->allowedVoices as $lang => $voices) {
+            foreach ($voices as $voice => $label) {
+                $pairs[] = [
+                    'lang' => $lang,
+                    'voice' => $voice,
+                    'label' => $label,
+                ];
+            }
+        }
+
+        return $pairs;
+    }
+
     public function plainTextFromHtml(string $html): string
     {
         $text = strip_tags($html);
@@ -131,6 +151,55 @@ class TextToSpeechService
             ]);
 
             return ['url' => $this->generateFromHtml($html, $lang, $voice, $rate), 'timings' => null];
+        }
+    }
+
+    /**
+     * @return array{url: string, timings: array<int, array{index: int, start: float, end: float}>|null}|null
+     */
+    public function cachedFromHtmlWithTimings(
+        string $html,
+        string $lang = 'es-CO',
+        string $voice = 'es-CO-SalomeNeural',
+        int $rate = 0,
+        mixed $clientBlocks = null
+    ): ?array {
+        $blocks = $this->normalizeClientBlocks($clientBlocks) ?: $this->speechBlocksFromHtml($html);
+
+        if (empty($blocks)) {
+            return null;
+        }
+
+        [$audioPath, $timingsPath] = $this->timedAudioPaths($blocks, $lang, $voice, $rate);
+        $cacheKey = $this->cacheKey($audioPath);
+
+        try {
+            if (Storage::disk('s3')->exists($audioPath) && Storage::disk('s3')->exists($timingsPath)) {
+                $url = Storage::disk('s3')->url($audioPath);
+                Cache::put($cacheKey, $url, now()->addDays(30));
+
+                return [
+                    'url' => $url,
+                    'timings' => json_decode((string) Storage::disk('s3')->get($timingsPath), true),
+                ];
+            }
+
+            $regularAudioPath = $this->pathForText($this->speechTextFromHtml($html), $lang, $voice, $rate);
+            if ($regularAudioPath && Storage::disk('s3')->exists($regularAudioPath)) {
+                $url = Storage::disk('s3')->url($regularAudioPath);
+                Cache::put($this->cacheKey($regularAudioPath), $url, now()->addDays(30));
+
+                return ['url' => $url, 'timings' => null];
+            }
+
+            return null;
+        } catch (\Throwable $exception) {
+            Log::warning('Timed TTS cached lookup failed', [
+                'path' => $audioPath,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return null;
         }
     }
 
@@ -227,6 +296,7 @@ class TextToSpeechService
         if ($cleanText === '') {
             return null;
         }
+        $cleanText = $this->applyDictionary($cleanText);
 
         [$lang, $voice] = $this->normalizeVoice($lang, $voice);
 
@@ -350,16 +420,7 @@ class TextToSpeechService
 
         $rate = max(-50, min(100, $rate));
         $rateText = $rate === 0 ? 'default' : sprintf('%+d%%', $rate);
-        $textKey = self::TIMED_AUDIO_VERSION.'|'.json_encode(
-            array_map(fn (array $block) => [
-                'kind' => $block['kind'],
-                'text' => $this->applyDictionary($block['text']),
-            ], $blocks),
-            JSON_UNESCAPED_UNICODE
-        );
-
-        $audioPath = $this->audioPath($textKey, $lang, $voice, $rateText, $outputFormat);
-        $timingsPath = $this->timingsPath($audioPath);
+        [$audioPath, $timingsPath] = $this->timedAudioPathsFromNormalized($blocks, $lang, $voice, $rateText, $outputFormat);
         $cacheKey = $this->cacheKey($audioPath);
 
         try {
@@ -438,6 +499,39 @@ class TextToSpeechService
     private function timingsPath(string $audioPath): string
     {
         return preg_replace('/\.mp3$/', '.timings.json', $audioPath) ?? $audioPath.'.timings.json';
+    }
+
+    /**
+     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @return array{0: string, 1: string}
+     */
+    private function timedAudioPaths(array $blocks, string $lang, string $voice, int $rate): array
+    {
+        $outputFormat = config('services.azure_speech.output_format');
+        [$lang, $voice] = $this->normalizeVoice($lang, $voice);
+        $rate = max(-50, min(100, $rate));
+        $rateText = $rate === 0 ? 'default' : sprintf('%+d%%', $rate);
+
+        return $this->timedAudioPathsFromNormalized($blocks, $lang, $voice, $rateText, $outputFormat);
+    }
+
+    /**
+     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @return array{0: string, 1: string}
+     */
+    private function timedAudioPathsFromNormalized(array $blocks, string $lang, string $voice, string $rateText, string $outputFormat): array
+    {
+        $textKey = self::TIMED_AUDIO_VERSION.'|'.json_encode(
+            array_map(fn (array $block) => [
+                'kind' => $block['kind'],
+                'text' => $this->applyDictionary($block['text']),
+            ], $blocks),
+            JSON_UNESCAPED_UNICODE
+        );
+
+        $audioPath = $this->audioPath($textKey, $lang, $voice, $rateText, $outputFormat);
+
+        return [$audioPath, $this->timingsPath($audioPath)];
     }
 
     /**
