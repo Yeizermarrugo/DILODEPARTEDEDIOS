@@ -1,9 +1,5 @@
-import { extractReadingBlocks } from '@/utils/ttsReading';
 import DOMPurify from 'dompurify';
-
-const sanitize = (html: string): string =>
-    typeof window !== 'undefined' ? (DOMPurify.sanitize(html) as string) : html;
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo } from 'react';
 
 type Props = {
     activeIndex: number | null;
@@ -12,70 +8,78 @@ type Props = {
 };
 
 const HEADING_TAGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
-type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+const BLOCK_TAGS = new Set([...HEADING_TAGS, 'p', 'blockquote', 'div', 'section', 'article']);
+const CONTAINER_TAGS = new Set(['div', 'section', 'article', 'blockquote']);
 
-function trimHtml(html: string): string {
-    return html
-        .replace(/^(\s|<br\s*\/?>|&nbsp;)*/gi, '')
-        .replace(/(\s|<br\s*\/?>|&nbsp;)*$/gi, '');
+function hasBlockChildren(element: HTMLElement): boolean {
+    return Array.from(element.children).some((child) => {
+        const tag = child.tagName.toLowerCase();
+        return BLOCK_TAGS.has(tag) || tag === 'li' || tag === 'ul' || tag === 'ol';
+    });
+}
+
+function hasReadableText(element: HTMLElement): boolean {
+    return Boolean((element.textContent ?? '').replace(/\s|\u00a0/g, ''));
+}
+
+function annotateElement(element: HTMLElement, nextIndex: { current: number }, activeIndex: number | null): void {
+    const tag = element.tagName.toLowerCase();
+
+    if (tag === 'ul' || tag === 'ol') {
+        Array.from(element.children).forEach((child) => {
+            const childElement = child as HTMLElement;
+            if (childElement.tagName.toLowerCase() === 'li' && hasReadableText(childElement)) {
+                childElement.dataset.readingIndex = String(nextIndex.current);
+                if (nextIndex.current === activeIndex) {
+                    childElement.classList.add('dd-reading-active');
+                }
+                nextIndex.current += 1;
+                return;
+            }
+
+            annotateElement(childElement, nextIndex, activeIndex);
+        });
+
+        return;
+    }
+
+    if (CONTAINER_TAGS.has(tag) && hasBlockChildren(element)) {
+        Array.from(element.children).forEach((child) => annotateElement(child as HTMLElement, nextIndex, activeIndex));
+        return;
+    }
+
+    if (BLOCK_TAGS.has(tag)) {
+        if (hasReadableText(element)) {
+            element.dataset.readingIndex = String(nextIndex.current);
+            if (nextIndex.current === activeIndex) {
+                element.classList.add('dd-reading-active');
+            }
+            nextIndex.current += 1;
+        }
+
+        return;
+    }
+
+    Array.from(element.children).forEach((child) => annotateElement(child as HTMLElement, nextIndex, activeIndex));
+}
+
+function sanitizeAndAnnotate(html: string, activeIndex: number | null): string {
+    if (typeof window === 'undefined') {
+        return html;
+    }
+
+    const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['style', 'data-reading-index'] }) as string;
+    const template = document.createElement('template');
+    template.innerHTML = sanitized;
+    const nextIndex = { current: 0 };
+
+    Array.from(template.content.children).forEach((child) => annotateElement(child as HTMLElement, nextIndex, activeIndex));
+
+    return template.innerHTML;
 }
 
 export default function ReadingContentBlocks({ html, activeIndex, className }: Props) {
-    const blocks = useMemo(() => extractReadingBlocks(html), [html]);
+    const contentHtml = useMemo(() => sanitizeAndAnnotate(html, activeIndex), [activeIndex, html]);
 
-    if (!blocks.length) {
-        return null;
-    }
-
-    return (
-        <div className={className} style={{ display: 'grid', gap: '12px' }}>
-            {blocks.map((block) => {
-                const active = activeIndex === block.index;
-                const isHeading = HEADING_TAGS.has(block.tag);
-                // Respect explicit alignment (e.g. text-align:center from TinyMCE).
-                // Fall back to justify for body text, no override for headings.
-                const textAlign: CSSProperties['textAlign'] =
-                    block.align ? (block.align as CSSProperties['textAlign'])
-                    : isHeading ? undefined
-                    : 'justify';
-
-                const sharedStyle: CSSProperties = {
-                    position: 'relative',
-                    padding: block.kind === 'list-item' ? '0.6rem 0.9rem 0.6rem 1rem' : '0.75rem 0.9rem',
-                    margin: 0,
-                    borderLeft: active ? '4px solid #f75815' : '4px solid transparent',
-                    background: active ? 'rgba(247, 88, 21, 0.08)' : 'transparent',
-                    borderRadius: 8,
-                    transition: 'background 50ms ease, border-color 50ms ease, box-shadow 50ms ease',
-                    boxShadow: active ? '0 10px 24px rgba(247, 88, 21, 0.08)' : 'none',
-                    ...(textAlign && { textAlign }),
-                };
-
-                if (block.kind === 'list-item') {
-                    return (
-                        <div key={block.index} style={sharedStyle}>
-                            <span style={{ display: 'inline-flex', width: 22, color: active ? '#f75815' : '#888' }}>
-                                •
-                            </span>
-                            <span dangerouslySetInnerHTML={{ __html: sanitize(trimHtml(block.html)) }} />
-                        </div>
-                    );
-                }
-
-                const Tag: HeadingTag | 'div' = HEADING_TAGS.has(block.tag)
-                    ? (block.tag as HeadingTag)
-                    : 'div';
-
-                return (
-                    <Tag
-                        key={block.index}
-                        style={{
-                            ...sharedStyle,
-                        }}
-                        dangerouslySetInnerHTML={{ __html: sanitize(trimHtml(block.html)) }}
-                    />
-                );
-            })}
-        </div>
-    );
+    return <div className={className} dangerouslySetInnerHTML={{ __html: contentHtml }} />;
 }

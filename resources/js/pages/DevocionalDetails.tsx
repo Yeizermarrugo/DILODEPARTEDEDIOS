@@ -99,7 +99,7 @@ const DevocionalDetails = ({ devocional }: Props) => {
             <section>
                 <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
-                <ReadingContentBlocks html={devocionalContent} activeIndex={bodyActiveIndex} />
+                <ReadingContentBlocks className="dd-reading-content" html={devocionalContent} activeIndex={bodyActiveIndex} />
 
                 <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>{devocional.autor ?? ''}</p>
 
