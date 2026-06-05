@@ -367,7 +367,7 @@ const DevocionalDetailsPage = (props: Props) => {
             {/* ── Body ─────────────────────────────────────── */}
             <div className="dd-body">
                 <div className="dd-content">
-                    <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
+                    <TextToSpeechButton contentId={devocional.id} html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
                     <article className="dd-article" lang="es">
                         <PublishedContent html={devocionalContent} activeIndex={bodyActiveIndex} />

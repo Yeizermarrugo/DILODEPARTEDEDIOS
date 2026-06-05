@@ -17,16 +17,19 @@ function csrfToken(): string {
 }
 
 type Props = {
+    contentId?: string;
     html: string;
     onBlockChange?: (index: number | null) => void;
 };
 
 type TtsResponse = {
+    message?: string;
+    ready?: boolean;
     timings?: ReadingTiming[] | null;
-    url: string;
+    url?: string;
 };
 
-export default function TextToSpeechButton({ html, onBlockChange }: Props) {
+export default function TextToSpeechButton({ contentId, html, onBlockChange }: Props) {
     const [selectedVoice, setSelectedVoice] = useState(VOICES[0].value);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -145,6 +148,7 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
                 body: JSON.stringify({
                     texto: html,
                     format: 'html',
+                    content_id: contentId,
                     lang,
                     v: selectedVoice,
                     blocks: readingBlocks.map((block) => ({
@@ -163,6 +167,14 @@ export default function TextToSpeechButton({ html, onBlockChange }: Props) {
                 return false;
             }
             const data = await res.json() as TtsResponse;
+
+            if (data.ready === false || !data.url) {
+                setLoading(false);
+                setIsPlaying(false);
+                alert(data.message ?? 'Audio en preparación. Intenta de nuevo en unos minutos.');
+                return false;
+            }
+
             const audioUrl = data.url.startsWith('http') ? data.url : window.location.origin + data.url;
 
             setAudioUrl(audioUrl);
