@@ -155,4 +155,27 @@ class DevocionalTest extends TestCase
         $saved = Devocional::latest()->first();
         $this->assertStringNotContainsString('onclick', $saved->contenido);
     }
+
+    public function test_valid_content_structure_is_preserved_on_save(): void
+    {
+        $user = User::factory()->create();
+
+        $html = '<h1>Título</h1><p>Primer párrafo.</p><p><br /></p><ul><li>Uno</li><li>Dos</li></ul>';
+
+        $this->actingAs($user)
+            ->postJson('/devocionalesadd', [
+                'contenido'     => $html,
+                'imagen'        => 'https://example.com/image.jpg',
+                'categoria'     => 'Fe',
+                'autor'         => 'Test',
+                'is_devocional' => 1,
+            ])
+            ->assertCreated();
+
+        $saved = Devocional::latest()->first();
+        $this->assertStringContainsString('<p><br', $saved->contenido);
+        $this->assertStringContainsString('<ul>', $saved->contenido);
+        $this->assertStringContainsString('<li>Uno</li>', $saved->contenido);
+        $this->assertStringContainsString('<li>Dos</li>', $saved->contenido);
+    }
 }

@@ -1,0 +1,149 @@
+/* Protected published content styles.
+   These rules define how saved TinyMCE HTML is presented to users.
+   Do not change this file for page layout, hero, buttons, navigation, cards, or other design work. */
+
+.dd-reading-content {
+    display: flow-root;
+    text-align: justify;
+}
+
+.dd-reading-content p,
+.dd-reading-content div {
+    font-family: var(--dd-font-serif);
+    font-size: 1.075rem;
+    line-height: 1.9;
+    color: var(--dd-text);
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    word-break: break-word;
+    margin: 0 0 1rem;
+}
+
+.dd-reading-content p:empty,
+.dd-reading-content div:empty {
+    min-height: 1.9em;
+}
+
+.dd-reading-content h1,
+.dd-reading-content h2,
+.dd-reading-content h3,
+.dd-reading-content h4,
+.dd-reading-content h5,
+.dd-reading-content h6 {
+    hyphens: manual;
+    -webkit-hyphens: manual;
+    word-break: normal;
+    overflow-wrap: normal;
+}
+
+.dd-reading-content h1,
+.dd-reading-content h2 {
+    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    font-weight: 800;
+    color: var(--dd-accent);
+    line-height: 1.2;
+    margin: 1.5rem 0 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dd-reading-content h3,
+.dd-reading-content h4 {
+    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--dd-accent);
+    line-height: 1.3;
+    margin: 1.25rem 0 0.85rem;
+}
+
+.dd-reading-content h5,
+.dd-reading-content h6 {
+    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dd-text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 1.1rem 0 0.75rem;
+}
+
+.dd-reading-content blockquote {
+    border-left: 3px solid var(--dd-accent2);
+    margin: 1rem 0;
+    padding-left: 1.2rem;
+    font-style: italic;
+    color: #46403a;
+    text-align: justify;
+}
+
+.dd-reading-content ul,
+.dd-reading-content ol {
+    margin: 0 0 1rem 1.15rem;
+    padding-left: 1.65rem;
+    list-style-position: outside;
+    text-align: justify;
+}
+
+.dd-reading-content ul {
+    list-style-type: disc;
+}
+
+.dd-reading-content ol {
+    list-style-type: decimal;
+}
+
+.dd-reading-content li {
+    display: list-item;
+    font-family: var(--dd-font-serif);
+    font-size: 1.075rem;
+    line-height: 1.8;
+    color: var(--dd-text);
+    text-align: justify;
+    text-indent: 0;
+}
+
+.dd-reading-content li + li {
+    margin-top: 0.35rem;
+}
+
+.dd-reading-active {
+    background: rgba(247, 88, 21, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(247, 88, 21, 0.08);
+    outline: 1px solid rgba(247, 88, 21, 0.18);
+    transition:
+        background 50ms ease,
+        box-shadow 50ms ease,
+        outline-color 50ms ease;
+}
+
+@media (min-width: 1100px) {
+    .dd-reading-content div,
+    .dd-reading-content p {
+        font-size: 1.1rem;
+    }
+}
+
+@media (min-width: 1400px) {
+    .dd-reading-content div,
+    .dd-reading-content p {
+        font-size: 1.125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dd-reading-content ul,
+    .dd-reading-content ol {
+        margin-left: 0.9rem;
+        padding-left: 1.35rem;
+    }
+
+    .dd-reading-content div,
+    .dd-reading-content p,
+    .dd-reading-content li {
+        font-size: 1rem;
+    }
+}
