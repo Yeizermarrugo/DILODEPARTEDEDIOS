@@ -1,9 +1,9 @@
 import { LikeButton } from '@/components/LikeButton';
-import ReadingContentBlocks from '@/components/ReadingContentBlocks';
 import { DevocionalDetailsSkeleton } from '@/components/SectionSkeletons';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
+import PublishedContent from '@/content/PublishedContent';
 import { extractReadingBlocks } from '@/utils/ttsReading';
 import { useEffect, useMemo, useState } from 'react';
 import '../../css/devocionalDetails.css';
@@ -99,7 +99,7 @@ const DevocionalDetails = ({ devocional }: Props) => {
             <section>
                 <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
-                <ReadingContentBlocks className="dd-reading-content" html={devocionalContent} activeIndex={bodyActiveIndex} />
+                <PublishedContent html={devocionalContent} activeIndex={bodyActiveIndex} />
 
                 <p style={{ color: '#888', display: 'flex', justifyContent: 'flex-end', padding: '0 20px 0 0' }}>{devocional.autor ?? ''}</p>
 

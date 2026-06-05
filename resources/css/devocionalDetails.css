@@ -165,119 +165,6 @@
     padding-top: 0.25rem;
 }
 
-.dd-reading-content {
-    display: flow-root;
-}
-
-/* Body text blocks rendered from the saved TinyMCE HTML */
-.dd-reading-content p,
-.dd-reading-content div {
-    font-family: var(--dd-font-serif);
-    font-size: 1.075rem;
-    line-height: 1.9;
-    color: var(--dd-text);
-    text-align: justify;
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    word-break: break-word;
-    margin: 0 0 1rem;
-}
-
-.dd-reading-content p:empty,
-.dd-reading-content div:empty {
-    min-height: 1.9em;
-}
-
-/* Headings within content */
-.dd-reading-content h1,
-.dd-reading-content h2,
-.dd-reading-content h3,
-.dd-reading-content h4,
-.dd-reading-content h5,
-.dd-reading-content h6 {
-    hyphens: manual;
-    -webkit-hyphens: manual;
-    word-break: normal;
-    overflow-wrap: normal;
-}
-
-.dd-reading-content h1,
-.dd-reading-content h2 {
-    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    font-size: clamp(1.4rem, 3vw, 1.85rem);
-    font-weight: 800;
-    color: var(--dd-accent);
-    line-height: 1.2;
-    margin: 1.5rem 0 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.dd-reading-content h3,
-.dd-reading-content h4 {
-    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
-    font-weight: 700;
-    color: var(--dd-accent);
-    line-height: 1.3;
-    margin: 1.25rem 0 0.85rem;
-}
-
-.dd-reading-content h5,
-.dd-reading-content h6 {
-    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--dd-text-muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin: 1.1rem 0 0.75rem;
-}
-
-/* Blockquotes (scripture citations) */
-.dd-reading-content blockquote {
-    border-left: 3px solid var(--dd-accent2);
-    margin: 1rem 0;
-    padding-left: 1.2rem;
-    font-style: italic;
-    color: #46403a;
-}
-
-/* Lists */
-.dd-reading-content ul,
-.dd-reading-content ol {
-    padding-left: 1.4rem;
-    margin: 0 0 1rem;
-    list-style-position: outside;
-}
-
-.dd-reading-content ul {
-    list-style-type: disc;
-}
-
-.dd-reading-content ol {
-    list-style-type: decimal;
-}
-
-.dd-reading-content li {
-    display: list-item;
-    font-family: var(--dd-font-serif);
-    font-size: 1.075rem;
-    line-height: 1.8;
-    color: var(--dd-text);
-}
-
-.dd-reading-active {
-    background: rgba(247, 88, 21, 0.08);
-    border-radius: 8px;
-    box-shadow: 0 10px 24px rgba(247, 88, 21, 0.08);
-    outline: 1px solid rgba(247, 88, 21, 0.18);
-    transition:
-        background 50ms ease,
-        box-shadow 50ms ease,
-        outline-color 50ms ease;
-}
-
 /* ── Byline / footer ───────────────────────────────── */
 .dd-footer {
     margin-top: 2rem;
@@ -344,11 +231,6 @@
         --dd-gutter: 3rem;
     }
 
-    .dd-reading-content div,
-    .dd-reading-content p {
-        font-size: 1.1rem;
-    }
-
     .dd-hero__title {
         font-size: clamp(2.2rem, 3.5vw, 3.4rem);
     }
@@ -362,11 +244,6 @@
     :root {
         --dd-max-width: 920px;
         --dd-gutter: 4rem;
-    }
-
-    .dd-reading-content div,
-    .dd-reading-content p {
-        font-size: 1.125rem;
     }
 }
 
@@ -401,12 +278,6 @@
 
     .dd-hero__title {
         font-size: clamp(1.2rem, 5.5vw, 1.6rem);
-    }
-
-    .dd-reading-content div,
-    .dd-reading-content p,
-    .dd-reading-content li {
-        font-size: 1rem;
     }
 
     .dd-content {

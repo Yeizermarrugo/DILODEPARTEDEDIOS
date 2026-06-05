@@ -1,9 +1,9 @@
 import LikeButton from '@/components/LikeButton';
-import ReadingContentBlocks from '@/components/ReadingContentBlocks';
 import { DevocionalDetailsSkeleton } from '@/components/SectionSkeletons';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import { useImagePreload } from '@/components/useImagePreload';
+import PublishedContent from '@/content/PublishedContent';
 import { extractReadingBlocks } from '@/utils/ttsReading';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -370,7 +370,7 @@ const DevocionalDetailsPage = (props: Props) => {
                     <TextToSpeechButton html={devocional.contenido ?? ''} onBlockChange={setActiveBlockIndex} />
 
                     <article className="dd-article" lang="es">
-                        <ReadingContentBlocks className="dd-reading-content" html={devocionalContent} activeIndex={bodyActiveIndex} />
+                        <PublishedContent html={devocionalContent} activeIndex={bodyActiveIndex} />
                     </article>
 
                     <footer className="dd-footer">
