@@ -1,18 +1,26 @@
-import DevocionalDetails from '@/pages/DevocionalDetails';
+import { LikeButton } from '@/components/LikeButton';
+import { ShareButton } from '@/components/ShareButton';
+import TextToSpeechButton from '@/components/TextToSpeechButton';
+import PublishedContent from '@/content/PublishedContent';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import '../../css/devocionalDetails.css';
 import '../../css/main-home.css';
 import CoverflowCarousel from './CoverflowCarousel';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 interface Devocional {
+    autor?: string;
     contenido: string;
-    imagen: string;
     id?: string;
+    imagen: string;
     created_at?: string;
     categoria?: string;
+    is_devocional?: number | string;
+    shares_count?: number;
+    views_count?: number;
 }
 
 interface YoutubeVideo {
@@ -52,6 +60,45 @@ function isToday(dateStr?: string): boolean {
     const d = new Date(dateStr);
     const now = new Date();
     return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+}
+
+function getH1Text(html: string): string {
+    return html.match(/<h1[^>]*>(.*?)<\/h1>/i)?.[1].trim() ?? '';
+}
+
+function removeFirstH1(html: string): string {
+    return html.replace(/<h1[^>]*>.*?<\/h1>/is, '').trim();
+}
+
+function decodeEntities(str: string): string {
+    if (typeof document === 'undefined') {
+        return str
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&nbsp;/g, ' ');
+    }
+
+    const el = document.createElement('textarea');
+    el.innerHTML = str;
+    return el.value;
+}
+
+function formatFullDate(dateStr?: string): string {
+    if (!dateStr) return '';
+
+    return new Date(dateStr)
+        .toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+        .replace(/^\w/, (c) => c.toUpperCase());
+}
+
+function getContentType(isDevocional?: number | string): 'devocional' | 'estudio' | 'ensenanza' {
+    const value = Number(isDevocional);
+    if (value === 3) return 'estudio';
+    if (value === 2) return 'ensenanza';
+    return 'devocional';
 }
 
 // ─── Hook: reveal on scroll ───────────────────────────────────────────────────
@@ -618,56 +665,111 @@ function PodCAFSection() {
 interface ModalProps {
     devocional: Devocional;
     onClose: () => void;
+    onViewRecorded: (id: string) => void;
 }
 
-function DevocionalModal({ devocional, onClose }: ModalProps) {
+function DevocionalModal({ devocional, onClose, onViewRecorded }: ModalProps) {
+    const [viewsCount, setViewsCount] = useState(devocional.views_count ?? 0);
+    const title = decodeEntities(getH1Text(devocional.contenido) || 'Devocional');
+    const bodyHtml = removeFirstH1(devocional.contenido ?? '');
+    const formattedDate = formatFullDate(devocional.created_at);
+    const likeType = getContentType(devocional.is_devocional);
+
+    useEffect(() => {
+        setViewsCount(devocional.views_count ?? 0);
+    }, [devocional.id, devocional.views_count]);
+
+    useEffect(() => {
+        const devId = devocional.id;
+        if (!devId) return;
+
+        const d = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+        fetch(`/devocionales/${devId}/view`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+            },
+            body: JSON.stringify({ local_time: local }),
+        })
+            .then((response) => response.json())
+            .then((data: { status: string }) => {
+                if (data.status === 'recorded') {
+                    setViewsCount((count) => count + 1);
+                    onViewRecorded(devId);
+                }
+            })
+            .catch(() => {
+                // View tracking should never block reading the devotional.
+            });
+    }, [devocional.id, onViewRecorded]);
+
     return (
         <div
-            style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.72)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1000,
-                overflow: 'auto',
-                padding: '20px',
-            }}
+            className="sp-modal-dev"
             onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
         >
             <div
-                style={{
-                    background: '#fff',
-                    padding: '28px',
-                    borderRadius: '16px',
-                    maxWidth: '800px',
-                    width: '100%',
-                    position: 'relative',
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
-                    boxShadow: '0 32px 80px rgba(0,0,0,0.25)',
-                }}
+                className="sp-modal-dev__panel"
                 onClick={(e) => e.stopPropagation()}
             >
                 <button
-                    style={{
-                        position: 'absolute',
-                        top: '12px',
-                        right: '14px',
-                        background: 'none',
-                        border: 'none',
-                        fontSize: '1.6rem',
-                        cursor: 'pointer',
-                        color: '#888',
-                        lineHeight: 1,
-                    }}
+                    className="sp-modal-dev__close"
                     onClick={onClose}
                     aria-label="Cerrar"
                 >
                     &times;
                 </button>
-                <DevocionalDetails devocional={devocional} />
+
+                <div className="sp-modal-dev__hero">
+                    {devocional.imagen ? (
+                        <img
+                            src={devocional.imagen}
+                            alt=""
+                            className="sp-modal-dev__hero-img"
+                            loading="eager"
+                            decoding="async"
+                        />
+                    ) : (
+                        <div className="sp-modal-dev__hero-fallback" />
+                    )}
+                    <div className="sp-modal-dev__hero-overlay" />
+                    <h1 className="sp-modal-dev__title">{title}</h1>
+                </div>
+
+                <div className="sp-modal-dev__body">
+                    <div className="sp-modal-dev__content">
+                        <TextToSpeechButton contentId={devocional.id} html={devocional.contenido ?? ''} />
+
+                        <article className="dd-article" lang="es">
+                            <PublishedContent html={bodyHtml} activeIndex={null} />
+                        </article>
+
+                        <footer className="dd-footer">
+                            <div className="dd-byline">
+                                {devocional.autor && <span className="dd-byline__author">{devocional.autor}</span>}
+                                {formattedDate && <time className="dd-byline__date">{formattedDate}</time>}
+                            </div>
+
+                            {devocional.id && (
+                                <div className="dd-actions">
+                                    <span className="dd-actions__views">
+                                        <i className="bi bi-eye" />
+                                        {viewsCount}
+                                    </span>
+                                    <ShareButton type={likeType} id={devocional.id} sharesCount={devocional.shares_count ?? 0} variant="default" />
+                                    <LikeButton type={likeType} id={devocional.id} variant="default" />
+                                </div>
+                            )}
+                        </footer>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -738,6 +840,22 @@ export default function MainContent() {
         window.history.pushState({}, '', window.location.pathname);
     }, []);
 
+    const handleViewRecorded = useCallback((id: string) => {
+        setDevocionales((items) =>
+            items.map((item) =>
+                String(item.id) === id
+                    ? { ...item, views_count: (item.views_count ?? 0) + 1 }
+                    : item,
+            ),
+        );
+
+        setSelected((current) =>
+            current && String(current.id) === id
+                ? { ...current, views_count: (current.views_count ?? 0) + 1 }
+                : current,
+        );
+    }, []);
+
     return (
         <main className="sp-home">
             <DevSection devocionales={devocionales} onOpen={abrirModal} />
@@ -745,7 +863,7 @@ export default function MainContent() {
             <VideoSoonSection />
             <YTSection videos={videos} error={ytError} onVisible={loadYouTubeVideos} />
             <PodCAFSection />
-            {modalOpen && selected && <DevocionalModal devocional={selected} onClose={cerrarModal} />}
+            {modalOpen && selected && <DevocionalModal devocional={selected} onClose={cerrarModal} onViewRecorded={handleViewRecorded} />}
         </main>
     );
 }
