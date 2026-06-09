@@ -16,7 +16,11 @@
     text-align: justify;
     hyphens: auto;
     -webkit-hyphens: auto;
-    word-break: break-word;
+    hyphenate-limit-chars: 8 4 4;
+    -webkit-hyphenate-limit-chars: 8 4 4;
+    hyphenate-limit-lines: 2;
+    -webkit-hyphenate-limit-lines: 2;
+    overflow-wrap: break-word;
     margin: 0 0 1rem;
 }
 
@@ -103,6 +107,12 @@
     color: var(--dd-text);
     text-align: justify;
     text-indent: 0;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphenate-limit-chars: 8 4 4;
+    -webkit-hyphenate-limit-chars: 8 4 4;
+    hyphenate-limit-lines: 2;
+    -webkit-hyphenate-limit-lines: 2;
 }
 
 .dd-reading-content li + li {
