@@ -16,10 +16,12 @@
     text-align: justify;
     hyphens: auto;
     -webkit-hyphens: auto;
-    hyphenate-limit-chars: 8 4 4;
-    -webkit-hyphenate-limit-chars: 8 4 4;
-    hyphenate-limit-lines: 2;
-    -webkit-hyphenate-limit-lines: 2;
+    hyphenate-limit-chars: 10 5 4;
+    -webkit-hyphenate-limit-chars: 10 5 4;
+    hyphenate-limit-lines: 1;
+    -webkit-hyphenate-limit-lines: 1;
+    hyphenate-limit-zone: 10%;
+    -webkit-hyphenate-limit-zone: 10%;
     overflow-wrap: break-word;
     margin: 0 0 1rem;
 }
@@ -109,10 +111,12 @@
     text-indent: 0;
     hyphens: auto;
     -webkit-hyphens: auto;
-    hyphenate-limit-chars: 8 4 4;
-    -webkit-hyphenate-limit-chars: 8 4 4;
-    hyphenate-limit-lines: 2;
-    -webkit-hyphenate-limit-lines: 2;
+    hyphenate-limit-chars: 10 5 4;
+    -webkit-hyphenate-limit-chars: 10 5 4;
+    hyphenate-limit-lines: 1;
+    -webkit-hyphenate-limit-lines: 1;
+    hyphenate-limit-zone: 10%;
+    -webkit-hyphenate-limit-zone: 10%;
 }
 
 .dd-reading-content li + li {
@@ -124,10 +128,12 @@
     border-radius: 8px;
     box-shadow: 0 10px 24px rgba(247, 88, 21, 0.08);
     outline: 1px solid rgba(247, 88, 21, 0.18);
+    border-left: 4px solid #f75815;
     transition:
         background 50ms ease,
         box-shadow 50ms ease,
-        outline-color 50ms ease;
+        outline-color 50ms ease,
+        border-color 50ms ease;
 }
 
 @media (min-width: 1100px) {

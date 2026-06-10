@@ -286,7 +286,7 @@ function estimateSeconds(block: ReadingBlock): number {
 }
 
 function normalizeText(text: string): string {
-    return text.replace(/\s+/g, ' ').trim();
+    return text.replace(/[\s ​‌‍﻿]+/g, ' ').trim();
 }
 
 function escapeHtml(text: string): string {
