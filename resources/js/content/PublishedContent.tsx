@@ -20,7 +20,7 @@ function hasBlockChildren(element: HTMLElement): boolean {
 }
 
 function hasReadableText(element: HTMLElement): boolean {
-    return Boolean((element.textContent ?? '').replace(/\s|\u00a0/g, ''));
+    return Boolean((element.textContent ?? '').replace(/[\s\u00a0\u200b\u200c\u200d\ufeff]/g, ''));
 }
 
 function annotateElement(element: HTMLElement, nextIndex: { current: number }, activeIndex: number | null): void {
