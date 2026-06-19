@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import '../../css/postImageGallery.css'; // Importa tu nuevo CSS
 
+const csrfToken = () => document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+
 const PostImage = () => {
     const [imagenUrl, setImagenUrl] = useState('');
     const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -51,9 +53,12 @@ const PostImage = () => {
             try {
                 const formData = new FormData();
                 formData.append('file', selectedImageFile);
+                formData.append('_token', csrfToken());
                 const response = await axios.post('/upload-post-image', formData, {
+                    withCredentials: true,
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'X-CSRF-TOKEN': csrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
                 urlImagenFinal = response.data.location || response.data.url;
@@ -76,8 +81,10 @@ const PostImage = () => {
         setIsSubmitting(true);
         try {
             await axios.delete(`/post-image/${id}`, {
+                withCredentials: true,
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': csrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
             });
             setPostImages(postImages.filter((img) => img.id !== id));
