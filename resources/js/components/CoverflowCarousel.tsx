@@ -21,8 +21,8 @@ export default function CoverflowCarousel() {
             .then((response) => response.json())
             .then((data: PostImage[]) => {
                 const sorted = [...data].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-                const lastFive = sorted.slice(0, 5);
-                setVisibleImages(lastFive);
+                const lastTen = sorted.slice(0, 10);
+                setVisibleImages(lastTen);
                 setCenter(0); // <-- inicia en el primer elemento (el más reciente)
             })
             .catch((error) => {
