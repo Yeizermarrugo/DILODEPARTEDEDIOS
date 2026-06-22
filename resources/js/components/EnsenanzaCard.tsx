@@ -13,6 +13,7 @@ type DevocionalEnsenanza = {
     tiktok?: string | null;
     views_count?: number | null;
     hidden?: boolean;
+    created_at?: string | null;
 };
 
 type EnsenanzaItem = {
@@ -45,21 +46,47 @@ function initials(name: string): string {
         .join('');
 }
 
+function formatShortDate(value?: string | null): string {
+    if (!value) return '';
+
+    return new Date(value).toLocaleDateString('es-CO', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'America/Bogota',
+    });
+}
+
+function formatCountdown(target: Date, now: Date): string {
+    const remaining = Math.max(0, target.getTime() - now.getTime());
+    const totalSeconds = Math.floor(remaining / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return [hours, minutes, seconds].map((part) => String(part).padStart(2, '0')).join(':');
+}
+
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function EnsenanzaCard({ ensenanza }: Props) {
     const devocionales = ensenanza.devocionales ?? [];
+    const hasEpisodes = devocionales.length > 0;
     const published = devocionales.filter((d) => !d.hidden);
     const isComingSoon = published.length === 0;
+    const firstEpisode = devocionales[0];
+    const firstPublishTime = firstEpisode?.created_at ? new Date(firstEpisode.created_at).getTime() : null;
+    const firstPublishDate = firstPublishTime ? new Date(firstPublishTime) : null;
     const sinImagen = !ensenanza.imagen;
     const sinDesc = !ensenanza.descripcion?.trim();
 
     // Lógica para mostrar el diseño de Próximamente espectacular
-    const esPróximamente = sinImagen && sinDesc;
+    const esPróximamente = sinImagen && sinDesc && !hasEpisodes;
 
     const [isOpen, setIsOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMoreBtn, setShowMoreBtn] = useState(false);
+    const [now, setNow] = useState(() => new Date());
     const descRef = useRef<HTMLParagraphElement>(null);
 
     useEffect(() => {
@@ -73,8 +100,23 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
         return () => window.removeEventListener('resize', check);
     }, [ensenanza.descripcion]);
 
+    useEffect(() => {
+        if (!isComingSoon || !firstPublishTime) return;
+
+        const interval = window.setInterval(() => setNow(new Date()), 1000);
+        return () => window.clearInterval(interval);
+    }, [firstPublishTime, isComingSoon]);
+
     const totalViews = published.reduce((s, d) => s + (d.views_count ?? 0), 0);
     const authorFirst = ensenanza.autores[0] ?? 'Autor desconocido';
+    const msUntilFirstPublish = firstPublishDate ? firstPublishDate.getTime() - now.getTime() : null;
+    const showCountdown =
+        msUntilFirstPublish !== null &&
+        msUntilFirstPublish > 0 &&
+        msUntilFirstPublish < 24 * 60 * 60 * 1000;
+    const upcomingText = firstPublishDate
+        ? `Próximamente: ${showCountdown ? formatCountdown(firstPublishDate, now) : formatShortDate(firstEpisode?.created_at)}`
+        : 'Próximamente';
 
     return (
         <div className={`ens-card ${esPróximamente ? 'ens-card--coming' : ''}`}>
@@ -176,7 +218,6 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                         <i className="bi bi-play-circle" style={{ fontSize: 13 }} />
                         <span>{ensenanza.ensenanzas_count} enseñanzas</span>
                     </div>
-                    {/* Solo mostrar vistas si NO es próximamente (ya que serían 0) */}
                     {!esPróximamente && (
                         <>
                             <div className="ens-stats__dot" />
@@ -186,16 +227,20 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                             </div>
                         </>
                     )}
+                    {isComingSoon && hasEpisodes && (
+                        <>
+                            <div className="ens-stats__dot" />
+                            <div className="ens-stats__item ens-stats__item--upcoming">
+                                <span>{upcomingText}</span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
             {/* ── FOOTER / DROPDOWN ── */}
             <div className="ens-footer-container">
-                {esPróximamente ? (
-                    <div className="ens-footer ens-footer--disabled">
-                        <span>Próximamente disponible</span>
-                    </div>
-                ) : isComingSoon ? (
+                {!hasEpisodes ? (
                     <div className="ens-footer ens-footer--disabled">
                         <span>Sin enseñanzas publicadas aún</span>
                     </div>
@@ -212,9 +257,13 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                             </span>
                             <span className="ens-trigger__chevron">
                                 <svg
-                                    width="12" height="12" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor"
-                                    strokeWidth="2.5" strokeLinecap="round"
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
                                     style={{ transition: 'transform .25s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
                                 >
                                     <path d="M6 9l6 6 6-6" />

@@ -71,6 +71,7 @@ class EnsenanzaController extends Controller
                     'instagram'  => $dev->instagram,
                     'hidden'     => (bool) $dev->hidden,
                     'views_count' => $dev->views_count ?? 0,
+                    'created_at'  => $dev->created_at?->toISOString(),
                 ];
             })->values()->all();
 
