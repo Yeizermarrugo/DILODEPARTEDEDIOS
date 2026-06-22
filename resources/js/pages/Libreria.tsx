@@ -7,7 +7,7 @@ import '../../css/libreria.css';
 interface Resource {
     id: string;
     title: string;
-    category: 'Masterclass' | 'Curso' | 'Recurso' | 'Libro' | 'Libro Infantil';
+    category: 'Masterclass' | 'Curso' | 'Recurso' | 'Libro' | 'Libro Infantil' | 'Guía gratuita';
     description: string;
     coverVariant: 'navy' | 'orange' | 'green' | 'purple' | 'blue';
     icon: string;
@@ -15,9 +15,59 @@ interface Resource {
     author?: string;
     descriptionNode?: React.ReactNode;
     imageUrl?: string;
+    learnhubUrl?: string; // URL para recursos gratuitos en LearnHub
 }
 
-// ─── Mock data — replace with LearnHub API response ──────────────────────────
+const LEARNHUB_URL = 'https://learnhub.dilodepartededios.com/libros';
+
+// ─── Free resources ───────────────────────────────────────────────────────────
+
+const freeResources: Resource[] = [
+    {
+        id: 'free-1',
+        title: 'Cómo saber si Dios me está hablando',
+        category: 'Guía gratuita',
+        description: '¿Te cuesta saber si Dios te está guiando? Descubre principios bíblicos prácticos para discernir su voz y tomar decisiones con mayor claridad, paz y confianza.',
+        coverVariant: 'orange',
+        icon: 'bi-signpost-split',
+        meta: 'Descarga gratuita',
+        author: 'Diana López',
+        imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/¿CÓMO SABER SI DIOS ME ESTÁ HABLANDO2.jpeg',
+        learnhubUrl: 'https://learnhub.dilodepartededios.com/libros/como-saber-si-dios-me-esta-hablando-KVwll',
+    },
+    {
+        id: 'free-2',
+        title: 'Devocional de 21 días',
+        category: 'Recurso',
+        description: 'Un plan devocional gratuito para transformar tu vida espiritual en tres semanas. Reflexiones diarias basadas en la Palabra de Dios.',
+        coverVariant: 'orange',
+        icon: 'bi-calendar3',
+        meta: '21 días · PDF',
+        author: 'Diana López',
+    },
+    {
+        id: 'free-3',
+        title: 'Cómo orar con propósito',
+        category: 'Recurso',
+        description: 'Material práctico que te enseña principios bíblicos de oración para que tus conversaciones con Dios sean más intencionales y profundas.',
+        coverVariant: 'navy',
+        icon: 'bi-hand-index-thumb',
+        meta: 'Descarga gratuita',
+        author: 'Diana López',
+    },
+    {
+        id: 'free-4',
+        title: 'Introducción a la enseñanza bíblica',
+        category: 'Recurso',
+        description: 'Fundamentos esenciales para quienes sienten el llamado a enseñar la Palabra. Aprende a preparar, estructurar y comunicar un mensaje bíblico.',
+        coverVariant: 'purple',
+        icon: 'bi-mic',
+        meta: 'Descarga gratuita',
+        author: 'Diana López',
+    },
+];
+
+// ─── Premium resources (mock) — replace with LearnHub API response ────────────
 
 const resources: Resource[] = [
     {
@@ -39,7 +89,7 @@ const resources: Resource[] = [
         icon: 'bi-journal-text',
         meta: '3 volúmenes',
         author: 'Diana López',
-        imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/nueva_imagen.png'
+        // imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/nueva_imagen.png'
     },
     {
         id: '3',
@@ -94,9 +144,9 @@ const whyItems = [
 
 // ─── Resource Card ────────────────────────────────────────────────────────────
 
-function ResourceCard({ resource }: { resource: Resource }) {
+function ResourceCard({ resource, free = false, learnhubUrl }: { resource: Resource; free?: boolean; learnhubUrl?: string }) {
     return (
-        <article className="lib-card">
+        <article className={`lib-card${free ? ' lib-card--free' : ''}`}>
             <div className={`lib-card__cover lib-card__cover--${resource.coverVariant}`}>
                 <div className="lib-card__cover-shine" aria-hidden />
                 {resource.imageUrl ? (
@@ -106,7 +156,9 @@ function ResourceCard({ resource }: { resource: Resource }) {
                         <i className={`bi ${resource.icon} lib-card__cover-icon`} aria-hidden />
                     </div>
                 )}
-                <span className="lib-card__badge">{resource.category}</span>
+                <span className={`lib-card__badge${free ? ' lib-card__badge--free' : ''}`}>
+                    {free ? '🎁 Gratis' : resource.category}
+                </span>
             </div>
             <div className="lib-card__body">
                 <h3 className="lib-card__title">{resource.title}</h3>
@@ -117,12 +169,18 @@ function ResourceCard({ resource }: { resource: Resource }) {
                 )}
                 <p className="lib-card__desc">{resource.descriptionNode ?? resource.description}</p>
                 <span className="lib-card__meta">
-                    <i className={`bi ${resource.category === 'Libro' ? 'bi-book' : 'bi-play-circle'}`} aria-hidden />
+                    <i className={`bi ${resource.category === 'Libro' || resource.category === 'Libro Infantil' ? 'bi-book' : 'bi-play-circle'}`} aria-hidden />
                     {resource.meta}
                 </span>
-                <a href="#learnhub-cta" className="lib-card__btn">
-                    Próximamente <i className="bi bi-arrow-right" aria-hidden />
-                </a>
+                {free && learnhubUrl ? (
+                    <a href={learnhubUrl} target="_blank" rel="noopener noreferrer" className="lib-card__btn lib-card__btn--free">
+                        Acceder gratis <i className="bi bi-box-arrow-up-right" aria-hidden />
+                    </a>
+                ) : (
+                    <a href="#learnhub-cta" className="lib-card__btn">
+                        Próximamente <i className="bi bi-arrow-right" aria-hidden />
+                    </a>
+                )}
             </div>
         </article>
     );
@@ -158,11 +216,32 @@ export default function Libreria() {
                     </div>
                 </section>
 
-                {/* ── RESOURCES GRID ── */}
+                {/* ── RESOURCES ── */}
                 <section className="lib-resources">
+
+                    {/* Gratuitos */}
+                    <div className="lib-resources__header">
+                        <span className="lib-section-label lib-section-label--green">Acceso gratuito</span>
+                        <h2 className="lib-section-title">Recursos <em style={{ fontStyle: 'italic', color: '#f75815' }}>gratis</em> en LearnHub</h2>
+                        <p className="lib-section-subtitle">
+                            Descarga o accede sin costo. Solo necesitas crear una cuenta gratuita en LearnHub.
+                        </p>
+                    </div>
+                    <div className="lib-resources__grid">
+                        {freeResources.map(resource => (
+                            <ResourceCard key={resource.id} resource={resource} learnhubUrl={resource.learnhubUrl ?? LEARNHUB_URL} free />
+                        ))}
+                    </div>
+
+                    {/* Separador */}
+                    <div className="lib-resources__divider">
+                        <span className="lib-resources__divider-label">Próximamente en LearnHub</span>
+                    </div>
+
+                    {/* Premium / Próximamente */}
                     <div className="lib-resources__header">
                         <span className="lib-section-label">Recursos disponibles</span>
-                        <h2 className="lib-section-title">Próximamente en LearnHub</h2>
+                        <h2 className="lib-section-title">Más recursos en camino</h2>
                         <p className="lib-section-subtitle">
                             Estamos preparando recursos de calidad para tu crecimiento. Estos son algunos de los que encontrarás.
                         </p>
@@ -172,6 +251,7 @@ export default function Libreria() {
                             <ResourceCard key={resource.id} resource={resource} />
                         ))}
                     </div>
+
                 </section>
 
                 {/* ── WHY LEARNHUB ── */}
