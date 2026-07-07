@@ -47,7 +47,7 @@
     $defaultTitle = "Dilo de parte de Dios " . $sectionName;
 
     $rawTitle = $meta['title'] ?? $defaultTitle;
-    $currentTitle = strlen($rawTitle) < 30 ? $rawTitle . ' | Dilo de parte de Dios' : $rawTitle;
+    $currentTitle = strlen($rawTitle) < 30 ? $rawTitle . ' ' : $rawTitle;
         $rawDesc=$meta['description'] ?? '' ; $currentDesc=strlen($rawDesc)>= 70
         ? $rawDesc
         : "Plataforma de recursos cristianos para conectar con Dios a través de estudios bíblicos, series temáticas y
