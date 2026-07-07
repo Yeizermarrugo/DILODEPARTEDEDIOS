@@ -53,8 +53,7 @@
         : "Plataforma de recursos cristianos para conectar con Dios a través de estudios bíblicos, series temáticas y
         herramientas de crecimiento espiritual.";
         $currentUrl = $meta['url'] ?? url()->current();
-        $currentImage = $meta['image'] ??
-        'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg';
+        $currentImage = $meta['image'] ?? asset('assets/img/og-image.png');
         @endphp
 
         <title inertia>{{ $currentTitle }}</title>
@@ -86,13 +85,11 @@
         <meta name="theme-color" content="#f75815" />
         <meta name="mobile-web-app-capable" content="yes" />
 
-        <link rel="icon" type="image/jpeg"
-            href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+        <link rel="icon" type="image/png" href="/icon-192.png">
 
         <link rel="apple-touch-icon" href="/icon-192.png" />
 
-        <link rel="shortcut icon"
-            href="https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/4PwemROBsNnno4Dulug2ADhR3bapRyhF6RliAM0u.jpg">
+        <link rel="shortcut icon" href="/icon-192.png">
 
         @if ($currentPath == '/' || empty($currentPath))
             <link rel="preload" as="image" href="{{ asset('assets/img/Estudio Bíblico - 1.png') }}"
