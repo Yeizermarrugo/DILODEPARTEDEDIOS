@@ -28,6 +28,8 @@ class Devocional extends Model
         'notificado_at',
         'short_code',
         'shares_count',
+        'audio_folder_month',
+        'audio_folder_position',
     ];
 
     // PK UUID string
@@ -35,9 +37,11 @@ class Devocional extends Model
     protected $keyType = 'string';
 
     protected $casts = [
-        'is_devocional' => 'integer',
-        'hidden'        => 'boolean',
-        'created_at'    => 'datetime',
+        'is_devocional'          => 'integer',
+        'hidden'                 => 'boolean',
+        'created_at'             => 'datetime',
+        'audio_folder_month'     => 'integer',
+        'audio_folder_position'  => 'integer',
     ];
 
     protected static function boot()
@@ -47,6 +51,15 @@ class Devocional extends Model
         static::creating(function ($model) {
             if (! $model->id) {
                 $model->id = (string) Str::uuid();
+            }
+        });
+
+        // Auto-incorporates new devocionales into the audio-folder calendar
+        // (next open slot, January first) so the admin only needs to run the
+        // "fill gaps" backfill once for pre-existing content.
+        static::created(function (Devocional $model) {
+            if ($model->is_devocional === self::TYPE_DEVOCIONAL && $model->audio_folder_month === null) {
+                app(\App\Services\DevocionalAudioFolderService::class)->assignNext($model);
             }
         });
     }
@@ -63,6 +76,21 @@ class Devocional extends Model
     public function scopeSoloEnsenanzas($query)
     {
         return $query->where('is_devocional', self::TYPE_SERIE);
+    }
+
+    public function scopeSoloDevocionales($query)
+    {
+        return $query->where('is_devocional', self::TYPE_DEVOCIONAL);
+    }
+
+    /**
+     * Scope: devocionales asignados a una carpeta de audio mensual, en orden de posición.
+     */
+    public function scopeInAudioFolder($query, int $month)
+    {
+        return $query->where('is_devocional', self::TYPE_DEVOCIONAL)
+            ->where('audio_folder_month', $month)
+            ->orderBy('audio_folder_position');
     }
 
     /**

@@ -120,6 +120,19 @@ class TextToSpeechService
         return Str::of($text)->squish()->toString();
     }
 
+    /**
+     * Derives a filesystem-safe filename from the first words of the content,
+     * for use when downloading audio (devocionals have no title field).
+     */
+    public function filenameFromHtml(string $html, string $fallback = 'devocional'): string
+    {
+        $text = $this->plainTextFromHtml($html);
+        $snippet = Str::of($text)->limit(50, '')->toString();
+        $slug = Str::slug($snippet);
+
+        return $slug !== '' ? $slug : $fallback;
+    }
+
     public function generateFromHtml(
         string $html,
         string $lang = 'es-CO',
@@ -292,6 +305,15 @@ class TextToSpeechService
 
             return $url;
         });
+    }
+
+    public function pathForHtml(
+        string $html,
+        string $lang = 'es-CO',
+        string $voice = 'es-CO-SalomeNeural',
+        int $rate = 0
+    ): ?string {
+        return $this->pathForText($this->speechTextFromHtml($html), $lang, $voice, $rate);
     }
 
     public function pathForText(

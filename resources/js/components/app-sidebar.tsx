@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Edit3, Image, LayoutGrid, PlusCircle, Trash2 } from 'lucide-react';
+import { BookOpen, Edit3, FolderOpen, Image, LayoutGrid, PlusCircle, Trash2 } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -32,6 +32,11 @@ const mainNavItems: NavItem[] = [
         title: 'Limpiar bucket',
         href: '/storage-cleanup',
         icon: Trash2,
+    },
+    {
+        title: 'Carpetas de audio',
+        href: '/devocionales-audio-folders',
+        icon: FolderOpen,
     },
 ];
 
