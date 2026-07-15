@@ -832,7 +832,13 @@ SSML;
                     'attempt' => $attempt,
                 ]);
 
-                throw new \RuntimeException('No se pudo generar el audio porque el servidor no logró conectar con Azure Speech.');
+                if ($attempt === $maxAttempts) {
+                    throw new \RuntimeException('No se pudo generar el audio porque el servidor no logró conectar con Azure Speech.');
+                }
+
+                usleep(750 * $attempt * 1000);
+
+                continue;
             }
 
             if (! in_array($response->status(), [429, 500, 503], true) || $attempt === $maxAttempts) {
