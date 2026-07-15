@@ -31,6 +31,8 @@ class TextToSpeechService
         'heading' => '850ms',
     ];
 
+    private const MAX_CHUNK_CHARS = 900;
+
     private const BLOCK_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'blockquote', 'div', 'section', 'article'];
 
     private const CONTAINER_TAGS = ['div', 'section', 'article', 'blockquote'];
@@ -254,20 +256,26 @@ class TextToSpeechService
                 return $url;
             }
 
-            $tokenResponse = $this->issueToken($apiKey, $region);
-            $ssml = $this->buildSsml($lang, $voice, $rateText, $cleanText);
-            $response = $this->synthesize($tokenResponse->body(), $region, $outputFormat, $ssml);
+            $token = $this->issueToken($apiKey, $region)->body();
+            $audioParts = [];
 
-            if (! ($response->ok() && str_contains((string) $response->header('Content-Type'), 'audio'))) {
-                Log::error('Azure Speech TTS error', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
+            foreach ($this->splitTextIntoChunks($cleanText) as $chunkText) {
+                $ssml = $this->buildSsml($lang, $voice, $rateText, $chunkText);
+                $response = $this->synthesize($token, $region, $outputFormat, $ssml);
 
-                throw new \RuntimeException('Error generando audio con Azure Speech');
+                if (! ($response->ok() && str_contains((string) $response->header('Content-Type'), 'audio'))) {
+                    Log::error('Azure Speech TTS error', [
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+
+                    throw new \RuntimeException('Error generando audio con Azure Speech');
+                }
+
+                $audioParts[] = $response->body();
             }
 
-            $stored = Storage::disk('s3')->put($audioPath, $response->body(), [
+            $stored = Storage::disk('s3')->put($audioPath, implode('', $audioParts), [
                 'visibility' => 'public',
                 'CacheControl' => 'public, max-age=31536000, immutable',
                 'ContentType' => 'audio/mpeg',
@@ -356,6 +364,42 @@ class TextToSpeechService
         }
 
         return [$lang, $voice];
+    }
+
+    /**
+     * Splits break-tokenized text into chunks under MAX_CHUNK_CHARS, only
+     * cutting at break-token boundaries so long content synthesizes as
+     * several short Azure requests instead of one long-lived connection.
+     *
+     * @return array<int, string>
+     */
+    private function splitTextIntoChunks(string $text, int $maxChars = self::MAX_CHUNK_CHARS): array
+    {
+        $tokenNames = array_map(fn (string $name) => $this->breakToken($name), array_keys(self::BREAKS));
+        $pattern = '/('.implode('|', array_map(fn (string $token) => preg_quote($token, '/'), $tokenNames)).')/u';
+        $pieces = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+        if ($pieces === false || $pieces === []) {
+            return [$text];
+        }
+
+        $chunks = [];
+        $current = '';
+
+        foreach ($pieces as $piece) {
+            if (! in_array($piece, $tokenNames, true) && $current !== '' && mb_strlen($current) + mb_strlen($piece) > $maxChars) {
+                $chunks[] = trim($current);
+                $current = '';
+            }
+
+            $current .= $piece;
+        }
+
+        if (trim($current) !== '') {
+            $chunks[] = trim($current);
+        }
+
+        return $chunks !== [] ? $chunks : [$text];
     }
 
     private function applyDictionary(string $text): string
