@@ -2,6 +2,8 @@ import { buildReadingTimings, extractReadingBlocks, findActiveReadingBlock, type
 import { useEffect, useRef, useState } from 'react';
 
 const LANG = 'es-CO';
+const POLL_INTERVAL_MS = 4000;
+const MAX_POLL_ATTEMPTS = 20; // ~80s before giving up
 
 const VOICES = [
     { label: 'Alonso (América)', value: 'es-US-AlonsoNeural', available: true, lang: 'es-US' },
@@ -36,6 +38,7 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
     const [rate, setRate] = useState(1);
     const [showSpeed, setShowSpeed] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [preparing, setPreparing] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [audioReady, setAudioReady] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -116,26 +119,12 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
         emitBlockChange(active);
     };
 
-    const loadAudio = async (): Promise<boolean> => {
-        // Cancel any in-flight request before starting a new one
-        abortRef.current?.abort();
-        const controller = new AbortController();
-        abortRef.current = controller;
-
-        setLoading(true);
-        setAudioUrl(null);
-        setAudioReady(false);
-        setIsPlaying(false);
-        setIsPaused(false);
-        emitBlockChange(null);
-        blocksRef.current = extractReadingBlocks(html);
-        timingsRef.current = [];
-        hasServerTimingsRef.current = false;
-
-        const selectedVoiceConfig = VOICES.find((voice) => voice.value === selectedVoice);
-        const lang = selectedVoiceConfig?.lang ?? LANG;
-        const readingBlocks = blocksRef.current;
-
+    const requestAudio = async (
+        controller: AbortController,
+        lang: string,
+        readingBlocks: ReadingBlock[],
+        attempt: number,
+    ): Promise<boolean> => {
         try {
             const res = await fetch('/api/tts', {
                 method: 'POST',
@@ -162,6 +151,7 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
             if (!res.ok) {
                 const errorText = await res.text();
                 setLoading(false);
+                setPreparing(false);
                 setIsPlaying(false);
                 alert('Error generando el audio:\n' + errorText);
                 return false;
@@ -169,10 +159,22 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
             const data = await res.json() as TtsResponse;
 
             if (data.ready === false || !data.url) {
-                setLoading(false);
-                setIsPlaying(false);
-                alert(data.message ?? 'Audio en preparación. Intenta de nuevo en unos minutos.');
-                return false;
+                if (attempt + 1 >= MAX_POLL_ATTEMPTS) {
+                    setLoading(false);
+                    setPreparing(false);
+                    setIsPlaying(false);
+                    alert(data.message ?? 'El audio está tardando más de lo esperado. Intenta de nuevo en unos minutos.');
+                    return false;
+                }
+
+                setPreparing(true);
+                await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+
+                if (controller.signal.aborted) {
+                    return false;
+                }
+
+                return requestAudio(controller, lang, readingBlocks, attempt + 1);
             }
 
             const audioUrl = data.url.startsWith('http') ? data.url : window.location.origin + data.url;
@@ -182,6 +184,7 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
 
             if (!audio) {
                 setLoading(false);
+                setPreparing(false);
                 setIsPlaying(false);
                 return false;
             }
@@ -192,6 +195,7 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
             setServerTimings(data.timings, readingBlocks);
 
             setLoading(false);
+            setPreparing(false);
             setAudioReady(true);
             setIsPlaying(false);
             setIsPaused(false);
@@ -203,10 +207,35 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
                 return false;
             }
             setLoading(false);
+            setPreparing(false);
             setIsPlaying(false);
             alert('Error generando el audio.');
             return false;
         }
+    };
+
+    const loadAudio = async (): Promise<boolean> => {
+        // Cancel any in-flight request before starting a new one
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
+
+        setLoading(true);
+        setPreparing(false);
+        setAudioUrl(null);
+        setAudioReady(false);
+        setIsPlaying(false);
+        setIsPaused(false);
+        emitBlockChange(null);
+        blocksRef.current = extractReadingBlocks(html);
+        timingsRef.current = [];
+        hasServerTimingsRef.current = false;
+
+        const selectedVoiceConfig = VOICES.find((voice) => voice.value === selectedVoice);
+        const lang = selectedVoiceConfig?.lang ?? LANG;
+        const readingBlocks = blocksRef.current;
+
+        return requestAudio(controller, lang, readingBlocks, 0);
     };
 
     const handleMainClick = () => {
@@ -240,12 +269,14 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
 
     const handleStopClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
+        abortRef.current?.abort();
         audioRef.current?.pause();
         if (audioRef.current) audioRef.current.currentTime = 0;
         stopRaf();
         setIsPlaying(false);
         setIsPaused(false);
         setLoading(false);
+        setPreparing(false);
         setAudioReady(false);
         emitBlockChange(null);
     };
@@ -364,6 +395,12 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
                 onPlay={() => { startRaf(); setIsPaused(false); }}
                 style={{ display: 'none' }}
             />
+
+            {preparing && (
+                <div style={{ textAlign: 'center', marginTop: 12, fontSize: '0.95em', color: '#6C63FF' }}>
+                    Generando audio… esto puede tardar hasta un minuto.
+                </div>
+            )}
 
             {audioReady && (
                 <div style={{ textAlign: 'center', marginTop: 12, fontSize: '0.95em', color: '#6C63FF' }}>

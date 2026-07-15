@@ -35,7 +35,7 @@ class TTSController extends Controller
                     $payload = $tts->cachedFromHtmlWithTimings($devocional->contenido ?? '', $lang, $voice, $rate);
 
                     if ($payload === null) {
-                        GenerateDevocionalAudio::dispatch($devocional->id);
+                        GenerateDevocionalAudio::dispatchIfNotInProgress($devocional->id);
 
                         return response()->json([
                             'ready' => false,

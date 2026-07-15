@@ -46,7 +46,7 @@ class GeneratePublishedDevocionalAudio extends Command
             if ($this->option('sync')) {
                 (new GenerateDevocionalAudio($devocional->id))->handle($tts);
             } else {
-                GenerateDevocionalAudio::dispatch($devocional->id);
+                GenerateDevocionalAudio::dispatchIfNotInProgress($devocional->id);
             }
 
             $count++;

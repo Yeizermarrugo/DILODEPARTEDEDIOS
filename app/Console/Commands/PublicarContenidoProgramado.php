@@ -41,7 +41,7 @@ class PublicarContenidoProgramado extends Command
 
         foreach ($publicados as $devocional) {
             $devocional->update(['hidden' => false]);
-            GenerateDevocionalAudio::dispatch($devocional->id);
+            GenerateDevocionalAudio::dispatchIfNotInProgress($devocional->id);
 
             // Ensure short_code exists
             if (! $devocional->short_code) {

@@ -19,6 +19,25 @@ class GenerateDevocionalAudio implements ShouldQueue
 
     public function __construct(private string $devocionalId) {}
 
+    public static function inProgressCacheKey(string $devocionalId): string
+    {
+        return "dilodepartededios:tts:devocional:{$devocionalId}:generating";
+    }
+
+    /**
+     * Dispatch a pregeneration job unless one is already running for this devocional.
+     * Prevents concurrent dispatches (e.g. an admin save + a visitor pressing Play)
+     * from piling up and fighting over the same cache lock.
+     */
+    public static function dispatchIfNotInProgress(string $devocionalId): void
+    {
+        if (Cache::has(self::inProgressCacheKey($devocionalId))) {
+            return;
+        }
+
+        self::dispatch($devocionalId)->afterCommit();
+    }
+
     public function handle(TextToSpeechService $tts): void
     {
         $devocional = Devocional::find($this->devocionalId);
@@ -30,6 +49,9 @@ class GenerateDevocionalAudio implements ShouldQueue
         if ($tts->plainTextFromHtml($devocional->contenido ?? '') === '') {
             return;
         }
+
+        $inProgressKey = self::inProgressCacheKey($devocional->id);
+        Cache::put($inProgressKey, true, $this->timeout);
 
         try {
             $lock = Cache::lock("dilodepartededios:tts:devocional:{$devocional->id}", 900);
@@ -87,6 +109,8 @@ class GenerateDevocionalAudio implements ShouldQueue
                 'id' => $devocional->id,
                 'message' => $exception->getMessage(),
             ]);
+        } finally {
+            Cache::forget($inProgressKey);
         }
     }
 }

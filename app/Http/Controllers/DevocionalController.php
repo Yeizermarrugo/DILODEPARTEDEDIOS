@@ -57,7 +57,7 @@ class DevocionalController extends Controller
     private function queueAudioIfVisible(Devocional $devocional): void
     {
         if (! $devocional->hidden) {
-            GenerateDevocionalAudio::dispatch($devocional->id)->afterCommit();
+            GenerateDevocionalAudio::dispatchIfNotInProgress($devocional->id);
         }
     }
 
