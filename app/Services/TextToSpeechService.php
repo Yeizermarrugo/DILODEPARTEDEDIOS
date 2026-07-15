@@ -814,7 +814,12 @@ SSML;
     {
         try {
             return Http::timeout(30)
-                ->retry(2, 750, fn (\Exception $exception) => $exception instanceof ConnectionException, throw: false)
+                ->retry(
+                    4,
+                    fn (int $attempt) => $attempt * 600,
+                    fn (\Exception $exception) => $exception instanceof ConnectionException,
+                    throw: false,
+                )
                 ->withToken($token)
                 ->withHeaders([
                     'Content-Type' => 'application/ssml+xml',
