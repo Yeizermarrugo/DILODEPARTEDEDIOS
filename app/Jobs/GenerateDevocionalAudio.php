@@ -25,13 +25,15 @@ class GenerateDevocionalAudio implements ShouldQueue
     }
 
     /**
-     * Dispatch a pregeneration job unless one is already running for this devocional.
-     * Prevents concurrent dispatches (e.g. an admin save + a visitor pressing Play)
-     * from piling up and fighting over the same cache lock.
+     * Dispatch a pregeneration job unless one is already queued/running for this devocional.
+     * Reserves the in-progress flag atomically at dispatch time (not job-start time) so two
+     * dispatches racing while the first job is still sitting in the queue can't both get through.
      */
     public static function dispatchIfNotInProgress(string $devocionalId): void
     {
-        if (Cache::has(self::inProgressCacheKey($devocionalId))) {
+        $reserved = Cache::add(self::inProgressCacheKey($devocionalId), true, 900);
+
+        if (! $reserved) {
             return;
         }
 
@@ -51,6 +53,8 @@ class GenerateDevocionalAudio implements ShouldQueue
         }
 
         $inProgressKey = self::inProgressCacheKey($devocional->id);
+        // Refresh/reserve the flag in case this job was dispatched directly
+        // (bypassing dispatchIfNotInProgress, e.g. the --sync CLI backfill path).
         Cache::put($inProgressKey, true, $this->timeout);
 
         try {
