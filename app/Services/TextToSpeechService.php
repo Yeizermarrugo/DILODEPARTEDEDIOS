@@ -812,30 +812,44 @@ SSML;
 
     private function synthesize(string $token, string $region, string $outputFormat, string $ssml): \Illuminate\Http\Client\Response
     {
-        try {
-            return Http::timeout(30)
-                ->retry(
-                    4,
-                    fn (int $attempt) => $attempt * 600,
-                    fn (\Exception $exception) => $exception instanceof ConnectionException,
-                    throw: false,
-                )
-                ->withToken($token)
-                ->withHeaders([
-                    'Content-Type' => 'application/ssml+xml',
-                    'X-Microsoft-OutputFormat' => $outputFormat,
-                    'User-Agent' => config('app.name', 'Laravel'),
-                ])
-                ->withBody($ssml, 'application/ssml+xml')
-                ->post("https://{$region}.tts.speech.microsoft.com/cognitiveservices/v1");
-        } catch (ConnectionException $exception) {
-            Log::error('Azure Speech synthesis connection error', [
-                'message' => $exception->getMessage(),
+        $maxAttempts = 4;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $response = Http::timeout(30)
+                    ->withToken($token)
+                    ->withHeaders([
+                        'Content-Type' => 'application/ssml+xml',
+                        'X-Microsoft-OutputFormat' => $outputFormat,
+                        'User-Agent' => config('app.name', 'Laravel'),
+                    ])
+                    ->withBody($ssml, 'application/ssml+xml')
+                    ->post("https://{$region}.tts.speech.microsoft.com/cognitiveservices/v1");
+            } catch (ConnectionException $exception) {
+                Log::error('Azure Speech synthesis connection error', [
+                    'message' => $exception->getMessage(),
+                    'region' => $region,
+                    'attempt' => $attempt,
+                ]);
+
+                throw new \RuntimeException('No se pudo generar el audio porque el servidor no logró conectar con Azure Speech.');
+            }
+
+            if (! in_array($response->status(), [429, 500, 503], true) || $attempt === $maxAttempts) {
+                return $response;
+            }
+
+            Log::warning('Azure Speech throttled; retrying', [
+                'status' => $response->status(),
+                'attempt' => $attempt,
                 'region' => $region,
             ]);
 
-            throw new \RuntimeException('No se pudo generar el audio porque el servidor no logró conectar con Azure Speech.');
+            $retryAfter = (int) $response->header('Retry-After');
+            usleep(($retryAfter > 0 ? $retryAfter * 1000 : 750 * $attempt) * 1000);
         }
+
+        return $response;
     }
 
     private function buildSsml(string $lang, string $voice, string $rate, string $text): string
