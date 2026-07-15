@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DevocionalAudioFolderController;
 use App\Http\Controllers\DevocionalController;
 use App\Http\Controllers\ShortUrlController;
 use App\Http\Controllers\EnsenanzaController;
@@ -177,6 +178,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/storage-cleanup', [StorageCleanupController::class, 'index'])->name('storage.cleanup');
     Route::get('/storage-cleanup/orphaned', [StorageCleanupController::class, 'orphaned'])->name('storage.orphaned');
     Route::delete('/storage-cleanup', [StorageCleanupController::class, 'destroy'])->name('storage.destroy');
+
+    Route::get('/devocionales-audio-folders', [DevocionalAudioFolderController::class, 'index'])->name('audio-folders.index');
+    Route::post('/devocionales-audio-folders/generate', [DevocionalAudioFolderController::class, 'generate'])->name('audio-folders.generate');
+    Route::post('/devocionales-audio-folders/move', [DevocionalAudioFolderController::class, 'move'])->name('audio-folders.move');
+    Route::get('/devocionales-audio-folders/{month}', [DevocionalAudioFolderController::class, 'show'])->whereNumber('month')->name('audio-folders.show');
+    Route::get('/devocionales-audio-folders/{month}/zip', [DevocionalAudioFolderController::class, 'downloadZip'])->whereNumber('month')->name('audio-folders.zip');
+    Route::get('/devocionales-audio-folders-audio/{id}', [DevocionalAudioFolderController::class, 'downloadAudio'])->name('audio-folders.audio');
+    Route::get('/devocionales-audio-folders-audio/{id}/url', [DevocionalAudioFolderController::class, 'audioUrl'])->name('audio-folders.audio-url');
 });
 
 Route::post('/upload-post-image', [ImageUploadController::class, 'post'])->middleware(['auth', 'verified']);
