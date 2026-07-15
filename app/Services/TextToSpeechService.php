@@ -573,24 +573,42 @@ SSML;
     private function synthesizeWithBookmarks(string $apiKey, string $region, string $outputFormat, string $voice, string $ssml, string $outputPath): array
     {
         $timeoutSeconds = max(5, min(45, (int) config('services.azure_speech.timed_timeout_seconds', 15)));
-        $process = new Process(['node', base_path('scripts/azure-tts-bookmarks.mjs')]);
-        $process->setTimeout($timeoutSeconds + 10);
-        $process->setInput(json_encode([
-            'key' => $apiKey,
-            'region' => $region,
-            'outputFormat' => $outputFormat,
-            'outputPath' => $outputPath,
-            'ssml' => $ssml,
-            'timeoutMs' => $timeoutSeconds * 1000,
-            'voice' => $voice,
-        ], JSON_THROW_ON_ERROR));
-        $process->run();
+        $maxAttempts = 2;
+        $lastError = 'Azure Speech SDK failed';
 
-        if (! $process->isSuccessful()) {
-            throw new \RuntimeException(trim($process->getErrorOutput()) ?: 'Azure Speech SDK failed');
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            $process = new Process(['node', base_path('scripts/azure-tts-bookmarks.mjs')]);
+            $process->setTimeout($timeoutSeconds + 10);
+            $process->setInput(json_encode([
+                'key' => $apiKey,
+                'region' => $region,
+                'outputFormat' => $outputFormat,
+                'outputPath' => $outputPath,
+                'ssml' => $ssml,
+                'timeoutMs' => $timeoutSeconds * 1000,
+                'voice' => $voice,
+            ], JSON_THROW_ON_ERROR));
+            $process->run();
+
+            if ($process->isSuccessful()) {
+                return json_decode($process->getOutput(), true, 512, JSON_THROW_ON_ERROR);
+            }
+
+            $lastError = trim($process->getErrorOutput()) ?: $lastError;
+
+            if ($attempt === $maxAttempts) {
+                break;
+            }
+
+            Log::warning('Timed TTS synthesis attempt failed; retrying', [
+                'attempt' => $attempt,
+                'error' => $lastError,
+            ]);
+
+            usleep(750 * $attempt * 1000);
         }
 
-        return json_decode($process->getOutput(), true, 512, JSON_THROW_ON_ERROR);
+        throw new \RuntimeException($lastError);
     }
 
     /**
@@ -816,7 +834,7 @@ SSML;
 
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             try {
-                $response = Http::timeout(30)
+                $response = Http::timeout(60)
                     ->withToken($token)
                     ->withHeaders([
                         'Content-Type' => 'application/ssml+xml',
