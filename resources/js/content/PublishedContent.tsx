@@ -1,6 +1,8 @@
 import DOMPurify from 'dompurify';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import './publishedContent.css';
+
+const SCROLL_MARGIN_RATIO = 0.2;
 
 type Props = {
     activeIndex: number | null;
@@ -91,6 +93,30 @@ function sanitizeAndAnnotate(html: string, activeIndex: number | null): string {
 export default function PublishedContent({ activeIndex, className = '', html }: Props) {
     const contentHtml = useMemo(() => sanitizeAndAnnotate(html, activeIndex), [activeIndex, html]);
     const classes = ['dd-reading-content', className].filter(Boolean).join(' ');
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    return <div className={classes} dangerouslySetInnerHTML={{ __html: contentHtml }} />;
+    useEffect(() => {
+        if (activeIndex === null) {
+            console.log('[dd-scroll] activeIndex null, skip');
+            return;
+        }
+
+        const el = containerRef.current?.querySelector<HTMLElement>(`[data-reading-index="${activeIndex}"]`);
+        if (!el) {
+            console.log('[dd-scroll] no element found for index', activeIndex);
+            return;
+        }
+
+        const rect = el.getBoundingClientRect();
+        const margin = window.innerHeight * SCROLL_MARGIN_RATIO;
+        const outOfBounds = rect.top < margin || rect.bottom > window.innerHeight - margin;
+
+        console.log('[dd-scroll] index', activeIndex, 'rect.top', rect.top, 'rect.bottom', rect.bottom, 'margin', margin, 'innerHeight', window.innerHeight, 'outOfBounds', outOfBounds);
+
+        if (outOfBounds) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [activeIndex, contentHtml]);
+
+    return <div ref={containerRef} className={classes} dangerouslySetInnerHTML={{ __html: contentHtml }} />;
 }
