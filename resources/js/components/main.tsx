@@ -351,7 +351,7 @@ function CarouselSection() {
 //                 el fondo oscuro con el botón play.
 
 const VIDEO_SRC = 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/videos/ZXF3DNFj6ois2QlJp9LD2IzpmNgiayARHoWby1n0.mp4'; // ← tu archivo
-const VIDEO_POSTER = '/assets/video/nosotros.png'; // ← portada (opcional)
+const VIDEO_POSTER = '/assets/video/nosotros.webp'; // ← portada (opcional)
 
 function VideoSoonSection() {
     const [playing, setPlaying] = useState(false);

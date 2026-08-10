@@ -4,25 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\PostImage;
 use App\Rules\ValidImageContent;
+use App\Traits\OptimizesUploadedImages;
 use App\Traits\UsesStoragePrefix;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ImageUploadController extends Controller
 {
-    use UsesStoragePrefix;
+    use UsesStoragePrefix, OptimizesUploadedImages;
     public function store(Request $request)
     {
         $request->validate([
             'file' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120', new ValidImageContent()],
         ]);
 
-        $path = Storage::disk('s3')->putFile($this->storageFolder('imagenes'), $request->file('file'), [
+        $optimized = $this->optimizeImageForUpload($request->file('file'), maxWidth: 1600, quality: 80);
+
+        $path = $this->storageFolder('imagenes') . '/' . Str::random(40) . '.' . $optimized['extension'];
+
+        $stored = Storage::disk('s3')->put($path, $optimized['contents'], [
             'visibility'    => 'public',
             'CacheControl'  => 'public, max-age=31536000, immutable',
+            'ContentType'   => $optimized['mime'],
         ]);
 
-        if (! $path) {
+        if (! $stored) {
             return response()->json(['error' => 'Upload failed.'], 500);
         }
 
@@ -39,13 +46,17 @@ class ImageUploadController extends Controller
         ]);
 
         if ($request->hasFile('file')) {
-            // Subir a S3 en carpeta devocionales
-            $path = Storage::disk('s3')->putFile($this->storageFolder('postCard'), $request->file('file'), [
+            $optimized = $this->optimizeImageForUpload($request->file('file'), maxWidth: 1080, quality: 82);
+
+            $path = $this->storageFolder('postCard') . '/' . Str::random(40) . '.' . $optimized['extension'];
+
+            $stored = Storage::disk('s3')->put($path, $optimized['contents'], [
                 'visibility'   => 'public',
                 'CacheControl' => 'public, max-age=31536000, immutable',
+                'ContentType'  => $optimized['mime'],
             ]);
 
-            if (! $path) {
+            if (! $stored) {
                 return response()->json(['error' => 'Upload failed.'], 500);
             }
 
