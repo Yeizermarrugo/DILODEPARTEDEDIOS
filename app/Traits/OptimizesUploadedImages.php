@@ -14,34 +14,37 @@ trait OptimizesUploadedImages
      */
     protected function optimizeImageForUpload(UploadedFile $file, int $maxWidth, int $quality): array
     {
-        $mime = $file->getMimeType();
-        $path = $file->getRealPath();
+        return $this->optimizeImageBytes(
+            file_get_contents($file->getRealPath()),
+            $file->getMimeType(),
+            $maxWidth,
+            $quality,
+            $file->getClientOriginalExtension() ?: 'bin',
+        );
+    }
 
+    /**
+     * @return array{contents: string, extension: string, mime: string}
+     */
+    protected function optimizeImageBytes(string $contents, string $mime, int $maxWidth, int $quality, string $fallbackExtension = 'bin'): array
+    {
         if ($mime === 'image/gif') {
-            return [
-                'contents' => file_get_contents($path),
-                'extension' => 'gif',
-                'mime' => 'image/gif',
-            ];
+            return ['contents' => $contents, 'extension' => 'gif', 'mime' => 'image/gif'];
         }
 
         $source = match ($mime) {
-            'image/jpeg' => imagecreatefromjpeg($path),
-            'image/png' => imagecreatefrompng($path),
-            'image/webp' => imagecreatefromwebp($path),
+            'image/jpeg' => imagecreatefromstring($contents),
+            'image/png' => imagecreatefromstring($contents),
+            'image/webp' => imagecreatefromstring($contents),
             default => null,
         };
 
         if (! $source) {
-            return [
-                'contents' => file_get_contents($path),
-                'extension' => $file->getClientOriginalExtension() ?: 'bin',
-                'mime' => $mime,
-            ];
+            return ['contents' => $contents, 'extension' => $fallbackExtension, 'mime' => $mime];
         }
 
         if ($mime === 'image/jpeg') {
-            $source = $this->applyExifOrientation($source, $path);
+            $source = $this->applyExifOrientation($source, $contents);
         }
 
         $width = imagesx($source);
@@ -59,19 +62,15 @@ trait OptimizesUploadedImages
 
         ob_start();
         imagewebp($source, null, $quality);
-        $contents = ob_get_clean();
+        $webpContents = ob_get_clean();
         imagedestroy($source);
 
-        return [
-            'contents' => $contents,
-            'extension' => 'webp',
-            'mime' => 'image/webp',
-        ];
+        return ['contents' => $webpContents, 'extension' => 'webp', 'mime' => 'image/webp'];
     }
 
-    private function applyExifOrientation($image, string $path)
+    private function applyExifOrientation($image, string $contents)
     {
-        $exif = @exif_read_data($path);
+        $exif = @exif_read_data('data://image/jpeg;base64,'.base64_encode($contents));
         $orientation = $exif['Orientation'] ?? 1;
 
         return match ($orientation) {
