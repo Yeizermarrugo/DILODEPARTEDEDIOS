@@ -458,7 +458,7 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 24px;
-    min-height: 84px; /* reserva espacio: evita CLS cuando la fuente custom reemplaza el fallback */
+    min-height: 116px; /* reserva espacio: evita CLS cuando la fuente custom reemplaza el fallback */
 }
 
 .sp-carousel__widget {
