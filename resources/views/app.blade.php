@@ -92,7 +92,7 @@
         <link rel="shortcut icon" href="/icon-192.png">
 
         @if ($currentPath == '/' || empty($currentPath))
-            <link rel="preload" as="image" href="{{ asset('assets/img/Estudio Bíblico - 1.png') }}"
+            <link rel="preload" as="image" href="{{ asset('assets/img/estudio-biblico-1.webp') }}"
                 fetchpriority="high">
         @endif
 

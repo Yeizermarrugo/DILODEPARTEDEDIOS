@@ -2,14 +2,16 @@
 namespace App\Http\Controllers;
 
 use App\Rules\ValidImageContent;
+use App\Traits\OptimizesUploadedImages;
 use App\Traits\UsesStoragePrefix;
 use Illuminate\Http\Request;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BulkUploadController extends Controller
 {
-    use UsesStoragePrefix;
+    use UsesStoragePrefix, OptimizesUploadedImages;
 
     public function index()
     {
@@ -39,9 +41,14 @@ class BulkUploadController extends Controller
         $paths = [];
 
         foreach ($request->file('files') as $file) {
-            $path    = $disk->putFile($this->storageFolder('imagenes'), $file, [
+            $optimized = $this->optimizeImageForUpload($file, maxWidth: 1600, quality: 80);
+
+            $path = $this->storageFolder('imagenes') . '/' . Str::random(40) . '.' . $optimized['extension'];
+
+            $disk->put($path, $optimized['contents'], [
                 'visibility' => 'public',
                 'CacheControl' => 'public, max-age=31536000, immutable',
+                'ContentType' => $optimized['mime'],
             ]);
             $url     = $disk->url($path);
             $paths[] = compact('path', 'url');

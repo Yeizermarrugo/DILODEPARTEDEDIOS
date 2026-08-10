@@ -35,8 +35,9 @@ import { initializeTheme } from './hooks/use-appearance';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const STORAGE_KEY = 'welcome_modal_ts';
 const TTL_MS = 12 * 60 * 60 * 1000;
-const WELCOME_IMAGE_SIZE = 1080;
-const WELCOME_IMAGE_SRC = '/assets/img/Estudio Bíblico - 1.png';
+const WELCOME_IMAGE_WIDTH = 720;
+const WELCOME_IMAGE_HEIGHT = 720;
+const WELCOME_IMAGE_SRC = '/assets/img/estudio-biblico-1.webp';
 
 function safeLocalStorage(action: 'get' | 'set' | 'remove', key: string, value?: string): string | null {
     try {
@@ -117,8 +118,8 @@ function WelcomeModal() {
                 <img
                     src={WELCOME_IMAGE_SRC}
                     alt="Bienvenido"
-                    width={WELCOME_IMAGE_SIZE}
-                    height={WELCOME_IMAGE_SIZE}
+                    width={WELCOME_IMAGE_WIDTH}
+                    height={WELCOME_IMAGE_HEIGHT}
                     loading="eager"
                     fetchPriority="high"
                     style={{
