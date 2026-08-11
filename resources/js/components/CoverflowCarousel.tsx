@@ -1,3 +1,4 @@
+import { toThumbSrc } from '@/lib/imageThumb';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/coverflowCarousel.css';
 
@@ -84,7 +85,18 @@ export default function CoverflowCarousel() {
             </div>
             <div id="items">
                 {visibleImages.map((img, idx) => (
-                    <img key={img.id} src={img.url} draggable={false} alt={`Slide ${idx + 1}`} className={getImageClass(idx)} loading="lazy" />
+                    <img
+                        key={img.id}
+                        src={toThumbSrc(img.url)}
+                        draggable={false}
+                        alt={`Slide ${idx + 1}`}
+                        className={getImageClass(idx)}
+                        loading="lazy"
+                        onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = img.url;
+                        }}
+                    />
                 ))}
             </div>
         </div>

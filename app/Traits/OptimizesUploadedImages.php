@@ -57,21 +57,65 @@ trait OptimizesUploadedImages
         $height = imagesy($source);
 
         if ($width > $maxWidth) {
-            $targetHeight = (int) round($height * ($maxWidth / $width));
-            $resized = imagecreatetruecolor($maxWidth, $targetHeight);
-            imagealphablending($resized, false);
-            imagesavealpha($resized, true);
-            imagecopyresampled($resized, $source, 0, 0, 0, 0, $maxWidth, $targetHeight, $width, $height);
-            imagedestroy($source);
-            $source = $resized;
+            $source = $this->resizeToWidth($source, $maxWidth, $width, $height);
         }
 
-        ob_start();
-        imagewebp($source, null, $quality);
-        $webpContents = ob_get_clean();
+        return ['contents' => $this->encodeWebp($source, $quality), 'extension' => 'webp', 'mime' => 'image/webp'];
+    }
+
+    /**
+     * Genera una variante más pequeña (para cards/grids) a partir de un WebP ya optimizado.
+     */
+    protected function makeThumbnail(string $webpContents, int $thumbWidth, int $quality = 75): string
+    {
+        $source = imagecreatefromstring($webpContents);
+
+        if (! imageistruecolor($source)) {
+            imagepalettetotruecolor($source);
+        }
+        imagealphablending($source, false);
+        imagesavealpha($source, true);
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+
+        if ($width > $thumbWidth) {
+            $source = $this->resizeToWidth($source, $thumbWidth, $width, $height);
+        }
+
+        return $this->encodeWebp($source, $quality);
+    }
+
+    /**
+     * Deriva la key S3 del thumbnail a partir de la key del WebP full, ej.
+     * "imagenes/abc.webp" -> "imagenes/abc_thumb.webp". Misma convención
+     * usada al leer en el frontend, sin necesidad de guardar la URL en BD.
+     */
+    protected function thumbKeyFor(string $webpKey): string
+    {
+        return preg_replace('/\.webp$/i', '_thumb.webp', $webpKey);
+    }
+
+    private function resizeToWidth($source, int $targetWidth, int $width, int $height)
+    {
+        $targetHeight = (int) round($height * ($targetWidth / $width));
+        $resized = imagecreatetruecolor($targetWidth, $targetHeight);
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        imagecopyresampled($resized, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
         imagedestroy($source);
 
-        return ['contents' => $webpContents, 'extension' => 'webp', 'mime' => 'image/webp'];
+        return $resized;
+    }
+
+    private function encodeWebp($source, int $quality): string
+    {
+        ob_start();
+        imagewebp($source, null, $quality);
+        $contents = ob_get_clean();
+        imagedestroy($source);
+
+        return $contents;
     }
 
     private function applyExifOrientation($image, string $contents)

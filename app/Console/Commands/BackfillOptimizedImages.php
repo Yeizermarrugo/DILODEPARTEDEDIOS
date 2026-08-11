@@ -24,6 +24,7 @@ class BackfillOptimizedImages extends Command
     private int $processed = 0;
     private int $failed = 0;
     private int $skipped = 0;
+    private int $thumbsGenerated = 0;
     private int $bytesBefore = 0;
     private int $bytesAfter = 0;
 
@@ -47,7 +48,7 @@ class BackfillOptimizedImages extends Command
         $this->backfillColumn(PostImage::class, 'url', $baseUrl, $dryRun, $limit, maxWidth: 1080, quality: 82);
 
         $savedKb = round(($this->bytesBefore - $this->bytesAfter) / 1024, 1);
-        $this->components->info("Done. Processed {$this->processed}, skipped {$this->skipped}, failed {$this->failed}. Saved {$savedKb} KiB.");
+        $this->components->info("Done. Processed {$this->processed}, skipped {$this->skipped}, thumbs generated {$this->thumbsGenerated}, failed {$this->failed}. Saved {$savedKb} KiB.");
 
         return $this->failed === 0 ? self::SUCCESS : self::FAILURE;
     }
@@ -77,6 +78,12 @@ class BackfillOptimizedImages extends Command
                     $key = substr($url, strlen($prefix));
 
                     if (str_ends_with(strtolower($key), '.webp')) {
+                        try {
+                            $this->ensureThumb($key, $disk, $dryRun);
+                        } catch (\Throwable $exception) {
+                            $this->warn("Failed to generate thumb for {$key}: {$exception->getMessage()}");
+                        }
+
                         $this->skipped++;
 
                         continue;
@@ -137,6 +144,13 @@ class BackfillOptimizedImages extends Command
             'ContentType' => 'image/webp',
         ]);
 
+        $disk->put($this->thumbKeyFor($newKey), $this->makeThumbnail($optimized['contents'], 640), [
+            'visibility' => 'public',
+            'CacheControl' => 'public, max-age=31536000, immutable',
+            'ContentType' => 'image/webp',
+        ]);
+        $this->thumbsGenerated++;
+
         $row->forceFill([$column => $prefix.$newKey])->save();
 
         $disk->delete($key);
@@ -146,5 +160,34 @@ class BackfillOptimizedImages extends Command
         $this->processed++;
 
         $this->line(sprintf('Optimized %s -> %s (%s KiB -> %s KiB)', $key, $newKey, round($originalBytes / 1024, 1), round($newBytes / 1024, 1)));
+    }
+
+    private function ensureThumb(string $key, $disk, bool $dryRun): void
+    {
+        $thumbKey = $this->thumbKeyFor($key);
+
+        if ($disk->exists($thumbKey)) {
+            return;
+        }
+
+        if ($dryRun) {
+            $this->line("Would generate thumb: {$thumbKey}");
+            $this->thumbsGenerated++;
+
+            return;
+        }
+
+        if (! $disk->exists($key)) {
+            return;
+        }
+
+        $disk->put($thumbKey, $this->makeThumbnail($disk->get($key), 640), [
+            'visibility' => 'public',
+            'CacheControl' => 'public, max-age=31536000, immutable',
+            'ContentType' => 'image/webp',
+        ]);
+
+        $this->thumbsGenerated++;
+        $this->line("Generated thumb: {$thumbKey}");
     }
 }

@@ -2,6 +2,7 @@ import { LikeButton } from '@/components/LikeButton';
 import { ShareButton } from '@/components/ShareButton';
 import TextToSpeechButton from '@/components/TextToSpeechButton';
 import PublishedContent from '@/content/PublishedContent';
+import { toThumbSrc } from '@/lib/imageThumb';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -215,7 +216,16 @@ function DevSection({ devocionales, onOpen }: DevSectionProps) {
                         aria-label="Abrir devocional destacado"
                     >
                         {featured?.imagen && (
-                            <img src={featured.imagen} alt="Devocional destacado" className="sp-dev__featured-img" loading="eager" />
+                            <img
+                                src={toThumbSrc(featured.imagen)}
+                                alt="Devocional destacado"
+                                className="sp-dev__featured-img"
+                                loading="eager"
+                                onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = featured.imagen;
+                                }}
+                            />
                         )}
                         <div className="sp-dev__featured-overlay" />
                         <div className="sp-dev__featured-content">
@@ -245,7 +255,18 @@ function DevSection({ devocionales, onOpen }: DevSectionProps) {
                                 onKeyDown={(e) => e.key === 'Enter' && onOpen(d)}
                                 aria-label={`Abrir devocional ${i + 1}`}
                             >
-                                {d.imagen && <img src={d.imagen} alt="" className="sp-dev__mini-img" loading="lazy" />}
+                                {d.imagen && (
+                                    <img
+                                        src={toThumbSrc(d.imagen)}
+                                        alt=""
+                                        className="sp-dev__mini-img"
+                                        loading="lazy"
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.src = d.imagen;
+                                        }}
+                                    />
+                                )}
                                 <div className="sp-dev__mini-overlay" />
                                 <span className="sp-dev__mini-num">{String(dev.indexOf(d) + 1).padStart(2, '0')}</span>
                                 <div className="sp-dev__mini-content">

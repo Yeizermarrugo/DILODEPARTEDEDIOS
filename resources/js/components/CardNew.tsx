@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { toThumbSrc } from '@/lib/imageThumb';
 import '../../css/cardNew.css';
 import { ShareButton } from './ShareButton';
 import LikeButton from './LikeButton';
@@ -66,7 +67,7 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref, hideActions = fa
                 <div
                     className="wrapper"
                     style={{
-                        backgroundImage: `url(${imagen})`,
+                        backgroundImage: `url(${toThumbSrc(imagen)})`,
                         borderBottom: `4px solid ${categoryColor}`,
                     }}
                 >

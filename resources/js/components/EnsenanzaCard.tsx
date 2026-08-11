@@ -1,4 +1,5 @@
 import LikeButton from '@/components/LikeButton';
+import { toThumbSrc } from '@/lib/imageThumb';
 import { useEffect, useRef, useState } from 'react';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -136,10 +137,14 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
             <div className="ens-cover">
                 {ensenanza.imagen ? (
                     <img
-                        src={ensenanza.imagen}
+                        src={toThumbSrc(ensenanza.imagen)}
                         alt={ensenanza.titulo}
                         className="ens-cover__img"
                         loading="lazy"
+                        onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = ensenanza.imagen as string;
+                        }}
                     />
                 ) : (
                     <div className="ens-cover__placeholder">

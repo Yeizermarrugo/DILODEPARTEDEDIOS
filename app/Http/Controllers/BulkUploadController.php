@@ -50,6 +50,15 @@ class BulkUploadController extends Controller
                 'CacheControl' => 'public, max-age=31536000, immutable',
                 'ContentType' => $optimized['mime'],
             ]);
+
+            if ($optimized['extension'] === 'webp') {
+                $disk->put($this->thumbKeyFor($path), $this->makeThumbnail($optimized['contents'], 640), [
+                    'visibility' => 'public',
+                    'CacheControl' => 'public, max-age=31536000, immutable',
+                    'ContentType' => 'image/webp',
+                ]);
+            }
+
             $url     = $disk->url($path);
             $paths[] = compact('path', 'url');
         }
