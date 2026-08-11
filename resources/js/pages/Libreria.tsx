@@ -1,5 +1,23 @@
 import PageLayout from "@/components/PageLayout";
 import { Head } from '@inertiajs/react';
+import { WhatsappIcon } from '@/components/icons/BrandIcons';
+import {
+    ArrowRight,
+    Book,
+    BookText,
+    Calendar,
+    ChevronDown,
+    ExternalLink,
+    GraduationCap,
+    Hand,
+    Mic,
+    PlayCircle,
+    ShieldCheck,
+    Signpost,
+    User,
+    Users,
+    type LucideIcon,
+} from 'lucide-react';
 import '../../css/libreria.css';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -10,7 +28,7 @@ interface Resource {
     category: 'Masterclass' | 'Curso' | 'Recurso' | 'Libro' | 'Libro Infantil' | 'Guía gratuita';
     description: string;
     coverVariant: 'navy' | 'orange' | 'green' | 'purple' | 'blue';
-    icon: string;
+    icon: LucideIcon;
     meta: string;
     author?: string;
     descriptionNode?: React.ReactNode;
@@ -29,7 +47,7 @@ const freeResources: Resource[] = [
         category: 'Guía gratuita',
         description: '¿Te cuesta saber si Dios te está guiando? Descubre principios bíblicos prácticos para discernir su voz y tomar decisiones con mayor claridad, paz y confianza.',
         coverVariant: 'orange',
-        icon: 'bi-signpost-split',
+        icon: Signpost,
         meta: 'Descarga gratuita',
         author: 'Diana López',
         imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/¿CÓMO SABER SI DIOS ME ESTÁ HABLANDO2.jpeg',
@@ -41,7 +59,7 @@ const freeResources: Resource[] = [
         category: 'Recurso',
         description: 'Un plan devocional gratuito para transformar tu vida espiritual en tres semanas. Reflexiones diarias basadas en la Palabra de Dios.',
         coverVariant: 'orange',
-        icon: 'bi-calendar3',
+        icon: Calendar,
         meta: '21 días · PDF',
         author: 'Diana López',
     },
@@ -51,7 +69,7 @@ const freeResources: Resource[] = [
         category: 'Recurso',
         description: 'Material práctico que te enseña principios bíblicos de oración para que tus conversaciones con Dios sean más intencionales y profundas.',
         coverVariant: 'navy',
-        icon: 'bi-hand-index-thumb',
+        icon: Hand,
         meta: 'Descarga gratuita',
         author: 'Diana López',
     },
@@ -61,7 +79,7 @@ const freeResources: Resource[] = [
         category: 'Recurso',
         description: 'Fundamentos esenciales para quienes sienten el llamado a enseñar la Palabra. Aprende a preparar, estructurar y comunicar un mensaje bíblico.',
         coverVariant: 'purple',
-        icon: 'bi-mic',
+        icon: Mic,
         meta: 'Descarga gratuita',
         author: 'Diana López',
     },
@@ -76,7 +94,7 @@ const resources: Resource[] = [
         category: 'Libro',
         description: 'Una obra que siembra fundamentos sólidos de la Palabra de Dios para quienes comienzan su camino de enseñanza bíblica.',
         coverVariant: 'orange',
-        icon: 'bi-book',
+        icon: Book,
         meta: 'Diana López',
         author: 'Diana López',
     },
@@ -86,7 +104,7 @@ const resources: Resource[] = [
         category: 'Libro Infantil',
         description: 'Una serie que muestra cómo el amor se perfecciona con el tiempo y encuentra su plenitud cuando se fundamenta en Dios.',
         coverVariant: 'blue',
-        icon: 'bi-journal-text',
+        icon: BookText,
         meta: '3 volúmenes',
         author: 'Diana López',
         // imageUrl: 'https://fls-a083ae02-d46d-49e7-84b6-1804f2c1bf37.laravel.cloud/imagenes/nueva_imagen.png'
@@ -97,7 +115,7 @@ const resources: Resource[] = [
         category: 'Masterclass',
         description: 'Una serie de masterclass que revela el costo real de tus decisiones y el peso del crecimiento, aprenderás a identificar lo que estás sacrificando en cada decisión y a sostener el crecimiento sin rendirte, desarrollando una vida intencional y con propósito.',
         coverVariant: 'navy',
-        icon: 'bi-mortarboard',
+        icon: GraduationCap,
         meta: '3 masterclasses',
         author: 'Diana López',
     },
@@ -107,7 +125,7 @@ const resources: Resource[] = [
         category: 'Masterclass',
         description: 'Descubre cómo renovar tu mente y romper patrones que están definiendo tu vida sin que te des cuenta.',
         coverVariant: 'navy',
-        icon: 'bi-mortarboard',
+        icon: GraduationCap,
         meta: '3 masterclasses',
         author: 'Diana López',
     },
@@ -118,7 +136,7 @@ const resources: Resource[] = [
         description: 'Aprende a evitar el agotamiento espiritual, mental y físico aplicando un sistema práctico basado en la Comunión, la Construcción y el Descanso.',
         descriptionNode: <>Aprende a evitar el agotamiento espiritual, mental y físico aplicando un sistema práctico basado en <strong>la Comunión</strong>, <strong>la Construcción</strong> y <strong>el Descanso</strong>.</>,
         coverVariant: 'purple',
-        icon: 'bi-mortarboard',
+        icon: GraduationCap,
         meta: '3 clases',
         author: 'Diana López',
     },
@@ -126,17 +144,17 @@ const resources: Resource[] = [
 
 const whyItems = [
     {
-        icon: 'bi-play-circle',
+        icon: PlayCircle,
         title: 'Aprende a tu ritmo',
         body: 'Accede a los recursos cuando quieras. El conocimiento de Dios disponible las 24 horas, desde cualquier dispositivo.',
     },
     {
-        icon: 'bi-shield-check',
+        icon: ShieldCheck,
         title: 'Recursos bíblicos seleccionados',
         body: 'Cada recurso es revisado y creado con fidelidad a las Escrituras. Calidad doctrinal garantizada.',
     },
     {
-        icon: 'bi-people',
+        icon: Users,
         title: 'Comunidad de crecimiento',
         body: 'Crece junto a una comunidad de creyentes comprometidos con aprender y vivir la Palabra de Dios.',
     },
@@ -153,7 +171,7 @@ function ResourceCard({ resource, free = false, learnhubUrl }: { resource: Resou
                     <img src={resource.imageUrl} alt={`${resource.title} cover`} className="lib-card__cover-image" />
                 ) : (
                     <div className="lib-card__cover-placeholder" aria-hidden>
-                        <i className={`bi ${resource.icon} lib-card__cover-icon`} aria-hidden />
+                        <resource.icon size={60} className="lib-card__cover-icon" aria-hidden />
                     </div>
                 )}
                 <span className={`lib-card__badge${free ? ' lib-card__badge--free' : ''}`}>
@@ -164,21 +182,25 @@ function ResourceCard({ resource, free = false, learnhubUrl }: { resource: Resou
                 <h3 className="lib-card__title">{resource.title}</h3>
                 {resource.author && (
                     <span className="lib-card__author">
-                        <i className="bi bi-person" aria-hidden /> {resource.author}
+                        <User size={11} aria-hidden /> {resource.author}
                     </span>
                 )}
                 <p className="lib-card__desc">{resource.descriptionNode ?? resource.description}</p>
                 <span className="lib-card__meta">
-                    <i className={`bi ${resource.category === 'Libro' || resource.category === 'Libro Infantil' ? 'bi-book' : 'bi-play-circle'}`} aria-hidden />
+                    {resource.category === 'Libro' || resource.category === 'Libro Infantil' ? (
+                        <Book size={11} aria-hidden />
+                    ) : (
+                        <PlayCircle size={11} aria-hidden />
+                    )}
                     {resource.meta}
                 </span>
                 {free && learnhubUrl ? (
                     <a href={learnhubUrl} target="_blank" rel="noopener noreferrer" className="lib-card__btn lib-card__btn--free">
-                        Acceder gratis <i className="bi bi-box-arrow-up-right" aria-hidden />
+                        Acceder gratis <ExternalLink size={13} aria-hidden />
                     </a>
                 ) : (
                     <a href="#learnhub-cta" className="lib-card__btn">
-                        Próximamente <i className="bi bi-arrow-right" aria-hidden />
+                        Próximamente <ArrowRight size={13} aria-hidden />
                     </a>
                 )}
             </div>
@@ -212,7 +234,7 @@ export default function Libreria() {
                     </div>
                     <div className="lib-hero__scroll-hint" aria-hidden>
                         <span>Explorar recursos</span>
-                        <i className="bi bi-chevron-down" />
+                        <ChevronDown size={16} />
                     </div>
                 </section>
 
@@ -263,7 +285,7 @@ export default function Libreria() {
                             {whyItems.map((item, i) => (
                                 <div key={i} className="lib-why__item">
                                     <div className="lib-why__icon-wrap" aria-hidden>
-                                        <i className={`bi ${item.icon}`} />
+                                        <item.icon size={24} />
                                     </div>
                                     <h3>{item.title}</h3>
                                     <p>{item.body}</p>
@@ -296,7 +318,7 @@ export default function Libreria() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <i className="bi bi-whatsapp" aria-hidden />
+                                <WhatsappIcon size={16} />
                                 Notificarme por WhatsApp
                             </a>
                             <a

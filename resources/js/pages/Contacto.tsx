@@ -1,7 +1,9 @@
 import PageLayout from "@/components/PageLayout";
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import { AlertCircle, CheckCircle2, Mail, Send } from 'lucide-react';
 import { useState } from 'react';
+import { InstagramIcon, WhatsappIcon, YoutubeIcon } from '@/components/icons/BrandIcons';
 import '../../css/contacto.css';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -73,7 +75,7 @@ export default function Contacto() {
                             <ul className="ct-info__list">
                                 <li>
                                     <a href="https://wa.me/573045851480" className="ct-info__link" target="_blank" rel="noopener noreferrer">
-                                        <span className="ct-info__icon-wrap"><i className="bi bi-whatsapp" /></span>
+                                        <span className="ct-info__icon-wrap"><WhatsappIcon size={18} /></span>
                                         <div>
                                             <span className="ct-info__link-label">WhatsApp</span>
                                             <span className="ct-info__link-value">+57 300 585 1480</span>
@@ -82,7 +84,7 @@ export default function Contacto() {
                                 </li>
                                 <li>
                                     <a href="https://www.instagram.com/dilodepartededios" className="ct-info__link" target="_blank" rel="noopener noreferrer">
-                                        <span className="ct-info__icon-wrap"><i className="bi bi-instagram" /></span>
+                                        <span className="ct-info__icon-wrap"><InstagramIcon size={18} /></span>
                                         <div>
                                             <span className="ct-info__link-label">Instagram</span>
                                             <span className="ct-info__link-value">@dilodepartededios</span>
@@ -91,7 +93,7 @@ export default function Contacto() {
                                 </li>
                                 <li>
                                     <a href="mailto:dilodepartededios@gmail.com" className="ct-info__link">
-                                        <span className="ct-info__icon-wrap"><i className="bi bi-envelope" /></span>
+                                        <span className="ct-info__icon-wrap"><Mail size={18} /></span>
                                         <div>
                                             <span className="ct-info__link-label">Correo electrónico</span>
                                             <span className="ct-info__link-value">dilodepartededios@gmail.com</span>
@@ -100,7 +102,7 @@ export default function Contacto() {
                                 </li>
                                 <li>
                                     <a href="https://www.youtube.com/@casadevalientes7" className="ct-info__link" target="_blank" rel="noopener noreferrer">
-                                        <span className="ct-info__icon-wrap"><i className="bi bi-youtube" /></span>
+                                        <span className="ct-info__icon-wrap"><YoutubeIcon size={18} /></span>
                                         <div>
                                             <span className="ct-info__link-label">YouTube</span>
                                             <span className="ct-info__link-value">@casadevalientes7</span>
@@ -120,7 +122,7 @@ export default function Contacto() {
                             {formState === 'success' ? (
                                 <div className="ct-success" role="status">
                                     <div className="ct-success__icon" aria-hidden>
-                                        <i className="bi bi-check-circle-fill" />
+                                        <CheckCircle2 size={64} />
                                     </div>
                                     <h3>¡Mensaje enviado!</h3>
                                     <p>Gracias por escribirnos, <strong>{form.name}</strong>. Hemos recibido tu mensaje y te responderemos pronto.</p>
@@ -160,14 +162,14 @@ export default function Contacto() {
                                     </div>
                                     {formState === 'error' && (
                                         <p className="ct-form-error" role="alert">
-                                            <i className="bi bi-exclamation-circle" /> {errorMsg}
+                                            <AlertCircle size={13} /> {errorMsg}
                                         </p>
                                     )}
                                     <button type="submit" className="ct-submit" disabled={formState === 'loading'}>
                                         {formState === 'loading' ? (
                                             <><span className="ct-spinner" aria-hidden /> Enviando...</>
                                         ) : (
-                                            <><i className="bi bi-send-fill" aria-hidden /> Enviar mensaje</>
+                                            <><Send size={16} aria-hidden /> Enviar mensaje</>
                                         )}
                                     </button>
                                 </form>

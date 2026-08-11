@@ -1,5 +1,6 @@
 import LikeButton from '@/components/LikeButton';
 import { toThumbSrc } from '@/lib/imageThumb';
+import { BookOpen, Eye, FileText, NotebookText, PlayCircle, Video } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -220,14 +221,14 @@ export default function EnsenanzaCard({ ensenanza }: Props) {
                 {/* Stats visibles siempre (incluso en próximamente) */}
                 <div className="ens-stats">
                     <div className="ens-stats__item">
-                        <i className="bi bi-play-circle" style={{ fontSize: 13 }} />
+                        <PlayCircle size={13} />
                         <span>{ensenanza.ensenanzas_count} enseñanzas</span>
                     </div>
                     {!esPróximamente && (
                         <>
                             <div className="ens-stats__dot" />
                             <div className="ens-stats__item">
-                                <i className="bi bi-eye" style={{ fontSize: 13 }} />
+                                <Eye size={13} />
                                 <span>{totalViews} vistas</span>
                             </div>
                         </>
@@ -324,7 +325,7 @@ function DevRow({ dev, idx, isEven, disabled = false }: DevRowProps) {
 
                 <div className="dev-row__meta">
                     <span className="dev-row__stat">
-                        <i className="bi bi-eye" style={{ fontSize: 11 }} />
+                        <Eye size={11} />
                         {dev.views_count ?? 0}
                     </span>
                     <span className="dev-row__like" onClick={(e) => e.stopPropagation()}>
@@ -340,21 +341,21 @@ function DevRow({ dev, idx, isEven, disabled = false }: DevRowProps) {
             {open && (
                 <div className="dev-row__actions">
                     <a href={`/series/${dev.id}`} className="dev-action dev-action--primary">
-                        <i className="bi bi-book-open" style={{ fontSize: 12 }} /> Leer
+                        <BookOpen size={12} /> Leer
                     </a>
                     {dev.pdf && (
                         <a href={dev.pdf} target="_blank" rel="noopener noreferrer" className="dev-action dev-action--pdf">
-                            <i className="bi bi-file-earmark-pdf" style={{ fontSize: 12 }} /> PDF
+                            <FileText size={12} /> PDF
                         </a>
                     )}
                     {dev.instagram && (
                         <a href={dev.instagram} target="_blank" rel="noopener noreferrer" className="dev-action dev-action--reducido">
-                            <i className="bi bi-card-text" style={{ fontSize: 12 }} /> Reducido
+                            <NotebookText size={12} /> Reducido
                         </a>
                     )}
                     {dev.tiktok && (
                         <a href={dev.tiktok} target="_blank" rel="noopener noreferrer" className="dev-action dev-action--reel">
-                            <i className="bi bi-camera-video" style={{ fontSize: 12 }} /> Reels
+                            <Video size={12} /> Reels
                         </a>
                     )}
                 </div>

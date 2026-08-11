@@ -3,6 +3,7 @@ import PageLayout from '@/components/PageLayout';
 import { DevocionalGridSkeleton } from '@/components/SectionSkeletons';
 import FilterSheet from '@/components/ui/FilterSheet';
 import { Head } from '@inertiajs/react';
+import { Clock, Eye, Heart, Share2, type LucideIcon } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import '../../css/devocionals.css';
@@ -147,11 +148,11 @@ function Devocionals() {
     const hasFilter = selectedCategory !== null || sort !== 'latest';
     const gridHeading = debouncedSearch.trim() ? `Resultados de "${debouncedSearch.trim()}"` : (selectedCategory ?? 'Todos los Devocionales');
     const selectedCategoryDescription = selectedCategory ? categories.find((c) => c.categoria === selectedCategory)?.description : null;
-    const sortOptions: { key: SortId; icon: string; label: string }[] = [
-        { key: 'latest', icon: 'bi-clock', label: 'Más recientes' },
-        { key: 'likes', icon: pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-heart', label: 'Más likes' },
-        { key: 'views', icon: 'bi-eye', label: 'Más vistas' },
-        { key: 'shares', icon: 'bi-share', label: 'Más compartidos' },
+    const sortOptions: { key: SortId; icon: LucideIcon; label: string }[] = [
+        { key: 'latest', icon: Clock, label: 'Más recientes' },
+        { key: 'likes', icon: Heart, label: 'Más likes' },
+        { key: 'views', icon: Eye, label: 'Más vistas' },
+        { key: 'shares', icon: Share2, label: 'Más compartidos' },
     ];
 
     const todasLasCategorias = useMemo(() => categories.map((c) => c.categoria.trim().toLowerCase()).sort(), [categories]);
@@ -242,7 +243,11 @@ function Devocionals() {
                                         className={`dv-sidebar__sort-btn ${sort === opt.key ? 'dv-sidebar__sort-btn--active' : ''}`}
                                         onClick={() => setSort(opt.key)}
                                     >
-                                        <i className={`bi ${opt.icon} dv-sidebar__sort-icon`} />
+                                        <opt.icon
+                                            size={13}
+                                            className="dv-sidebar__sort-icon"
+                                            fill={opt.key === 'likes' && sort === 'likes' ? 'currentColor' : 'none'}
+                                        />
                                         {opt.label}
                                     </button>
                                 ))}

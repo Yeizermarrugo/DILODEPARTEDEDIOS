@@ -1,31 +1,33 @@
 import { usePage } from '@inertiajs/react';
+import { Archive, Book, BookMarked, Heart, Home, ListVideo, Mail, Mic, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import '../../css/header.css';
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from './icons/BrandIcons';
 
 const navLinks = [
-    { href: '/', label: 'Inicio', icon: 'bi-house' },
-    { href: '/about', label: '¿Quiénes somos?', icon: 'bi-people' },
-    { href: '/devocionales', label: 'Devocionales', icon: 'bi-journal-bookmark' },
-    { href: '/series', label: 'Series', icon: 'bi-collection-play' },
-    { href: '/estudios', label: 'Estudios bíblicos', icon: 'bi-book' },
-    { href: '/recursos', label: 'Recursos', icon: 'bi-archive' },
-    { href: '/podcast', label: 'Podcast y más', icon: 'bi-mic' },
-    { href: '/obras', label: 'Obras', icon: 'bi-heart' },
-    { href: '/contacto', label: 'Contacto', icon: 'bi-envelope' },
+    { href: '/', label: 'Inicio', icon: Home },
+    { href: '/about', label: '¿Quiénes somos?', icon: Users },
+    { href: '/devocionales', label: 'Devocionales', icon: BookMarked },
+    { href: '/series', label: 'Series', icon: ListVideo },
+    { href: '/estudios', label: 'Estudios bíblicos', icon: Book },
+    { href: '/recursos', label: 'Recursos', icon: Archive },
+    { href: '/podcast', label: 'Podcast y más', icon: Mic },
+    { href: '/obras', label: 'Obras', icon: Heart },
+    { href: '/contacto', label: 'Contacto', icon: Mail },
 ];
 
 const socialLinks = [
     {
         href: 'https://www.facebook.com/share/1MD6hDKdce/?mibextid=wwXIfr',
-        icon: 'bi-facebook', label: 'Facebook',
+        icon: FacebookIcon, label: 'Facebook',
     },
     {
         href: 'https://www.youtube.com/@casadevalientes7',
-        icon: 'bi-youtube', label: 'YouTube',
+        icon: YoutubeIcon, label: 'YouTube',
     },
     {
         href: 'https://www.instagram.com/dilodepartededios?igsh=ODU0dHc1bnVhNGd2',
-        icon: 'bi-instagram', label: 'Instagram',
+        icon: InstagramIcon, label: 'Instagram',
     },
 ];
 
@@ -62,7 +64,7 @@ const Header = () => {
                             <div className="social-links d-none d-xl-flex">
                                 {socialLinks.map(s => (
                                     <a key={s.href} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
-                                        <i className={`bi ${s.icon}`}></i>
+                                        <s.icon size={17} />
                                     </a>
                                 ))}
                             </div>
@@ -144,7 +146,7 @@ const Header = () => {
                                     className={`mob-drawer__link ${isActive(link.href) ? 'mob-drawer__link--active' : ''}`}
                                     onClick={close}
                                 >
-                                    <i className={`bi ${link.icon} mob-drawer__link-icon`} />
+                                    <link.icon size={15} className="mob-drawer__link-icon" />
                                     <span className="mob-drawer__link-label">{link.label}</span>
                                     {isActive(link.href) && (
                                         <span className="mob-drawer__link-dot" />
@@ -172,7 +174,7 @@ const Header = () => {
                                 aria-label={s.label}
                                 onClick={close}
                             >
-                                <i className={`bi ${s.icon}`} />
+                                <s.icon size={16} />
                             </a>
                         ))}
                     </div>
