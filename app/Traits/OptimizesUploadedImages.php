@@ -47,6 +47,12 @@ trait OptimizesUploadedImages
             $source = $this->applyExifOrientation($source, $contents);
         }
 
+        if (! imageistruecolor($source)) {
+            imagepalettetotruecolor($source);
+        }
+        imagealphablending($source, false);
+        imagesavealpha($source, true);
+
         $width = imagesx($source);
         $height = imagesy($source);
 
