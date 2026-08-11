@@ -5,6 +5,7 @@ import PublishedContent from '@/content/PublishedContent';
 import { toThumbSrc } from '@/lib/imageThumb';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
+import { Eye } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/devocionalDetails.css';
 import '../../css/main-home.css';
@@ -781,7 +782,7 @@ function DevocionalModal({ devocional, onClose, onViewRecorded }: ModalProps) {
                             {devocional.id && (
                                 <div className="dd-actions">
                                     <span className="dd-actions__views">
-                                        <i className="bi bi-eye" />
+                                        <Eye size={16} />
                                         {viewsCount}
                                     </span>
                                     <ShareButton type={likeType} id={devocional.id} sharesCount={devocional.shares_count ?? 0} variant="default" />

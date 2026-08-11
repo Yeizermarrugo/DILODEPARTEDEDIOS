@@ -6,7 +6,7 @@ import { useImagePreload } from '@/components/useImagePreload';
 import PublishedContent from '@/content/PublishedContent';
 import { extractReadingBlocks } from '@/utils/ttsReading';
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import '../../css/devocionalDetails.css';
 
@@ -350,7 +350,7 @@ const DevocionalDetailsPage = (props: Props) => {
     return (
         <div className="dd-page">
             <a href={backHref} className={`dd-back-btn${pastHero ? 'dd-back-btn--scrolled' : ''}`}>
-                <i className="bi bi-arrow-left" /> Atrás
+                <ArrowLeft size={14} /> Atrás
             </a>
 
             {/* ── Hero ─────────────────────────────────────── */}
@@ -382,7 +382,7 @@ const DevocionalDetailsPage = (props: Props) => {
                         {devocional.id && (
                             <div className="dd-actions">
                                 <span className="dd-actions__views">
-                                    <i className="bi bi-eye" />
+                                    <Eye size={16} />
                                     {viewsCount}
                                 </span>
                                 <ShareButton type={likeType} id={devocional.id} sharesCount={devocional.shares_count ?? 0} variant="default" />

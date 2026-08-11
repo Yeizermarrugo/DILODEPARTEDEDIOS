@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { Eye } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import LikeButton from './LikeButton';
 import { EstudiosAccordionSkeleton } from './SectionSkeletons';
@@ -266,7 +267,7 @@ export default function LibroList({ searchTerm, onLoad }: Props) {
                                             {/* Vistas + Compartir + Like — stopPropagation evita navegar al link */}
                                             <span className="est-item__meta">
                                                 <span className="est-item__views">
-                                                    <i className="bi bi-eye" style={{ fontSize: 12 }} />
+                                                    <Eye size={12} />
                                                     {libro.views_count ?? 0}
                                                 </span>
                                                 <span onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>

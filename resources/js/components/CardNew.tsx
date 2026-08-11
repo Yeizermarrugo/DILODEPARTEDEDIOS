@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { toThumbSrc } from '@/lib/imageThumb';
+import { Eye } from 'lucide-react';
 import '../../css/cardNew.css';
 import { ShareButton } from './ShareButton';
 import LikeButton from './LikeButton';
@@ -93,7 +94,7 @@ const CardNew = ({ dev, todasLasCategorias, onClick, buildHref, hideActions = fa
                             >
                                 {/* Vistas */}
                                 <li style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'white' }}>
-                                    <i className="bi bi-eye" />
+                                    <Eye size={14} />
                                     <span>{views_count ?? 0}</span>
                                 </li>
                             </ul>

@@ -1,4 +1,5 @@
 // components/ui/FilterSheet.tsx
+import { Clock, Eye, Heart, Share2, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 type Category = { categoria: string; count: number };
@@ -38,11 +39,11 @@ export default function FilterSheet({
         return () => { document.body.style.overflow = ''; };
     }, [isOpen]);
 
-    const sortOptions: { id: SortId; label: string; icon: string }[] = [
-        { id: 'latest', icon: 'bi-clock', label: 'Más recientes' },
-        { id: 'likes', icon: pendingSort === 'likes' ? 'bi-heart-fill' : 'bi-heart', label: 'Más likes' },
-        { id: 'views', icon: 'bi-eye', label: 'Más vistas' },
-        { id: 'shares', icon: 'bi-share', label: 'Más compartidos' },
+    const sortOptions: { id: SortId; label: string; icon: LucideIcon }[] = [
+        { id: 'latest', icon: Clock, label: 'Más recientes' },
+        { id: 'likes', icon: Heart, label: 'Más likes' },
+        { id: 'views', icon: Eye, label: 'Más vistas' },
+        { id: 'shares', icon: Share2, label: 'Más compartidos' },
     ];
 
     const sortPillStyle = (id: SortId): React.CSSProperties => {
@@ -160,7 +161,7 @@ export default function FilterSheet({
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
                         {sortOptions.map(s => (
                             <button key={s.id} onClick={() => onSortChange(s.id)} style={sortPillStyle(s.id)}>
-                                <i className={`bi ${s.icon}`} style={{ fontSize: 13 }} />
+                                <s.icon size={13} fill={s.id === 'likes' && pendingSort === 'likes' ? 'currentColor' : 'none'} />
                                 {s.label}
                             </button>
                         ))}
@@ -176,7 +177,13 @@ export default function FilterSheet({
                         )}
                         {pendingSort !== 'latest' && (
                             <span style={{ background: ORANGE, color: '#fff', borderRadius: 100, padding: '2px 10px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                <i className={`bi ${pendingSort === 'likes' ? 'bi-heart-fill' : pendingSort === 'shares' ? 'bi-share' : 'bi-eye'}`} style={{ fontSize: 11 }} />
+                                {pendingSort === 'likes' ? (
+                                    <Heart size={11} fill="currentColor" />
+                                ) : pendingSort === 'shares' ? (
+                                    <Share2 size={11} />
+                                ) : (
+                                    <Eye size={11} />
+                                )}
                                 {pendingSort === 'likes' ? 'Más likes' : pendingSort === 'shares' ? 'Más compartidos' : 'Más vistas'}
                             </span>
                         )}

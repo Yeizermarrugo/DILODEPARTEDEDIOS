@@ -1,3 +1,5 @@
+import { Eye, Share2 } from 'lucide-react';
+
 export type SortId = 'latest' | 'likes' | 'views' | 'shares';
 
 type Category = { categoria: string; count: number };
@@ -120,7 +122,7 @@ export default function FilterBar({
                                 transition: 'all 0.15s ease',
                             }}
                         >
-                            <i className="bi bi-eye" style={{ fontSize: 14 }} />
+                            <Eye size={14} />
                             Más vistas
                             {sort === 'views' && (
                                 <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#2563eb', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
@@ -139,7 +141,7 @@ export default function FilterBar({
                                 transition: 'all 0.15s ease',
                             }}
                         >
-                            <i className="bi bi-share" style={{ fontSize: 14 }} />
+                            <Share2 size={14} />
                             Más compartidos
                             {sort === 'shares' && (
                                 <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#16a34a', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</span>
