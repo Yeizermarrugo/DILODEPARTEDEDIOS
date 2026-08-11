@@ -33,6 +33,14 @@ class ImageUploadController extends Controller
             return response()->json(['error' => 'Upload failed.'], 500);
         }
 
+        if ($optimized['extension'] === 'webp') {
+            Storage::disk('s3')->put($this->thumbKeyFor($path), $this->makeThumbnail($optimized['contents'], 640), [
+                'visibility'   => 'public',
+                'CacheControl' => 'public, max-age=31536000, immutable',
+                'ContentType'  => 'image/webp',
+            ]);
+        }
+
         $url = Storage::disk('s3')->url($path);
 
         return response()->json(['location' => $url]);
@@ -58,6 +66,14 @@ class ImageUploadController extends Controller
 
             if (! $stored) {
                 return response()->json(['error' => 'Upload failed.'], 500);
+            }
+
+            if ($optimized['extension'] === 'webp') {
+                Storage::disk('s3')->put($this->thumbKeyFor($path), $this->makeThumbnail($optimized['contents'], 640), [
+                    'visibility'   => 'public',
+                    'CacheControl' => 'public, max-age=31536000, immutable',
+                    'ContentType'  => 'image/webp',
+                ]);
             }
 
             $url = Storage::disk('s3')->url($path);

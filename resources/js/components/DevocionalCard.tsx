@@ -1,3 +1,4 @@
+import { toThumbSrc } from '@/lib/imageThumb';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -94,8 +95,12 @@ export default function DevocionalCard({ devocionales, todasLasCategorias, build
                         >
                             <CardMedia
                                 component="img"
-                                image={dev.imagen}
+                                image={toThumbSrc(dev.imagen)}
                                 alt="Descripción"
+                                onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = dev.imagen;
+                                }}
                                 sx={{
                                     height: 150,
                                     width: '100%',
