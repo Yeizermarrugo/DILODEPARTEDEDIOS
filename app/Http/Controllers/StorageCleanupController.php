@@ -15,8 +15,15 @@ class StorageCleanupController extends Controller
 {
     use UsesStoragePrefix;
 
-    /** @var string[] */
-    private array $baseFolders = ['imagenes', 'postCard', 'pdf', 'videos', 'tts'];
+    /**
+     * "tts" is deliberately excluded: those files are keyed by a content hash
+     * (see TextToSpeechService::storageFolder) and never referenced from any
+     * DB column or content HTML — there is no reliable way to tell an in-use
+     * TTS audio file from an orphaned one, so it must never be scanned here.
+     *
+     * @var string[]
+     */
+    private array $baseFolders = ['imagenes', 'postCard', 'pdf', 'videos'];
 
     public function index()
     {
@@ -133,6 +140,13 @@ class StorageCleanupController extends Controller
         $inUsePaths = $directUrls
             ->map($toPath)
             ->filter()
+            ->unique();
+
+        // Los thumbnails ("<hash>_thumb.webp") se derivan por convención en el
+        // frontend (ver OptimizesUploadedImages::thumbKeyFor) y nunca se guardan
+        // en BD — hay que marcarlos "en uso" a partir de su full pareado.
+        $inUsePaths = $inUsePaths
+            ->merge($inUsePaths->map(fn (string $path) => preg_replace('/\.webp$/i', '_thumb.webp', $path))->filter())
             ->unique()
             ->flip()
             ->toArray();
