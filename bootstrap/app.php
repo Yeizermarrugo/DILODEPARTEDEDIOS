@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AddSecurityHeaders;
+use App\Http\Middleware\AddStaticCacheHeaders;
 use App\Http\Middleware\AssignVisitorId;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -17,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(AddStaticCacheHeaders::class);
+
         $middleware->validateCsrfTokens(except: [
             'devocionales/*/view',
             'privacy/accept',
