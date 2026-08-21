@@ -78,14 +78,14 @@
 .dd-hero {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     background: #1a1a1a;
 }
 
-@supports not (aspect-ratio: 16/7) {
+@supports not (aspect-ratio: 16/9) {
     .dd-hero {
-        padding-top: 43.75%;
+        padding-top: 56.25%;
         height: 0;
     }
 }
@@ -117,8 +117,8 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 43.75vw;
-    /* matches 16:7 hero aspect ratio */
+    height: 56.25vw;
+    /* matches 16:9 hero aspect ratio */
     display: flex;
     align-items: flex-end;
     justify-content: center;
