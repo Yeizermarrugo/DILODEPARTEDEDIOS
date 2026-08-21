@@ -273,8 +273,8 @@ const DevocionalDetailsPage = (props: Props) => {
 
     useEffect(() => {
         const onScroll = () => {
-            // Hero height ≈ 43.75vw (16:7). Transition starts at 70% of hero.
-            const threshold = window.innerWidth * (7 / 16) * 0.7;
+            // Hero height ≈ 56.25vw (16:9). Transition starts at 70% of hero.
+            const threshold = window.innerWidth * (9 / 16) * 0.7;
             setPastHero(window.scrollY > threshold);
         };
         window.addEventListener('scroll', onScroll, { passive: true });
