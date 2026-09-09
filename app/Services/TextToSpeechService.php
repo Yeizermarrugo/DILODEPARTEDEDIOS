@@ -47,20 +47,20 @@ class TextToSpeechService
         'RVR1960' => 'Reina Valera 1960',
         'RVR2015' => 'Reina Valera actualizada 2015',
         'RVR1909' => 'Reina Valera 1909',
-        'NBLH'    => 'Nueva Biblia Latinoamericana de Hoy',
-        'LBLA'    => 'La Biblia de las Américas',
-        'NTV'     => 'Nueva Traducción Viviente',
-        'NVI'     => 'Nueva Versión Internacional',
-        'DHH'     => 'Dios Habla Hoy',
-        'PDT'     => 'Palabra de Dios para Todos',
-        'TLA'     => 'Traducción en Lenguaje Actual',
-        'BLS'     => 'Biblia en Lenguaje Sencillo',
-        'RVR'     => 'Reina Valera',
-        'NKJV'    => 'New King James Version',
-        'KJV'     => 'King James Version',
-        'NIV'     => 'New International Version',
-        'ESV'     => 'English Standard Version',
-        'NLT'     => 'New Living Translation',
+        'NBLH' => 'Nueva Biblia Latinoamericana de Hoy',
+        'LBLA' => 'La Biblia de las Américas',
+        'NTV' => 'Nueva Traducción Viviente',
+        'NVI' => 'Nueva Versión Internacional',
+        'DHH' => 'Dios Habla Hoy',
+        'PDT' => 'Palabra de Dios para Todos',
+        'TLA' => 'Traducción en Lenguaje Actual',
+        'BLS' => 'Biblia en Lenguaje Sencillo',
+        'RVR' => 'Reina Valera',
+        'NKJV' => 'New King James Version',
+        'KJV' => 'King James Version',
+        'NIV' => 'New International Version',
+        'ESV' => 'English Standard Version',
+        'NLT' => 'New Living Translation',
     ];
 
     /** @var array<string, array<string, string>> */
@@ -469,7 +469,7 @@ class TextToSpeechService
     }
 
     /**
-     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @param  array<int, array{index: int, kind: string, text: string}>  $blocks
      * @return array{url: string, timings: array<int, array{index: int, start: float, end: float}>|null}
      */
     private function generateBlocksWithTimings(array $blocks, string $lang, string $voice, int $rate): array
@@ -530,16 +530,20 @@ class TextToSpeechService
                     throw new \RuntimeException('Azure no devolvió bookmarks suficientes para sincronizar el audio.');
                 }
 
-                $audio = @file_get_contents($tmpPath);
+                $audio = @fopen($tmpPath, 'rb');
                 if ($audio === false) {
                     throw new \RuntimeException('El SDK generó metadata, pero no se encontró el archivo de audio.');
                 }
 
-                $stored = Storage::disk('s3')->put($audioPath, $audio, [
-                    'visibility' => 'public',
-                    'CacheControl' => 'public, max-age=31536000, immutable',
-                    'ContentType' => 'audio/mpeg',
-                ]);
+                try {
+                    $stored = Storage::disk('s3')->put($audioPath, $audio, [
+                        'visibility' => 'public',
+                        'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ContentType' => 'audio/mpeg',
+                    ]);
+                } finally {
+                    fclose($audio);
+                }
 
                 if (! $stored) {
                     throw new \RuntimeException('El audio se generó, pero no se pudo guardar en el bucket.');
@@ -568,7 +572,7 @@ class TextToSpeechService
     }
 
     /**
-     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @param  array<int, array{index: int, kind: string, text: string}>  $blocks
      * @return array{0: string, 1: string}
      */
     private function timedAudioPaths(array $blocks, string $lang, string $voice, int $rate): array
@@ -582,7 +586,7 @@ class TextToSpeechService
     }
 
     /**
-     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @param  array<int, array{index: int, kind: string, text: string}>  $blocks
      * @return array{0: string, 1: string}
      */
     private function timedAudioPathsFromNormalized(array $blocks, string $lang, string $voice, string $rateText, string $outputFormat): array
@@ -601,7 +605,7 @@ class TextToSpeechService
     }
 
     /**
-     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @param  array<int, array{index: int, kind: string, text: string}>  $blocks
      */
     private function buildTimedSsml(string $lang, string $voice, string $rate, array $blocks): string
     {
@@ -678,8 +682,8 @@ SSML;
     }
 
     /**
-     * @param array<int, array{index: int, kind: string, text: string}> $blocks
-     * @param array{bookmarks: array<int, array{mark: string, offset: float|int}>, duration: float|int|null} $metadata
+     * @param  array<int, array{index: int, kind: string, text: string}>  $blocks
+     * @param  array{bookmarks: array<int, array{mark: string, offset: float|int}>, duration: float|int|null}  $metadata
      * @return array<int, array{index: int, start: float, end: float}>|null
      */
     private function timingsFromBookmarks(array $blocks, array $metadata): ?array
@@ -764,7 +768,7 @@ SSML;
     }
 
     /**
-     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @param  array<int, array{index: int, kind: string, text: string}>  $blocks
      */
     private function collectSpeechBlocks(\DOMNode $node, array &$blocks): void
     {
@@ -833,7 +837,7 @@ SSML;
     }
 
     /**
-     * @param array<int, array{index: int, kind: string, text: string}> $blocks
+     * @param  array<int, array{index: int, kind: string, text: string}>  $blocks
      */
     private function pushSpeechBlock(string $tag, string $text, array &$blocks): void
     {

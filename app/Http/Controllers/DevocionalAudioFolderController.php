@@ -128,9 +128,8 @@ class DevocionalAudioFolderController extends Controller
 
         $filename = $tts->filenameFromHtml($devocional->contenido ?? '', 'devocional');
 
-        return response(Storage::disk('s3')->get($path), 200, [
+        return Storage::disk('s3')->download($path, "{$filename}.mp3", [
             'Content-Type' => 'audio/mpeg',
-            'Content-Disposition' => "attachment; filename=\"{$filename}.mp3\"",
         ]);
     }
 
@@ -154,38 +153,87 @@ class DevocionalAudioFolderController extends Controller
         abort_if($devocionales->isEmpty(), 404, 'La carpeta está vacía');
 
         $tmpPath = tempnam(sys_get_temp_dir(), 'devocionales-zip-');
-        $zip = new ZipArchive();
-        $zip->open($tmpPath, ZipArchive::OVERWRITE);
-
-        $usedNames = [];
-
-        foreach ($devocionales as $devocional) {
-            $tts->generateFromHtml($devocional->contenido ?? '', $lang, $voice);
-            $path = $tts->pathForHtml($devocional->contenido ?? '', $lang, $voice);
-
-            if (! $path || ! Storage::disk('s3')->exists($path)) {
-                continue;
-            }
-
-            $baseName = sprintf('%02d-%s', $devocional->audio_folder_position, $tts->filenameFromHtml($devocional->contenido ?? '', "devocional-{$devocional->audio_folder_position}"));
-            $entryName = $baseName;
-            $suffix = 1;
-            while (isset($usedNames[$entryName])) {
-                $entryName = "{$baseName}-{$suffix}";
-                $suffix++;
-            }
-            $usedNames[$entryName] = true;
-
-            $zip->addFromString("{$entryName}.mp3", Storage::disk('s3')->get($path));
+        if ($tmpPath === false) {
+            throw new \RuntimeException('No se pudo crear el archivo temporal.');
         }
+        $zip = new ZipArchive;
+        $audioFiles = [];
+        $closed = false;
+        try {
+            if ($zip->open($tmpPath, ZipArchive::OVERWRITE) !== true) {
+                throw new \RuntimeException('No se pudo abrir el ZIP.');
+            }
 
-        $zip->close();
+            $usedNames = [];
 
-        $monthName = DevocionalAudioFolderService::MONTH_NAMES[$month];
+            foreach ($devocionales as $devocional) {
+                $tts->generateFromHtml($devocional->contenido ?? '', $lang, $voice);
+                $path = $tts->pathForHtml($devocional->contenido ?? '', $lang, $voice);
 
-        return response()->download($tmpPath, "{$monthName}.zip", [
-            'Content-Type' => 'application/zip',
-        ])->deleteFileAfterSend(true);
+                if (! $path || ! Storage::disk('s3')->exists($path)) {
+                    continue;
+                }
+
+                $baseName = sprintf('%02d-%s', $devocional->audio_folder_position, $tts->filenameFromHtml($devocional->contenido ?? '', "devocional-{$devocional->audio_folder_position}"));
+                $entryName = $baseName;
+                $suffix = 1;
+                while (isset($usedNames[$entryName])) {
+                    $entryName = "{$baseName}-{$suffix}";
+                    $suffix++;
+                }
+                $usedNames[$entryName] = true;
+
+                $audioFile = tempnam(sys_get_temp_dir(), 'devocional-audio-');
+                if ($audioFile === false) {
+                    throw new \RuntimeException('No se pudo crear el audio temporal.');
+                }
+                $audioFiles[] = $audioFile;
+                $input = Storage::disk('s3')->readStream($path);
+                $output = null;
+                try {
+                    $output = fopen($audioFile, 'wb');
+                    if (! is_resource($input) || ! is_resource($output)
+                        || stream_copy_to_stream($input, $output) === false) {
+                        throw new \RuntimeException('No se pudo descargar el audio.');
+                    }
+                } finally {
+                    if (is_resource($input)) {
+                        fclose($input);
+                    }
+                    if (is_resource($output)) {
+                        fclose($output);
+                    }
+                }
+                if (! $zip->addFile($audioFile, "{$entryName}.mp3")) {
+                    throw new \RuntimeException('No se pudo agregar el audio al ZIP.');
+                }
+            }
+
+            if ($zip->numFiles === 0) {
+                abort(404, 'No hay audios disponibles');
+            }
+            if (! $zip->close()) {
+                throw new \RuntimeException('No se pudo finalizar el ZIP.');
+            }
+            $closed = true;
+
+            $monthName = DevocionalAudioFolderService::MONTH_NAMES[$month];
+
+            return response()->download($tmpPath, "{$monthName}.zip", [
+                'Content-Type' => 'application/zip',
+            ])->deleteFileAfterSend(true);
+        } catch (\Throwable $exception) {
+            if (! $closed) {
+                // Release the archive before removing its source files.
+                unset($zip);
+            }
+            @unlink($tmpPath);
+            throw $exception;
+        } finally {
+            foreach ($audioFiles as $audioFile) {
+                @unlink($audioFile);
+            }
+        }
     }
 
     /** @return array{0: string, 1: string} */

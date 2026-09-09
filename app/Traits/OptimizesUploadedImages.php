@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Rules\ValidImageContent;
 use Illuminate\Http\UploadedFile;
 
 trait OptimizesUploadedImages
@@ -28,6 +29,13 @@ trait OptimizesUploadedImages
      */
     protected function optimizeImageBytes(string $contents, string $mime, int $maxWidth, int $quality, string $fallbackExtension = 'bin'): array
     {
+        $dimensions = @getimagesizefromstring($contents);
+        if ($dimensions === false || $dimensions[0] > ValidImageContent::MAX_DIMENSION
+            || $dimensions[1] > ValidImageContent::MAX_DIMENSION
+            || $dimensions[0] * $dimensions[1] > ValidImageContent::MAX_PIXELS) {
+            throw new \RuntimeException('La imagen excede las dimensiones permitidas o no es válida.');
+        }
+
         if ($mime === 'image/gif') {
             return ['contents' => $contents, 'extension' => 'gif', 'mime' => 'image/gif'];
         }
@@ -56,8 +64,9 @@ trait OptimizesUploadedImages
         $width = imagesx($source);
         $height = imagesy($source);
 
-        if ($width > $maxWidth) {
-            $source = $this->resizeToWidth($source, $maxWidth, $width, $height);
+        if (max($width, $height) > $maxWidth) {
+            $targetWidth = max(1, (int) round($width * $maxWidth / max($width, $height)));
+            $source = $this->resizeToWidth($source, $targetWidth, $width, $height);
         }
 
         return ['contents' => $this->encodeWebp($source, $quality), 'extension' => 'webp', 'mime' => 'image/webp'];
@@ -98,7 +107,7 @@ trait OptimizesUploadedImages
 
     private function resizeToWidth($source, int $targetWidth, int $width, int $height)
     {
-        $targetHeight = (int) round($height * ($targetWidth / $width));
+        $targetHeight = max(1, (int) round($height * ($targetWidth / $width)));
         $resized = imagecreatetruecolor($targetWidth, $targetHeight);
         imagealphablending($resized, false);
         imagesavealpha($resized, true);
