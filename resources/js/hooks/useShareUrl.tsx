@@ -1,9 +1,7 @@
 import { useRef, useState } from 'react';
+import { csrfHeaders } from '@/lib/csrf';
 
 export type ShareContentType = 'devocional' | 'estudio' | 'ensenanza';
-
-const csrfToken = () =>
-    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
 
 export function useShareUrl(type: ShareContentType, id: string, initialSharesCount = 0) {
     const [shortUrl, setShortUrl] = useState<string | null>(() => {
@@ -21,7 +19,7 @@ export function useShareUrl(type: ShareContentType, id: string, initialSharesCou
     const recordShare = () => {
         fetch(`/api/share/${type}/${id}`, {
             method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken() },
+            headers: csrfHeaders(),
         }).then(() => {
             setSharesCount((c) => c + 1);
         }).catch(() => {});

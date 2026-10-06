@@ -8,6 +8,7 @@ import { extractReadingBlocks } from '@/utils/ttsReading';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { csrfHeaders } from '@/lib/csrf';
 import '../../css/devocionalDetails.css';
 
 type Devocional = {
@@ -299,7 +300,7 @@ const DevocionalDetailsPage = (props: Props) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
+                ...csrfHeaders(),
             },
             body: JSON.stringify({ local_time: local }),
         })

@@ -5,6 +5,7 @@ import { router } from '@inertiajs/react';
 import { Download, FileArchive, Loader2, Play } from 'lucide-react';
 import { useState } from 'react';
 import '../../css/admin-edit.css';
+import { csrfHeaders } from '@/lib/csrf';
 import '../../css/cardNew.css';
 
 interface VoicePair {
@@ -41,10 +42,6 @@ interface Props {
 
 function voiceKey(lang: string, voice: string): string {
     return `${lang}|${voice}`;
-}
-
-function csrfToken(): string {
-    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
 
 export default function DevocionalAudioFolderDetail({ month, monthName, capacity, items, voicePairs, todasLasCategorias, monthOptions }: Props) {
@@ -97,7 +94,7 @@ export default function DevocionalAudioFolderDetail({ month, monthName, capacity
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken(),
+                    ...csrfHeaders(),
                 },
                 body: JSON.stringify({ id, month: target }),
             });

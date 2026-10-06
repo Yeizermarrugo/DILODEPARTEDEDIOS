@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { csrfHeaders } from '@/lib/csrf';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 export type ContentType = 'devocional' | 'estudio' | 'ensenanza';
@@ -84,7 +85,7 @@ export function useLike(type: ContentType, id: string): UseLikeReturn {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
+                        ...csrfHeaders(),
                     },
                     body: JSON.stringify({ local_time: localTime }), // ← único cambio
                 });

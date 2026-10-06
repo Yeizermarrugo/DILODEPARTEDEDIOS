@@ -1,10 +1,9 @@
 import ImageUpload from '@/components/ImageUpload';
 import LoaderBook from '@/components/LoaderBook';
 import axios from 'axios';
+import { csrfHeaders } from '@/lib/csrf';
 import { useEffect, useState } from 'react';
 import '../../css/postImageGallery.css'; // Importa tu nuevo CSS
-
-const csrfToken = () => document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
 
 const PostImage = () => {
     const [imagenUrl, setImagenUrl] = useState('');
@@ -53,11 +52,10 @@ const PostImage = () => {
             try {
                 const formData = new FormData();
                 formData.append('file', selectedImageFile);
-                formData.append('_token', csrfToken());
                 const response = await axios.post('/upload-post-image', formData, {
                     withCredentials: true,
                     headers: {
-                        'X-CSRF-TOKEN': csrfToken(),
+                        ...csrfHeaders(),
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
@@ -83,7 +81,7 @@ const PostImage = () => {
             await axios.delete(`/post-image/${id}`, {
                 withCredentials: true,
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken(),
+                    ...csrfHeaders(),
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             });

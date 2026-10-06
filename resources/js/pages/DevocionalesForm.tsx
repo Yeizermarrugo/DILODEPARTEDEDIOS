@@ -20,6 +20,7 @@ import {
     Tv2,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { csrfHeaders } from '@/lib/csrf';
 import '../../css/devocionalesForm.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -75,6 +76,9 @@ export default function DevocionalesForm() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    // Remember side resources created by a failed submit so a retry reuses them instead of duplicating.
+    const uploadedImageRef = useRef<{ file: File; url: string } | null>(null);
+    const createdEnsenanzaRef = useRef<{ titulo: string; id: string } | null>(null);
 
     // Image
     const [dragActive, setDragActive] = useState(false);
@@ -201,9 +205,7 @@ export default function DevocionalesForm() {
             const fd = new FormData();
             fd.append('file', file);
             const res = await axios.post('/upload-pdf', fd, {
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
+                headers: csrfHeaders(),
             });
             setPdf(res.data.location);
         } catch {
@@ -220,9 +222,7 @@ export default function DevocionalesForm() {
             const fd = new FormData();
             fd.append('file', file);
             const res = await axios.post('/upload-image', fd, {
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
+                headers: csrfHeaders(),
             });
             setNuevaEnsenanzaImagenUrl(res.data.location || res.data.url);
         } catch (err: unknown) {
@@ -238,51 +238,69 @@ export default function DevocionalesForm() {
         setIsSubmitting(true);
 
         try {
-            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            const headers = { 'X-CSRF-TOKEN': csrf };
+            const headers = csrfHeaders();
             const categoriaFinal = useNuevaCategoria ? nuevaCategoria.trim() : categoria;
+            const autorFinal = (useNuevoAutor ? nuevoAutor : autor).trim();
 
-            let urlImagenFinal = imagenUrl;
-
-            if (selectedImageFile) {
-                const fd = new FormData();
-                fd.append('file', selectedImageFile);
-                const res = await axios.post('/upload-image', fd, {
-                    headers,
-                });
-                urlImagenFinal = res.data.location || res.data.url;
-            }
-
-            let ensenanzaIdFinal: string | null = ensenanzaId || null;
-            if (hasSerie && useNuevaEnsenanza) {
-                if (!nuevaEnsenanzaTitulo.trim()) {
-                    alert('El título de la enseñanza es obligatorio');
-                    setIsSubmitting(false);
-                    return;
-                }
-                const resE = await axios.post(
-                    '/api/series',
-                    {
-                        titulo: nuevaEnsenanzaTitulo.trim(),
-                        descripcion: nuevaEnsenanzaDescripcion.trim(),
-                        imagen: nuevaEnsenanzaImagenUrl || null,
-                    },
-                    { headers },
-                );
-                ensenanzaIdFinal = resE.data.id?.toString();
+            // Validate everything before uploading or creating anything, so a
+            // rejected submit never leaves an image or series behind.
+            if (!autorFinal) {
+                alert('El autor es obligatorio');
+                return;
             }
 
             if (useNuevaCategoria) {
                 if (!categoriaFinal) {
                     alert('El nombre de la nueva categoría es obligatorio');
-                    setIsSubmitting(false);
                     return;
                 }
 
                 if (!nuevaCategoriaDescripcion.trim()) {
                     alert('La descripción de la nueva categoría es obligatoria');
-                    setIsSubmitting(false);
                     return;
+                }
+            }
+
+            if (hasSerie && useNuevaEnsenanza && !nuevaEnsenanzaTitulo.trim()) {
+                alert('El título de la enseñanza es obligatorio');
+                return;
+            }
+
+            let urlImagenFinal = imagenUrl;
+
+            if (selectedImageFile) {
+                if (uploadedImageRef.current?.file === selectedImageFile) {
+                    urlImagenFinal = uploadedImageRef.current.url;
+                } else {
+                    const fd = new FormData();
+                    fd.append('file', selectedImageFile);
+                    const res = await axios.post('/upload-image', fd, {
+                        headers,
+                    });
+                    urlImagenFinal = res.data.location || res.data.url;
+                    uploadedImageRef.current = { file: selectedImageFile, url: urlImagenFinal };
+                }
+            }
+
+            let ensenanzaIdFinal: string | null = ensenanzaId || null;
+            if (hasSerie && useNuevaEnsenanza) {
+                const titulo = nuevaEnsenanzaTitulo.trim();
+                if (createdEnsenanzaRef.current?.titulo === titulo) {
+                    ensenanzaIdFinal = createdEnsenanzaRef.current.id;
+                } else {
+                    const resE = await axios.post(
+                        '/api/series',
+                        {
+                            titulo,
+                            descripcion: nuevaEnsenanzaDescripcion.trim(),
+                            imagen: nuevaEnsenanzaImagenUrl || null,
+                        },
+                        { headers },
+                    );
+                    ensenanzaIdFinal = resE.data.id?.toString();
+                    if (ensenanzaIdFinal) {
+                        createdEnsenanzaRef.current = { titulo, id: ensenanzaIdFinal };
+                    }
                 }
             }
 
@@ -291,7 +309,7 @@ export default function DevocionalesForm() {
                 imagen: urlImagenFinal,
                 categoria: categoriaFinal,
                 category_description: useNuevaCategoria ? nuevaCategoriaDescripcion.trim() : null,
-                autor: useNuevoAutor ? nuevoAutor : autor,
+                autor: autorFinal,
                 is_devocional: contentType,
                 hidden: ocultar,
                 serie: useNuevaSerie ? nuevaSerie : serie,
@@ -304,9 +322,11 @@ export default function DevocionalesForm() {
 
             const endpoint = mode === 'create' ? '/devocionalesadd' : `/devocionales/${id}`;
             const method = mode === 'create' ? 'post' : 'put';
-            await axios[method](endpoint, payload, { headers });
+            const res = await axios[method](endpoint, payload, { headers });
 
-            alert(mode === 'create' ? '¡Publicado con éxito!' : '¡Actualizado con éxito!');
+            const okMsg = mode === 'create' ? '¡Publicado con éxito!' : '¡Actualizado con éxito!';
+            const warnings: string[] = res.data?.warnings ?? [];
+            alert(warnings.length ? `${okMsg}\n\nPero fallaron pasos secundarios:\n${warnings.join('\n')}` : okMsg);
             window.location.href = mode === 'create' ? '/dashboard' : '/devocionales-edit';
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -316,7 +336,7 @@ export default function DevocionalesForm() {
                     const errores = data.errors ? Object.values(data.errors).flat().join('\n') : data.message;
                     alert(`Datos incompletos:\n\n${errores}`);
                 } else if (status === 500) {
-                    alert('Error 500: posiblemente el título o slug ya existen en la base de datos.');
+                    alert(`Error 500 (${error.config?.url}):\n\n${data?.message || 'Error interno del servidor. Revisa los logs.'}`);
                 } else {
                     alert(`Error (${status}): ${data?.message || 'Consulta la consola'}`);
                 }

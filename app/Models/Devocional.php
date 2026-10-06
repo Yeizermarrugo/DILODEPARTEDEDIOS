@@ -59,7 +59,15 @@ class Devocional extends Model
         // "fill gaps" backfill once for pre-existing content.
         static::created(function (Devocional $model) {
             if ($model->is_devocional === self::TYPE_DEVOCIONAL && $model->audio_folder_month === null) {
-                app(\App\Services\DevocionalAudioFolderService::class)->assignNext($model);
+                // Never let folder bookkeeping fail the save; "fill gaps" backfill can fix it later.
+                try {
+                    app(\App\Services\DevocionalAudioFolderService::class)->assignNext($model);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Audio folder assignment failed', [
+                        'devocional_id' => $model->id,
+                        'exception' => $e,
+                    ]);
+                }
             }
         });
     }

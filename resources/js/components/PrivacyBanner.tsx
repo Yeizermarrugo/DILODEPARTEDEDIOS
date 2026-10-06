@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { csrfHeaders } from '@/lib/csrf';
 
 const PrivacyBanner = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -22,7 +23,7 @@ const PrivacyBanner = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                    ...csrfHeaders(),
                 },
                 body: JSON.stringify({ accepted: true }),
             });

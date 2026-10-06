@@ -10,13 +10,17 @@ use App\Services\TextToSpeechService;
 use Carbon\Carbon;
 use HTMLPurifier;
 use HTMLPurifier_Config;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Jenssegers\Agent\Agent;
 use Stevebauman\Location\Facades\Location;
+use Throwable;
 
 class DevocionalController extends Controller
 {
@@ -64,6 +68,58 @@ class DevocionalController extends Controller
     private function deleteAudioForContent(string $html): void
     {
         app(TextToSpeechService::class)->deleteForHtml($html);
+    }
+
+    /**
+     * Runs a post-save step (cache, audio queue, S3 cleanup) without letting it
+     * turn an already-saved request into a 500. Failures are logged and returned
+     * as warnings so the admin knows the content was saved but a step failed.
+     *
+     * @param  array<int, string>  $warnings
+     */
+    private function runAfterSave(string $step, string $devocionalId, callable $callback, array &$warnings): void
+    {
+        try {
+            $callback();
+        } catch (Throwable $e) {
+            Log::error("Devocional post-save step failed: {$step}", [
+                'devocional_id' => $devocionalId,
+                'exception' => $e,
+            ]);
+            $warnings[] = "{$step}: {$e->getMessage()}";
+        }
+    }
+
+    /**
+     * Turns a failed insert/update into a 500 response that says what went wrong
+     * instead of a generic "Server Error".
+     */
+    private function saveErrorResponse(Throwable $e, string $action): JsonResponse
+    {
+        Log::error("Devocional {$action} failed", ['exception' => $e]);
+
+        $message = "No se pudo {$action} el contenido.";
+
+        if ($e instanceof QueryException) {
+            $driverCode = $e->errorInfo[1] ?? null;
+            $detail = $e->errorInfo[2] ?? '';
+
+            $message .= match ($driverCode) {
+                1048 => preg_match("/Column '([^']+)'/", $detail, $m)
+                    ? " El campo '{$m[1]}' es obligatorio."
+                    : ' Falta un campo obligatorio.',
+                1062 => ' Ya existe un registro con ese valor único.',
+                1406 => preg_match("/column '([^']+)'/", $detail, $m)
+                    ? " El valor del campo '{$m[1]}' es demasiado largo."
+                    : ' Un valor es demasiado largo.',
+                1452 => ' La serie/categoría relacionada no existe.',
+                default => " Error de base de datos ({$driverCode}): {$detail}",
+            };
+        } else {
+            $message .= ' '.class_basename($e).': '.$e->getMessage();
+        }
+
+        return response()->json(['message' => $message], 500);
     }
 
     private function purifyHtml(string $html): string
@@ -502,7 +558,7 @@ class DevocionalController extends Controller
             'contenido' => 'required|string',
             'categoria' => 'required|string',
             'imagen' => 'nullable|string',
-            'autor' => 'nullable|string|max:255',
+            'autor' => 'required|string|max:255',
             'is_devocional' => 'required|integer|in:1,2,3',
             'hidden' => 'boolean',
             'serie' => 'nullable|string|max:255',
@@ -512,6 +568,8 @@ class DevocionalController extends Controller
             'tiktok' => 'nullable|string|max:255',
             'ensenanza_id' => 'nullable|uuid|exists:ensenanzas,id',
             'category_description' => 'nullable|string|max:1000',
+        ], [
+            'autor.required' => 'El autor es obligatorio.',
         ]);
 
         if (
@@ -526,30 +584,39 @@ class DevocionalController extends Controller
             ], 422);
         }
 
-        $this->syncCategory($validated['categoria'], $validated['category_description'] ?? null);
+        try {
+            // Category + row in one transaction: a failed insert no longer leaves an orphan category.
+            $devocional = DB::transaction(function () use ($validated) {
+                $this->syncCategory($validated['categoria'], $validated['category_description'] ?? null);
 
-        // Creamos el registro usando SOLO los campos que existen en la DB
-        $devocional = Devocional::create([
-            'contenido' => $this->purifyHtml($validated['contenido']),
-            'categoria' => $validated['categoria'],
-            'imagen' => $validated['imagen'] ?? null,
-            'autor' => $validated['autor'] ?? null,
-            'is_devocional' => $validated['is_devocional'],
-            'hidden' => $validated['hidden'] ?? false,
-            'serie' => $validated['serie'] ?? null,
-            'created_at' => ($validated['created_at'] ?? null) ?: now(),
-            'pdf' => $validated['pdf'] ?? null,
-            'instagram' => $validated['instagram'] ?? null,
-            'tiktok' => $validated['tiktok'] ?? null,
-            'ensenanza_id' => $validated['ensenanza_id'] ?? null,
-        ]);
+                // Creamos el registro usando SOLO los campos que existen en la DB
+                return Devocional::create([
+                    'contenido' => $this->purifyHtml($validated['contenido']),
+                    'categoria' => $validated['categoria'],
+                    'imagen' => $validated['imagen'] ?? null,
+                    'autor' => $validated['autor'],
+                    'is_devocional' => $validated['is_devocional'],
+                    'hidden' => $validated['hidden'] ?? false,
+                    'serie' => $validated['serie'] ?? null,
+                    'created_at' => ($validated['created_at'] ?? null) ?: now(),
+                    'pdf' => $validated['pdf'] ?? null,
+                    'instagram' => $validated['instagram'] ?? null,
+                    'tiktok' => $validated['tiktok'] ?? null,
+                    'ensenanza_id' => $validated['ensenanza_id'] ?? null,
+                ]);
+            });
+        } catch (Throwable $e) {
+            return $this->saveErrorResponse($e, 'guardar');
+        }
 
-        $this->forgetCategoryCaches();
-        $this->queueAudioIfVisible($devocional);
+        $warnings = [];
+        $this->runAfterSave('Limpiar caché', $devocional->id, fn () => $this->forgetCategoryCaches(), $warnings);
+        $this->runAfterSave('Encolar audio', $devocional->id, fn () => $this->queueAudioIfVisible($devocional), $warnings);
 
         return response()->json([
             'message' => '¡Guardado con éxito!',
             'devocional' => $devocional,
+            'warnings' => $warnings,
         ], 201);
     }
 
@@ -704,7 +771,7 @@ class DevocionalController extends Controller
             'categoria' => 'required|string',
             // permite que imagen venga null o string; si viene vacía, conservamos la anterior
             'imagen' => 'nullable|string|url',
-            'autor' => 'nullable|string|max:255',
+            'autor' => 'required|string|max:255',
             'is_devocional' => 'required|integer|in:1,2,3',
             'hidden' => 'boolean',
             'serie' => 'nullable|string|max:255',
@@ -714,6 +781,8 @@ class DevocionalController extends Controller
             'tiktok' => 'nullable|string|max:255',
             'ensenanza_id' => 'nullable|uuid|exists:ensenanzas,id',
             'category_description' => 'nullable|string|max:1000',
+        ], [
+            'autor.required' => 'El autor es obligatorio.',
         ]);
 
         $categoryName = $request->input('categoria');
@@ -729,39 +798,47 @@ class DevocionalController extends Controller
             ], 422);
         }
 
-        $this->syncCategory($categoryName, $request->input('category_description'));
-
         $createdAt = $request->input('created_at');
         $previousContenido = (string) $devocional->contenido;
         $previousHidden = (bool) $devocional->hidden;
         $newContenido = $this->purifyHtml($request->input('contenido'));
 
-        $devocional->update([
-            'contenido' => $newContenido,
-            'categoria' => $request->input('categoria'),
-            'imagen' => $request->input('imagen') ?: $devocional->imagen,
-            'autor' => $request->input('autor'),
-            'is_devocional' => $request->input('is_devocional'),
-            'hidden' => $request->boolean('hidden', false),
-            'serie' => $request->input('serie'),
-            'created_at' => $createdAt
-                ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')
-                : $devocional->created_at,
-            'pdf' => $request->input('pdf'),
-            'instagram' => $request->input('instagram'),
-            'tiktok' => $request->input('tiktok'),
-            'ensenanza_id' => $request->input('ensenanza_id'),
-        ]);
+        try {
+            DB::transaction(function () use ($request, $devocional, $categoryName, $createdAt, $newContenido) {
+                $this->syncCategory($categoryName, $request->input('category_description'));
 
-        $this->forgetCategoryCaches();
-        if (! $previousHidden && $previousContenido !== $newContenido) {
-            $this->deleteAudioForContent($previousContenido);
+                $devocional->update([
+                    'contenido' => $newContenido,
+                    'categoria' => $request->input('categoria'),
+                    'imagen' => $request->input('imagen') ?: $devocional->imagen,
+                    'autor' => $request->input('autor'),
+                    'is_devocional' => $request->input('is_devocional'),
+                    'hidden' => $request->boolean('hidden', false),
+                    'serie' => $request->input('serie'),
+                    'created_at' => $createdAt
+                        ? Carbon::createFromFormat('Y-m-d\TH:i', $createdAt)->format('Y-m-d H:i:s')
+                        : $devocional->created_at,
+                    'pdf' => $request->input('pdf'),
+                    'instagram' => $request->input('instagram'),
+                    'tiktok' => $request->input('tiktok'),
+                    'ensenanza_id' => $request->input('ensenanza_id'),
+                ]);
+            });
+        } catch (Throwable $e) {
+            return $this->saveErrorResponse($e, 'actualizar');
         }
-        $this->queueAudioIfVisible($devocional);
+
+        $warnings = [];
+        $this->runAfterSave('Limpiar caché', $devocional->id, fn () => $this->forgetCategoryCaches(), $warnings);
+        if (! $previousHidden && $previousContenido !== $newContenido) {
+            $this->runAfterSave('Borrar audio anterior', $devocional->id, fn () => $this->deleteAudioForContent($previousContenido), $warnings);
+        }
+        $this->runAfterSave('Encolar audio', $devocional->id, fn () => $this->queueAudioIfVisible($devocional), $warnings);
 
         return response()->json([
             'message' => 'Devocional actualizado correctamente',
             'devocional' => $devocional,
+            'warnings' => $warnings,
         ]);
     }
     // public function trackView(Request $request, $id)

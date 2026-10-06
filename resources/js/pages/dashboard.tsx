@@ -16,6 +16,7 @@ import {
     TrendingUp
 } from 'lucide-react';
 import { useState } from 'react';
+import { csrfHeaders } from '@/lib/csrf';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
 
@@ -64,16 +65,13 @@ interface ContactMsg {
     created_at: string;
 }
 
-const csrfToken = () =>
-    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
-
 function MessagesPanel({ initialMessages }: { initialMessages: ContactMsg[] }) {
     const [messages, setMessages] = useState<ContactMsg[]>(initialMessages);
     const [expanded, setExpanded] = useState<number | null>(null);
 
     const markRead = (id: number) => {
         setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: new Date().toISOString() } : m));
-        axios.patch(`/contact-messages/${id}/read`, {}, { headers: { 'X-CSRF-TOKEN': csrfToken() } }).catch(() => {
+        axios.patch(`/contact-messages/${id}/read`, {}, { headers: csrfHeaders() }).catch(() => {
             setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: null } : m));
         });
     };
@@ -81,7 +79,7 @@ function MessagesPanel({ initialMessages }: { initialMessages: ContactMsg[] }) {
     const archive = (id: number) => {
         setMessages(prev => prev.filter(m => m.id !== id));
         if (expanded === id) setExpanded(null);
-        axios.patch(`/contact-messages/${id}/archive`, {}, { headers: { 'X-CSRF-TOKEN': csrfToken() } }).catch(() => {
+        axios.patch(`/contact-messages/${id}/archive`, {}, { headers: csrfHeaders() }).catch(() => {
             setMessages(initialMessages);
         });
     };
