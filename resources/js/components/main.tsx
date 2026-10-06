@@ -9,6 +9,7 @@ import { Eye } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/devocionalDetails.css';
 import '../../css/main-home.css';
+import { csrfHeaders } from '@/lib/csrf';
 import CoverflowCarousel from './CoverflowCarousel';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -713,7 +714,7 @@ function DevocionalModal({ devocional, onClose, onViewRecorded }: ModalProps) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+                ...csrfHeaders(),
             },
             body: JSON.stringify({ local_time: local }),
         })

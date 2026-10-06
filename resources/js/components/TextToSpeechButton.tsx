@@ -1,3 +1,4 @@
+import { csrfHeaders } from '@/lib/csrf';
 import { buildReadingTimings, extractReadingBlocks, findActiveReadingBlock, type ReadingBlock, type ReadingTiming } from '@/utils/ttsReading';
 import { useEffect, useRef, useState } from 'react';
 
@@ -13,10 +14,6 @@ const VOICES = [
     { label: 'Elvira (España)', value: 'es-ES-ElviraNeural', available: true, lang: 'es-ES' },
     { label: 'Alvaro (España)', value: 'es-ES-AlvaroNeural', available: true, lang: 'es-ES' },
 ];
-
-function csrfToken(): string {
-    return document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
-}
 
 type Props = {
     contentId?: string;
@@ -132,7 +129,7 @@ export default function TextToSpeechButton({ contentId, html, onBlockChange }: P
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken(),
+                    ...csrfHeaders(),
                 },
                 body: JSON.stringify({
                     texto: html,
