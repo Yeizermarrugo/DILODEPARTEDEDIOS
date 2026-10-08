@@ -40,6 +40,9 @@ trait OptimizesUploadedImages
             return ['contents' => $contents, 'extension' => 'gif', 'mime' => 'image/gif'];
         }
 
+        // Leer la orientación EXIF antes de decodificar para poder liberar los bytes originales.
+        $orientation = $mime === 'image/jpeg' ? $this->exifOrientation($contents) : 1;
+
         $source = match ($mime) {
             'image/jpeg' => imagecreatefromstring($contents),
             'image/png' => imagecreatefromstring($contents),
@@ -51,9 +54,7 @@ trait OptimizesUploadedImages
             return ['contents' => $contents, 'extension' => $fallbackExtension, 'mime' => $mime];
         }
 
-        if ($mime === 'image/jpeg') {
-            $source = $this->applyExifOrientation($source, $contents);
-        }
+        unset($contents);
 
         if (! imageistruecolor($source)) {
             imagepalettetotruecolor($source);
@@ -68,6 +69,10 @@ trait OptimizesUploadedImages
             $targetWidth = max(1, (int) round($width * $maxWidth / max($width, $height)));
             $source = $this->resizeToWidth($source, $targetWidth, $width, $height);
         }
+
+        // Rotar después de redimensionar: rotar la imagen completa duplica un bitmap
+        // de ~48 MB (12 MP) y agota el memory_limit de 128M.
+        $source = $this->applyExifOrientation($source, $orientation);
 
         return ['contents' => $this->encodeWebp($source, $quality), 'extension' => 'webp', 'mime' => 'image/webp'];
     }
@@ -127,16 +132,32 @@ trait OptimizesUploadedImages
         return $contents;
     }
 
-    private function applyExifOrientation($image, string $contents)
+    private function exifOrientation(string $contents): int
     {
-        $exif = @exif_read_data('data://image/jpeg;base64,'.base64_encode($contents));
-        $orientation = $exif['Orientation'] ?? 1;
+        $stream = fopen('php://memory', 'r+');
+        fwrite($stream, $contents);
+        rewind($stream);
+        $exif = @exif_read_data($stream);
+        fclose($stream);
 
-        return match ($orientation) {
+        return (int) ($exif['Orientation'] ?? 1);
+    }
+
+    private function applyExifOrientation($image, int $orientation)
+    {
+        $rotated = match ($orientation) {
             3 => imagerotate($image, 180, 0),
             6 => imagerotate($image, -90, 0),
             8 => imagerotate($image, 90, 0),
-            default => $image,
+            default => null,
         };
+
+        if (! $rotated) {
+            return $image;
+        }
+
+        imagedestroy($image);
+
+        return $rotated;
     }
 }
