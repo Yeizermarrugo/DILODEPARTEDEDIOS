@@ -40,6 +40,12 @@ trait OptimizesUploadedImages
             return ['contents' => $contents, 'extension' => 'gif', 'mime' => 'image/gif'];
         }
 
+        // GD decodifica el bitmap completo (~5 bytes/píxel + copia al redimensionar).
+        // Si no hay memoria suficiente, subir el original es mejor que un fatal 500.
+        if (! $this->ensureMemoryFor($dimensions[0] * $dimensions[1])) {
+            return ['contents' => $contents, 'extension' => $fallbackExtension, 'mime' => $mime];
+        }
+
         // Leer la orientación EXIF antes de decodificar para poder liberar los bytes originales.
         $orientation = $mime === 'image/jpeg' ? $this->exifOrientation($contents) : 1;
 
@@ -130,6 +136,44 @@ trait OptimizesUploadedImages
         imagedestroy($source);
 
         return $contents;
+    }
+
+    private function ensureMemoryFor(int $pixels): bool
+    {
+        $limit = $this->bytesFromIni((string) ini_get('memory_limit'));
+        if ($limit < 0) {
+            return true;
+        }
+
+        $needed = memory_get_usage(true) + (int) ($pixels * 5 * 1.3) + 16 * 1024 * 1024;
+        if ($needed <= $limit) {
+            return true;
+        }
+
+        // Subir el límite solo lo necesario (máx. 256M) para esta petición.
+        $target = min(max($needed, $limit), 256 * 1024 * 1024);
+        if ($target >= $needed && function_exists('ini_set') && @ini_set('memory_limit', (string) $target) !== false) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function bytesFromIni(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '' || $value === '-1') {
+            return -1;
+        }
+
+        $number = (int) $value;
+
+        return match (strtolower(substr($value, -1))) {
+            'g' => $number * 1024 ** 3,
+            'm' => $number * 1024 ** 2,
+            'k' => $number * 1024,
+            default => $number,
+        };
     }
 
     private function exifOrientation(string $contents): int
