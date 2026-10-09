@@ -30,7 +30,7 @@ class ImageUploadController extends Controller
         ]);
 
         if (! $stored) {
-            return response()->json(['error' => 'Upload failed.'], 500);
+            return response()->json(['error' => 'Upload failed.', 'message' => 'No se pudo guardar la imagen en el almacenamiento (S3/R2). Revisa las credenciales del bucket.'], 500);
         }
 
         if ($optimized['extension'] === 'webp') {
@@ -65,7 +65,7 @@ class ImageUploadController extends Controller
             ]);
 
             if (! $stored) {
-                return response()->json(['error' => 'Upload failed.'], 500);
+                return response()->json(['error' => 'Upload failed.', 'message' => 'No se pudo guardar la imagen en el almacenamiento (S3/R2). Revisa las credenciales del bucket.'], 500);
             }
 
             if ($optimized['extension'] === 'webp') {
